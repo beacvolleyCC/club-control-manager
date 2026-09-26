@@ -1,7 +1,7 @@
-const CACHE='club-control-manager-pwa-v0-4-0-competition-core-readonly';
+const CACHE='club-control-manager-pwa-v0-4-1-parity-readonly';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest',
-  './icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
+  './assets/player-animals.webp','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install',event=>{

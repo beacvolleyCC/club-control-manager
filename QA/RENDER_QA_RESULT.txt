@@ -1,0 +1,12 @@
+CC Manager PWA V0.4.1 Parity Read-only — Render QA
+
+PASS  Mobile Overview rendered
+PASS  Tablet Overview rendered
+PASS  Desktop Overview rendered
+PASS  Wide Overview rendered
+PASS  Desktop Trainings rendered as dense Manager-style table
+PASS  Desktop Players rendered with full identity/membership/medical/account/attendance columns
+PASS  Overview contains Részvételi jelzések and Következő meccsek
+PASS  Full BEAC team names visible in rendered preview
+
+Note: render QA used local demo data and an isolated QA copy. Production authenticated Supabase behavior is gated by MGR002 live QA.

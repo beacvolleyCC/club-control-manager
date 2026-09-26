@@ -1,46 +1,33 @@
-# CC 10× Review — Manager PWA V0.4
+# CC 10× Review — Manager PWA V0.4.1 Parity Read-only
 
-## Scope
-Versenysport read-only core parity: Áttekintés, Edzések, Meccsek, Naptár, Csapatok, Játékosok. No write operations. No new SQL migration.
-
-| Gate | Status | V0.4 result |
+| Gate | Status | Result |
 |---|---|---|
-| Product / Business | PASS | Core daily Manager read surfaces are real, not placeholders. |
-| UX / IA | PASS | Mass/Competition hierarchy retained; global Settings retained; Training Planner excluded. |
-| UI / Design System | PASS | Player-derived Club Control language retained; master/detail on large screens, compact mobile components. |
-| Frontend / PWA / Device | PASS* | Adaptive CSS, day/week/month/season calendar, mobile agenda, cache bump. *Physical iPhone/desktop live smoke remains deployment gate. |
-| Backend / API | PASS | Uses installed MGR001 scoped RPCs only; no browser table reads introduced. |
-| Database / Data Integrity | PASS | V0.4 requires no schema/write migration. Read-only only. |
-| Architecture / Integration | PASS | One responsive PWA; no separate mobile backend; current Supabase contracts retained. |
-| Security / Permissions | PASS | Permission-aware RPC loading and route gate; publishable key only; privileged secrets absent. |
-| QA / Performance / Accessibility | PASS* | Static QA 25/25; keyboard focus retained; bounded season/calendar RPC windows. *Live authenticated smoke remains. |
-| DevOps / Release / Rollback | PASS | Full-replacement package, V0.4 SW cache name, V0.3 remains Git rollback point. |
+| Product / Business | PASS | Migration restores the already-working Manager information model instead of inventing a simplified replacement. Training Planner remains explicitly out of scope. |
+| UX / Information Architecture | PASS | Mass/Competition hierarchy and global Settings remain. Full names and Manager information density are preserved; mobile reflows instead of deleting information. |
+| UI / Design System | PASS | Player-derived Club Control colors, filters, dialogs, dark-mode language and focus treatment are used without copying Player's simplified information structure. |
+| Frontend / PWA / Device | PASS* | Responsive phone/tablet/desktop/wide layouts were rendered in QA; dense tables transform for narrow containers. *Physical-device live smoke remains a deployment gate. |
+| Backend / API | PASS (pending live install) | MGR002 adds only scoped read RPCs for players v2, RSVP matrix, event list, event roster and calendar v2. No direct browser table access added. |
+| Database / Data Integrity | PASS (pending preflight) | MGR002 creates functions only; no table/data mutation. Missing RSVP rows are correctly counted as `Nincs válasz`. Rollback drops only MGR002 functions. |
+| Architecture / Integration | PASS | Same responsive PWA and routes on every device. Event modules no longer depend on Calendar permission as a side-effect. |
+| Security / Permissions | PASS (pending post-install QA) | SECURITY DEFINER RPCs gate through installed Manager permission helpers; only `authenticated` receives EXECUTE; `anon/public` are revoked. Publishable key only in frontend. |
+| QA / Performance / Accessibility | PASS* | Static JS checks and rendered parity views are green; bounded RPC date windows; full keyboard/focus CSS retained. *Authenticated live RPC smoke remains. |
+| DevOps / Release / Rollback | PASS | MGR002 has preflight, one-time guard, post-install QA and rollback. Frontend SW/cache bumped to V0.4.1; current deployed V0.3 remains rollback point until V0.4.1 is accepted. |
 
-## Important fixes included
-- Replaced `Promise.allSettled()` core loading with fail-closed required RPC handling.
-- Partial module-permission accounts no longer require every core RPC.
-- Direct hash navigation to an unauthorized module renders a permission-denied state.
-- Event rows now open a real detail dialog instead of being a dead click target.
-- Calendar uses Europe/Budapest date keys rather than UTC-day grouping.
-- Service worker cache bumped to V0.4.
+## Browser/render QA confirmed
+- Overview renders at mobile, tablet, desktop and wide widths.
+- `Részvételi jelzések` and `Következő meccsek` render with full team names.
+- Desktop Trainings/Matches render columns: Esemény/csapat, Időpont, Pálya/helyszín, Jövök, Nem jövök, Nincs válasz, Státusz.
+- Players render full identity/membership/position/jersey/license/medical/account/attendance data.
 
-## Known intentional gaps
-- No edit/write operations yet.
-- Team animal avatars are not exposed by MGR001, so V0.4 uses monograms in Manager roster/detail. Do not add a broad player_settings browser read just for this.
-- Fees remains later parity work.
-- Competition Core / BRSZ / MRSZ remains separate 054 work.
-- Mass-sport runtime remains later parity work.
-- Training Planner remains excluded.
+## Known non-blocking gaps
+- Read-only only; write parity is a later phase.
+- Calendar resource/availability bands from legacy configuration are not yet canonical Supabase data.
+- Fees, Mass runtime, manual notification composer and Competition Core remain later modules.
+- Training Planner remains excluded by product decision.
 
 ## Deployment gate
-After GitHub Pages deployment, perform authenticated smoke on:
-1. Versenysport Overview
-2. Trainings / Matches filters and event detail
-3. Teams master/detail
-4. Players search/filter/detail
-5. Calendar Day/Week/Month/Season
-6. Mobile layout + bottom navigation
-7. Desktop layout + sidebar
-8. Dark mode
-9. Refresh
-10. Logout/login session
+1. MGR002 preflight: all rows `ok=true`.
+2. MGR002 install succeeds once.
+3. MGR002 post-install QA: all rows `ok=true`.
+4. Only then deploy V0.4.1 full replacement to GitHub Pages.
+5. Authenticated smoke on desktop + phone before considering read parity accepted.

@@ -1,7 +1,7 @@
 {
-  "name": "Club Control Manager V0.4",
+  "name": "Club Control Manager V0.4.1",
   "short_name": "CC Manager",
-  "description": "Club Control Manager PWA – Versenysport Core read-only",
+  "description": "Club Control Manager PWA – Versenysport parity read-only",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
