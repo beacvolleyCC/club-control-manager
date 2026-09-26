@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7b700">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self';">
+  <title>Club Control – Manager</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css?v=0.3.0">
+</head>
+<body>
+  <div class="login-overlay hidden" id="loginOverlay">
+    <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <div class="eyebrow">CLUB CONTROL · MANAGER</div>
+      <div id="loginLoadingStep" class="login-step">
+        <h1 id="loginTitle">Manager ellenőrzése</h1>
+        <p>A biztonságos munkamenet betöltése…</p>
+        <div class="spinner" aria-hidden="true"></div>
+      </div>
+      <div id="loginEmailStep" class="login-step hidden">
+        <h1>Belépés</h1>
+        <p>Csak engedélyezett Manager-fiókkal lehet belépni.</p>
+        <label class="field"><span>Email cím</span><input id="loginEmail" type="email" autocomplete="email" inputmode="email" placeholder="email@pelda.hu"></label>
+        <button class="button primary full" id="requestCodeBtn" type="button">Kód kérése</button>
+        <div class="form-message" id="loginMsg" aria-live="polite"></div>
+      </div>
+      <div id="loginCodeStep" class="login-step hidden">
+        <h1>Belépési kód</h1>
+        <p id="loginEmailPreview">–</p>
+        <label class="field"><span>Kód</span><input id="loginCode" class="otp-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="000000"></label>
+        <button class="button primary full" id="verifyCodeBtn" type="button">Belépés</button>
+        <button class="button quiet full" id="changeEmailBtn" type="button">Másik email</button>
+        <div class="form-message" id="loginCodeMsg" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" aria-label="Manager navigáció">
+      <div class="brand-block">
+        <span class="brand-mark" aria-hidden="true">CC</span>
+        <span class="brand-copy"><strong>Club Control</strong><small>MANAGER</small></span>
+      </div>
+
+      <div class="area-switch desktop-area-switch" role="group" aria-label="Terület">
+        <button class="area-button" type="button" data-area="mass" aria-label="Tömegsport" title="Tömegsport"><span class="area-glyph">△</span><span class="area-label">Tömegsport</span></button>
+        <button class="area-button active" type="button" data-area="competition" aria-label="Versenysport" title="Versenysport"><span class="area-glyph">◇</span><span class="area-label">Versenysport</span></button>
+      </div>
+
+      <div class="side-section-label" id="sideSectionLabel">VERSENYSPORT</div>
+      <nav class="side-nav" id="sideNav"></nav>
+      <div class="sidebar-settings-slot" id="sidebarSettingsSlot"></div>
+
+      <div class="sidebar-foot">
+        <span class="status-dot"></span>
+        <span class="sidebar-foot-copy" id="runtimeLabel">V0.3 · live read-only</span>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-area-button" id="mobileAreaBtn" type="button" aria-haspopup="dialog" aria-label="Terület váltása">
+            <span id="mobileAreaGlyph">◇</span><span id="mobileAreaLabel">Versenysport</span><span aria-hidden="true">⌄</span>
+          </button>
+          <div class="topbar-title">
+            <span class="eyebrow" id="pageAreaLabel">VERSENYSPORT</span>
+            <h1 id="pageTitle">Áttekintés</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <label class="season-select"><span class="sr-only">Szezon</span><select id="seasonSelect"><option>2026/27</option></select></label>
+          <button class="icon-button" id="refreshBtn" type="button" aria-label="Frissítés" title="Frissítés">↻</button>
+          <button class="manager-chip" id="managerMenuBtn" type="button" aria-label="Manager fiók">
+            <span class="profile-dot" id="managerInitials">M</span>
+            <span class="manager-chip-copy"><b id="managerName">Manager</b><small id="managerEmail">preview</small></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="content" id="mainContent">
+        <div class="global-status hidden" id="globalStatus" role="status" aria-live="polite"></div>
+
+        <section class="view active" id="view-dynamic" aria-live="polite">
+          <div id="viewContent"></div>
+        </section>
+      </main>
+    </div>
+
+    <nav class="bottom-nav" id="bottomNav" aria-label="Mobil Manager navigáció"></nav>
+  </div>
+
+  <dialog class="dialog mobile-sheet" id="mobileMoreDialog">
+    <div class="dialog-card sheet-card">
+      <div class="dialog-head"><div><span class="eyebrow" id="moreAreaLabel">VERSENYSPORT</span><h2>További modulok</h2></div><button class="dialog-close" id="mobileMoreClose" type="button" aria-label="Bezárás">×</button></div>
+      <div class="mobile-more-grid" id="mobileMoreGrid"></div>
+    </div>
+  </dialog>
+
+  <dialog class="dialog mobile-sheet" id="areaDialog">
+    <div class="dialog-card sheet-card compact-sheet">
+      <div class="dialog-head"><div><span class="eyebrow">CLUB CONTROL</span><h2>Terület</h2></div><button class="dialog-close" id="areaDialogClose" type="button" aria-label="Bezárás">×</button></div>
+      <div class="area-dialog-grid">
+        <button class="area-choice" data-area="mass" type="button"><span>△</span><div><b>Tömegsport</b><small>Edzések, sportolók, bérletek</small></div></button>
+        <button class="area-choice" data-area="competition" type="button"><span>◇</span><div><b>Versenysport</b><small>Csapatok, meccsek, játékosok, díjak</small></div></button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="dialog" id="accountDialog">
+    <div class="dialog-card">
+      <button class="dialog-close" id="accountDialogClose" type="button" aria-label="Bezárás">×</button>
+      <span class="eyebrow">MANAGER FIÓK</span>
+      <h2 id="accountDialogName">Manager</h2>
+      <p id="accountDialogEmail">–</p>
+      <div class="account-runtime"><span id="dataModePill">DEMO</span><small id="dataModeDetail">Biztonságos preview.</small></div>
+      <button class="button danger full" id="logoutBtn" type="button">Kijelentkezés erről az eszközről</button>
+    </div>
+  </dialog>
+
+  <template id="overviewTemplate">
+    <div class="page-intro"><div><h2></h2><p></p></div><span class="read-only-badge">READ-ONLY V0.2</span></div>
+    <div class="metric-grid" data-slot="metrics"></div>
+    <div class="overview-grid adaptive-overview-grid">
+      <article class="panel wide-panel"><div class="panel-head"><div><h3 data-slot="primary-title"></h3><p data-slot="primary-copy"></p></div></div><div class="stack" data-slot="primary"></div></article>
+      <article class="panel"><div class="panel-head"><div><h3 data-slot="secondary-title"></h3><p data-slot="secondary-copy"></p></div></div><div class="stack" data-slot="secondary"></div></article>
+      <article class="panel compact-panel"><div class="panel-head"><div><h3>Állapot</h3><p>Foundation és migráció.</p></div></div><div class="health-list" data-slot="health"></div></article>
+    </div>
+  </template>
+
+  <script src="./config.js?v=0.3.0"></script>
+  <script src="./app.js?v=0.3.0"></script>
+</body>
+</html>
