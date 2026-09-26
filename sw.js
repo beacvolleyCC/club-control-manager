@@ -1,4 +1,4 @@
-const CACHE='club-control-manager-pwa-v0-3-0-live-readonly';
+const CACHE='club-control-manager-pwa-v0-4-0-competition-core-readonly';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest',
   './icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'

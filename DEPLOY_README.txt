@@ -1,42 +1,31 @@
-CLUB CONTROL MANAGER PWA V0.3 — LIVE READ-ONLY
+CLUB CONTROL MANAGER PWA V0.4 — VERSENYSPORT CORE READ-ONLY
 
-DEPLOY TARGET
-- GitHub Pages
-- Use a SEPARATE repository from the Player PWA.
-- Recommended repository name: club-control-manager
-- Do NOT put this inside the Player repo /manager folder because the Player service worker may control that path.
-
-UPLOAD THESE TO THE REPOSITORY ROOT:
+FULL REPLACEMENT DEPLOY over the V0.3 repository root:
 - index.html
 - app.js
 - styles.css
 - config.js
 - manifest.webmanifest
 - sw.js
-- icons/ folder (all 3 PNG files)
+- icons/* (unchanged but safe to replace)
 
-DO NOT UPLOAD:
-- SQL files
-- Apps Script files
-- service-role keys
-- old Manager source
+No new SQL migration is required for V0.4.
+Requires already-installed MGR001 Manager PWA Foundation V1.
 
-GITHUB PAGES
-Settings -> Pages
-Source: Deploy from a branch
-Branch: main
-Folder: / (root)
-Save
+V0.4 real/live read modules:
+- Versenysport / Áttekintés
+- Versenysport / Edzések
+- Versenysport / Meccsek
+- Versenysport / Naptár (Day/Week/Month/Season; week grid desktop, agenda mobile)
+- Versenysport / Csapatok (master/detail + roster)
+- Versenysport / Játékosok (table/cards + detail dialog)
+- Settings remains global
 
-EXPECTED URL
-https://<github-username>.github.io/club-control-manager/
+Still intentionally NOT migrated:
+- write/edit operations
+- Fees production parity
+- Competition Core/BRSZ/MRSZ
+- Mass sport runtime parity
+- Training planner
 
-FIRST LOGIN
-Use: elteroplabda@gmail.com
-The Manager account and 14 permissions were installed by MGR001.
-Authentication uses the same Supabase OTP flow as the Player.
-
-SCOPE V0.3
-READ-ONLY only. Competition Overview / Teams / Players / Calendar use live Supabase RPCs.
-Mass-sport and several competition modules are migration placeholders and do NOT replace the old Manager yet.
-Keep the existing Apps Script Manager online in parallel.
+IMPORTANT: old Apps Script Manager remains the production fallback during parity testing.

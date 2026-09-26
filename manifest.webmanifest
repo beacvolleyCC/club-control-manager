@@ -1,7 +1,7 @@
 {
-  "name": "Club Control Manager",
+  "name": "Club Control Manager V0.4",
   "short_name": "CC Manager",
-  "description": "Club Control Manager PWA – Tömegsport és Versenysport",
+  "description": "Club Control Manager PWA – Versenysport Core read-only",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,8 +9,21 @@
   "theme_color": "#f7b700",
   "orientation": "any",
   "icons": [
-    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png"},
-    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png"},
-    {"src":"./icons/apple-touch-icon.png","sizes":"180x180","type":"image/png","purpose":"any"}
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }

@@ -1,0 +1,29 @@
+CC MANAGER PWA V0.4 — STATIC QA
+
+PASS | JavaScript build marker
+PASS | Config build marker
+PASS | Service worker cache bump
+PASS | No old V0.3 cache
+PASS | Overview real module
+PASS | Teams master/detail
+PASS | Players detail dialog
+PASS | Calendar day/week/month/season
+PASS | Desktop week grid
+PASS | Mobile agenda
+PASS | Module permission gate
+PASS | Permission-aware RPC loading
+PASS | Fail-closed required RPC load
+PASS | No service-role key
+PASS | Publishable key only
+PASS | Global Settings retained
+PASS | Training planner absent from modules
+PASS | Filter reset behavior present
+PASS | Actual attendance semantics
+PASS | RSVP semantically separated
+PASS | Manifest standalone
+PASS | CSP exists
+PASS | Responsive master/detail CSS
+PASS | Keyboard focus styles
+PASS | Read-only wording
+
+TOTAL: 25/25 PASS
