@@ -1,4 +1,4 @@
-const CACHE='club-control-manager-pwa-v0-4-2b-structure-parity-admin';
+const CACHE='club-control-manager-pwa-v0-4-2c-legacy-mass-ui';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest',
   './assets/player-animals.webp','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'

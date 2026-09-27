@@ -10,7 +10,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="./styles.css?v=0.4.2b">
+  <link rel="stylesheet" href="./styles.css?v=0.4.2c">
 </head>
 <body>
   <div class="login-overlay hidden" id="loginOverlay">
@@ -46,10 +46,11 @@
         <span class="brand-copy"><strong>Club Control</strong><small>MANAGER</small></span>
       </div>
 
-      <div class="area-switch desktop-area-switch" role="group" aria-label="Terület">
-        <button class="area-button" type="button" data-area="mass" aria-label="Tömegsport" title="Tömegsport"><span class="area-glyph">△</span><span class="area-label">Tömegsport</span></button>
-        <button class="area-button active" type="button" data-area="competition" aria-label="Versenysport" title="Versenysport"><span class="area-glyph">◇</span><span class="area-label">Versenysport</span></button>
-      </div>
+      <button class="sidebar-area-selector" id="sidebarAreaBtn" type="button" aria-haspopup="dialog" aria-label="Terület váltása">
+        <span class="area-glyph" id="sidebarAreaGlyph">◇</span>
+        <span class="area-label" id="sidebarAreaLabel">Versenysport</span>
+        <span class="sidebar-area-chevron" aria-hidden="true">⌄</span>
+      </button>
 
       <div class="side-section-label" id="sideSectionLabel">VERSENYSPORT</div>
       <nav class="side-nav" id="sideNav"></nav>
@@ -57,7 +58,7 @@
 
       <div class="sidebar-foot">
         <span class="status-dot"></span>
-        <span class="sidebar-foot-copy" id="runtimeLabel">V0.4.2B · structure + parity</span>
+        <span class="sidebar-foot-copy" id="runtimeLabel">V0.4.2C · legacy parity UI</span>
       </div>
     </aside>
 
@@ -139,7 +140,7 @@
     </div>
   </template>
 
-  <script src="./config.js?v=0.4.2b"></script>
-  <script src="./app.js?v=0.4.2b"></script>
+  <script src="./config.js?v=0.4.2c"></script>
+  <script src="./app.js?v=0.4.2c"></script>
 </body>
 </html>

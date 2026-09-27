@@ -334,3 +334,95 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
   .admin-account-grid{grid-template-columns:1fr}.admin-permission-toolbar{align-items:flex-start;flex-direction:column}.admin-permission-toolbar>div:last-child{justify-content:flex-start}
   .admin-permission-row{grid-template-columns:1fr repeat(3,auto)}
 }
+
+/* =====================================================
+   V0.4.2C — LEGACY MASS UI + AREA HIERARCHY
+   ===================================================== */
+.sidebar-area-selector{
+  width:100%;min-height:44px;border:1px solid var(--yellow-dark);border-radius:10px;
+  background:var(--yellow);color:#171717;display:grid;grid-template-columns:30px minmax(0,1fr) 18px;
+  align-items:center;gap:6px;padding:0 8px;text-align:left;font-size:10px;font-weight:950;cursor:pointer;
+}
+.sidebar-area-selector:hover{filter:brightness(.985)}
+.sidebar-area-selector .area-glyph{font-size:16px;text-align:center}
+.sidebar-area-chevron{text-align:center;font-size:13px}
+.side-nav .nav-item.active{background:var(--soft);color:var(--black);box-shadow:inset 3px 0 0 var(--yellow)}
+.side-section-label{padding-top:5px}
+
+/* System feedback should not occupy prime page space. */
+.global-status{
+  position:fixed;right:18px;bottom:18px;z-index:120;max-width:min(420px,calc(100vw - 28px));
+  margin:0;padding:9px 12px;box-shadow:0 10px 34px rgba(0,0,0,.15);backdrop-filter:blur(14px);
+  background:color-mix(in srgb,var(--card) 94%,transparent);
+}
+
+.mass-summary-compact{margin-bottom:10px}
+.legacy-mass-panel{overflow:hidden}
+.legacy-mass-training-header,
+.legacy-mass-training-row{
+  display:grid;grid-template-columns:minmax(190px,1.45fr) minmax(145px,1fr) minmax(90px,.65fr) minmax(110px,.75fr) minmax(120px,.8fr) minmax(155px,.95fr) 28px;
+  gap:10px;align-items:center;
+}
+.legacy-mass-training-header{
+  padding:10px 14px;background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  color:var(--muted);font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;
+}
+.legacy-mass-training-header.overview{
+  grid-template-columns:minmax(190px,1.45fr) minmax(145px,1fr) minmax(90px,.65fr) minmax(110px,.75fr) minmax(120px,.8fr) 28px;
+}
+.legacy-mass-training-row{
+  position:relative;isolation:isolate;overflow:hidden;min-height:66px;padding:10px 14px;border-bottom:1px solid var(--line);
+  background:var(--card);transition:background .14s ease,border-color .14s ease,opacity .14s ease;
+}
+.legacy-mass-training-row:last-child{border-bottom:0}
+.legacy-mass-training-row::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:linear-gradient(90deg,rgba(var(--level-rgb),.11) 0%,rgba(var(--level-rgb),.07) 15%,rgba(var(--level-rgb),.028) 28%,rgba(var(--level-rgb),0) 42%);
+}
+.legacy-mass-training-row>*{position:relative;z-index:1;min-width:0}
+.legacy-mass-training-row:hover{background:color-mix(in srgb,var(--card) 97%,var(--yellow) 3%)}
+.legacy-mass-training-row.inactive{opacity:.52;background:var(--soft)}
+.legacy-mass-training-row.waitlist-only{box-shadow:inset 0 0 0 1px rgba(247,183,0,.20)}
+.legacy-mass-main{appearance:none;border:0;background:transparent;color:inherit;text-align:left;padding:0;cursor:pointer;min-width:0}
+.legacy-mass-main b,.legacy-mass-date b,.legacy-mass-court b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legacy-mass-main small,.legacy-mass-date small,.legacy-mass-court small,.legacy-mass-count small{display:block;margin-top:4px;color:var(--muted);font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legacy-mass-count b{font-size:18px;line-height:1}.legacy-mass-count b span{font-size:11px;color:var(--muted)}
+.training-active-pill{display:inline-flex;align-items:center;min-height:25px;padding:0 8px;border-radius:99px;background:#e8f3ea;color:#2c6638;font-size:8px;font-weight:950;letter-spacing:.035em}
+.training-active-pill.off{background:#ececec;color:#666}
+.training-active-pill.waitlist{background:#fff3c2;color:#775600}
+.legacy-mass-actions{display:flex;justify-content:flex-end}
+.legacy-mass-chevron{appearance:none;width:28px;height:34px;border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer}
+.mass-system-state{margin-top:8px;display:flex;justify-content:flex-end;gap:8px;align-items:center;color:var(--muted);font-size:7px}
+.mass-system-state span{font-weight:900;text-transform:uppercase;letter-spacing:.06em}.mass-system-state small{font-size:7px}
+
+.dark .training-active-pill{background:#193021;color:#9dd3aa}
+.dark .training-active-pill.off{background:#2b2b2b;color:#aaa}
+.dark .training-active-pill.waitlist{background:#382e14;color:#e7ca72}
+
+@media(max-width:1050px){
+  .legacy-mass-training-header,.legacy-mass-training-row{grid-template-columns:minmax(170px,1.3fr) minmax(130px,.9fr) 85px 100px 110px 28px}
+  .legacy-mass-training-header>div:nth-child(6){display:none}
+  .legacy-mass-training-row .legacy-mass-actions{display:none}
+  .legacy-mass-training-header.overview{grid-template-columns:minmax(170px,1.3fr) minmax(130px,.9fr) 85px 100px 110px 28px}
+}
+@media(max-width:900px){
+  .global-status{right:10px;left:10px;bottom:82px;max-width:none}
+  .legacy-mass-training-header{display:none}
+  .legacy-mass-training-list{display:grid;gap:8px}
+  .legacy-mass-training-row{
+    grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:
+      "main status chevron"
+      "date court count"
+      "actions actions actions";
+    gap:8px 12px;border:1px solid var(--line);border-radius:12px;padding:12px;
+  }
+  .legacy-mass-main{grid-area:main}.legacy-mass-date{grid-area:date}.legacy-mass-court{grid-area:court}.legacy-mass-count{grid-area:count;text-align:right}.legacy-mass-status{grid-area:status}.legacy-mass-actions{grid-area:actions;display:flex!important;justify-content:stretch}.legacy-mass-actions .button{width:100%}.legacy-mass-chevron{grid-area:chevron}
+  .mass-system-state{justify-content:flex-start;padding:0 2px}
+}
+@media(max-width:700px){
+  .legacy-mass-training-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main status" "date count" "court count" "actions actions"}
+  .legacy-mass-chevron{display:none}.legacy-mass-count{align-self:end}.legacy-mass-court small{display:none}
+}
+@media(min-width:901px) and (max-width:1250px){
+  .sidebar-area-selector{grid-template-columns:1fr;justify-items:center;padding:0}.sidebar-area-selector .area-label,.sidebar-area-chevron{display:none}
+}
