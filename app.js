@@ -27,7 +27,7 @@ const plannerList = document.getElementById('plannerList');
 const cancelDialog = document.getElementById('cancelDialog');
 let pendingCancel = null;
 let missingOnly = false;
-let detailedMode = localStorage.getItem('cc-detailed-mode') === 'true';
+let detailedMode = false; // V2.3.10.19: contextual event detail is always used; legacy flag kept DB-compatible.
 let currentPlayerName = 'Te';
 let currentPlayerDisplayName = 'Te';
 let currentPlayerData = null;
@@ -287,35 +287,78 @@ function typeLabel(e){
   if(e.type==='Edzés') return 'EDZÉS';
   return e.matchKind==='home' ? 'HAZAI MECCS' : 'IDEGENBELI MECCS';
 }
-function mapLink(e){
+function mapLink(e,label='Útvonaltervezés ↗',extraClass=''){
   if(e.matchKind!=='away' || !e.address) return '';
   const destination=encodeURIComponent(String(e.address).trim());
-  return `<a class="map-link map-nav-link" href="https://www.google.com/maps/dir/?api=1&destination=${destination}" target="_blank" rel="noopener noreferrer" aria-label="Útvonaltervezés ehhez a címhez a Google Mapsben">Útvonaltervezés ↗</a>`;
+  const cls=['map-link','map-nav-link',extraClass].filter(Boolean).join(' ');
+  return `<a class="${cls}" href="https://www.google.com/maps/dir/?api=1&destination=${destination}" target="_blank" rel="noopener noreferrer" aria-label="Útvonaltervezés ehhez a címhez a Google Mapsben">${label}</a>`;
+}
+function inferredHomeMatchCourt_(e){
+  if(e?.type!=='Meccs' || e?.matchKind!=='home') return '';
+  const teamName=String(currentTeamData?.teamName||currentTeamData?.name||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const start=eventStart(e);
+  const weekday=(start instanceof Date && !Number.isNaN(start.getTime())) ? start.getDay() : null;
+
+  // 2026/27 BEAC home-match slots supplied by club operations.
+  // Monday: BEAC Férfi — court 3
+  // Tuesday: BEAC Női II. — court 2
+  // Friday: BEAC Női I. — court 3
+  if(teamName.includes('ferfi') && weekday===1) return '3. pálya';
+  if(teamName.includes('noi ii') && weekday===2) return '2. pálya';
+  if((teamName.includes('noi i') || teamName.includes('noi 1')) && !teamName.includes('noi ii') && weekday===5) return '3. pálya';
+  return '';
+}
+function compactCourtLabel_(e){
+  const normalize=value=>{
+    const raw=String(value||'').trim();
+    if(!raw) return '';
+    if(/^\d+$/.test(raw)) return `${raw}. pálya`;
+    const m=raw.match(/(\d+)\.?\s*pálya/i);
+    if(m) return `${m[1]}. pálya`;
+    return raw;
+  };
+  const direct=normalize(e.court);
+  if(direct) return direct;
+  const place=String(e.place||'').trim();
+  const m=place.match(/(?:^|[•,–—-]\s*)(\d+\.?\s*pálya)\s*$/i);
+  if(m) return normalize(m[1]);
+  const loose=place.match(/(\d+\.?\s*pálya)/i);
+  if(loose) return normalize(loose[1]);
+  const inferred=normalize(inferredHomeMatchCourt_(e));
+  if(inferred) return inferred;
+  return '–';
+}
+function compactCourtMeta_(e){
+  const court=compactCourtLabel_(e);
+  return court==='–' ? 'Pálya –' : court;
 }
 function eventCard(e){
   const archived=isPast(e);
-  const detailClass=detailedMode?'show-detail':'compact-detail';
-  const awayLine = e.matchKind==='away' && e.address
-    ? `<div class="event-extra away-location"><span><b>Cím:</b> ${e.address}</span>${mapLink(e)}</div>` : '';
-  const meetingLine = e.meeting
-    ? `<div class="meeting-note ${detailClass}"><b>Találkozó:</b> ${e.meeting}</div>` : '';
+  const court=compactCourtMeta_(e);
+  const isAway=e.matchKind==='away';
+  const matchTitle=e.type==='Meccs' ? `<div class="event-match-title">${e.title}</div>` : '';
+  const compactMeta=isAway
+    ? [e.date,e.day,e.time].filter(Boolean).join(' • ')
+    : [e.date,e.day,e.time,court].filter(Boolean).join(' • ');
+  const awayLine=isAway && e.address
+    ? `<div class="away-location event-away-compact"><span class="away-address">${e.address}</span><span class="away-card-actions">${mapLink(e,'Google Maps ↗','map-card-link')}<strong class="${attendanceCountClass(e.yes.length)}">${e.yes.length} fő</strong></span></div>`
+    : '';
   const autoAbsence = archived && e.status===null
-    ? `<div class="auto-absence ${detailClass}">Automatikus hiányzás a lezáráskor</div>` : '';
+    ? `<div class="auto-absence">Automatikus hiányzás a lezáráskor</div>` : '';
 
   return `<article class="event-card ${cardClass(e)} ${archived?'archived-card':''}">
     <div class="event-collapsed">
-      <div class="event-top centered-card event-open-zone" data-open-event="${e.id}" aria-label="${typeLabel(e)} részleteinek megnyitása">
+      <div class="event-top centered-card event-open-zone ${isAway?'event-top-away':''}" data-open-event="${e.id}" aria-label="${typeLabel(e)} részleteinek megnyitása">
         <div class="event-icon bare-icon">${typeIcon(e)}</div>
         <div class="event-main">
           <div class="event-type">${typeLabel(e)}</div>
-          <div class="event-title">${e.date} • ${e.day}</div>
-          <div class="event-meta">${e.time ? e.time+' • ' : ''}${e.title}</div>
-          <div class="event-place ${detailClass}">${e.place}</div>
+          ${matchTitle}
+          <div class="event-meta event-meta-compact">${compactMeta}</div>
           ${awayLine}
-          ${meetingLine}
           ${autoAbsence}
         </div>
-        <div class="head-count"><strong class="${attendanceCountClass(e.yes.length)}">${e.yes.length} fő</strong></div>
+        ${isAway?'':`<div class="head-count"><strong class="${attendanceCountClass(e.yes.length)}">${e.yes.length} fő</strong></div>`}
       </div>
 
       <div class="slider-wrap">
@@ -1111,17 +1154,16 @@ function renderCalendar(rows){
 function renderCardSchedule(rows){
   return rows.map(e=>{
     const archived=isPast(e);
-    const detail = detailedMode ? `
-      <small>${e.day} • ${e.time} • ${e.place}</small>
-      ${e.meeting?`<small><b>Találkozó:</b> ${e.meeting}</small>`:''}
-      ${archived?'<span class="archive-badge">Lezárt</span>':''}
-    ` : '';
-    const awayQuick = e.matchKind==='away' && e.address
-      ? `<small class="planner-away-location"><b>Cím:</b> ${e.address}</small>${mapLink(e)}`
+    const court=compactCourtMeta_(e);
+    const baseMeta=e.matchKind==='away'
+      ? [e.day,e.time].filter(Boolean).join(' • ')
+      : [e.day,e.time,court].filter(Boolean).join(' • ');
+    const awayQuick=e.matchKind==='away' && e.address
+      ? `<small class="planner-away-location">${e.address}</small>${mapLink(e,'Google Maps ↗','planner-map-link')}`
       : '';
     return `<div class="planner-row planner-event-open ${cardClass(e)} ${archived?'archived-row':''}" data-open-event="${e.id}" data-event-id="${e.id}">
       <div class="planner-icon bare-icon">${typeIcon(e)}</div>
-      <div class="planner-main"><b>${e.date} · ${e.title}</b>${detail}${awayQuick}</div>
+      <div class="planner-main"><b>${e.date} · ${e.title}</b><small>${baseMeta}</small>${awayQuick}${archived?'<span class="archive-badge">Lezárt</span>':''}</div>
       <div class="planner-count"><strong class="${attendanceCountClass(e.yes.length)}">${e.yes.length} fő</strong></div>
       ${plannerStatusControls(e,archived)}
     </div>`;
@@ -1242,8 +1284,6 @@ function renderPlanner(){
 
   updatePlannerFilterButton_();
   const rows=filteredPlannerEvents();
-  const settingsToggle=document.getElementById('settingsDetailToggle');
-  if(settingsToggle) settingsToggle.checked=detailedMode;
   const defaultView=document.getElementById('settingsDefaultView');
   if(defaultView) defaultView.value=localStorage.getItem('cc-planner-default') || 'last';
 
@@ -1866,7 +1906,7 @@ renderEvents();
 renderPlanner();
 
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=231017').catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=231018').catch(()=>{}));
 }
 
 
@@ -2076,7 +2116,7 @@ async function ccPushRegistration_(){
   try{
     const existing=await navigator.serviceWorker.getRegistration('./');
     if(existing) return existing;
-    return await navigator.serviceWorker.register('./sw.js?v=231017');
+    return await navigator.serviceWorker.register('./sw.js?v=231018');
   }catch(err){ console.warn('Push service worker hiba:',err); return null; }
 }
 async function ccPushBrowserSubscription_(){
@@ -2191,60 +2231,6 @@ async function ccPushDisableCurrentDevice_(){
   }catch(err){ console.error(err); ccPushSetStatus_(err?.message||'Nem sikerült kikapcsolni.','error'); }
   finally{ ccPushBusy=false; await ccPushSyncUi_(); }
 }
-let ccPushQaHideTimer=null;
-let ccPushQaTapTimer=null;
-let ccPushQaTapCount=0;
-
-function ccPushQaResetTap_(){
-  ccPushQaTapCount=0;
-  if(ccPushQaTapTimer){ clearTimeout(ccPushQaTapTimer); ccPushQaTapTimer=null; }
-}
-function ccPushQaHide_(){
-  const row=document.getElementById('pushSelfTestRow');
-  if(row) row.hidden=true;
-  if(ccPushQaHideTimer){ clearTimeout(ccPushQaHideTimer); ccPushQaHideTimer=null; }
-  ccPushQaResetTap_();
-}
-function ccPushQaReveal_(){
-  const row=document.getElementById('pushSelfTestRow');
-  if(!row) return;
-  row.hidden=false;
-  if(ccPushQaHideTimer) clearTimeout(ccPushQaHideTimer);
-  ccPushQaHideTimer=setTimeout(ccPushQaHide_,90_000);
-}
-function ccPushQaTap_(event){
-  event?.preventDefault?.();
-  const card=document.getElementById('pushDeviceCard');
-  if(card?.dataset.pushState!=='active'){ ccPushQaResetTap_(); return; }
-  ccPushQaTapCount+=1;
-  if(ccPushQaTapTimer) clearTimeout(ccPushQaTapTimer);
-  if(ccPushQaTapCount>=3){
-    ccPushQaResetTap_();
-    ccPushQaReveal_();
-    return;
-  }
-  ccPushQaTapTimer=setTimeout(ccPushQaResetTap_,900);
-}
-async function ccPushQueueTest_(){
-  if(!SUPABASE_ENABLED || !ccSupabase || !ccSupabaseSession) return;
-  const btn=document.getElementById('pushSelfTestBtn');
-  if(btn) btn.disabled=true;
-  try{
-    const sub=await ccPushBrowserSubscription_();
-    if(!sub || Notification.permission!=='granted'){
-      throw new Error('Ezen az eszközön előbb kapcsold be a telefonos értesítéseket.');
-    }
-    const {data,error}=await ccSupabase.rpc('cc_player_push_test_v1');
-    if(error) throw error;
-    if(data && data.ok===false) throw new Error(data.error||'A teszt értesítés nem indítható.');
-    await ccLoadNotifications_({force:true});
-    ccPushSetStatus_('Saját teszt létrehozva. Az appban már látszik; a push a következő automatikus küldési körben érkezik.','active');
-    ccPushQaHide_();
-  }catch(err){
-    console.error('Saját push teszt hiba:',err);
-    ccPushSetStatus_(err?.message||'A teszt értesítés nem indítható.','error');
-  }finally{ if(btn) btn.disabled=false; }
-}
 async function ccPushDeactivateBackendOnLogout_(){
   if(!ccPushSupported_() || !SUPABASE_ENABLED || !ccSupabase || !ccSupabaseSession) return;
   try{
@@ -2271,9 +2257,6 @@ function ccPushOpenRequestedTarget_(){
 
 document.getElementById('pushEnableBtn')?.addEventListener('click',ccPushSubscribeCurrentDevice_);
 document.getElementById('pushDisableBtn')?.addEventListener('click',ccPushDisableCurrentDevice_);
-const ccPushQaTrigger=document.getElementById('pushDeviceQaTrigger');
-ccPushQaTrigger?.addEventListener('click',ccPushQaTap_);
-document.getElementById('pushSelfTestBtn')?.addEventListener('click',ccPushQueueTest_);
 
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('message',event=>{
@@ -2285,6 +2268,144 @@ document.addEventListener('visibilitychange',()=>{
 });
 window.addEventListener('focus',()=>{ if(ccSupabaseSession) ccLoadNotifications_({force:true}); });
 
+function icsEscape_(value){
+  return String(value??'')
+    .replace(/\\/g,'\\\\')
+    .replace(/\r?\n/g,'\\n')
+    .replace(/,/g,'\\,')
+    .replace(/;/g,'\\;');
+}
+function icsLocalStamp_(dateObj){
+  const p=n=>String(n).padStart(2,'0');
+  return `${dateObj.getFullYear()}${p(dateObj.getMonth()+1)}${p(dateObj.getDate())}T${p(dateObj.getHours())}${p(dateObj.getMinutes())}${p(dateObj.getSeconds())}`;
+}
+function icsUtcStamp_(dateObj=new Date()){
+  const p=n=>String(n).padStart(2,'0');
+  return `${dateObj.getUTCFullYear()}${p(dateObj.getUTCMonth()+1)}${p(dateObj.getUTCDate())}T${p(dateObj.getUTCHours())}${p(dateObj.getUTCMinutes())}${p(dateObj.getUTCSeconds())}Z`;
+}
+function calendarEventLocation_(e){
+  if(e.matchKind==='away' && e.address) return String(e.address).trim();
+  const place=String(e.place||'').trim();
+  const court=compactCourtLabel_(e);
+  if(place && court!=='–' && !place.toLowerCase().includes(court.toLowerCase())) return `${place} • ${court}`;
+  return place || (court==='–'?'':court) || '';
+}
+function calendarEventSummary_(e){
+  const team=String(currentTeamData?.teamName||currentTeamData?.name||'BEAC').trim();
+  if(e.type==='Edzés') return `${team} – Edzés`;
+  return String(e.title||`${team} – Meccs`).trim();
+}
+function calendarEventDescription_(e){
+  const lines=[typeLabel(e)];
+  if(e.meeting) lines.push(`Találkozó: ${e.meeting}`);
+  lines.push('Club Control');
+  return lines.join('\n');
+}
+function buildCalendarIcs_(){
+  const rows=(events||[]).slice().sort((a,b)=>eventStart(a)-eventStart(b));
+  const now=icsUtcStamp_();
+  const body=rows.map(e=>{
+    const start=eventStart(e);
+    let end=eventEnd(e);
+    if(!(end instanceof Date) || Number.isNaN(end.getTime()) || end<=start){
+      end=new Date(start.getTime()+(e.type==='Meccs'?2:2)*60*60*1000);
+    }
+    const uid=`${String(e.id||crypto?.randomUUID?.()||Date.now()).replace(/[^a-zA-Z0-9._-]/g,'-')}@club-control.beac`;
+    return [
+      'BEGIN:VEVENT',
+      `UID:${icsEscape_(uid)}`,
+      `DTSTAMP:${now}`,
+      `DTSTART;TZID=Europe/Budapest:${icsLocalStamp_(start)}`,
+      `DTEND;TZID=Europe/Budapest:${icsLocalStamp_(end)}`,
+      `SUMMARY:${icsEscape_(calendarEventSummary_(e))}`,
+      `LOCATION:${icsEscape_(calendarEventLocation_(e))}`,
+      `DESCRIPTION:${icsEscape_(calendarEventDescription_(e))}`,
+      `CATEGORIES:${icsEscape_(e.type==='Meccs'?'Meccs':'Edzés')}`,
+      'END:VEVENT'
+    ].join('\r\n');
+  }).join('\r\n');
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//BEAC Club Control//Player Calendar Export//HU',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    `X-WR-CALNAME:${icsEscape_(String(currentTeamData?.teamName||currentTeamData?.name||'BEAC Club Control'))}`,
+    'X-WR-TIMEZONE:Europe/Budapest',
+    'BEGIN:VTIMEZONE',
+    'TZID:Europe/Budapest',
+    'X-LIC-LOCATION:Europe/Budapest',
+    'BEGIN:DAYLIGHT',
+    'TZOFFSETFROM:+0100',
+    'TZOFFSETTO:+0200',
+    'TZNAME:CEST',
+    'DTSTART:19700329T020000',
+    'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+    'END:DAYLIGHT',
+    'BEGIN:STANDARD',
+    'TZOFFSETFROM:+0200',
+    'TZOFFSETTO:+0100',
+    'TZNAME:CET',
+    'DTSTART:19701025T030000',
+    'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+    'END:STANDARD',
+    'END:VTIMEZONE',
+    body,
+    'END:VCALENDAR',
+    ''
+  ].join('\r\n');
+}
+function calendarExportFilename_(){
+  const team=String(currentTeamData?.teamName||currentTeamData?.name||'BEAC')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_|_$/g,'');
+  return `${team||'BEAC'}_Club_Control_2026_27.ics`;
+}
+function setCalendarExportStatus_(text,tone='info'){
+  const el=document.getElementById('calendarExportStatus');
+  if(!el) return;
+  el.textContent=text||'';
+  el.dataset.tone=tone;
+}
+function calendarIcsFile_(){
+  return new File([buildCalendarIcs_()],calendarExportFilename_(),{type:'text/calendar;charset=utf-8'});
+}
+function downloadCalendarIcs_(){
+  const file=calendarIcsFile_();
+  const url=URL.createObjectURL(file);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=file.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(()=>URL.revokeObjectURL(url),1500);
+  return file;
+}
+async function exportAppleCalendar_(){
+  if(!events?.length){ setCalendarExportStatus_('Nincs exportálható esemény.','error'); return; }
+  const file=calendarIcsFile_();
+  try{
+    if(navigator.share && navigator.canShare?.({files:[file]})){
+      await navigator.share({files:[file],title:'BEAC Club Control – naptár'});
+      setCalendarExportStatus_(`${events.length} esemény átadva a megosztási panelnek.`,'ok');
+      return;
+    }
+  }catch(error){
+    if(error?.name==='AbortError') return;
+    console.warn('Apple naptár megosztás hiba:',error);
+  }
+  downloadCalendarIcs_();
+  setCalendarExportStatus_(`${events.length} esemény .ics fájlba exportálva. iPhone-on nyisd meg a fájlt a Naptárral.`,'ok');
+}
+function exportGoogleCalendar_(){
+  if(!events?.length){ setCalendarExportStatus_('Nincs exportálható esemény.','error'); return; }
+  downloadCalendarIcs_();
+  setCalendarExportStatus_(`${events.length} esemény .ics fájlba exportálva. Google Calendarba számítógépen: Beállítások → Importálás és exportálás.`,'ok');
+}
+
+document.getElementById('calendarExportAppleBtn')?.addEventListener('click',()=>exportAppleCalendar_());
+document.getElementById('calendarExportGoogleBtn')?.addEventListener('click',exportGoogleCalendar_);
+
 const settingsDialog=document.getElementById('settingsDialog');
 let currentPlayerSettings=null;
 let ccSettingsSaveTimer=null;
@@ -2294,7 +2415,7 @@ function defaultSettingsPayload_(){
     theme:localStorage.getItem('cc-theme-mode')||'system',
     scheduleDefaultView:localStorage.getItem('cc-planner-default')||'last',
     language:'hu',
-    detailedMode:localStorage.getItem('cc-detailed-mode')==='true',
+    detailedMode:false,
     avatarId:'',
     notifications:{
       new_training:true,
@@ -2314,7 +2435,7 @@ function collectSettingsUi_(){
     theme:document.getElementById('settingsThemeMode')?.value||'system',
     scheduleDefaultView:document.getElementById('settingsDefaultView')?.value||'last',
     language:document.getElementById('settingsLanguage')?.value||'hu',
-    detailedMode:!!document.getElementById('settingsDetailToggle')?.checked,
+    detailedMode:false,
     avatarId:currentAvatarId||'',
     notifications
   };
@@ -2332,7 +2453,6 @@ function applySettingsUi_(value){
   currentPlayerSettings=settings;
   const map={settingsThemeMode:settings.theme||'system',settingsDefaultView:settings.scheduleDefaultView||'last',settingsLanguage:settings.language||'hu'};
   Object.entries(map).forEach(([id,val])=>{const el=document.getElementById(id); if(el) el.value=val;});
-  const detail=document.getElementById('settingsDetailToggle'); if(detail) detail.checked=!!settings.detailedMode;
   if(PLAYER_AVATAR_IDS.has(String(settings.avatarId||''))) currentAvatarId=String(settings.avatarId);
   else currentAvatarId='';
   avatarPickerMode=currentAvatarId ? 'avatar' : 'monogram';
@@ -2345,9 +2465,9 @@ async function savePlayerSettingsNow_(){
   currentPlayerSettings=settings;
   localStorage.setItem('cc-theme-mode',settings.theme);
   localStorage.setItem('cc-planner-default',settings.scheduleDefaultView);
-  localStorage.setItem('cc-detailed-mode',settings.detailedMode?'true':'false');
+  localStorage.removeItem('cc-detailed-mode');
   applyThemePreference_(settings.theme);
-  detailedMode=settings.detailedMode;
+  detailedMode=false;
 
   if(SUPABASE_ENABLED && ccSupabase && currentPlayerData?.playerId){
     const {error}=await ccSupabase.from('player_settings').upsert({
@@ -2379,12 +2499,6 @@ document.getElementById('openSettingsBtn')?.addEventListener('click',()=>{
 document.getElementById('closeSettingsBtn')?.addEventListener('click',async()=>{
   try{ await savePlayerSettingsNow_(); }catch(err){ console.warn(err); }
   settingsDialog.close();
-});
-document.getElementById('settingsDetailToggle')?.addEventListener('change',e=>{
-  detailedMode=e.target.checked;
-  localStorage.setItem('cc-detailed-mode', detailedMode ? 'true' : 'false');
-  scheduleSettingsSave_();
-  renderEvents(); renderPlanner();
 });
 document.getElementById('settingsDefaultView')?.addEventListener('change',e=>{
   localStorage.setItem('cc-planner-default',e.target.value);
@@ -2473,6 +2587,20 @@ function eventNoteSection_(e, archived){
     </details>`;
 }
 
+function eventDialogDetails_(e){
+  const court=compactCourtLabel_(e);
+  if(e.matchKind==='away'){
+    const venue=String(e.place||'').trim();
+    const address=String(e.address||'').trim();
+    return `<div class="event-dialog-details event-dialog-location">
+      ${venue?`<p><b>Helyszín:</b> ${venue}</p>`:''}
+      ${address?`<div class="event-dialog-address-row"><span><b>Cím:</b> ${address}</span>${mapLink(e)}</div>`:''}
+      ${e.meeting?`<p><b>Találkozó:</b> ${e.meeting}</p>`:''}
+    </div>`;
+  }
+  return `<div class="event-dialog-details event-dialog-location compact-home-location"><p><b>Pálya:</b> ${court}</p></div>`;
+}
+
 function openEventDialog(eventId){
   const e=events.find(x=>x.id===eventId); if(!e) return;
   const archived=isPast(e);
@@ -2486,11 +2614,7 @@ function openEventDialog(eventId){
       </div>
       <strong class="${attendanceCountClass((e.yes||[]).length)}">${(e.yes||[]).length} fő</strong>
     </div>
-    ${(detailedMode || (e.matchKind==='away' && e.address))?`<div class="event-dialog-details">
-      ${detailedMode?`<p><b>Helyszín:</b> ${e.place||'–'}</p>`:''}
-      ${e.matchKind==='away' && e.address?`<p><b>Cím:</b> ${e.address}</p><p>${mapLink(e)}</p>`:''}
-      ${detailedMode && e.meeting?`<p><b>Találkozó:</b> ${e.meeting}</p>`:''}
-    </div>`:''}
+    ${eventDialogDetails_(e)}
     <div class="event-dialog-slider">${plannerStatusControls(e,archived)}</div>
     ${eventNoteSection_(e,archived)}
     ${eventDialogRoster(e)}`;
@@ -2630,6 +2754,9 @@ function normalizeApiEvent(x){
     color:x.color||'',
     place:x.venue||'',
     address:x.address||'',
+    court:x.court||'',
+    startsAt:x.startsAt||x.starts_at||'',
+    endsAt:x.endsAt||x.ends_at||'',
     meeting:x.meetingTime ? `${x.meetingTime}${x.meetingPlace?' • '+x.meetingPlace:''}` : '',
     month:x.monthKey||'',
     status:x.myStatus || null,

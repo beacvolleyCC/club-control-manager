@@ -1,8 +1,55 @@
-directions_url: PASS
-search_url_removed: PASS
-away_address_always_card: PASS
-dialog_away_address: PASS
-planner_away_address: PASS
-cache_bust_index: PASS
-sw_cache_bumped: PASS
-reduced_motion: PASS
+CLUB CONTROL PLAYER V2.3.10.19 — QA RESULT
+Date: 2026-09-27
+
+RESULT: STATIC / REGRESSION QA PASS
+PRODUCTION RELEASE GATE: PHYSICAL DEVICE SMOKE STILL REQUIRED
+
+BASELINE / REGRESSION
+PASS - V2.3.10.19 was rebuilt from V2.3.10.16 stable baseline.
+PASS - V2.3.10.16 notification swipe mask/red-tail CSS remains present.
+PASS - V2.3.10.16 native dismiss JS remains present.
+PASS - accidental V2.3.10.17 hidden push-QA UI was not inherited.
+PASS - build label/cache keys updated to V2.3.10.19.
+
+FRONTEND / JS
+PASS - node --check app.js.
+PASS - no duplicate HTML IDs.
+PASS - removed settingsDetailToggle from HTML/listeners.
+PASS - away Maps URL uses /maps/dir destination encoding.
+PASS - event.court is preserved by normalizeApiEvent.
+PASS - missing court is shown as "Pálya –", not guessed from an address.
+
+CALENDAR EXPORT
+PASS - generated VCALENDAR contains VTIMEZONE Europe/Budapest.
+PASS - generated VEVENT count matches input event count in harness.
+PASS - DTSTART/DTEND/SUMMARY/LOCATION/DESCRIPTION/CATEGORIES emitted.
+PASS - no attendance roster, RSVP or coach-note data emitted.
+PASS - .ics filename is team-specific and filesystem-safe.
+
+UX / INFORMATION ARCHITECTURE
+PASS - calendar export lives under Settings > Menetrend.
+PASS - event cards remove duplicate full venue/address data.
+PASS - away Google Maps + headcount share one action row at normal mobile widths.
+PASS - Apple/Google export buttons share one row at normal mobile widths; stack only below 340px.
+PASS - contextual details reduce redundant rows.
+
+BACKEND / DATA
+PASS - no SQL/schema changes required for one-time export.
+KNOWN DATA GAP - BRSZ-imported home matches have court=NULL; UI correctly shows "Pálya –" until data is supplied.
+
+SECURITY / PRIVACY
+PASS - export uses only event/team schedule data already loaded in Player.
+PASS - no auth token or private player data is embedded in .ics.
+
+NOT EXECUTED IN THIS ENVIRONMENT
+- authenticated live Supabase smoke
+- iPhone PWA file/share test
+- Android Google Calendar import test
+- desktop Google Calendar import test
+- visual screenshot/browser QA (local browser navigation blocked by environment policy)
+
+PASS - Home court fallback: Férfi Monday -> 3. pálya.
+PASS - Home court fallback: Női I Friday -> 3. pálya.
+PASS - Home court fallback: Női II Tuesday -> 2. pálya.
+PASS - Explicit event.court has precedence over inferred home court.
+PASS - ICS LOCATION uses the same resolved court helper.

@@ -6219,71 +6219,12 @@ body.dark .account-quick-menu{box-shadow:0 18px 46px rgba(0,0,0,.42);}
 }
 
 
-/* ==========================================================
-   PLAYER V2.3.10.0 — HIDDEN SELF TEST
-   Hidden QA control for the already-installed self-only push test RPC.
-   ========================================================== */
-.push-self-test-row{
-  width:100%;
-  margin-top:10px;
-  padding-top:10px;
-  border-top:1px solid color-mix(in srgb,var(--line) 76%,transparent);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.push-self-test-row[hidden]{display:none!important;}
-.push-self-test-copy{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  gap:3px;
-}
-.push-self-test-copy b{font-size:11px;line-height:1.25;}
-.push-self-test-copy small{font-size:9.5px;line-height:1.35;color:var(--muted);}
-@media(max-width:760px){
-  .push-self-test-row{align-items:stretch;flex-direction:column;}
-  .push-self-test-row .push-device-btn{width:100%;}
-}
-
-/* PLAYER V2.3.10.2 — hidden QA trigger: fixed non-text triple-tap target */
+/* PLAYER V2.3.10.15 — production push settings title */
 .push-device-title-row{
   display:flex;
   align-items:center;
-  gap:6px;
   min-width:0;
 }
-.push-device-qa-trigger{
-  appearance:none;
-  -webkit-appearance:none;
-  width:30px;
-  height:30px;
-  margin:-8px -8px -8px 0;
-  padding:0;
-  border:0;
-  border-radius:999px;
-  background:transparent;
-  display:inline-grid;
-  place-items:center;
-  flex:0 0 30px;
-  touch-action:manipulation;
-  -webkit-user-select:none;
-  user-select:none;
-  -webkit-touch-callout:none;
-  cursor:default;
-}
-.push-device-state-dot{
-  width:7px;
-  height:7px;
-  border-radius:999px;
-  background:currentColor;
-  opacity:.28;
-  pointer-events:none;
-}
-.push-device-card[data-push-state="active"] .push-device-state-dot{opacity:.72;}
-.push-device-card[data-push-state="error"] .push-device-state-dot{opacity:.58;}
-.push-device-qa-trigger:focus{outline:none;}
 
 
 /* ==========================================================
@@ -6677,48 +6618,252 @@ body.dark .chip.yes[class*="position-"]{
   .notification-swipe-row{scroll-behavior:auto !important;}
 }
 
-
-/* V2.3.10.17 — away match address + Google Maps directions */
-.away-location{
-  display:flex !important;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:6px;
-  color:var(--muted);
+/* ==========================================================
+   PLAYER V2.3.10.13 — NOTIFICATION SWIPE MASK / BORDER FIX
+   - persistent outer border belongs to the scroll row
+   - Safari/iOS mask forces composited scroll content inside radius
+   - red dismiss surface does not draw its own outer radius
+   ========================================================== */
+.notification-swipe-row{
+  border:1px solid var(--line) !important;
+  border-radius:12px !important;
+  box-sizing:border-box !important;
+  overflow-x:auto !important;
+  overflow-y:hidden !important;
+  -webkit-mask-image:-webkit-radial-gradient(white,black);
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-size:100% 100%;
+  mask-image:linear-gradient(#fff,#fff);
+  mask-repeat:no-repeat;
+  mask-size:100% 100%;
+  isolation:isolate;
 }
-.map-nav-link{
+.notification-item-card{
+  border:0 !important;
+  border-radius:11px !important;
+}
+.notification-swipe-action{
+  border:0 !important;
+  border-radius:0 !important;
+  margin:0 !important;
+  background-clip:padding-box !important;
+}
+
+/* ==========================================================
+   PLAYER V2.3.10.15 — MONOCHROME PUSH SETTINGS
+   Neutral production UI; explicitly suppresses native iOS blue
+   and old semantic green/red card tinting.
+   ========================================================== */
+#settingsDialog .push-device-card,
+#settingsDialog .push-device-card[data-push-state="active"],
+#settingsDialog .push-device-card[data-push-state="error"],
+#settingsDialog .push-device-card[data-push-state="info"]{
+  border-color:var(--line) !important;
+  background:var(--card) !important;
+  color:var(--black) !important;
+}
+
+#settingsDialog #pushDeviceStatus{
+  color:var(--black) !important;
+  opacity:.68 !important;
+}
+
+#settingsDialog #pushEnableBtn,
+#settingsDialog #pushDisableBtn{
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  border:1px solid var(--black) !important;
+  background:var(--card) !important;
+  color:var(--black) !important;
+  -webkit-text-fill-color:var(--black) !important;
+  box-shadow:none !important;
+}
+
+#settingsDialog #pushEnableBtn:hover,
+#settingsDialog #pushDisableBtn:hover,
+#settingsDialog #pushEnableBtn:focus-visible,
+#settingsDialog #pushDisableBtn:focus-visible{
+  background:var(--soft) !important;
+  color:var(--black) !important;
+  -webkit-text-fill-color:var(--black) !important;
+  outline:2px solid var(--black) !important;
+  outline-offset:2px !important;
+}
+
+#settingsDialog #pushEnableBtn:disabled,
+#settingsDialog #pushDisableBtn:disabled{
+  opacity:.46 !important;
+}
+
+body.dark #settingsDialog .push-device-card,
+body.dark #settingsDialog .push-device-card[data-push-state="active"],
+body.dark #settingsDialog .push-device-card[data-push-state="error"],
+body.dark #settingsDialog .push-device-card[data-push-state="info"]{
+  border-color:var(--line) !important;
+  background:var(--card) !important;
+  color:var(--black) !important;
+}
+
+body.dark #settingsDialog #pushEnableBtn,
+body.dark #settingsDialog #pushDisableBtn{
+  border-color:var(--black) !important;
+  background:var(--card) !important;
+  color:var(--black) !important;
+  -webkit-text-fill-color:var(--black) !important;
+}
+
+/* ==========================================================
+   PLAYER V2.3.10.16 — NOTIFICATION SWIPE RED TAIL
+   iOS can rubber-band a horizontal scroller beyond its content edge.
+   Keep the scrollport backing red so the dismiss surface never visually
+   "runs out". The outer row remains the sole rounded/masked shape owner.
+   Scroll width, snap positions and dismiss thresholds are unchanged.
+   ========================================================== */
+.notification-swipe-row{
+  background:#b3261e !important;
+}
+.dark .notification-swipe-row{
+  background:#8f2d27 !important;
+}
+.notification-item-card{
+  border-radius:0 !important;
+}
+
+
+
+/* ==========================================================
+   PLAYER V2.3.10.18 — COMPACT CONTEXTUAL EVENT INFO + CALENDAR EXPORT
+   Base: V2.3.10.16 stable rollback
+   ========================================================== */
+.event-match-title{
+  margin-top:2px;
+  font-size:13px;
+  line-height:1.2;
+  font-weight:900;
+  color:inherit;
+  overflow-wrap:anywhere;
+}
+.event-meta-compact{
+  margin-top:3px;
+  font-size:11px;
+  line-height:1.3;
+  color:var(--muted);
+  font-weight:700;
+}
+.event-top-away{
+  grid-template-columns:auto minmax(0,1fr) !important;
+}
+.event-away-compact{
+  margin-top:5px !important;
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px !important;
+  align-items:center !important;
+}
+.away-address{
+  min-width:0;
+  font-size:10px;
+  line-height:1.3;
+  color:var(--muted);
+  overflow-wrap:anywhere;
+}
+.away-card-actions{
   display:inline-flex;
   align-items:center;
-  justify-content:center;
-  min-height:30px;
-  margin-top:0;
-  padding:6px 9px;
-  border:1px solid var(--line);
-  border-radius:9px;
-  background:var(--card);
-  color:var(--black);
-  text-decoration:none;
-  font-size:10px;
-  font-weight:900;
-  line-height:1.1;
-  transition:transform .16s cubic-bezier(.22,1,.36,1),background .16s ease,border-color .16s ease;
+  gap:8px;
+  white-space:nowrap;
+  justify-self:end;
 }
-.map-nav-link:hover{background:var(--soft)}
-.map-nav-link:active{transform:scale(.98)}
+.away-card-actions strong{
+  font-size:14px;
+  line-height:1;
+  font-weight:900;
+}
+.map-card-link,
+.planner-map-link{
+  min-height:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  text-decoration:underline !important;
+  text-underline-offset:2px;
+  font-size:10px !important;
+  line-height:1.2 !important;
+  font-weight:850 !important;
+}
+.map-card-link:hover,
+.planner-map-link:hover{background:transparent !important;}
+.map-card-link:active,
+.planner-map-link:active{transform:none !important;}
+.event-dialog-location{
+  display:grid;
+  gap:6px;
+}
+.event-dialog-location p{margin:0 !important;}
+.event-dialog-address-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+}
+.event-dialog-address-row .map-nav-link{
+  margin:0 !important;
+  white-space:nowrap;
+}
+.compact-home-location{
+  padding-top:8px !important;
+  padding-bottom:8px !important;
+}
 .planner-away-location{
   display:block;
-  margin-top:4px;
+  margin-top:3px;
   color:var(--muted);
   font-size:10px;
+  line-height:1.3;
 }
-.planner-main>.map-nav-link{margin-top:5px}
-.event-dialog-details .map-nav-link{margin-top:0}
-.dark .map-nav-link{
-  background:#1b1a18;
-  color:#f3eee4;
-  border-color:#4a453d;
+.planner-main>.planner-map-link{margin-top:3px;}
+.calendar-export-card{
+  margin-top:10px;
+  padding:11px 12px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--soft);
+  display:grid;
+  gap:9px;
 }
-@media (prefers-reduced-motion:reduce){
-  .map-nav-link{transition-duration:.01ms !important}
+.calendar-export-copy{
+  display:grid;
+  gap:3px;
+}
+.calendar-export-copy b{font-size:12px;line-height:1.2;}
+.calendar-export-copy small,
+.calendar-export-note{
+  font-size:10px;
+  line-height:1.35;
+  color:var(--muted);
+}
+.calendar-export-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.calendar-export-btn{
+  min-height:36px;
+  padding:8px 10px !important;
+  font-size:10.5px !important;
+}
+.calendar-export-status{
+  min-height:0;
+  font-size:10px;
+  line-height:1.35;
+  color:var(--muted);
+}
+.calendar-export-status:empty{display:none;}
+.calendar-export-status[data-tone="ok"]{color:#287d3f;}
+.calendar-export-status[data-tone="error"]{color:#b9342f;}
+.dark .calendar-export-status[data-tone="ok"]{color:#6fc184;}
+.dark .calendar-export-status[data-tone="error"]{color:#ef8079;}
+@media(max-width:340px){
+  .calendar-export-actions{grid-template-columns:1fr;}
 }
