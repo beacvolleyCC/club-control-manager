@@ -1,0 +1,9 @@
+PASS — version 2.3.9.12
+PASS — refresh id unique
+PASS — refresh inside calendar nav
+PASS — refresh removed from header action class
+PASS — refresh JS binding preserved
+PASS — context-preserving refresh preserved
+PASS — post-save auto refresh preserved
+PASS — new training button preserved
+PASS — notification flow preserved
