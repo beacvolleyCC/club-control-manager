@@ -1,102 +1,27 @@
-CLUB CONTROL PLAYER V2.3.10.20 — QA RESULT
-Date: 2026-09-27
-Scope: Club Control Motion System v1
+CLUB CONTROL PLAYER V2.3.10.22 — QA RESULT
 
-RESULT: STATIC / REGRESSION QA PASS
-PRODUCTION RELEASE GATE: PHYSICAL IPHONE + ANDROID + DESKTOP SMOKE STILL REQUIRED
+TARGETED FIX SCOPE
+- attendance slider pointer/touch drag
+- Menetrend grid native X/Y scroll ownership
+- compact event-card headcount row
 
-BASELINE / CHANGE SCOPE
-PASS - Direct base is V2.3.10.19.
-PASS - No SQL/schema/migration change.
-PASS - Only index.html, app.js, styles.css and sw.js are deployment files.
-PASS - service-worker cache/version and app/style query versions bumped to V2.3.10.20.
-PASS - build label updated to Player V2.3.10.20.
+PASS — static / structural
+- app.js syntax
+- sw.js syntax
+- duplicate HTML IDs: none
+- build/cache/version markers consistent
+- full-track slider pointer binding present; old button exclusion removed
+- matrixScroll is the single grid overflow owner in final high-specificity CSS
+- pull-to-refresh checks the active internal grid scroller
+- mobile headcount forced back to row 1 / right column
 
-STATIC CODE QA
-PASS - node --check app.js.
-PASS - node --check sw.js.
-PASS - styles.css parses with zero top-level tinycss2 parse errors.
-PASS - CSS brace balance = 0.
-PASS - no duplicate HTML IDs.
-PASS - five dialog elements retained: Notifications, Settings, Logout, Event, Cancel.
-PASS - three bottom-nav destinations retained.
+PASS — isolated Chromium interaction harness
+- drag started directly on the center slider BUTTON
+- cc-slider-dragging activated and --cc-slider-left changed during movement
+- release to the right committed the `no` state
+- matrix viewport: clientWidth 368 px / scrollWidth 690 px in 390 px mobile viewport
+- matrix scrollLeft changed 0 -> 180 while outer planner viewport stayed at 0
 
-MOTION SYSTEM TOKENS
-PASS - micro token 140 ms is inside 120–160 ms specification.
-PASS - normal token 210 ms is inside 180–240 ms specification.
-PASS - structural token 280 ms is inside 240–320 ms specification.
-PASS - standard cubic-bezier(.2,0,0,1).
-PASS - enter cubic-bezier(.2,.8,.2,1).
-PASS - exit cubic-bezier(.4,0,1,1).
-PASS - open 200 ms / close 160 ms.
-PASS - slider/sheet snap 200 ms.
-PASS - skeleton-content transition 100 ms.
-
-INTERACTION QA — STATIC
-PASS - card press scale = .985; release uses shared release timing.
-PASS - no page-slide transition added to .view.
-PASS - bottom nav uses one moving indicator + icon/label micro transitions.
-PASS - filter panel uses normal motion token.
-PASS - dialog content uses opacity + 16 px translate.
-PASS - native Escape/backdrop/X paths are routed through the shared close helper where controlled by app JS.
-PASS - native Cancel-dialog “Mégse” button is intercepted so it also uses the shared close motion.
-PASS - Settings + Notifications get mobile header drag with distance/velocity close and snap-back.
-
-ATTENDANCE SLIDER
-PASS - pointer drag tracks horizontal delta 1:1.
-PASS - bounds are clamped to the three-state track.
-PASS - 8 px direction lock protects vertical scrolling.
-PASS - drag phase has transition:none.
-PASS - release projects velocity before nearest-state selection.
-PASS - release snap uses 200 ms token.
-PASS - existing applySliderState -> setYes / askCancel / neutralizeEvent flow retained.
-
-MENETREND / SCROLL STABILITY
-PASS - planner viewport and matrix scroll remain native X/Y scrolling.
-PASS - overscroll-behavior:contain and touch-action:pan-x pan-y applied.
-PASS - planner scroll container/table are excluded from transitions.
-PASS - no new scrollTop animation or dynamic scroll-height motion introduced.
-
-NOTIFICATIONS
-PASS - V2.3.10.16 native notification swipe JS is not replaced by custom transform dragging.
-PASS - V2.3.10.16 red-tail scrollport styling remains present below historical rules and before Motion v1 overrides.
-PASS - Motion v1 does not apply transform drag to notification cards.
-PASS - initial empty notification load gets skeleton; existing-content refresh remains silent.
-PASS - content reveal uses 100 ms crossfade.
-
-REDUCED MOTION / ACCESSIBILITY
-PASS - app-wide prefers-reduced-motion rule present.
-PASS - non-essential animation/transition durations collapse to near-zero.
-PASS - bottom-nav moving indicator is disabled and static active highlight restored.
-PASS - skeleton shimmer and refresh rotation disabled.
-PASS - keyboard focus styles are not removed by the Motion v1 layer.
-
-BUSINESS-LOGIC REGRESSION
-PASS - inferredHomeMatchCourt_ byte-for-byte unchanged vs V2.3.10.19.
-PASS - compactCourtLabel_ byte-for-byte unchanged vs V2.3.10.19.
-PASS - buildCalendarIcs_ byte-for-byte unchanged vs V2.3.10.19.
-PASS - normalizeApiEvent byte-for-byte unchanged vs V2.3.10.19.
-PASS - persist byte-for-byte unchanged vs V2.3.10.19.
-PASS - Supabase RPC identifier set unchanged vs V2.3.10.19.
-PASS - explicit event.court precedence and 3/3/2 home-court fallback retained.
-PASS - calendar export structure/data logic unchanged.
-
-REVIEW GATES
-PASS (static) - Product/Business: motion-only scope; no feature removed.
-PASS (static) - UX/IA: existing information hierarchy/navigation preserved.
-PASS (static) - UI/Design System: shared motion tokens introduced without color/layout redesign.
-PASS (static) - Frontend/PWA: pointer/native-scroll separation preserved.
-PASS (static) - Backend/API: no endpoint/RPC contract change.
-PASS (static) - Database/Data integrity: no schema/write-path change from motion work.
-PASS (static) - Architecture/Integration: motion layer remains frontend-only.
-PASS (static) - Security/Permissions: auth/permission logic unchanged.
-PASS (static) - QA/Performance/Accessibility: transform/opacity preferred; scroll geometry excluded; reduced motion added.
-PASS (static) - DevOps/Release/Rollback: V2.3.10.19 remains direct rollback package.
-PASS (static) - Motion/Interaction: v1 token/timing/drag/snap/nav/dialog/loading rules represented.
-
-NOT EXECUTED IN THIS ENVIRONMENT
-- authenticated live Supabase smoke
-- real iPhone PWA gesture smoke
-- real Android PWA gesture smoke
-- desktop interactive visual smoke
-- automated Chromium rendering: container Chromium did not complete headless DOM navigation, so no browser-render PASS is claimed.
+NOT CLAIMED
+- These harnesses verify the corrected interaction model, but they are not a substitute for physical Safari/PWA behavior.
+- Physical iPhone PWA + Android + desktop smoke remains required before production approval.

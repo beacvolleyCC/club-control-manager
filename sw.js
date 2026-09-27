@@ -1,4 +1,4 @@
-const CACHE='club-control-player-v2-3-10-20-motion-system-v1';
+const CACHE='club-control-player-v2-3-10-22-touch-scroll-fix';
 const CORE=[
   './manifest.webmanifest',
   './icons/icon-192.png',

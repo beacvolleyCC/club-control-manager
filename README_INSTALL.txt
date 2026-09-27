@@ -1,4 +1,4 @@
-CLUB CONTROL PLAYER — V2.3.10.20
+CLUB CONTROL PLAYER — V2.3.10.22
 CLUB CONTROL MOTION SYSTEM V1
 
 BASELINE
@@ -98,4 +98,19 @@ NO SQL REQUIRED.
 Do not rerun 047–053, MGR001 or MGR002.
 
 Build:
-Player V2.3.10.20
+Player V2.3.10.22
+
+
+V2.3.10.22 targeted UI adjustment:
+- Removed legacy minimum-height from Edzések event-card header.
+- One-line venue/court cards now collapse naturally instead of leaving unused space above the attendance slider.
+- Motion System v1 and business logic unchanged.
+
+
+V2.3.10.22 touch/grid correction:
+- Attendance slider drag starts from the full track, including all three labels/buttons.
+- Horizontal drag uses 1:1 thumb tracking; normal taps remain unchanged.
+- Menetrend grid has exactly one native X/Y scroll surface: #matrixScroll.
+- Sticky header + Alkalom + Fő are anchored inside that same scroll surface.
+- Pull-to-refresh no longer competes while the matrix is internally scrolled.
+- Mobile event headcount no longer creates a second empty CSS-grid row.

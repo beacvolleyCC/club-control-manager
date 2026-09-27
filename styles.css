@@ -7160,3 +7160,134 @@ dialog.cc-sheet-snapping .dialog-card{
   .cc-motion-skeleton-row::after{display:none !important;}
   .refresh-button.is-refreshing .refresh-icon{animation:none !important;}
 }
+
+/* ==========================================================
+   PLAYER V2.3.10.21 — COMPACT EVENT CARD VERTICAL RHYTHM
+   Scope: remove legacy minimum-height from the event header so
+   one-line venue/court cards do not reserve empty space below.
+   ========================================================== */
+.event-top.centered-card{
+  min-height:0 !important;
+}
+.event-card .event-top.centered-card{
+  padding-top:14px !important;
+  padding-bottom:7px !important;
+}
+.event-card .slider-wrap{
+  padding-top:3px !important;
+  padding-bottom:11px !important;
+}
+@media(max-width:760px){
+  .event-card .event-top.centered-card{
+    padding-top:13px !important;
+    padding-bottom:6px !important;
+  }
+}
+
+
+/* ==========================================================
+   PLAYER V2.3.10.22 — TOUCH INPUT + SINGLE GRID SCROLLER FIX
+   - whole attendance track is draggable, including label buttons
+   - horizontal slider drag is reserved for the component; vertical pan stays native
+   - matrixScroll is the one native X/Y grid scroller on iOS/PWA
+   - old nested overflow rules are neutralized with matching specificity
+   - mobile headcount stays in row 1, aligned with the final event-info line
+   ========================================================== */
+
+/* Real draggable three-state control. */
+.attendance-slider{
+  touch-action:pan-y !important;
+  -webkit-user-select:none !important;
+  user-select:none !important;
+  -webkit-touch-callout:none !important;
+}
+.attendance-slider .slider-zone{
+  touch-action:pan-y !important;
+  -webkit-user-select:none !important;
+  user-select:none !important;
+}
+
+/* One scroll owner only: the table wrapper itself. */
+#plannerView .planner-scroll-viewport{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+  overscroll-behavior:auto !important;
+  touch-action:auto !important;
+  -webkit-overflow-scrolling:auto !important;
+}
+#plannerView .planner-scroll-viewport > .planner-card.planner-surface{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+}
+#plannerView #plannerList:has(.transposed-matrix){
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+}
+#plannerView #plannerList:has(.transposed-matrix) .matrix-scroll{
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+  overflow-x:auto !important;
+  overflow-y:auto !important;
+  overscroll-behavior:contain !important;
+  touch-action:pan-x pan-y !important;
+  -webkit-overflow-scrolling:touch !important;
+  scroll-behavior:auto !important;
+  scrollbar-width:none !important;
+}
+#plannerView #plannerList:has(.transposed-matrix) .matrix-scroll::-webkit-scrollbar{
+  display:none !important;
+  width:0 !important;
+  height:0 !important;
+}
+#plannerView #plannerList:has(.transposed-matrix) .transposed-matrix{
+  width:max-content !important;
+  min-width:100% !important;
+  max-width:none !important;
+}
+
+/* Sticky items are relative to matrixScroll, the same element that moves. */
+#plannerView #plannerList:has(.transposed-matrix) .transposed-matrix thead th{
+  position:sticky !important;
+  top:0 !important;
+}
+#plannerView #plannerList:has(.transposed-matrix) .transposed-matrix .matrix-event-side{
+  position:sticky !important;
+  left:0 !important;
+}
+#plannerView #plannerList:has(.transposed-matrix) .transposed-matrix .matrix-count-head,
+#plannerView #plannerList:has(.transposed-matrix) .transposed-matrix .matrix-count-cell{
+  position:sticky !important;
+  left:124px !important;
+}
+body.planner-grid-page-lock #plannerView .planner-scroll-tail{
+  display:none !important;
+}
+
+/* Old mobile rule placed the count into a second CSS-grid row. That row was the
+   remaining empty band visible above the attendance slider. */
+@media(max-width:760px){
+  .event-top.centered-card .head-count{
+    grid-column:3 !important;
+    grid-row:1 !important;
+    align-self:end !important;
+    justify-self:end !important;
+    align-items:flex-end !important;
+    margin:0 0 1px 8px !important;
+  }
+  #plannerView #plannerList:has(.transposed-matrix) .transposed-matrix .matrix-count-head,
+  #plannerView #plannerList:has(.transposed-matrix) .transposed-matrix .matrix-count-cell{
+    left:112px !important;
+  }
+}

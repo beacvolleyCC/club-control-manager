@@ -38,7 +38,7 @@ let avatarPickerMode = 'monogram';
 
 
 // ---------------------------------------------------------------------------
-// CLUB CONTROL MOTION SYSTEM V1 — Player V2.3.10.20
+// CLUB CONTROL MOTION SYSTEM V1 — Player V2.3.10.22
 // Shared motion primitives only. Business/data behavior stays unchanged.
 // ---------------------------------------------------------------------------
 const CC_MOTION_V1=Object.freeze({
@@ -1332,25 +1332,28 @@ function scrollPlannerToNearest(rows, behavior='auto'){
   if(!next) return;
 
   if(plannerMode==='grid'){
-    const viewport=document.getElementById('plannerScrollViewport');
-    const row=viewport?.querySelector(`[data-grid-event="${next.id}"]`);
-    if(!viewport || !row) return;
+    // V2.3.10.22: the matrix itself is the ONE native X/Y scroll surface.
+    // Keeping sticky header + sticky left columns inside the same scroller is
+    // substantially more reliable in iOS/PWA than nested overflow containers.
+    const scroller=document.getElementById('matrixScroll');
+    const row=scroller?.querySelector(`[data-grid-event="${next.id}"]`);
+    if(!scroller || !row) return;
 
     forcePlannerPageTop_();
 
-    const viewportRect=viewport.getBoundingClientRect();
+    const scrollerRect=scroller.getBoundingClientRect();
     const rowRect=row.getBoundingClientRect();
-    const head=viewport.querySelector('thead');
+    const head=scroller.querySelector('thead');
     const target=Math.max(
       0,
-      viewport.scrollTop +
-      (rowRect.top-viewportRect.top) -
+      scroller.scrollTop +
+      (rowRect.top-scrollerRect.top) -
       (head?.offsetHeight || 0) -
       2
     );
 
-    if(behavior==='auto') viewport.scrollTop=target;
-    else viewport.scrollTo({top:target,behavior});
+    if(behavior==='auto') scroller.scrollTop=target;
+    else scroller.scrollTo({top:target,behavior});
     return;
   }
 
@@ -1391,7 +1394,11 @@ function syncPlannerGridViewport_(){
 
   if(!plannerView?.classList.contains('active') || !viewport || !bottomNav) return;
 
-  // Neutralize all historical matrix-scroller runtime sizing.
+  // V2.3.10.22: never create nested scroll containers. The outer viewport is
+  // layout-only; #matrixScroll owns both axes in grid mode.
+  viewport.style.removeProperty('height');
+  viewport.style.removeProperty('max-height');
+
   if(matrix){
     matrix.classList.remove('matrix-has-vertical-scroll');
     matrix.style.removeProperty('height');
@@ -1400,27 +1407,19 @@ function syncPlannerGridViewport_(){
   }
 
   const portrait=window.matchMedia?.('(max-width:760px) and (orientation:portrait)')?.matches;
-
-  // Tail height is derived from the REAL fixed nav height.
-  const navHeight=Math.ceil(bottomNav.getBoundingClientRect().height || 72);
-  viewport.style.setProperty('--planner-nav-height',`${navHeight}px`);
-
-  if(!portrait){
-    viewport.style.removeProperty('height');
-    viewport.style.removeProperty('max-height');
-    return;
-  }
+  if(!portrait || plannerMode!=='grid' || !matrix) return;
 
   forcePlannerPageTop_();
 
-  // Viewport runs to the physical screen bottom, BEHIND the fixed nav.
-  // The tail spacer then makes the real card bottom stop 12px above the nav
-  // at maximum scroll. This geometry never changes during scrolling.
-  const rect=viewport.getBoundingClientRect();
-  const available=Math.max(280,Math.floor(window.innerHeight-rect.top));
+  // The fixed panel remains in place. Only the table viewport pans X/Y.
+  // End it 12px above the fixed bottom navigation without changing geometry
+  // while the user is scrolling.
+  const matrixRect=matrix.getBoundingClientRect();
+  const navRect=bottomNav.getBoundingClientRect();
+  const available=Math.max(260,Math.floor(navRect.top-matrixRect.top-12));
 
-  viewport.style.setProperty('height',`${available}px`,'important');
-  viewport.style.setProperty('max-height',`${available}px`,'important');
+  matrix.style.setProperty('height',`${available}px`,'important');
+  matrix.style.setProperty('max-height',`${available}px`,'important');
 }
 
 function hidePlannerFloatingHeader_(){}
@@ -1554,14 +1553,14 @@ plannerList.addEventListener('click',e=>{
 // Programmatic scrollTop changes must NOT set plannerUserPositioned.
 plannerList.addEventListener('touchmove',event=>{
   if(plannerAutoPositioning) return;
-  if(event.target?.closest?.('.planner-scroll-viewport')){
+  if(event.target?.closest?.('.matrix-scroll, .planner-scroll-viewport')){
     plannerUserPositioned=true;
   }
 },{passive:true});
 
 plannerList.addEventListener('wheel',event=>{
   if(plannerAutoPositioning) return;
-  if(event.target?.closest?.('.planner-scroll-viewport')){
+  if(event.target?.closest?.('.matrix-scroll, .planner-scroll-viewport')){
     plannerUserPositioned=true;
   }
 },{passive:true});
@@ -1696,8 +1695,11 @@ function positionPlannerInitial_(rows=filteredPlannerEvents()){
     requestAnimationFrame(()=>{
       // Default Menetrend is already filtered to current + future.
       // Therefore its first row is the correct starting point.
-      const viewport=document.getElementById('plannerScrollViewport');
-      if(viewport) viewport.scrollTop=0;
+      const matrix=document.getElementById('matrixScroll');
+      if(matrix){
+        matrix.scrollTop=0;
+        matrix.scrollLeft=0;
+      }
 
       plannerList.classList.remove('planner-prepositioning');
 
@@ -2109,9 +2111,9 @@ document.querySelectorAll('.view-mode-btn[data-mode]').forEach(btn=>{
   document.body.appendChild(indicator);
 
   document.addEventListener('touchstart',event=>{
-    const plannerViewport=
+    const plannerScroller=
       event.target && event.target.closest
-        ? event.target.closest('.planner-scroll-viewport')
+        ? event.target.closest('.matrix-scroll, .planner-scroll-viewport')
         : null;
 
     if(
@@ -2119,7 +2121,7 @@ document.querySelectorAll('.view-mode-btn[data-mode]').forEach(btn=>{
       running ||
       !event.touches ||
       !event.touches.length ||
-      (plannerViewport && plannerViewport.scrollTop>1)
+      (plannerScroller && plannerScroller.scrollTop>1)
     ){
       startY=null;
       return;
@@ -2228,6 +2230,7 @@ function bindSliderDrag(){
 
     let active=false,locked=false,pointerId=null;
     let startX=0,startY=0,startLeft=0,currentLeft=0,lastX=0,lastT=0,velocityX=0;
+    let suppressClick=false;
 
     const geometry=()=>{
       const thumbWidth=thumb.getBoundingClientRect().width || Math.max(20,slider.clientWidth/3-4);
@@ -2262,8 +2265,19 @@ function bindSliderDrag(){
       },delay);
     };
 
+    // A drag normally ends over one of the three real buttons. Suppress only
+    // the synthetic click that follows a completed drag; normal taps still use
+    // the existing button/click business logic unchanged.
+    slider.addEventListener('click',e=>{
+      if(!suppressClick) return;
+      suppressClick=false;
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation?.();
+    },true);
+
     slider.addEventListener('pointerdown',e=>{
-      if(e.target.closest('button') || e.button!==0) return;
+      if(e.button!==0) return;
       const g=geometry();
       active=true; locked=false; pointerId=e.pointerId;
       startX=e.clientX; startY=e.clientY;
@@ -2278,6 +2292,7 @@ function bindSliderDrag(){
       const dx=e.clientX-startX,dy=e.clientY-startY;
       if(!locked){
         if(Math.hypot(dx,dy)<CC_MOTION_V1.directionLock) return;
+        // Vertical intent stays native so the surrounding page/panel can scroll.
         if(Math.abs(dy)>Math.abs(dx)){
           cleanup();
           slider.style.removeProperty('--cc-slider-left');
@@ -2304,19 +2319,21 @@ function bindSliderDrag(){
       const g=geometry();
       const projected=Math.min(g.max,Math.max(g.min,currentLeft+velocityX*120));
       const state=wasLocked?stateFromLeft(projected,g):(event.status||'none');
+      if(wasLocked) suppressClick=true;
       cleanup();
-      finishSnap(state,wasLocked);
+      if(wasLocked) finishSnap(state,true);
+      else slider.style.removeProperty('--cc-slider-left');
     });
 
     slider.addEventListener('pointercancel',e=>{
       if(!active || e.pointerId!==pointerId) return;
       try{slider.releasePointerCapture?.(e.pointerId);}catch(_){ }
+      const original=event.status||'none';
       cleanup();
-      finishSnap(event.status||'none',false);
+      finishSnap(original,false);
     });
   });
 }
-
 
 
 
