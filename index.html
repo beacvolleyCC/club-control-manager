@@ -2,144 +2,517 @@
 <html lang="hu">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#f7b700">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self';">
-  <title>Club Control – Manager</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self';">
+  <title>Club Control – Versenycsapat</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="./styles.css?v=0.4.1">
+  <link rel="stylesheet" href="./styles.css?v=15.12-away-nav">
 </head>
 <body>
   <div class="login-overlay hidden" id="loginOverlay">
-    <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-      <div class="eyebrow">CLUB CONTROL · MANAGER</div>
+    <div class="login-card" role="dialog" aria-labelledby="loginTitle" aria-modal="true">
+      <div class="eyebrow">CLUB CONTROL</div>
+
       <div id="loginLoadingStep" class="login-step">
-        <h1 id="loginTitle">Manager ellenőrzése</h1>
+        <h2 id="loginTitle">Fiók ellenőrzése</h2>
         <p>A biztonságos munkamenet betöltése…</p>
-        <div class="spinner" aria-hidden="true"></div>
+        <div class="login-loader" aria-hidden="true"></div>
       </div>
+
       <div id="loginEmailStep" class="login-step hidden">
-        <h1>Belépés</h1>
-        <p>Csak engedélyezett Manager-fiókkal lehet belépni.</p>
-        <label class="field"><span>Email cím</span><input id="loginEmail" type="email" autocomplete="email" inputmode="email" placeholder="email@pelda.hu"></label>
-        <button class="button primary full" id="requestCodeBtn" type="button">Kód kérése</button>
-        <div class="form-message" id="loginMsg" aria-live="polite"></div>
+        <h2>Belépés</h2>
+        <p>Írd be a Club Control-fiókodhoz rendelt email címet. Küldünk rá egy egyszer használatos belépési kódot.</p>
+        <label class="login-field-label" for="loginEmail">Email cím</label>
+        <input type="email" id="loginEmail" placeholder="email@pelda.hu" autocomplete="email" inputmode="email">
+        <button class="login-btn" id="requestCodeBtn">Kód kérése</button>
+        <div class="login-msg" id="loginMsg" aria-live="polite"></div>
+        <small class="login-note">Nincs nyílt regisztráció: csak a manager által játékoshoz rendelt email címmel lehet belépni.</small>
       </div>
+
       <div id="loginCodeStep" class="login-step hidden">
-        <h1>Belépési kód</h1>
-        <p id="loginEmailPreview">–</p>
-        <label class="field"><span>Kód</span><input id="loginCode" class="otp-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="000000"></label>
-        <button class="button primary full" id="verifyCodeBtn" type="button">Belépés</button>
-        <button class="button quiet full" id="changeEmailBtn" type="button">Másik email</button>
-        <div class="form-message" id="loginCodeMsg" aria-live="polite"></div>
+        <h2>Belépési kód</h2>
+        <p>A 6 számjegyű kódot erre a címre küldtük:</p>
+        <div class="login-email-preview" id="loginEmailPreview"></div>
+        <label class="login-field-label" for="loginCode">Kód</label>
+        <input type="text" id="loginCode" class="login-code-input" placeholder="00000000" inputmode="numeric" autocomplete="one-time-code" minlength="6" maxlength="10" pattern="[0-9]{6,10}">
+        <button class="login-btn" id="verifyCodeBtn">Belépés</button>
+        <div class="login-msg" id="loginCodeMsg" aria-live="polite"></div>
+        <div class="login-secondary-actions">
+          <button class="text-btn" type="button" id="resendCodeBtn">Új kód kérése</button>
+          <button class="text-btn" type="button" id="changeEmailBtn">Másik email</button>
+        </div>
+        <small class="login-note">A kód 10 percig érvényes és egyszer használható.</small>
       </div>
     </div>
   </div>
+  <header class="hero">
+  <div class="topbar compact-topbar">
+    <div class="brand-left brand-inline">
+      <h1 class="team-heading"><span id="teamTitle">BEAC Női I.</span></h1>
+      <div class="eyebrow player-season-label" id="teamSeason">2026/27</div>
+    </div>
+    <div class="header-actions">
+      <button class="round-btn header-settings-btn" id="headerSettingsBtn" type="button" aria-label="Beállítások" title="Beállítások">
+        <svg class="header-settings-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.09a2 2 0 0 1 1 1.73v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.73l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      </button>
+      <button class="profile-btn" id="accountMenuBtn" type="button" aria-label="Profil megnyitása">
+        <span class="profile-avatar-wrap">
+          <span class="profile-dot" id="profileInitials">JT</span>
+          <span class="profile-notification-badge" id="profileNotificationBadge" hidden aria-label="0 új értesítés">0</span>
+        </span>
+        <span class="profile-meta"><b id="profileName">Játékos Teszt</b><small id="profileMeta">Szélső ütő • #12</small></span>
+      </button>
+    </div>
+  </div>
+</header>
 
-  <div class="app-shell" id="appShell">
-    <aside class="sidebar" aria-label="Manager navigáció">
-      <div class="brand-block">
-        <span class="brand-mark" aria-hidden="true">CC</span>
-        <span class="brand-copy"><strong>Club Control</strong><small>MANAGER</small></span>
-      </div>
+  <main class="page">
 
-      <div class="area-switch desktop-area-switch" role="group" aria-label="Terület">
-        <button class="area-button" type="button" data-area="mass" aria-label="Tömegsport" title="Tömegsport"><span class="area-glyph">△</span><span class="area-label">Tömegsport</span></button>
-        <button class="area-button active" type="button" data-area="competition" aria-label="Versenysport" title="Versenysport"><span class="area-glyph">◇</span><span class="area-label">Versenysport</span></button>
-      </div>
-
-      <div class="side-section-label" id="sideSectionLabel">VERSENYSPORT</div>
-      <nav class="side-nav" id="sideNav"></nav>
-      <div class="sidebar-settings-slot" id="sidebarSettingsSlot"></div>
-
-      <div class="sidebar-foot">
-        <span class="status-dot"></span>
-        <span class="sidebar-foot-copy" id="runtimeLabel">V0.4.1 · parity read-only</span>
-      </div>
-    </aside>
-
-    <div class="workspace">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="mobile-area-button" id="mobileAreaBtn" type="button" aria-haspopup="dialog" aria-label="Terület váltása">
-            <span id="mobileAreaGlyph">◇</span><span id="mobileAreaLabel">Versenysport</span><span aria-hidden="true">⌄</span>
+    <section id="homeView" class="view active">
+      <div class="home-panel-head">
+        <div>
+          <h3>Edzések</h3>
+          <p id="homeFilterSummary">Következő 14 nap.</p>
+        </div>
+        <div class="home-head-actions">
+          <button class="ghost-btn icon-action-btn filter-state-btn" id="eventFilterBtn" aria-label="Edzések szűrése" aria-expanded="false" title="Szűrő">
+            <span class="filter-funnel" aria-hidden="true">
+              <span class="filter-icon-outline">▽</span>
+              <span class="filter-icon-filled">▼</span>
+            </span>
           </button>
-          <div class="topbar-title">
-            <span class="eyebrow" id="pageAreaLabel">VERSENYSPORT</span>
-            <h1 id="pageTitle">Áttekintés</h1>
+        </div>
+      </div>
+
+      <div id="eventFilterPanel" class="filter-panel is-collapsed" aria-hidden="true">
+        <div class="filter-grid">
+          <label><span>Időszak</span>
+            <select id="eventPeriodFilter">
+              <option value="next14">Következő 14 nap</option>
+              <option value="next30">Következő 30 nap</option>
+              <option value="future">Minden következő</option>
+              <option value="past">Elmúlt alkalmak</option>
+              <option value="all">Teljes szezon</option>
+              <option value="custom">Egyéni időszak</option>
+            </select>
+          </label>
+          <label><span>Típus</span>
+            <select id="eventTypeFilter">
+              <option value="all">Minden alkalom</option>
+              <option value="Edzés">Edzések</option>
+              <option value="Meccs">Meccsek</option>
+            </select>
+          </label>
+          <label><span>Jelzés</span>
+            <select id="eventStatusFilter">
+              <option value="all">Minden állapot</option>
+              <option value="missing">Még nem jelöltem</option>
+              <option value="yes">Jövök</option>
+              <option value="no">Nem jövök</option>
+            </select>
+          </label>
+        </div>
+        <div id="eventCustomRange" class="custom-date-range" hidden>
+          <label><span>Ettől</span><input id="eventDateFrom" type="date" aria-label="Egyéni időszak kezdő dátuma"></label>
+          <label><span>Eddig</span><input id="eventDateTo" type="date" aria-label="Egyéni időszak záró dátuma"></label>
+        </div>
+        <div class="filter-panel-actions">
+          <button class="filter-reset-btn" type="button" id="resetEventFiltersBtn">Szűrők törlése</button>
+        </div>
+      </div>
+
+      <div id="eventList" class="stack event-stack"></div>
+    </section>
+
+    <section id="plannerView" class="view">
+      <div class="section-head planner-title-row">
+        <div>
+          <h3>Menetrend</h3>
+          <p>Rács és naptár a teljes szezonhoz.</p>
+        </div>
+        <div class="planner-view-actions" role="group" aria-label="Menetrend nézet">
+          <button class="view-mode-btn active icon-only" data-mode="grid" title="Rácsnézet – játékosok" aria-label="Rácsnézet – játékosok">
+            <svg class="cc-icon cc-icon-square-in-square" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="4" y="4" width="24" height="24" rx="1"></rect>
+              <rect x="10" y="10" width="12" height="12" rx=".5"></rect>
+            </svg>
+          </button>
+          <button class="view-mode-btn icon-only" data-mode="calendar" title="Naptárnézet – dátumok" aria-label="Naptárnézet – dátumok">
+            <svg class="cc-icon cc-icon-schedule-grid" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="4" y="4" width="24" height="24" rx="1"></rect>
+              <path d="M8.8 4V28 M13.6 4V28 M18.4 4V28 M23.2 4V28 M4 8.8H28 M4 13.6H28 M4 18.4H28 M4 23.2H28"></path>
+            </svg>
+          </button>
+          <button class="view-mode-btn icon-only filter-state-btn" id="plannerFilterBtn" title="Szűrők" aria-label="Szűrők" aria-expanded="false">
+            <span class="filter-funnel" aria-hidden="true">
+              <span class="filter-icon-outline">▽</span>
+              <span class="filter-icon-filled">▼</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="planner-toolbar filter-panel is-collapsed" id="plannerFilterPanel" aria-hidden="true">
+        <div class="filter-bar compact-filters">
+          <select id="plannerPeriodFilter" aria-label="Időszak">
+            <option value="upcoming" selected>Aktuális és következő</option>
+            <option value="past">Elmúlt alkalmak</option>
+            <option value="all">Teljes szezon</option>
+          </select>
+          <select id="monthFilter" aria-label="Hónap">
+            <option value="all">Teljes szezon</option>
+            <option value="Szept">Szeptember</option>
+            <option value="Okt">Október</option>
+            <option value="Nov">November</option>
+            <option value="Dec">December</option>
+          </select>
+          <select id="typeFilter" aria-label="Típus">
+            <option value="all">Minden alkalom</option>
+            <option value="Edzés">Csak edzések</option>
+            <option value="Meccs">Csak meccsek</option>
+          </select>
+          <button class="ghost-btn" id="missingOnlyBtn">Még nem jelöltem</button>
+        </div>
+        <div class="filter-panel-actions">
+          <button class="filter-reset-btn" type="button" id="resetPlannerFiltersBtn">Szűrők törlése</button>
+        </div>
+      </div>
+
+      <div class="planner-scroll-viewport" id="plannerScrollViewport">
+        <div class="planner-card planner-surface">
+          <div id="plannerList"></div>
+        </div>
+        <div class="planner-scroll-tail" aria-hidden="true"></div>
+      </div>
+    </section>
+<section id="profileView" class="view">
+      <div class="section-head">
+        <div>
+          <h3 id="profilePageTitle">Profil</h3>
+          <p>Értesítések, saját adatok, díjak, szezon és beállítások.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Értesítések</h4>
+        <button class="settings-row profile-notifications-row" id="openNotificationsBtn" type="button">
+          <span><small class="settings-row-main" id="profileNotificationsStatus">Nincs új értesítés</small></span>
+          <span class="profile-notifications-count" id="profileNotificationsCount" hidden>0</span>
+        </button>
+      </div>
+
+      <div class="card profile-personal-card">
+        <h4>Személyes adatok</h4>
+        <div class="detail-row" id="profileFullNameRow"><span>Teljes név</span><b id="profileFullName">–</b></div>
+        <div class="detail-row" id="profileLicenseRow"><span>Igazolási szám</span><b id="profileLicense">–</b></div>
+        <div class="detail-row" id="profileMedicalRow"><span>Sportorvosi lejár</span><b class="ok" id="profileMedical">–</b></div>
+
+        <details class="profile-more-details">
+          <summary>
+            <span class="profile-disclosure-label">
+              <span class="profile-disclosure-closed">További adatok</span>
+              <span class="profile-disclosure-open">Kevesebb adat</span>
+            </span>
+            <span class="cc-outline-triangle profile-details-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="profile-more-content">
+            <div class="detail-row" id="profilePositionRow"><span>Poszt</span><b id="profilePosition">–</b></div>
+            <div class="detail-row" id="profileJerseyNoRow"><span>Mezszám</span><b id="profileJerseyNo">–</b></div>
+            <div class="detail-row" id="profileJerseySizeRow"><span>Mezméret</span><b id="profileJerseySize">–</b></div>
+            <div class="detail-row" id="profileShortsSizeRow"><span>Nadrágméret</span><b id="profileShortsSize">–</b></div>
+          </div>
+        </details>
+      </div>
+
+      <div class="card profile-payments-card">
+        <h4>Díjak és fizetések</h4>
+        <div id="profilePaymentsContent" class="profile-payments-v2">
+          <div class="profile-empty-block">
+            <b>Fizetési adatok betöltése…</b>
           </div>
         </div>
-        <div class="topbar-actions">
-          <label class="season-select"><span class="sr-only">Szezon</span><select id="seasonSelect"><option>2026/27</option></select></label>
-          <button class="icon-button" id="refreshBtn" type="button" aria-label="Frissítés" title="Frissítés">↻</button>
-          <button class="manager-chip" id="managerMenuBtn" type="button" aria-label="Manager fiók">
-            <span class="profile-dot" id="managerInitials">M</span>
-            <span class="manager-chip-copy"><b id="managerName">Manager</b><small id="managerEmail">preview</small></span>
-          </button>
+      </div>
+
+      <div class="card profile-season-card">
+        <h4>Saját szezon</h4>
+
+        <div id="profileStatsGrid" class="stats-grid compact-profile-stats real-profile-stats" hidden>
+          <div class="stat-card profile-ratio-card">
+            <span class="profile-stat-title">Edzések</span>
+            <strong id="profileStatTrainingRatio">–</strong>
+            <small id="profileStatTrainingPct">–</small>
+          </div>
+
+          <div class="stat-card profile-ratio-card">
+            <span class="profile-stat-title">Meccsek</span>
+            <strong id="profileStatMatchRatio">–</strong>
+            <small id="profileStatMatchPct">–</small>
+          </div>
+
+          <div class="stat-card profile-ratio-card">
+            <span class="profile-stat-title">Összesen</span>
+            <strong id="profileStatAllRatio">–</strong>
+            <small id="profileStatAllPct">–</small>
+          </div>
         </div>
-      </header>
 
-      <main class="content" id="mainContent">
-        <div class="global-status hidden" id="globalStatus" role="status" aria-live="polite"></div>
+        <div id="profileStatsEmpty" class="profile-empty-block">
+          <b>Még nincs lezárt jelenléti adat.</b>
+        </div>
 
-        <section class="view active" id="view-dynamic" aria-live="polite">
-          <div id="viewContent"></div>
-        </section>
-      </main>
-    </div>
+        <details id="profileStatsMore" class="profile-more-details profile-stats-more" hidden>
+          <summary>
+            <span class="profile-disclosure-label">
+              <span class="profile-disclosure-closed">További statisztikák</span>
+              <span class="profile-disclosure-open">Kevesebb statisztika</span>
+            </span>
+            <span class="cc-outline-triangle profile-details-chevron" aria-hidden="true"></span>
+          </summary>
 
-    <nav class="bottom-nav" id="bottomNav" aria-label="Mobil Manager navigáció"></nav>
-  </div>
+          <div class="profile-more-content profile-stats-more-content">
+            <div class="profile-stats-subtitle">Havi bontás</div>
+            <div id="profileStatsMonthly" class="profile-stats-monthly"></div>
+          </div>
+        </details>
+      </div>
 
-  <dialog class="dialog mobile-sheet" id="mobileMoreDialog">
-    <div class="dialog-card sheet-card">
-      <div class="dialog-head"><div><span class="eyebrow" id="moreAreaLabel">VERSENYSPORT</span><h2>További modulok</h2></div><button class="dialog-close" id="mobileMoreClose" type="button" aria-label="Bezárás">×</button></div>
-      <div class="mobile-more-grid" id="mobileMoreGrid"></div>
-    </div>
-  </dialog>
+      <div class="card">
+        <h4>Beállítások</h4>
+        <button class="settings-row" id="openSettingsBtn" type="button">
+          <span><small class="settings-row-main">Értesítések, megjelenés, menetrend, fiók</small></span>
+        </button>
+      </div>
+    </section>
+  </main>
 
-  <dialog class="dialog mobile-sheet" id="areaDialog">
-    <div class="dialog-card sheet-card compact-sheet">
-      <div class="dialog-head"><div><span class="eyebrow">CLUB CONTROL</span><h2>Terület</h2></div><button class="dialog-close" id="areaDialogClose" type="button" aria-label="Bezárás">×</button></div>
-      <div class="area-dialog-grid">
-        <button class="area-choice" data-area="mass" type="button"><span>△</span><div><b>Tömegsport</b><small>Edzések, sportolók, bérletek</small></div></button>
-        <button class="area-choice" data-area="competition" type="button"><span>◇</span><div><b>Versenysport</b><small>Csapatok, meccsek, játékosok, díjak</small></div></button>
+  <nav class="bottom-nav">
+    <button data-view="homeView" class="nav-btn active">
+      <span class="cc-bottom-icon cc-geo-nav-icon cc-bottom-training" aria-hidden="true">
+        <svg viewBox="0 0 36 36" focusable="false">
+          <path class="geo-outline-outer" d="M18 5 L31 29 H5 Z"></path>
+          <path class="geo-outline-inner" d="M18 11 L26.5 26 H9.5 Z"></path>
+        </svg>
+      </span>
+      <small>Edzések</small>
+    </button>
+    <button data-view="plannerView" class="nav-btn">
+      <span class="cc-bottom-icon cc-geo-nav-icon cc-bottom-schedule" aria-hidden="true">
+        <svg viewBox="0 0 36 36" focusable="false">
+          <rect class="geo-outline-outer" x="5" y="5" width="26" height="26" rx="1.5"></rect>
+          <rect class="geo-outline-inner" x="9.5" y="9.5" width="17" height="17" rx="1"></rect>
+        </svg>
+      </span>
+      <small>Menetrend</small>
+    </button>
+    <button data-view="profileView" class="nav-btn">
+      <span class="cc-bottom-icon cc-geo-nav-icon cc-bottom-profile" aria-hidden="true">
+        <svg viewBox="0 0 36 36" focusable="false">
+          <circle class="geo-outline-outer" cx="18" cy="18" r="14"></circle>
+          <circle class="geo-outline-inner" cx="18" cy="18" r="10.5"></circle>
+        </svg>
+      </span>
+      <small>Profil</small>
+    </button>
+  </nav>
+
+  <dialog id="notificationsDialog" class="cc-panel-dialog notifications-dialog" aria-labelledby="notificationsDialogTitle" aria-describedby="notificationsDialogSummary">
+    <div class="dialog-card cc-panel-card notifications-dialog-card">
+      <button class="dialog-x-btn" id="closeNotificationsBtn" type="button" aria-label="Bezárás">×</button>
+      <h3 id="notificationsDialogTitle" tabindex="-1">Értesítések</h3>
+      <p class="notifications-dialog-summary" id="notificationsDialogSummary">Nincs új értesítés.</p>
+      <div class="notification-inbox-card">
+        <div class="notification-empty-state" id="notificationEmptyState" hidden></div>
+        <div id="notificationInboxList" class="notification-inbox-list" hidden aria-live="polite"></div>
       </div>
     </div>
   </dialog>
 
-  <dialog class="dialog" id="accountDialog">
-    <div class="dialog-card">
-      <button class="dialog-close" id="accountDialogClose" type="button" aria-label="Bezárás">×</button>
-      <span class="eyebrow">MANAGER FIÓK</span>
-      <h2 id="accountDialogName">Manager</h2>
-      <p id="accountDialogEmail">–</p>
-      <div class="account-runtime"><span id="dataModePill">DEMO</span><small id="dataModeDetail">Biztonságos preview.</small></div>
-      <button class="button danger full" id="logoutBtn" type="button">Kijelentkezés erről az eszközről</button>
+  <dialog id="settingsDialog" class="cc-panel-dialog settings-dialog" aria-labelledby="settingsDialogTitle">
+    <div class="dialog-card cc-panel-card settings-dialog-card">
+      <button class="dialog-x-btn" id="closeSettingsBtn" type="button" aria-label="Bezárás">×</button>
+      <h3 id="settingsDialogTitle" tabindex="-1">Beállítások</h3>
+
+      <div class="settings-section">
+        <h4>Értesítések</h4>
+        <div class="push-device-card" id="pushDeviceCard">
+          <div class="push-device-copy">
+            <div class="push-device-title-row">
+              <b>Telefonos értesítések</b>
+              <button class="push-device-qa-trigger" id="pushDeviceQaTrigger" type="button" tabindex="-1" aria-hidden="true">
+                <span class="push-device-state-dot" aria-hidden="true"></span>
+              </button>
+            </div>
+            <small id="pushDeviceStatus">Állapot ellenőrzése…</small>
+          </div>
+          <div class="push-device-actions">
+            <button class="ghost-btn push-device-btn" id="pushEnableBtn" type="button">Értesítések bekapcsolása</button>
+            <button class="ghost-btn push-device-btn danger-outline" id="pushDisableBtn" type="button" hidden>Kikapcsolás ezen az eszközön</button>
+          </div>
+          <div class="push-self-test-row" id="pushSelfTestRow" hidden>
+            <div class="push-self-test-copy">
+              <b>QA · saját értesítés</b>
+              <small>Csak a saját fiókodnak készít tesztet. Az appban azonnal, pushként a következő automatikus küldési körben jelenik meg.</small>
+            </div>
+            <button class="ghost-btn push-device-btn" id="pushSelfTestBtn" type="button">Saját tesztértesítés</button>
+          </div>
+        </div>
+
+        <details class="notification-types-details" id="notificationTypesDetails">
+          <summary>
+            <span class="notification-types-copy">
+              <b>Értesítéstípusok</b>
+              <small id="notificationTypesSummary">7/7 bekapcsolva</small>
+            </span>
+            <span class="cc-outline-triangle notification-types-triangle" aria-hidden="true"></span>
+          </summary>
+          <div class="notification-types-content">
+            <label class="switch-row">
+              <span><b>Új edzés</b><small>Ha új edzés kerül a csapat menetrendjébe.</small></span>
+              <input type="checkbox" data-notify-setting="new_training" checked>
+            </label>
+            <label class="switch-row">
+              <span><b>Edzés módosult vagy törlődött</b><small>Időpont, helyszín vagy törlés esetén.</small></span>
+              <input type="checkbox" data-notify-setting="training_change" checked>
+            </label>
+            <label class="switch-row">
+              <span><b>Heti visszajelzés emlékeztető</b><small>Hétfő reggel, ha az adott hét valamelyik edzésére még nem jeleztél.</small></span>
+              <input type="checkbox" data-notify-setting="weekly_response_reminder" checked>
+            </label>
+            <label class="switch-row">
+              <span><b>Edzésnapi emlékeztető</b><small>Az edzés napján reggel, ha arra az alkalomra még nincs Jövök / Nem jövök jelzésed.</small></span>
+              <input type="checkbox" data-notify-setting="same_day_response_reminder" checked>
+            </label>
+            <label class="switch-row">
+              <span><b>Új meccs</b><small>Új bajnoki vagy felkészülési mérkőzés.</small></span>
+              <input type="checkbox" data-notify-setting="new_match" checked>
+            </label>
+            <label class="switch-row">
+              <span><b>Meccs módosult</b><small>Időpont, helyszín vagy találkozó változása.</small></span>
+              <input type="checkbox" data-notify-setting="match_change" checked>
+            </label>
+            <label class="switch-row">
+              <span><b>Fizetési emlékeztető</b><small>Minden hónapban 14-én este és 15-én dél körül, ha a rendszerben az aktuális díj fizetendőként szerepel.</small></span>
+              <input type="checkbox" data-notify-setting="payment" checked>
+            </label>
+          </div>
+        </details>
+      </div>
+
+      <div class="settings-section">
+        <h4>Megjelenés</h4>
+        <label class="settings-select-row">
+          <span><b>Téma</b><small>A telefon beállítását követheti, vagy külön is választható.</small></span>
+          <select id="settingsThemeMode">
+            <option value="system">Rendszer szerint</option>
+            <option value="light">Világos</option>
+            <option value="dark">Sötét</option>
+          </select>
+        </label>
+        <div class="settings-avatar-block">
+          <div class="settings-avatar-head">
+            <span>
+              <b>Profilkép</b>
+              <small>Használhatsz monogramot vagy választhatsz állatavatart.</small>
+            </span>
+            <span class="settings-avatar-preview profile-dot" id="settingsAvatarPreview" aria-hidden="true">JT</span>
+          </div>
+          <div class="avatar-mode-toggle" role="group" aria-label="Profilkép típusa">
+            <button class="avatar-mode-btn" id="avatarModeMonogramBtn" type="button" data-avatar-mode="monogram" aria-pressed="true">Monogram használata</button>
+            <button class="avatar-mode-btn" id="avatarModeAvatarBtn" type="button" data-avatar-mode="avatar" aria-pressed="false">Avatar választása</button>
+          </div>
+          <div class="avatar-picker-panel" id="avatarPickerPanel" hidden>
+            <div class="avatar-picker-grid" id="avatarPickerGrid" role="listbox" aria-label="Profilavatar kiválasztása"></div>
+          </div>
+        </div>
+        <label class="switch-row">
+          <span><b>Részletes eseményadatok</b><small>Helyszín, találkozó és Maps-link megjelenítése.</small></span>
+          <input type="checkbox" id="settingsDetailToggle">
+        </label>
+      </div>
+
+      <div class="settings-section">
+        <h4>Menetrend</h4>
+        <label class="settings-select-row">
+          <span><b>Induló nézet</b></span>
+          <select id="settingsDefaultView">
+            <option value="last">Utoljára használt</option>
+            <option value="grid">Rács</option>
+            <option value="calendar">Naptár</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="settings-section">
+        <h4>Nyelv</h4>
+        <label class="settings-select-row">
+          <span><b>Felület nyelve</b><small>Az angol teljes felület külön lokalizációs buildben készül el.</small></span>
+          <select id="settingsLanguage">
+            <option value="hu">Magyar</option>
+            <option value="en" disabled>English – következő kör</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="settings-section">
+        <h4>Fiók és adatvédelem</h4>
+        <div class="detail-row compact-setting-detail"><span>Email</span><b id="settingsAccountEmail">–</b></div>
+        <p class="settings-note">Adatkezelési kérdés: elteroplabda@gmail.com</p>
+      </div>
+
+      <div class="settings-footer-actions">
+        <button class="ghost-btn settings-wide-btn" id="settingsRefreshBtn">↻ Adatok újratöltése</button>
+        <button class="ghost-btn settings-wide-btn danger-outline" id="logoutBtn">Kijelentkezés</button>
+        <div class="settings-build-line"><span>Build</span><b>Player V2.3.10.10</b></div>
+      </div>
     </div>
   </dialog>
 
-  <dialog class="dialog entity-dialog" id="entityDialog">
-    <div class="dialog-card entity-dialog-card">
-      <div class="dialog-head"><div><span class="eyebrow">VERSENYSPORT · JÁTÉKOS</span><h2 id="entityDialogTitle">Játékos</h2></div><button class="dialog-close" id="entityDialogClose" type="button" aria-label="Bezárás">×</button></div>
-      <div id="entityDialogBody"></div>
+  <dialog id="logoutDialog" class="account-action-dialog">
+    <div class="dialog-card account-action-card">
+      <button class="dialog-x-btn" id="closeLogoutDialogBtn" type="button" aria-label="Bezárás">×</button>
+      <h3>Kijelentkezés</h3>
+      <p class="account-action-lead">Honnan szeretnél kijelentkezni?</p>
+      <div class="account-action-options">
+        <button class="ghost-btn settings-wide-btn" id="logoutLocalBtn" type="button">Csak erről az eszközről</button>
+        <button class="ghost-btn settings-wide-btn danger-outline" id="logoutAllBtn" type="button">Minden eszközről</button>
+      </div>
+      <p class="settings-note account-action-note">A „Minden eszközről” megszünteti a többi aktív Player munkamenetet és kikapcsolja a telefonos push-feliratkozásokat is.</p>
+      <div class="logout-dialog-status" id="logoutDialogStatus" role="status" aria-live="polite"></div>
+      <div class="dialog-actions account-action-cancel">
+        <button class="ghost-btn" id="logoutCancelBtn" type="button">Mégse</button>
+      </div>
     </div>
   </dialog>
 
-  <template id="overviewTemplate">
-    <div class="page-intro"><div><h2></h2><p></p></div><span class="read-only-badge">READ-ONLY V0.4.1</span></div>
-    <div class="metric-grid" data-slot="metrics"></div>
-    <div class="overview-grid adaptive-overview-grid">
-      <article class="panel wide-panel"><div class="panel-head"><div><h3 data-slot="primary-title"></h3><p data-slot="primary-copy"></p></div></div><div class="stack" data-slot="primary"></div></article>
-      <article class="panel"><div class="panel-head"><div><h3 data-slot="secondary-title"></h3><p data-slot="secondary-copy"></p></div></div><div class="stack" data-slot="secondary"></div></article>
-      <article class="panel compact-panel"><div class="panel-head"><div><h3>Állapot</h3><p>Foundation és migráció.</p></div></div><div class="health-list" data-slot="health"></div></article>
+  <dialog id="eventDialog" class="event-dialog">
+    <div class="dialog-card event-dialog-card">
+      <button class="dialog-x-btn" id="closeEventDialogBtn" type="button" aria-label="Bezárás">×</button>
+      <div id="eventDialogContent"></div>
     </div>
-  </template>
+  </dialog>
 
-  <script src="./config.js?v=0.4.1"></script>
-  <script src="./app.js?v=0.4.1"></script>
+  <dialog id="cancelDialog">
+    <form method="dialog" class="dialog-card">
+      <h3>Lemondás</h3>
+      <p id="cancelEventTitle"></p>
+      <label>Miért nem tudsz jönni?</label>
+      <textarea id="cancelNote" placeholder="Írd ide röviden az okát…"></textarea>
+      <div class="dialog-actions">
+        <button value="cancel" class="ghost-btn">Mégse</button>
+        <button value="default" id="confirmCancel" class="danger-btn">Lemondom</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js?v=15.8-native-notification-swipe"></script>
+  <script src="./app.js?v=15.12-away-nav"></script>
 </body>
 </html>
