@@ -426,3 +426,84 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
 @media(min-width:901px) and (max-width:1250px){
   .sidebar-area-selector{grid-template-columns:1fr;justify-items:center;padding:0}.sidebar-area-selector .area-label,.sidebar-area-chevron{display:none}
 }
+
+
+/* ==========================================================
+   MANAGER V0.4.2D — MANUAL NOTIFICATION V1
+   One Player account, existing in-app + push pipeline.
+   ========================================================== */
+.notification-manager-grid{
+  display:grid;
+  grid-template-columns:minmax(300px,.85fr) minmax(360px,1.15fr);
+  gap:16px;
+  margin-bottom:16px;
+}
+.notification-recipient-panel,.notification-compose-panel,.notification-history-panel{min-width:0}
+.notification-search{margin-bottom:12px}
+.notification-recipient-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:520px;
+  overflow:auto;
+  overscroll-behavior:contain;
+}
+.notification-recipient{
+  width:100%;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:inherit;
+  border-radius:12px;
+  min-height:62px;
+  padding:8px 10px;
+  display:grid;
+  grid-template-columns:40px minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  text-align:left;
+  cursor:pointer;
+}
+.notification-recipient:hover{border-color:#cfaa33}
+.notification-recipient.selected{border-color:#d7a900;box-shadow:0 0 0 2px rgba(247,183,0,.16);background:rgba(247,183,0,.06)}
+.notification-recipient>span{min-width:0;display:flex;flex-direction:column;gap:2px}
+.notification-recipient b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notification-recipient small{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notification-recipient em{font-style:normal;font-size:9px;font-weight:850;color:var(--muted);white-space:nowrap}
+.cc-avatar.notification{width:36px;height:36px;min-width:36px}
+.cc-avatar.notification-large{width:48px;height:48px;min-width:48px}
+.notification-selected-card{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;margin-bottom:14px;
+  border:1px solid var(--line);border-radius:13px;background:var(--soft);
+}
+.notification-selected-card>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.notification-selected-card b{font-size:14px}
+.notification-selected-card span,.notification-selected-card small{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notification-compose-panel textarea{resize:vertical;min-height:118px}
+.notification-delivery-note{
+  display:flex;flex-direction:column;gap:4px;
+  margin:12px 0;padding:10px 12px;border-radius:11px;
+  background:rgba(247,183,0,.08);border:1px solid rgba(215,169,0,.24)
+}
+.notification-delivery-note b{font-size:11px}.notification-delivery-note span{font-size:10px;color:var(--muted);line-height:1.45}
+.notification-history-list{display:flex;flex-direction:column}
+.notification-history-row{
+  display:grid;grid-template-columns:minmax(180px,.7fr) minmax(240px,1.4fr) auto;
+  align-items:center;gap:14px;padding:11px 2px;border-top:1px solid var(--line)
+}
+.notification-history-row:first-child{border-top:0}
+.notification-history-row>div:first-child,.notification-history-message{display:flex;flex-direction:column;gap:2px;min-width:0}
+.notification-history-row b,.notification-history-message strong{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notification-history-row small,.notification-history-message span{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inline-error{margin-bottom:14px;padding:10px 12px;border-radius:10px;background:rgba(190,40,40,.08);border:1px solid rgba(190,40,40,.2);font-size:11px;color:#9d2424}
+@media(max-width:880px){
+  .notification-manager-grid{grid-template-columns:1fr}
+  .notification-recipient-list{max-height:340px}
+  .notification-history-row{grid-template-columns:minmax(0,1fr) auto}
+  .notification-history-message{grid-column:1/-1;grid-row:2}
+}
+@media(max-width:560px){
+  .notification-recipient{grid-template-columns:36px minmax(0,1fr)}
+  .notification-recipient em{grid-column:2}
+}
+.dark .notification-recipient.selected{background:rgba(247,183,0,.12)}
