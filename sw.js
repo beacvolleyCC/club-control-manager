@@ -1,4 +1,4 @@
-const CACHE='club-control-player-v2-3-10-19-home-courts';
+const CACHE='club-control-player-v2-3-10-20-motion-system-v1';
 const CORE=[
   './manifest.webmanifest',
   './icons/icon-192.png',

@@ -6867,3 +6867,296 @@ body.dark #settingsDialog #pushDisableBtn{
 @media(max-width:340px){
   .calendar-export-actions{grid-template-columns:1fr;}
 }
+
+
+/* ==========================================================
+   PLAYER V2.3.10.20 — CLUB CONTROL MOTION SYSTEM V1
+   Motion only. No page-slide transitions and no scroll-time geometry changes.
+   ========================================================== */
+:root{
+  --cc-motion-micro:140ms;
+  --cc-motion-press:110ms;
+  --cc-motion-release:160ms;
+  --cc-motion-normal:210ms;
+  --cc-motion-structural:280ms;
+  --cc-motion-enter:200ms;
+  --cc-motion-exit:160ms;
+  --cc-motion-snap:200ms;
+  --cc-motion-skeleton:100ms;
+  --cc-ease-standard:cubic-bezier(.2,0,0,1);
+  --cc-ease-enter:cubic-bezier(.2,.8,.2,1);
+  --cc-ease-exit:cubic-bezier(.4,0,1,1);
+  --cc-ease-snap:cubic-bezier(.18,.9,.24,1.06);
+}
+
+/* Micro interactions: tactile, transform-only, no layout reflow. */
+.ghost-btn,.danger-btn,.status-btn,.round-btn,.icon-action-btn,.view-mode-btn,
+.settings-row,.settings-wide-btn,.calendar-nav,.roster-toggle,.slider-zone,
+.matrix-control button,.account-action-options button,.dialog-x-btn{
+  transition:
+    transform var(--cc-motion-release) var(--cc-ease-standard),
+    background-color var(--cc-motion-micro) var(--cc-ease-standard),
+    border-color var(--cc-motion-micro) var(--cc-ease-standard),
+    color var(--cc-motion-micro) var(--cc-ease-standard),
+    opacity var(--cc-motion-micro) var(--cc-ease-standard) !important;
+}
+.ghost-btn:active,.danger-btn:active,.status-btn:active,.round-btn:active,
+.icon-action-btn:active,.view-mode-btn:active,.settings-row:active,.settings-wide-btn:active,
+.calendar-nav:active,.roster-toggle:active,.slider-zone:active,.matrix-control button:active,
+.account-action-options button:active,.dialog-x-btn:active{
+  transform:scale(.975);
+  transition-duration:var(--cc-motion-press) !important;
+}
+
+/* Event cards: press 0.985, release without moving document geometry. */
+.event-card,.planner-row{
+  transform:translateZ(0) scale(1);
+  transform-origin:center;
+  transition:
+    transform var(--cc-motion-release) var(--cc-ease-standard),
+    box-shadow var(--cc-motion-normal) var(--cc-ease-standard),
+    opacity var(--cc-motion-normal) var(--cc-ease-standard),
+    filter var(--cc-motion-normal) var(--cc-ease-standard);
+}
+.event-card:has(.event-open-zone:active),
+.planner-row.planner-event-open:active{
+  transform:translateZ(0) scale(.985);
+  transition-duration:var(--cc-motion-press);
+}
+
+/* Filters use the normal UI timing and a restrained 6px enter motion. */
+.filter-panel{
+  transform:translateY(0);
+  transform-origin:top center;
+  transition:
+    max-height var(--cc-motion-normal) var(--cc-ease-standard),
+    opacity var(--cc-motion-normal) var(--cc-ease-standard),
+    margin var(--cc-motion-normal) var(--cc-ease-standard),
+    padding var(--cc-motion-normal) var(--cc-ease-standard),
+    border-width var(--cc-motion-normal) var(--cc-ease-standard),
+    transform var(--cc-motion-normal) var(--cc-ease-standard) !important;
+}
+.filter-panel.is-collapsed{transform:translateY(-6px);}
+.filter-open .filter-funnel{transform:translateY(-1px) rotate(180deg);}
+.filter-funnel{transition:transform var(--cc-motion-normal) var(--cc-ease-standard);}
+
+/* Roster expansion follows the same normal timing instead of display:none popping. */
+.roster{
+  display:grid !important;
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  padding-top:0 !important;
+  padding-bottom:0 !important;
+  border-top-width:0 !important;
+  transition:
+    max-height var(--cc-motion-normal) var(--cc-ease-standard),
+    opacity var(--cc-motion-micro) var(--cc-ease-standard),
+    padding var(--cc-motion-normal) var(--cc-ease-standard),
+    border-width var(--cc-motion-normal) var(--cc-ease-standard);
+}
+.roster.open{
+  max-height:760px;
+  opacity:1;
+  padding-top:12px !important;
+  padding-bottom:15px !important;
+  border-top-width:1px !important;
+}
+
+/* Slider: free drag is transitionless; release uses a 200ms soft spring snap. */
+.attendance-slider .slider-thumb{
+  transition:
+    left var(--cc-motion-snap) var(--cc-ease-snap),
+    background-color var(--cc-motion-micro) var(--cc-ease-standard),
+    box-shadow var(--cc-motion-micro) var(--cc-ease-standard) !important;
+  will-change:left;
+}
+.attendance-slider.cc-slider-dragging .slider-thumb{
+  left:var(--cc-slider-left) !important;
+  transition:none !important;
+}
+.attendance-slider.cc-slider-snapping .slider-thumb{
+  left:var(--cc-slider-left) !important;
+  transition:left var(--cc-motion-snap) var(--cc-ease-snap) !important;
+}
+.attendance-slider.cc-slider-dragging{cursor:grabbing;}
+
+/* Bottom nav: only indicator/icon/label move. Views themselves never slide. */
+.bottom-nav{
+  --cc-nav-offset:0%;
+  isolation:isolate;
+}
+.bottom-nav::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:7px;
+  left:0;
+  width:33.333333%;
+  height:44px;
+  border-radius:12px;
+  background:#fff0a3;
+  clip-path:inset(0 31% round 11px);
+  transform:translate3d(var(--cc-nav-offset),0,0);
+  transition:transform var(--cc-motion-normal) var(--cc-ease-standard);
+  pointer-events:none;
+}
+.dark .bottom-nav::before{background:#d5a72f;}
+.bottom-nav .nav-btn{position:relative;z-index:1;}
+.bottom-nav .nav-btn.active > .cc-geo-nav-icon{
+  background:transparent !important;
+  box-shadow:none !important;
+}
+.bottom-nav .cc-geo-nav-icon{
+  transition:transform var(--cc-motion-micro) var(--cc-ease-standard) !important;
+}
+.bottom-nav .nav-btn.active .cc-geo-nav-icon{
+  transform:translateY(-1px) scale(1.045) !important;
+}
+.bottom-nav .nav-btn small{
+  opacity:.62;
+  transition:opacity var(--cc-motion-micro) var(--cc-ease-standard),color var(--cc-motion-micro) var(--cc-ease-standard);
+}
+.bottom-nav .nav-btn.active small{opacity:1;font-weight:900;}
+.view{transform:none !important;}
+
+/* Dialog/panel enter = opacity + 16px; exit is quicker. */
+dialog::backdrop{
+  background:rgba(0,0,0,0) !important;
+  transition:background-color var(--cc-motion-enter) var(--cc-ease-enter);
+}
+dialog .dialog-card{
+  --cc-sheet-drag-y:0px;
+  opacity:0;
+  transform:translate3d(0,calc(16px + var(--cc-sheet-drag-y)),0);
+  transform-origin:50% 12%;
+  transition:
+    transform var(--cc-motion-enter) var(--cc-ease-enter),
+    opacity var(--cc-motion-enter) var(--cc-ease-enter);
+  will-change:transform,opacity;
+}
+dialog.cc-motion-open::backdrop{background:rgba(0,0,0,.5) !important;}
+dialog.cc-motion-open .dialog-card{
+  opacity:1;
+  transform:translate3d(0,var(--cc-sheet-drag-y),0);
+}
+dialog.cc-motion-closing::backdrop{
+  background:rgba(0,0,0,0) !important;
+  transition-duration:var(--cc-motion-exit);
+  transition-timing-function:var(--cc-ease-exit);
+}
+dialog.cc-motion-closing .dialog-card{
+  opacity:0;
+  transform:translate3d(0,calc(16px + var(--cc-sheet-drag-y,0px)),0);
+  transition-duration:var(--cc-motion-exit);
+  transition-timing-function:var(--cc-ease-exit);
+}
+dialog.cc-sheet-dragging .dialog-card{transition:none !important;}
+dialog.cc-sheet-snapping .dialog-card{
+  transition:transform var(--cc-motion-snap) var(--cc-ease-snap),opacity var(--cc-motion-micro) var(--cc-ease-standard) !important;
+}
+@media(max-width:760px){
+  #notificationsDialog .cc-panel-card > h3,
+  #settingsDialog .cc-panel-card > h3{
+    touch-action:none;
+    cursor:grab;
+  }
+  #notificationsDialog.cc-sheet-dragging .cc-panel-card > h3,
+  #settingsDialog.cc-sheet-dragging .cc-panel-card > h3{cursor:grabbing;}
+  #notificationsDialog .cc-panel-card::before,
+  #settingsDialog .cc-panel-card::before{
+    content:"";
+    position:absolute;
+    top:5px;
+    left:50%;
+    width:34px;
+    height:3px;
+    border-radius:999px;
+    transform:translateX(-50%);
+    background:color-mix(in srgb,var(--muted) 38%,transparent);
+    pointer-events:none;
+  }
+}
+
+/* Native schedule grid owns X/Y movement. Never animate its dimensions. */
+#plannerView .planner-scroll-viewport,
+#plannerView .matrix-scroll{
+  overscroll-behavior:contain !important;
+  touch-action:pan-x pan-y !important;
+  scroll-behavior:auto !important;
+}
+#plannerView .planner-scroll-viewport,
+#plannerView .matrix-scroll,
+#plannerView .matrix-table{
+  transition-property:none !important;
+}
+
+/* Skeleton -> real data crossfade: 100ms. */
+.cc-motion-skeleton-list{display:grid !important;gap:9px !important;}
+.cc-motion-skeleton-row{
+  position:relative;
+  min-height:76px;
+  display:grid;
+  grid-template-columns:8px minmax(0,1fr);
+  grid-template-rows:16px 12px;
+  gap:8px 10px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--card);
+  overflow:hidden;
+}
+.cc-motion-skeleton-row::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.38) 48%,transparent 76%);
+  transform:translateX(-110%);
+  animation:cc-motion-skeleton-shimmer 1.15s linear infinite;
+}
+.dark .cc-motion-skeleton-row::after{background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.07) 48%,transparent 76%);}
+.cc-motion-skeleton-row span{grid-row:1 / span 2;width:7px;height:7px;margin-top:5px;border-radius:50%;background:var(--line);}
+.cc-motion-skeleton-row b,.cc-motion-skeleton-row i{display:block;border-radius:999px;background:var(--soft);}
+.cc-motion-skeleton-row b{width:66%;height:12px;}
+.cc-motion-skeleton-row i{width:88%;height:9px;}
+.cc-motion-content-reveal{animation:cc-motion-content-reveal var(--cc-motion-skeleton) var(--cc-ease-enter) both;}
+@keyframes cc-motion-content-reveal{from{opacity:0}to{opacity:1}}
+@keyframes cc-motion-skeleton-shimmer{to{transform:translateX(110%)}}
+
+/* Disclosure arrows and small state changes use micro/normal tokens. */
+.notification-types-triangle,.profile-details-chevron,.event-note-triangle,.cc-outline-triangle{
+  transition:transform var(--cc-motion-normal) var(--cc-ease-standard) !important;
+}
+.switch-row input[type="checkbox"]{
+  transition:background-color var(--cc-motion-micro) var(--cc-ease-standard),border-color var(--cc-motion-micro) var(--cc-ease-standard) !important;
+}
+.switch-row input[type="checkbox"]::after{
+  transition:transform var(--cc-motion-micro) var(--cc-ease-standard) !important;
+}
+.refresh-button.is-refreshing .refresh-icon{animation-duration:.7s;}
+
+/* Complete app-level reduced motion: keep state changes, remove non-essential movement. */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto !important;
+    animation-duration:.01ms !important;
+    animation-delay:0ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    transition-delay:0ms !important;
+  }
+  .event-card,.planner-row,.bottom-nav .cc-geo-nav-icon,
+  .bottom-nav::before,dialog .dialog-card,.filter-panel,.filter-funnel{
+    transform:none !important;
+  }
+  .bottom-nav::before{display:none !important;}
+  .bottom-nav .nav-btn.active > .cc-geo-nav-icon{
+    background:#fff0a3 !important;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.12) !important;
+  }
+  .dark .bottom-nav .nav-btn.active > .cc-geo-nav-icon{background:#d5a72f !important;}
+  dialog .dialog-card{opacity:1 !important;}
+  dialog::backdrop{background:rgba(0,0,0,.5) !important;}
+  .cc-motion-skeleton-row::after{display:none !important;}
+  .refresh-button.is-refreshing .refresh-icon{animation:none !important;}
+}

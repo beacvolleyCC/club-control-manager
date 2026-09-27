@@ -36,6 +36,157 @@ let currentAvatarId = '';
 let teamAvatarByPlayerId = new Map();
 let avatarPickerMode = 'monogram';
 
+
+// ---------------------------------------------------------------------------
+// CLUB CONTROL MOTION SYSTEM V1 — Player V2.3.10.20
+// Shared motion primitives only. Business/data behavior stays unchanged.
+// ---------------------------------------------------------------------------
+const CC_MOTION_V1=Object.freeze({
+  micro:140,
+  normal:210,
+  structural:280,
+  enter:200,
+  exit:160,
+  snap:200,
+  skeleton:100,
+  directionLock:8
+});
+const ccReducedMotionMedia_=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+function ccPrefersReducedMotion_(){ return !!ccReducedMotionMedia_?.matches; }
+
+const ccDialogCloseTimers_=new WeakMap();
+function ccDialogMotionCleanup_(dialog){
+  if(!dialog) return;
+  const timer=ccDialogCloseTimers_.get(dialog);
+  if(timer) clearTimeout(timer);
+  ccDialogCloseTimers_.delete(dialog);
+  dialog.classList.remove('cc-motion-open','cc-motion-closing','cc-sheet-dragging','cc-sheet-snapping');
+  dialog.style.removeProperty('--cc-sheet-drag-y');
+}
+function ccOpenDialog_(dialog){
+  if(!dialog) return;
+  const oldTimer=ccDialogCloseTimers_.get(dialog);
+  if(oldTimer) clearTimeout(oldTimer);
+  ccDialogCloseTimers_.delete(dialog);
+  dialog.classList.remove('cc-motion-closing');
+  dialog.style.removeProperty('--cc-sheet-drag-y');
+  if(typeof dialog.showModal==='function' && !dialog.open) dialog.showModal();
+  if(ccPrefersReducedMotion_()){
+    dialog.classList.add('cc-motion-open');
+    return;
+  }
+  dialog.classList.remove('cc-motion-open');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    if(dialog.open) dialog.classList.add('cc-motion-open');
+  }));
+}
+function ccCloseDialog_(dialog,onClosed){
+  if(!dialog?.open){ if(typeof onClosed==='function') onClosed(); return; }
+  const finish=()=>{
+    const oldTimer=ccDialogCloseTimers_.get(dialog);
+    if(oldTimer) clearTimeout(oldTimer);
+    ccDialogCloseTimers_.delete(dialog);
+    if(dialog.open) dialog.close();
+    ccDialogMotionCleanup_(dialog);
+    if(typeof onClosed==='function') onClosed();
+  };
+  if(ccPrefersReducedMotion_()){
+    finish();
+    return;
+  }
+  dialog.classList.remove('cc-motion-open','cc-sheet-dragging','cc-sheet-snapping');
+  dialog.classList.add('cc-motion-closing');
+  const timer=window.setTimeout(finish,CC_MOTION_V1.exit+24);
+  ccDialogCloseTimers_.set(dialog,timer);
+}
+function ccBindDialogMotion_(dialog){
+  if(!dialog || dialog.dataset.ccMotionBound==='1') return;
+  dialog.dataset.ccMotionBound='1';
+  dialog.addEventListener('cancel',event=>{
+    event.preventDefault();
+    ccCloseDialog_(dialog);
+  });
+  dialog.addEventListener('close',()=>ccDialogMotionCleanup_(dialog));
+}
+function ccBindPanelSheetMotion_(dialog){
+  if(!dialog || dialog.dataset.ccSheetBound==='1') return;
+  dialog.dataset.ccSheetBound='1';
+  const card=dialog.querySelector('.cc-panel-card');
+  const handle=card?.querySelector(':scope > h3');
+  if(!card || !handle) return;
+
+  let active=false,locked=false,startX=0,startY=0,lastY=0,lastT=0,velocityY=0,pointerId=null;
+  const reset=()=>{
+    active=false; locked=false; pointerId=null; velocityY=0;
+    dialog.classList.remove('cc-sheet-dragging');
+  };
+  const snapBack=()=>{
+    dialog.classList.remove('cc-sheet-dragging');
+    dialog.classList.add('cc-sheet-snapping');
+    dialog.style.setProperty('--cc-sheet-drag-y','0px');
+    window.setTimeout(()=>dialog.classList.remove('cc-sheet-snapping'),ccPrefersReducedMotion_()?0:CC_MOTION_V1.snap+30);
+  };
+
+  handle.addEventListener('pointerdown',event=>{
+    if(window.innerWidth>760 || ccPrefersReducedMotion_() || event.button!==0) return;
+    active=true; locked=false; pointerId=event.pointerId;
+    startX=event.clientX; startY=event.clientY; lastY=event.clientY; lastT=performance.now(); velocityY=0;
+    handle.setPointerCapture?.(event.pointerId);
+  });
+  handle.addEventListener('pointermove',event=>{
+    if(!active || event.pointerId!==pointerId) return;
+    const dx=event.clientX-startX, dy=event.clientY-startY;
+    if(!locked){
+      if(Math.hypot(dx,dy)<CC_MOTION_V1.directionLock) return;
+      if(Math.abs(dx)>Math.abs(dy)){
+        reset();
+        try{handle.releasePointerCapture?.(event.pointerId);}catch(_){ }
+        return;
+      }
+      locked=true;
+      dialog.classList.add('cc-sheet-dragging');
+    }
+    const y=Math.max(0,dy);
+    const now=performance.now();
+    const dt=Math.max(1,now-lastT);
+    velocityY=(event.clientY-lastY)/dt;
+    lastY=event.clientY; lastT=now;
+    dialog.style.setProperty('--cc-sheet-drag-y',`${y.toFixed(1)}px`);
+    event.preventDefault();
+  });
+  const end=event=>{
+    if(!active || (pointerId!==null && event.pointerId!==pointerId)) return;
+    const dy=Math.max(0,event.clientY-startY);
+    const threshold=Math.max(72,Math.min(132,card.getBoundingClientRect().height*.18));
+    const shouldClose=locked && (dy>=threshold || (velocityY>.55 && dy>32));
+    try{handle.releasePointerCapture?.(event.pointerId);}catch(_){ }
+    reset();
+    if(shouldClose) ccCloseDialog_(dialog);
+    else snapBack();
+  };
+  handle.addEventListener('pointerup',end);
+  handle.addEventListener('pointercancel',event=>{
+    if(!active || (pointerId!==null && event.pointerId!==pointerId)) return;
+    try{handle.releasePointerCapture?.(event.pointerId);}catch(_){ }
+    reset(); snapBack();
+  });
+}
+function ccSyncNavMotionIndicator_(){
+  const nav=document.querySelector('.bottom-nav');
+  if(!nav) return;
+  const buttons=[...nav.querySelectorAll('.nav-btn')];
+  const index=Math.max(0,buttons.findIndex(button=>button.classList.contains('active')));
+  nav.style.setProperty('--cc-nav-offset',`${index*100}%`);
+}
+function ccMotionReveal_(element){
+  if(!element || ccPrefersReducedMotion_()) return;
+  element.classList.remove('cc-motion-content-reveal');
+  void element.offsetWidth;
+  element.classList.add('cc-motion-content-reveal');
+  window.setTimeout(()=>element.classList.remove('cc-motion-content-reveal'),CC_MOTION_V1.skeleton+30);
+}
+
+
 const PLAYER_AVATARS = [
   // First 40 IDs stay untouched for backwards compatibility with saved profiles.
   ['alpaca','',0],['lion','',1],['tiger','',2],['panther','',3],
@@ -1311,7 +1462,7 @@ function askCancel(event){
   pendingCancel = event;
   document.getElementById('cancelEventTitle').textContent = `${event.date} • ${event.time} • ${event.title}`;
   document.getElementById('cancelNote').value = event.note || '';
-  cancelDialog.showModal();
+  ccOpenDialog_(cancelDialog);
 }
 
 function setYes(event){
@@ -1415,6 +1566,15 @@ plannerList.addEventListener('wheel',event=>{
   }
 },{passive:true});
 
+document.querySelector('#cancelDialog button[value="cancel"]')?.addEventListener('click',ev=>{
+  ev.preventDefault();
+  ccCloseDialog_(cancelDialog,()=>{
+    pendingCancel=null;
+    const note=document.getElementById('cancelNote');
+    if(note) note.value='';
+  });
+});
+
 document.getElementById('confirmCancel').addEventListener('click',ev=>{
   ev.preventDefault();
   if(!pendingCancel) return;
@@ -1424,7 +1584,7 @@ document.getElementById('confirmCancel').addEventListener('click',ev=>{
     return;
   }
   persist(pendingCancel,'no',note);
-  cancelDialog.close();
+  ccCloseDialog_(cancelDialog);
   pendingCancel=null;
   renderEvents();
   renderPlanner();
@@ -1647,16 +1807,20 @@ function renderNotificationInbox_(){
         ccBindNotificationSwipes_();
       }
     }else{
-      list.hidden=true;
+      list.hidden=false;
+      list.classList.add('cc-motion-skeleton-list');
+      list.innerHTML='<div class="cc-motion-skeleton-row" aria-hidden="true"><span></span><b></b><i></i></div><div class="cc-motion-skeleton-row" aria-hidden="true"><span></span><b></b><i></i></div>';
     }
     return;
   }
   if(!ccNotificationsBackendReady){
+    list.classList.remove('cc-motion-skeleton-list');
     empty.hidden=false; list.hidden=true;
     empty.innerHTML='<span class="notification-empty-icon" aria-hidden="true">!</span><b>Nem érhető el.</b><small>Az értesítési központ backendje még nem válaszol.</small>';
     return;
   }
   if(!ccPlayerNotifications.length){
+    list.classList.remove('cc-motion-skeleton-list');
     list.hidden=true;
     list.innerHTML='';
     empty.hidden=false;
@@ -1664,8 +1828,10 @@ function renderNotificationInbox_(){
     return;
   }
   empty.hidden=true; list.hidden=false;
+  list.classList.remove('cc-motion-skeleton-list');
   list.innerHTML=ccPlayerNotifications.map(ccNotificationItemHtml_).join('');
   ccBindNotificationSwipes_();
+  ccMotionReveal_(list);
 }
 async function ccLoadNotifications_(options={}){
   if(!SUPABASE_ENABLED || !ccSupabase || !ccSupabaseSession){
@@ -1721,12 +1887,12 @@ async function ccOpenNotification_(id){
   let target;
   try{ target=new URL(raw,location.href); }catch(_){ target=null; }
   if(!target || target.searchParams.has('ccNotifications')) return;
-  notificationsDialog?.close();
+  ccCloseDialog_(notificationsDialog);
   const eventId=target.searchParams.get('ccEvent') || item.eventId || item.data?.eventId;
   const view=target.searchParams.get('ccView');
   if(view==='profile') switchView('profileView');
   else if(view==='schedule') switchView('plannerView');
-  if(eventId && events.some(e=>String(e.id)===String(eventId))) window.setTimeout(()=>openEventDialog(String(eventId)),100);
+  if(eventId && events.some(e=>String(e.id)===String(eventId))) window.setTimeout(()=>openEventDialog(String(eventId)),CC_MOTION_V1.exit+50);
 }
 function ccBindNotificationSwipes_(){
   document.querySelectorAll('.notification-swipe-row').forEach(row=>{
@@ -1844,7 +2010,7 @@ function ccFocusPanelTitle_(dialog,titleId){
 }
 
 async function openNotificationsDialog_(){
-  if(notificationsDialog && !notificationsDialog.open) notificationsDialog.showModal();
+  ccOpenDialog_(notificationsDialog);
   ccFocusPanelTitle_(notificationsDialog,'notificationsDialogTitle');
   await ccLoadNotifications_({force:true});
 }
@@ -1854,7 +2020,7 @@ document.getElementById('accountMenuBtn')?.addEventListener('click',()=>{
 });
 document.getElementById('headerSettingsBtn')?.addEventListener('click',()=>document.getElementById('openSettingsBtn')?.click());
 document.getElementById('openNotificationsBtn')?.addEventListener('click',openNotificationsDialog_);
-document.getElementById('closeNotificationsBtn')?.addEventListener('click',()=>notificationsDialog?.close());
+document.getElementById('closeNotificationsBtn')?.addEventListener('click',()=>ccCloseDialog_(notificationsDialog));
 renderNotificationShell_(0);
 
 function switchView(viewId){
@@ -1864,6 +2030,7 @@ function switchView(viewId){
   forcePlannerPageTop_();
 
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.view===navView));
+  ccSyncNavMotionIndicator_();
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===viewId));
 
   if(viewId==='plannerView'){
@@ -1889,6 +2056,7 @@ function switchView(viewId){
 
 document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>switchView(btn.dataset.view)));
 document.querySelectorAll('[data-view-jump]').forEach(btn=>btn.addEventListener('click',()=>switchView(btn.dataset.viewJump)));
+ccSyncNavMotionIndicator_();
 
 window.addEventListener('resize',()=>requestAnimationFrame(()=>{syncPlannerPageLock_();syncPlannerGridViewport_();}));
 window.addEventListener('orientationchange',()=>setTimeout(()=>{syncPlannerPageLock_();syncPlannerGridViewport_();},80));
@@ -1906,7 +2074,7 @@ renderEvents();
 renderPlanner();
 
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=231018').catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=231020').catch(()=>{}));
 }
 
 
@@ -2053,25 +2221,98 @@ function bindSliderDrag(){
     if(slider.dataset.dragBound==='1') return;
     slider.dataset.dragBound='1';
 
-    let startX=0, dragging=false;
     const id=slider.dataset.slider;
     const event=events.find(x=>x.id===id);
-    if(!event || isPast(event)) return;
+    const thumb=slider.querySelector('.slider-thumb');
+    if(!event || !thumb || isPast(event)) return;
 
-    slider.addEventListener('pointerdown', e=>{
-      if(e.target.closest('button')) return;
-      dragging=true; startX=e.clientX;
+    let active=false,locked=false,pointerId=null;
+    let startX=0,startY=0,startLeft=0,currentLeft=0,lastX=0,lastT=0,velocityX=0;
+
+    const geometry=()=>{
+      const thumbWidth=thumb.getBoundingClientRect().width || Math.max(20,slider.clientWidth/3-4);
+      const min=2;
+      const max=Math.max(min,slider.clientWidth-thumbWidth-2);
+      return {min,max,mid:(min+max)/2};
+    };
+    const stateLeft=(state,g=geometry())=>state==='yes'?g.min:(state==='no'?g.max:g.mid);
+    const stateFromLeft=(left,g=geometry())=>{
+      const points=[['yes',g.min],['none',g.mid],['no',g.max]];
+      return points.reduce((best,item)=>Math.abs(item[1]-left)<Math.abs(best[1]-left)?item:best,points[0])[0];
+    };
+    const setFreeLeft=left=>{
+      currentLeft=left;
+      slider.style.setProperty('--cc-slider-left',`${left.toFixed(1)}px`);
+    };
+    const cleanup=()=>{
+      active=false; locked=false; pointerId=null; velocityX=0;
+      slider.classList.remove('cc-slider-dragging');
+    };
+    const finishSnap=(state,commit=true)=>{
+      const g=geometry();
+      const target=stateLeft(state,g);
+      slider.classList.remove('cc-slider-dragging');
+      slider.classList.add('cc-slider-snapping');
+      setFreeLeft(target);
+      const delay=ccPrefersReducedMotion_()?0:CC_MOTION_V1.snap;
+      window.setTimeout(()=>{
+        slider.classList.remove('cc-slider-snapping');
+        slider.style.removeProperty('--cc-slider-left');
+        if(commit) applySliderState(event,state);
+      },delay);
+    };
+
+    slider.addEventListener('pointerdown',e=>{
+      if(e.target.closest('button') || e.button!==0) return;
+      const g=geometry();
+      active=true; locked=false; pointerId=e.pointerId;
+      startX=e.clientX; startY=e.clientY;
+      startLeft=stateLeft(event.status||'none',g); currentLeft=startLeft;
+      lastX=e.clientX; lastT=performance.now(); velocityX=0;
+      setFreeLeft(startLeft);
       slider.setPointerCapture?.(e.pointerId);
     });
 
-    slider.addEventListener('pointerup', e=>{
-      if(!dragging) return;
-      dragging=false;
-      const dx=e.clientX-startX;
-      const threshold=Math.max(24, slider.clientWidth*0.12);
-      if(dx < -threshold) applySliderState(event,'yes');
-      else if(dx > threshold) applySliderState(event,'no');
-      else applySliderState(event,'none');
+    slider.addEventListener('pointermove',e=>{
+      if(!active || e.pointerId!==pointerId) return;
+      const dx=e.clientX-startX,dy=e.clientY-startY;
+      if(!locked){
+        if(Math.hypot(dx,dy)<CC_MOTION_V1.directionLock) return;
+        if(Math.abs(dy)>Math.abs(dx)){
+          cleanup();
+          slider.style.removeProperty('--cc-slider-left');
+          try{slider.releasePointerCapture?.(e.pointerId);}catch(_){ }
+          return;
+        }
+        locked=true;
+        slider.classList.add('cc-slider-dragging');
+      }
+      const g=geometry();
+      const next=Math.min(g.max,Math.max(g.min,startLeft+dx));
+      const now=performance.now();
+      const dt=Math.max(1,now-lastT);
+      velocityX=(e.clientX-lastX)/dt;
+      lastX=e.clientX; lastT=now;
+      setFreeLeft(next);
+      e.preventDefault();
+    },{passive:false});
+
+    slider.addEventListener('pointerup',e=>{
+      if(!active || e.pointerId!==pointerId) return;
+      try{slider.releasePointerCapture?.(e.pointerId);}catch(_){ }
+      const wasLocked=locked;
+      const g=geometry();
+      const projected=Math.min(g.max,Math.max(g.min,currentLeft+velocityX*120));
+      const state=wasLocked?stateFromLeft(projected,g):(event.status||'none');
+      cleanup();
+      finishSnap(state,wasLocked);
+    });
+
+    slider.addEventListener('pointercancel',e=>{
+      if(!active || e.pointerId!==pointerId) return;
+      try{slider.releasePointerCapture?.(e.pointerId);}catch(_){ }
+      cleanup();
+      finishSnap(event.status||'none',false);
     });
   });
 }
@@ -2116,7 +2357,7 @@ async function ccPushRegistration_(){
   try{
     const existing=await navigator.serviceWorker.getRegistration('./');
     if(existing) return existing;
-    return await navigator.serviceWorker.register('./sw.js?v=231018');
+    return await navigator.serviceWorker.register('./sw.js?v=231020');
   }catch(err){ console.warn('Push service worker hiba:',err); return null; }
 }
 async function ccPushBrowserSubscription_(){
@@ -2493,12 +2734,12 @@ document.getElementById('openSettingsBtn')?.addEventListener('click',()=>{
   // Merge it over any older remote settings before the dialog opens.
   const source=currentPlayerSettings||defaultSettingsPayload_();
   applySettingsUi_({...source,theme:currentThemePreference_()});
-  settingsDialog.showModal();
+  ccOpenDialog_(settingsDialog);
   ccFocusPanelTitle_(settingsDialog,'settingsDialogTitle');
 });
 document.getElementById('closeSettingsBtn')?.addEventListener('click',async()=>{
   try{ await savePlayerSettingsNow_(); }catch(err){ console.warn(err); }
-  settingsDialog.close();
+  ccCloseDialog_(settingsDialog);
 });
 document.getElementById('settingsDefaultView')?.addEventListener('change',e=>{
   localStorage.setItem('cc-planner-default',e.target.value);
@@ -2618,10 +2859,10 @@ function openEventDialog(eventId){
     <div class="event-dialog-slider">${plannerStatusControls(e,archived)}</div>
     ${eventNoteSection_(e,archived)}
     ${eventDialogRoster(e)}`;
-  if(!eventDialog.open) eventDialog.showModal();
+  ccOpenDialog_(eventDialog);
   bindSliderDrag();
 }
-document.getElementById('closeEventDialogBtn')?.addEventListener('click',()=>eventDialog.close());
+document.getElementById('closeEventDialogBtn')?.addEventListener('click',()=>ccCloseDialog_(eventDialog));
 document.getElementById('eventDialogContent')?.addEventListener('click',e=>{
   const saveBtn=e.target.closest('[data-event-note-save]');
   if(saveBtn){
@@ -2645,7 +2886,7 @@ document.getElementById('eventDialogContent')?.addEventListener('click',e=>{
   const b=e.target.closest('[data-slider-action]'); if(!b) return;
   const ev=events.find(x=>x.id===b.dataset.id); if(!ev || isPast(ev)) return;
   if(b.dataset.sliderAction==='yes') setYes(ev);
-  else if(b.dataset.sliderAction==='no'){ eventDialog.close(); askCancel(ev); return; }
+  else if(b.dataset.sliderAction==='no'){ ccCloseDialog_(eventDialog,()=>askCancel(ev)); return; }
   else neutralizeEvent(ev);
   setTimeout(()=>openEventDialog(ev.id),0);
 });
@@ -2655,8 +2896,7 @@ function enableBackdropDismiss(dialog, onClose){
   if(!dialog) return;
   dialog.addEventListener('click',e=>{
     if(e.target!==dialog) return;
-    dialog.close();
-    if(typeof onClose==='function') onClose();
+    ccCloseDialog_(dialog,onClose);
   });
 }
 
@@ -2668,6 +2908,9 @@ enableBackdropDismiss(document.getElementById('cancelDialog'),()=>{
   const note=document.getElementById('cancelNote');
   if(note) note.value='';
 });
+
+[notificationsDialog,settingsDialog,eventDialog,cancelDialog,document.getElementById('logoutDialog')].forEach(ccBindDialogMotion_);
+[notificationsDialog,settingsDialog].forEach(ccBindPanelSheetMotion_);
 
 /* PLAYER CORE V2 — dual backend adapter.
    Stable UI stays unchanged. DATA_BACKEND='supabase' switches only auth/data. */
@@ -3134,13 +3377,13 @@ function ccOpenLogoutDialog_(){
   if(!dialog) return;
   ccSetLogoutStatus_('');
   ccSetLogoutBusy_(false);
-  if(typeof dialog.showModal==='function' && !dialog.open) dialog.showModal();
+  ccOpenDialog_(dialog);
 }
 
 function ccCloseLogoutDialog_(){
   if(ccLogoutBusy) return;
   const dialog=ccLogoutDialog_();
-  if(dialog?.open) dialog.close();
+  if(dialog?.open) ccCloseDialog_(dialog);
 }
 
 async function ccLogoutSupabase_(scope){
