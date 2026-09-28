@@ -855,10 +855,10 @@ html:not(.cc-keyboard-nav) .filter-toggle:focus-visible{
 
 
 /* ==========================================================
-   MANAGER V0.4.2F5 — MEDICAL STATUS + FILTER TYPE LOCK
-   Scope locked: no calendar/resource/notification behavior changes.
+   MANAGER V0.4.2F6 — EMERGENCY MEDICAL ROLLBACK + FILTER TYPE LOCK
+   Medical data/status behavior is exactly the pre-F5 behavior.
+   Typography-only filter normalization; no medical write/check/filter.
    ========================================================== */
-/* One typography contract for every Manager filter surface. */
 .filter-toggle,
 .matrix-filter-toggle{
   font-weight:600 !important;
@@ -882,17 +882,4 @@ html:not(.cc-keyboard-nav) .filter-toggle:focus-visible{
 .filter-reset-btn{
   font-weight:500 !important;
   text-decoration:none !important;
-}
-.player-filter-bar{
-  grid-template-columns:minmax(240px,1fr) minmax(150px,180px) minmax(170px,200px) auto;
-}
-.medical-ok{color:#2d6b3f !important;}
-.medical-warn{color:#9a6800 !important;}
-.medical-expired{color:var(--red) !important;}
-.medical-empty{color:var(--muted) !important;}
-.medical-status-label{font-weight:500 !important;color:currentColor !important;}
-body.dark .medical-ok{color:#9ed6aa !important;}
-body.dark .medical-warn{color:#e2b654 !important;}
-@media(max-width:779px){
-  .player-filter-bar{grid-template-columns:1fr !important;}
 }

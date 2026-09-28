@@ -1,4 +1,4 @@
-const CACHE='cc-manager-v0-4-2f5-medical-filter-type-lock-11x';
+const CACHE='cc-manager-v0-4-2f6-medical-rollback-filter-type-lock';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest?v=0.4.2f3',
   './assets/player-animals.webp','./icons/icon-192.png?v=manager-double-ring-v1','./icons/icon-512.png?v=manager-double-ring-v1','./icons/apple-touch-icon.png?v=manager-double-ring-v1'
