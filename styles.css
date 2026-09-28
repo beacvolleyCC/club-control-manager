@@ -507,3 +507,255 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
   .notification-recipient em{grid-column:2}
 }
 .dark .notification-recipient.selected{background:rgba(247,183,0,.12)}
+
+/* ========================================================================== 
+   MANAGER V0.4.2F1 — DOUBLE-RING ICON PATCH (UI PARITY UNCHANGED)
+   Old Manager information hierarchy + colors, Player density/design language.
+   ========================================================================== */
+
+/* Competition overview: Player-dense matrix left, legacy gradient matches right. */
+.overview-player-intro{margin-bottom:10px}
+.manager-overview-main{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.55fr) minmax(330px,.72fr)!important;
+  gap:10px!important;
+  align-items:start;
+}
+.manager-overview-main .parity-matrix-card{padding:0!important;overflow:hidden}
+.next-matches-card{padding:10px!important;overflow:hidden}
+.next-matches-card .panel-head{padding:2px 2px 8px;margin:0}
+
+/* Compact KPI strip: old metrics remain, but no oversized cards. */
+.compact-kpi-strip{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,170px))!important;
+  justify-content:start;
+  gap:6px!important;
+  margin:10px 0 0!important;
+}
+.compact-kpi-strip>div{
+  min-height:46px!important;
+  padding:7px 10px!important;
+  border-radius:10px!important;
+  box-shadow:none!important;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+}
+.compact-kpi-strip strong{font-size:17px!important;line-height:1!important}
+.compact-kpi-strip span{margin:0!important;font-size:8px!important;line-height:1.2!important}
+
+/* Legacy Manager next-match color wash, retained with Player-like compact rows. */
+.gradient-match-list{display:grid;gap:5px}
+.gradient-match-row{
+  overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--team-color) 22%,var(--line))!important;
+  border-radius:10px!important;
+  padding:8px 8px 8px 5px!important;
+  background:linear-gradient(100deg,
+    color-mix(in srgb,var(--team-color) 22%,var(--card)) 0%,
+    color-mix(in srgb,var(--team-color) 10%,var(--card)) 58%,
+    var(--card) 100%)!important;
+}
+.gradient-match-row:last-child{border-bottom:1px solid color-mix(in srgb,var(--team-color) 22%,var(--line))!important}
+.gradient-match-row:hover{filter:brightness(.992)}
+.gradient-match-row .legacy-overview-accent{height:38px;background:var(--team-color)}
+.gradient-match-row .rsvp-pills{justify-self:end}
+
+/* Actual Player-like compact RSVP grid. One native X/Y scroll surface. */
+.player-parity-team{padding:10px 10px 12px!important}
+.player-parity-team+.player-parity-team{border-top:1px solid var(--line)}
+.player-parity-team .matrix-team-title{margin:0 0 6px;padding:0 2px}
+.player-parity-team .matrix-team-title strong{display:flex;align-items:center;gap:6px;font-size:11px}
+.player-parity-team .matrix-team-title strong i{width:5px;height:18px;border-radius:999px;background:var(--team-color);display:inline-block}
+.player-parity-team .matrix-team-title span{font-size:8px}
+.manager-player-grid{
+  --mgr-grid-event:112px;
+  --mgr-grid-count:34px;
+  position:relative;
+  width:100%;
+  max-height:min(54vh,470px);
+  overflow:auto!important;
+  overscroll-behavior:contain;
+  touch-action:pan-x pan-y;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--card);
+}
+.manager-player-grid::-webkit-scrollbar{display:none;width:0;height:0}
+.manager-player-matrix{
+  width:max-content!important;
+  min-width:100%!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  table-layout:fixed!important;
+  font-size:8px!important;
+}
+.manager-player-matrix th,
+.manager-player-matrix td{
+  box-sizing:border-box!important;
+  border-right:1px solid var(--line)!important;
+  border-bottom:1px solid var(--line)!important;
+  background:var(--card);
+}
+.manager-player-matrix thead th{
+  position:sticky!important;
+  top:0!important;
+  z-index:12!important;
+  height:46px!important;
+  min-height:46px!important;
+  padding:3px 2px!important;
+  background:var(--card)!important;
+  border-bottom:1px solid color-mix(in srgb,var(--team-color) 48%,var(--line))!important;
+  vertical-align:middle!important;
+}
+.manager-player-matrix .matrix-event-side{
+  position:sticky!important;
+  left:0!important;
+  z-index:10!important;
+  width:var(--mgr-grid-event)!important;
+  min-width:var(--mgr-grid-event)!important;
+  max-width:var(--mgr-grid-event)!important;
+  height:43px!important;
+  padding:4px 7px!important;
+  text-align:left!important;
+  vertical-align:middle!important;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--team-color) 8%,var(--card)),var(--card) 75%)!important;
+}
+.manager-player-matrix thead .matrix-event-side{
+  z-index:16!important;
+  height:46px!important;
+  padding-left:8px!important;
+  font-size:9px!important;
+  font-weight:950!important;
+  background:var(--card)!important;
+}
+.manager-player-matrix .matrix-count-head,
+.manager-player-matrix .matrix-count-cell{
+  position:sticky!important;
+  left:var(--mgr-grid-event)!important;
+  z-index:9!important;
+  width:var(--mgr-grid-count)!important;
+  min-width:var(--mgr-grid-count)!important;
+  max-width:var(--mgr-grid-count)!important;
+  height:43px!important;
+  padding:0 2px!important;
+  text-align:center!important;
+  vertical-align:middle!important;
+  background:var(--card)!important;
+  box-shadow:1px 0 0 color-mix(in srgb,var(--team-color) 52%,var(--line))!important;
+}
+.manager-player-matrix thead .matrix-count-head{z-index:15!important;height:46px!important;font-size:8px!important;font-weight:950!important}
+.manager-player-matrix .matrix-player-head,
+.manager-player-matrix .matrix-cell{
+  width:42px!important;
+  min-width:42px!important;
+  max-width:42px!important;
+  height:43px!important;
+  padding:0 2px!important;
+  text-align:center!important;
+  vertical-align:middle!important;
+}
+.manager-player-matrix .grid-player-head-inner{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:0}
+.manager-player-matrix .matrix-player-head .cc-avatar{width:19px!important;height:19px!important;min-width:19px!important;margin:0 auto 1px!important}
+.manager-player-matrix .grid-player-label{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7.5px!important;line-height:1!important;font-weight:900}
+.manager-player-matrix .matrix-event-side-btn{display:block;width:100%;border:0;background:transparent;color:inherit;padding:0;text-align:left;min-width:0}
+.manager-player-matrix .matrix-event-copy{display:block;min-width:0}
+.manager-player-matrix .matrix-event-copy b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8.5px!important;line-height:1.08}
+.manager-player-matrix .matrix-event-copy small{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px!important;line-height:1.05;color:var(--muted)}
+.manager-player-matrix .matrix-status{font-size:14px!important;line-height:1;font-weight:950}
+.manager-player-matrix .matrix-count-cell strong{font-size:9px!important;line-height:1;font-weight:950}
+.manager-player-matrix .matrix-count-cell strong.high{color:var(--green)}
+.manager-player-matrix .matrix-count-cell strong.mid{color:var(--amber)}
+.manager-player-matrix .matrix-count-cell strong.low{color:var(--red)}
+.manager-player-matrix .matrix-cell.going{background:#e6f3e8!important;color:#246235!important}
+.manager-player-matrix .matrix-cell.not-going{background:#fae4e4!important;color:#8b2929!important}
+.manager-player-matrix .matrix-cell.none{background:var(--card)!important;color:var(--muted)!important}
+.manager-player-matrix .matrix-month-divider td{
+  height:25px!important;
+  padding:0!important;
+  text-align:left!important;
+  background:var(--soft)!important;
+  border-right:0!important;
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:900;
+  text-transform:lowercase;
+  letter-spacing:.01em;
+}
+.manager-player-matrix .matrix-month-divider td span{position:sticky;left:8px;display:inline-block;padding:0 7px;line-height:25px;background:var(--soft)}
+.dark .manager-player-matrix .matrix-event-side{background:linear-gradient(90deg,color-mix(in srgb,var(--team-color) 11%,#191a17),#191a17 75%)!important}
+.dark .manager-player-matrix .matrix-count-head,
+.dark .manager-player-matrix .matrix-count-cell,
+.dark .manager-player-matrix thead th{background:var(--card)!important}
+.dark .manager-player-matrix .matrix-cell.going{background:#17351e!important;color:#9ed6aa!important}
+.dark .manager-player-matrix .matrix-cell.not-going{background:#3a1919!important;color:#e8a2a2!important}
+
+/* Event detail: RSVP and actual closed attendance remain explicitly separate. */
+.event-roster-detail{border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.event-roster-list{display:grid}
+.event-roster-player{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:7px 9px;border-bottom:1px solid var(--line)}
+.event-roster-player:last-child{border-bottom:0}
+.event-roster-player>div{min-width:0}.event-roster-player b,.event-roster-player small{display:block}.event-roster-player b{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-roster-player small{margin-top:2px;color:var(--muted);font-size:7.5px}
+.roster-rsvp,.roster-attendance{min-height:24px;display:inline-flex;align-items:center;padding:0 7px;border-radius:999px;font-size:7.5px;font-weight:900;white-space:nowrap;background:var(--soft)}
+.roster-rsvp.going{background:#e6f3e8;color:#246235}.roster-rsvp.not_going{background:#fae4e4;color:#8b2929}.roster-rsvp.none{color:var(--muted)}
+.roster-attendance.present{color:var(--green)}.roster-attendance.absent{color:var(--red)}.roster-attendance.none{color:var(--muted)}
+
+/* Old Manager calendar geometry, Player controls. */
+.legacy-calendar-intro{margin-bottom:9px}
+.calendar-player-filter{margin-bottom:9px}
+.filter-toggle.open .triangle-icon{transform:rotate(180deg)}
+.legacy-calendar-panel{padding:10px!important;overflow:hidden}
+.legacy-calendar-nav{display:grid;grid-template-columns:auto minmax(160px,1fr) auto;align-items:center;gap:10px;padding:0 0 9px}
+.legacy-calendar-nav>strong{text-align:center;font-size:10px}
+.legacy-calendar-nav-buttons{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.legacy-calendar-nav-buttons .button{min-height:34px;padding:0 9px;font-size:8.5px}
+.legacy-calendar-nav-buttons .button.square{width:34px;padding:0;display:grid;place-items:center}
+.calendar-team-legend{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:7.5px;font-weight:800}
+.calendar-team-legend span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.calendar-team-legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.legacy-week-shell{width:100%;overflow:auto;border:1px solid var(--line);border-radius:11px;background:var(--card);scrollbar-width:thin}
+.legacy-week-header,.legacy-week-body{min-width:980px;display:grid;grid-template-columns:58px repeat(7,minmax(120px,1fr))}
+.legacy-week-header{position:sticky;top:0;z-index:8;background:var(--card);border-bottom:1px solid var(--line)}
+.legacy-week-corner{min-height:46px;background:var(--soft);border-right:1px solid var(--line)}
+.legacy-week-day{min-height:46px;border:0;border-right:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:inherit}
+.legacy-week-day:last-child{border-right:0}.legacy-week-day:hover{background:var(--soft)}
+.legacy-week-day b{font-size:9px;text-transform:capitalize}.legacy-week-day span{font-size:8px;color:var(--muted)}
+.legacy-week-day.today{background:color-mix(in srgb,var(--yellow) 10%,var(--card));box-shadow:inset 0 -2px 0 var(--yellow)}
+.legacy-week-scroll{overflow:visible}
+.legacy-week-body{position:relative;height:var(--week-height);background:var(--card)}
+.legacy-time-axis{position:relative;height:var(--week-height);background:var(--soft);border-right:1px solid var(--line)}
+.legacy-time-axis span{position:absolute;right:7px;transform:translateY(-50%);color:var(--muted);font-size:7.5px;font-weight:800}
+.legacy-day-column{position:relative;height:var(--week-height);border-right:1px solid color-mix(in srgb,var(--line) 65%,transparent);background:var(--card);overflow:hidden}
+.legacy-day-column:last-child{border-right:0}.legacy-day-column.today{background:color-mix(in srgb,var(--yellow) 2.5%,var(--card))}
+.legacy-day-column>i{position:absolute;left:0;right:0;height:1px;background:color-mix(in srgb,var(--line) 38%,transparent);pointer-events:none}
+.legacy-calendar-event{position:absolute;z-index:2;border:1px solid color-mix(in srgb,var(--event-color) 40%,var(--line));border-left:4px solid var(--event-color);border-radius:7px;padding:5px 6px;overflow:hidden;text-align:left;color:inherit;background:linear-gradient(105deg,color-mix(in srgb,var(--event-color) 22%,var(--card)),color-mix(in srgb,var(--event-color) 8%,var(--card)));box-shadow:0 2px 5px rgba(20,20,16,.045)}
+.legacy-calendar-event:hover{filter:brightness(.99);z-index:4}
+.legacy-calendar-event.match{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--event-color) 34%,transparent),0 2px 5px rgba(20,20,16,.045)}
+.legacy-calendar-event.past{opacity:.55}
+.legacy-calendar-event b,.legacy-calendar-event strong,.legacy-calendar-event span,.legacy-calendar-event small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.legacy-calendar-event b{font-size:7px;color:var(--muted)}.legacy-calendar-event strong{margin-top:1px;font-size:8.5px}.legacy-calendar-event span{margin-top:1px;font-size:7.5px;font-weight:850}.legacy-calendar-event small{margin-top:2px;font-size:7px;color:var(--muted)}
+.dark .legacy-calendar-event{background:linear-gradient(105deg,color-mix(in srgb,var(--event-color) 20%,var(--card)),color-mix(in srgb,var(--event-color) 7%,var(--card)))}
+
+@media(max-width:1199px){
+  .manager-overview-main{grid-template-columns:1fr!important}
+  .next-matches-card{order:2}
+}
+@media(max-width:779px){
+  .compact-kpi-strip{display:flex!important;overflow-x:auto;gap:5px!important;padding-bottom:2px;scrollbar-width:none}
+  .compact-kpi-strip::-webkit-scrollbar{display:none}
+  .compact-kpi-strip>div{min-width:132px!important;flex:0 0 132px}
+  .manager-player-grid{--mgr-grid-event:112px;--mgr-grid-count:34px;max-height:calc(100dvh - 315px)}
+  .manager-player-matrix .matrix-player-head,.manager-player-matrix .matrix-cell{width:38px!important;min-width:38px!important;max-width:38px!important}
+  .manager-player-matrix .matrix-player-head .cc-avatar{width:17px!important;height:17px!important;min-width:17px!important}
+  .manager-player-matrix .grid-player-label{font-size:7px!important}
+  .gradient-match-row{grid-template-columns:5px minmax(0,1fr) auto!important}
+  .gradient-match-row>div:nth-of-type(3),.gradient-match-row>div:nth-of-type(4){grid-column:2/-1}
+  .event-roster-player{grid-template-columns:30px minmax(0,1fr) auto}.event-roster-player .roster-attendance{grid-column:2/-1;justify-self:start}
+  .legacy-calendar-nav{grid-template-columns:1fr;align-items:start}
+  .legacy-calendar-nav>strong{text-align:left;order:-1}
+  .calendar-team-legend{justify-content:flex-start}
+}

@@ -1,7 +1,7 @@
-const CACHE='club-control-manager-pwa-v0-4-2e-match-day-resource-release';
+const CACHE='club-control-manager-pwa-v0-4-2f1-manager-double-ring-icon';
 const CORE=[
-  './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest',
-  './assets/player-animals.webp','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
+  './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest?v=0.4.2f1',
+  './assets/player-animals.webp','./icons/icon-192.png?v=manager-double-ring-v1','./icons/icon-512.png?v=manager-double-ring-v1','./icons/apple-touch-icon.png?v=manager-double-ring-v1'
 ];
 
 self.addEventListener('install',event=>{
