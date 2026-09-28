@@ -784,3 +784,49 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
   .matrix-filter-toggle .triangle-icon,
   .filter-toggle .triangle-icon{transition:none !important;}
 }
+
+
+/* =========================================================
+   MANAGER V0.4.2F3 — NATIVE PICKER / FILTER HARDENING
+   11X review: prevent iOS focus zoom and picker-anchor replacement.
+   ========================================================= */
+.filter-panel,
+.matrix-filter-panel,
+.filter-bar,
+.player-filter-bar{
+  will-change:auto !important;
+  contain:none !important;
+}
+.filter-panel select,
+.matrix-filter-panel select,
+.filter-bar select,
+.filter-panel input,
+.matrix-filter-panel input,
+.filter-bar input{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+@media(max-width:779px){
+  .filter-panel select,
+  .matrix-filter-panel select,
+  .filter-bar select,
+  .player-filter-bar select,
+  .filter-panel input[type="date"],
+  .matrix-filter-panel input[type="date"],
+  .filter-bar input[type="search"]{
+    font-size:16px !important;
+    line-height:1.15 !important;
+  }
+  .filter-toggle,
+  .matrix-filter-toggle{
+    touch-action:manipulation;
+  }
+}
+
+.filter-panel,
+.matrix-filter-panel{
+  position:relative !important;
+  z-index:12 !important;
+  overflow:visible !important;
+  isolation:isolate;
+}
