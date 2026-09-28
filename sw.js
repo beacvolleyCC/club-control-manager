@@ -1,6 +1,6 @@
-const CACHE='club-control-manager-pwa-v0-4-2f1-manager-double-ring-icon';
+const CACHE='club-control-manager-pwa-v0-4-2f2-filter-stability-11x';
 const CORE=[
-  './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest?v=0.4.2f1',
+  './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest?v=0.4.2f2',
   './assets/player-animals.webp','./icons/icon-192.png?v=manager-double-ring-v1','./icons/icon-512.png?v=manager-double-ring-v1','./icons/apple-touch-icon.png?v=manager-double-ring-v1'
 ];
 

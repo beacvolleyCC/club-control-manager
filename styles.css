@@ -759,3 +759,28 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
   .legacy-calendar-nav>strong{text-align:left;order:-1}
   .calendar-team-legend{justify-content:flex-start}
 }
+
+
+/* =========================================================
+   V0.4.2F2 — FILTER STABILITY / 11X MOTION QA
+   Native select/popover anchors must never move while opening.
+   ========================================================= */
+.filter-panel,
+.matrix-filter-panel{
+  transform:none !important;
+  transition:none !important;
+  will-change:auto !important;
+  contain:none !important;
+}
+.filter-panel[hidden],
+.matrix-filter-panel[hidden]{display:none !important;}
+.matrix-filter-panel.open{display:grid !important;}
+/* Motion is restricted to the triangle indicator only. */
+.matrix-filter-toggle .triangle-icon,
+.filter-toggle .triangle-icon{
+  transition:transform 140ms cubic-bezier(.22,1,.36,1) !important;
+}
+@media (prefers-reduced-motion: reduce){
+  .matrix-filter-toggle .triangle-icon,
+  .filter-toggle .triangle-icon{transition:none !important;}
+}
