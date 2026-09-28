@@ -852,3 +852,47 @@ html:not(.cc-keyboard-nav) .filter-toggle:focus-visible{
   box-shadow:none !important;
 }
 .matrix-filter-toggle{font-weight:700 !important;}
+
+
+/* ==========================================================
+   MANAGER V0.4.2F5 — MEDICAL STATUS + FILTER TYPE LOCK
+   Scope locked: no calendar/resource/notification behavior changes.
+   ========================================================== */
+/* One typography contract for every Manager filter surface. */
+.filter-toggle,
+.matrix-filter-toggle{
+  font-weight:600 !important;
+}
+.filter-panel .field span,
+.matrix-filter-panel label,
+.filter-bar .field span,
+.player-filter-bar .field span{
+  font-weight:600 !important;
+}
+.filter-panel select,
+.matrix-filter-panel select,
+.filter-bar select,
+.player-filter-bar select,
+.filter-panel input,
+.matrix-filter-panel input,
+.filter-bar input{
+  font-weight:400 !important;
+}
+.filter-reset,
+.filter-reset-btn{
+  font-weight:500 !important;
+  text-decoration:none !important;
+}
+.player-filter-bar{
+  grid-template-columns:minmax(240px,1fr) minmax(150px,180px) minmax(170px,200px) auto;
+}
+.medical-ok{color:#2d6b3f !important;}
+.medical-warn{color:#9a6800 !important;}
+.medical-expired{color:var(--red) !important;}
+.medical-empty{color:var(--muted) !important;}
+.medical-status-label{font-weight:500 !important;color:currentColor !important;}
+body.dark .medical-ok{color:#9ed6aa !important;}
+body.dark .medical-warn{color:#e2b654 !important;}
+@media(max-width:779px){
+  .player-filter-bar{grid-template-columns:1fr !important;}
+}
