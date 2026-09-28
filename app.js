@@ -134,7 +134,7 @@
   async function requestCode(){const email=text($('#loginEmail')?.value).toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){loginMessage('#loginMsg','Adj meg egy érvényes email címet.',true);return}const b=$('#requestCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginMsg','Kód küldése…');const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});if(error)throw error;state.pendingEmail=email;$('#loginEmailPreview').textContent=email;showLogin('loginCodeStep');loginMessage('#loginCodeMsg','A kódot elküldtük.')}catch(err){loginMessage('#loginMsg',err.message||'A kód küldése sikertelen.',true)}finally{if(b)b.disabled=false}}
   async function verifyCode(){const token=text($('#loginCode')?.value).replace(/\D/g,'');if(token.length<6){loginMessage('#loginCodeMsg','Írd be az emailben kapott kódot.',true);return}const b=$('#verifyCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginCodeMsg','Ellenőrzés…');const {data,error}=await state.supabase.auth.verifyOtp({email:state.pendingEmail,token,type:'email'});if(error)throw error;state.session=data.session||null;await loadLiveData();hideLogin()}catch(err){loginMessage('#loginCodeMsg',err.message||'A belépés sikertelen.',true)}finally{if(b)b.disabled=false}}
 
-  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';$('#runtimeLabel').textContent='V0.4.2F3';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · V0.4.2F3';}
+  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';$('#runtimeLabel').textContent='V0.5.0A';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · V0.5.0A';}
 
   async function loadLiveData(){
     state.loading=true;status('Manager adatok frissítése…');
@@ -425,12 +425,155 @@
     $$('[data-team-id]').forEach(b=>b.addEventListener('click',()=>{state.selectedTeam=b.dataset.teamId;renderTeams()}));$$('[data-player-id]').forEach(b=>b.addEventListener('click',()=>openPlayerDetail(b.dataset.playerId)));
   }
 
-  function medicalClass(v){const d=safeDate(v);if(!d)return'';const days=(d-Date.now())/864e5;return days<0?'medical-expired':days<92?'medical-warn':''}
-  function playerRows(){const q=state.playerSearch.toLocaleLowerCase('hu');return state.players.filter(p=>{if(state.playerTeam&&text(p.teamId||p.team_id)!==state.playerTeam)return false;if(q&&!`${p.name||''} ${p.displayName||''} ${p.email||''} ${p.licenseNo||''}`.toLocaleLowerCase('hu').includes(q))return false;return true})}
-  function playerTableRow(p){return `<tr class="clickable-row" tabindex="0" data-player-id="${esc(p.playerId)}"><td class="player-cell player-name-cell">${avatarHtml(p,'table')}<span><b>${esc(p.displayName||p.name||'–')}</b><small>${esc(p.email||'')}</small></span></td><td><b>${esc(p.teamName||'–')}</b>${p.membershipStartsOn?`<small>${esc(fmtDate(p.membershipStartsOn))} óta</small>`:''}</td><td>${esc(p.position||'–')}</td><td>${esc(p.jerseyNo??'–')}</td><td>${esc(p.licenseNo||'–')}</td><td class="${medicalClass(p.medicalValidUntil)}">${esc(p.medicalValidUntil?fmtDate(p.medicalValidUntil):'–')}</td><td><span class="status-pill ${p.hasAccount?'ok':''}">${p.hasAccount?'AKTÍV FIÓK':'NINCS FIÓK'}</span></td><td><b>${esc(p.trainingPresent??0)}/${esc(p.trainingMarked??0)}</b><small>${esc(pctText(p.trainingPresent,p.trainingMarked))}</small></td><td><b>${esc(p.matchPresent??0)}/${esc(p.matchMarked??0)}</b><small>${esc(pctText(p.matchPresent,p.matchMarked))}</small></td></tr>`}
-  function playerCard(p){return `<button class="player-card parity-player-card" type="button" data-player-id="${esc(p.playerId)}">${avatarHtml(p,'card')}<div class="player-card-main"><div class="player-card-head"><b>${esc(p.displayName||p.name||'–')}</b><span>${p.jerseyNo!=null?'#'+esc(p.jerseyNo):''}</span></div><small>${esc(p.teamName||'Nincs aktív csapat')} · ${esc(p.position||'–')}</small><div class="player-card-stats"><span>Edzés <b>${esc(pctText(p.trainingPresent,p.trainingMarked))}</b></span><span>Meccs <b>${esc(pctText(p.matchPresent,p.matchMarked))}</b></span><span>${p.hasAccount?'Fiók aktív':'Nincs fiók'}</span></div></div><span class="chevron">›</span></button>`}
-  function renderPlayers(){const rows=playerRows(),active=!!state.playerTeam||!!state.playerSearch;$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Játékosok</h2><p>Teljes sportolói adatbázis · teljes nevek · csapattagság · sportorvosi · tényleges jelenlét.</p></div><span class="read-only-badge">READ-ONLY PARITY</span></div><div class="filter-bar player-filter-bar"><label class="search-field"><span class="sr-only">Keresés</span><input id="playerSearch" type="search" value="${esc(state.playerSearch)}" placeholder="Keresés név, email vagy igazolási szám alapján…"></label><label class="field compact"><span>Csapat</span><select id="playerTeamFilter">${teamOptions(state.playerTeam)}</select></label><button class="filter-reset" id="playerFilterReset" ${active?'':'hidden'} type="button">Szűrők törlése</button></div><article class="panel player-surface"><div class="table-summary"><span><b>${rows.length}</b> játékos</span><span>Read-only</span></div><div class="responsive-table-wrap"><table class="data-table parity-player-table"><thead><tr><th>Név</th><th>Csapat / tagság</th><th>Poszt</th><th>#</th><th>Igazolás</th><th>Sportorvosi</th><th>Fiók</th><th>Edzés</th><th>Meccs</th></tr></thead><tbody>${rows.map(playerTableRow).join('')}</tbody></table></div><div class="player-card-list">${rows.map(playerCard).join('')}</div></article>`;const input=$('#playerSearch');let timer;input?.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>{state.playerSearch=input.value;renderPlayers()},180)});$('#playerTeamFilter')?.addEventListener('change',e=>{state.playerTeam=e.target.value;afterNativePicker(e.target,renderPlayers,'.player-filter-bar')});$('#playerFilterReset')?.addEventListener('click',()=>{state.playerTeam='';state.playerSearch='';renderPlayers()});$$('[data-player-id]').forEach(el=>{el.addEventListener('click',()=>openPlayerDetail(el.dataset.playerId));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPlayerDetail(el.dataset.playerId)}})})}
-  function openPlayerDetail(id){const p=playerById(id);if(!p)return;state.selectedPlayer=id;const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='VERSENYSPORT · JÁTÉKOS';title.textContent=p.displayName||p.name||'Játékos';body.innerHTML=`<div class="entity-hero">${avatarHtml(p,'large')}<div><b>${esc(p.teamName||'Nincs aktív csapat')}</b><span>${esc(p.position||'–')}${p.jerseyNo!=null?' · #'+esc(p.jerseyNo):''}</span></div></div><div class="detail-grid">${detailPair('Email',p.email)}${detailPair('Igazolási szám',p.licenseNo)}${detailPair('Sportorvosi',p.medicalValidUntil?fmtDate(p.medicalValidUntil):'–',medicalClass(p.medicalValidUntil))}${detailPair('Tagság kezdete',p.membershipStartsOn?fmtDate(p.membershipStartsOn):'–')}${detailPair('Mezméret',p.jerseySize)}${detailPair('Nadrágméret',p.shortsSize)}${detailPair('Fiók',p.hasAccount?'Aktív':'Nincs összekapcsolva')}${detailPair('Státusz',p.active===false?'Inaktív':'Aktív')}</div><div class="attendance-detail"><div><small>Edzésjelenlét</small><b>${esc(p.trainingPresent??0)}/${esc(p.trainingMarked??0)}</b><span>${esc(pctText(p.trainingPresent,p.trainingMarked))}</span></div><div><small>Meccsjelenlét</small><b>${esc(p.matchPresent??0)}/${esc(p.matchMarked??0)}</b><span>${esc(pctText(p.matchPresent,p.matchMarked))}</span></div></div><div class="read-only-note">A korábbi Manager adatstruktúrája megmarad; a jelenléti adatok szerkesztése külön write-fázis.</div>`;ccOpenDialogStable_(d)}
+  const HU_NAME_COLLATOR=new Intl.Collator('hu-HU',{sensitivity:'variant',numeric:true,ignorePunctuation:true});
+  function playerSurnameKey_(value){
+    const parts=text(value).replace(/\s+/g,' ').split(' ').filter(Boolean);
+    while(parts.length>1&&/^(dr\.?|ifj\.?|id\.?|özv\.?)$/i.test(parts[0]))parts.shift();
+    return parts[0]||'';
+  }
+  function comparePlayersBySurname_(a,b){
+    const an=text(a?.name||a?.displayName),bn=text(b?.name||b?.displayName);
+    const bySurname=HU_NAME_COLLATOR.compare(playerSurnameKey_(an),playerSurnameKey_(bn));
+    return bySurname||HU_NAME_COLLATOR.compare(an,bn)||HU_NAME_COLLATOR.compare(text(a?.email),text(b?.email));
+  }
+  function playerTeam_(p){return teamById(text(p?.teamId||p?.team_id))||state.teams.find(t=>text(t.name)===text(p?.teamName))||null}
+  function playerRows(){
+    const q=state.playerSearch.toLocaleLowerCase('hu-HU');
+    return state.players.filter(p=>{
+      if(state.playerTeam&&text(p.teamId||p.team_id)!==state.playerTeam)return false;
+      if(q&&!`${p.name||''} ${p.displayName||''} ${p.email||''} ${p.licenseNo||''} ${p.position||''}`.toLocaleLowerCase('hu-HU').includes(q))return false;
+      return true;
+    }).slice().sort(comparePlayersBySurname_);
+  }
+  function playerMetaPills_(p){
+    const bits=[];
+    if(text(p.position))bits.push(text(p.position));
+    if(p.jerseyNo!==null&&p.jerseyNo!==undefined&&text(p.jerseyNo)!=='')bits.push('#'+text(p.jerseyNo));
+    if(text(p.jerseySize))bits.push('mez '+text(p.jerseySize));
+    if(text(p.shortsSize))bits.push('nadrág '+text(p.shortsSize));
+    if(text(p.displayName)&&text(p.displayName)!==text(p.name))bits.push('név: '+text(p.displayName));
+    return bits;
+  }
+  function playerLegacyRow_(p){
+    const team=playerTeam_(p),color=team?.color||'#b9b4aa',bits=playerMetaPills_(p),canEdit=canAnyAction('competition.players','edit');
+    const medical=p.medicalValidUntil?fmtDate(p.medicalValidUntil):'–';
+    return `<article class="legacy-player-row ${p.active===false?'is-inactive':''}" style="--player-team-color:${esc(color)}">
+      <button class="legacy-player-main" type="button" data-player-open="${esc(p.playerId)}">
+        ${avatarHtml(p,'table')}
+        <span class="legacy-player-copy">
+          <b>${esc(p.name||p.displayName||'–')}</b>
+          <small>${esc(p.email||'')}</small>
+          <span class="legacy-player-pills">${bits.map(x=>`<i>${esc(x)}</i>`).join('')}${p.active===false?'<i class="inactive">INAKTÍV</i>':''}</span>
+        </span>
+      </button>
+      <div class="legacy-player-membership">
+        <b>${esc(p.teamName||team?.name||'Nincs aktív csapat')}</b>
+        <small>${p.membershipStartsOn?esc(fmtDate(p.membershipStartsOn))+' óta':'Nincs aktív tagság'}</small>
+        <span>Igazolás: <b>${esc(p.licenseNo||'–')}</b> · Sportorvosi: <b>${esc(medical)}</b></span>
+      </div>
+      <div class="legacy-player-attendance">
+        <span>Edzés <b>${esc(p.trainingPresent??0)}/${esc(p.trainingMarked??0)}</b> · ${esc(pctText(p.trainingPresent,p.trainingMarked))}</span>
+        <span>Meccs <b>${esc(p.matchPresent??0)}/${esc(p.matchMarked??0)}</b> · ${esc(pctText(p.matchPresent,p.matchMarked))}</span>
+      </div>
+      <div class="legacy-player-actions">
+        ${canEdit?`<button class="button compact" type="button" data-player-edit="${esc(p.playerId)}">Szerkesztés</button><button class="button compact" type="button" data-player-transfer="${esc(p.playerId)}">Csapatváltás</button>`:`<button class="button compact" type="button" data-player-open="${esc(p.playerId)}">Részletek</button>`}
+      </div>
+    </article>`;
+  }
+  function playerTeamTabs_(){
+    const all=`<button class="legacy-player-team-tab ${state.playerTeam?'':'active'}" type="button" data-player-team="">Mind</button>`;
+    return all+state.teams.filter(t=>t.active!==false).map(t=>`<button class="legacy-player-team-tab ${text(state.playerTeam)===text(t.id)?'active':''}" style="--tab-team-color:${esc(t.color||'#f7b700')}" type="button" data-player-team="${esc(t.id)}">${esc(t.name)}</button>`).join('');
+  }
+  function bindPlayerListActions_(){
+    const input=$('#playerSearch');let timer;
+    input?.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>{state.playerSearch=input.value;renderPlayers()},150)});
+    $$('[data-player-team]').forEach(b=>b.addEventListener('click',()=>{state.playerTeam=text(b.dataset.playerTeam);renderPlayers()}));
+    $('#playerFilterReset')?.addEventListener('click',()=>{state.playerTeam='';state.playerSearch='';renderPlayers()});
+    $$('[data-player-open]').forEach(el=>el.addEventListener('click',()=>openPlayerDetail(el.dataset.playerOpen,'overview')));
+    $$('[data-player-edit]').forEach(el=>el.addEventListener('click',()=>openPlayerDetail(el.dataset.playerEdit,'edit')));
+    $$('[data-player-transfer]').forEach(el=>el.addEventListener('click',()=>openPlayerDetail(el.dataset.playerTransfer,'transfer')));
+  }
+  function renderPlayers(){
+    const rows=playerRows(),active=!!state.playerTeam||!!state.playerSearch,canEdit=canAnyAction('competition.players','edit');
+    $('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Játékosok</h2><p>Teljes sportolói adatbázis · vezetéknév szerinti ABC · csapatszínezés · tényleges jelenlét.</p></div>${canEdit?'':'<span class="read-only-badge">MEGTEKINTÉS</span>'}</div>
+      <div class="legacy-player-toolbar">
+        <input id="playerSearch" class="legacy-player-search" type="search" value="${esc(state.playerSearch)}" placeholder="Keresés név, email vagy igazolási szám alapján…" autocomplete="off">
+        <div class="legacy-player-team-tabs" aria-label="Csapatszűrő">${playerTeamTabs_()}</div>
+        <button class="filter-reset" id="playerFilterReset" ${active?'':'hidden'} type="button">Szűrők törlése</button>
+      </div>
+      <article class="panel legacy-player-surface">
+        <div class="legacy-player-summary"><span><b>${rows.length}</b> játékos</span><span>Vezetéknév szerint A–Z</span></div>
+        <div class="legacy-player-list">${rows.map(playerLegacyRow_).join('')||emptyInline('Nincs a szűrésnek megfelelő játékos.')}</div>
+      </article>`;
+    bindPlayerListActions_();
+  }
+  function playerOverviewHtml_(p){
+    return `<div class="player-detail-tabs"><button class="active" type="button" data-player-detail-tab="overview">Áttekintés</button>${canAnyAction('competition.players','edit')?'<button type="button" data-player-detail-tab="edit">Szerkesztés</button><button type="button" data-player-detail-tab="transfer">Csapatváltás</button>':''}</div>
+      <div class="entity-hero">${avatarHtml(p,'large')}<div><b>${esc(p.name||p.displayName||'Játékos')}</b><span>${esc(p.teamName||'Nincs aktív csapat')}${p.position?' · '+esc(p.position):''}${p.jerseyNo!=null?' · #'+esc(p.jerseyNo):''}</span></div></div>
+      <div class="detail-grid">${detailPair('Megjelenési név',p.displayName||'–')}${detailPair('Email',p.email)}${detailPair('Igazolási szám',p.licenseNo)}${detailPair('Sportorvosi',p.medicalValidUntil?fmtDate(p.medicalValidUntil):'–')}${detailPair('Tagság kezdete',p.membershipStartsOn?fmtDate(p.membershipStartsOn):'–')}${detailPair('Mezméret',p.jerseySize)}${detailPair('Nadrágméret',p.shortsSize)}${detailPair('Fiók',p.hasAccount?'Aktív':'Nincs összekapcsolva')}${detailPair('Státusz',p.active===false?'Inaktív':'Aktív')}</div>
+      <div class="attendance-detail"><div><small>Edzésjelenlét</small><b>${esc(p.trainingPresent??0)}/${esc(p.trainingMarked??0)}</b><span>${esc(pctText(p.trainingPresent,p.trainingMarked))}</span></div><div><small>Meccsjelenlét</small><b>${esc(p.matchPresent??0)}/${esc(p.matchMarked??0)}</b><span>${esc(pctText(p.matchPresent,p.matchMarked))}</span></div></div>`;
+  }
+  function positionOptions_(value){
+    const values=['Feladó','Átló','4-es ütő','Szélső','Liberó','Center'];
+    if(text(value)&&!values.includes(text(value)))values.unshift(text(value));
+    return '<option value="">Nincs megadva</option>'+values.map(v=>`<option value="${esc(v)}" ${text(value)===v?'selected':''}>${esc(v)}</option>`).join('');
+  }
+  function sizeOptions_(value){
+    const values=['XS','S','M','L','XL','XXL','XXXL'];
+    if(text(value)&&!values.includes(text(value).toUpperCase()))values.unshift(text(value));
+    return '<option value="">Nincs megadva</option>'+values.map(v=>`<option value="${esc(v)}" ${text(value).toUpperCase()===String(v).toUpperCase()?'selected':''}>${esc(v)}</option>`).join('');
+  }
+  function playerEditHtml_(p){
+    return `<div class="player-detail-tabs"><button type="button" data-player-detail-tab="overview">Áttekintés</button><button class="active" type="button" data-player-detail-tab="edit">Szerkesztés</button><button type="button" data-player-detail-tab="transfer">Csapatváltás</button></div>
+      <form class="manager-player-edit-form" id="managerPlayerEditForm">
+        <label class="full"><span>Teljes név</span><input id="editPlayerName" value="${esc(p.name||'')}" autocomplete="off" required></label>
+        <label><span>Megjelenési név</span><input id="editPlayerDisplayName" value="${esc(p.displayName||'')}" autocomplete="off"></label>
+        <label><span>Email</span><input value="${esc(p.email||'')}" disabled><small>Az Auth-fiók miatt itt most nem módosítható.</small></label>
+        <label><span>Poszt</span><select id="editPlayerPosition">${positionOptions_(p.position)}</select></label>
+        <label><span>Mezszám</span><input id="editPlayerJerseyNo" inputmode="numeric" value="${esc(p.jerseyNo??'')}"></label>
+        <label><span>Igazolási szám</span><input id="editPlayerLicenseNo" value="${esc(p.licenseNo||'')}"></label>
+        <label><span>Sportorvosi érvényes</span><input id="editPlayerMedical" type="date" value="${esc(text(p.medicalValidUntil).slice(0,10))}"><small>Csak kézi Mentés írja ezt az adatot.</small></label>
+        <label><span>Mezméret</span><select id="editPlayerJerseySize">${sizeOptions_(p.jerseySize)}</select></label>
+        <label><span>Nadrágméret</span><select id="editPlayerShortsSize">${sizeOptions_(p.shortsSize)}</select></label>
+        <div class="manager-player-form-actions full"><button class="button" type="button" data-player-detail-tab="overview">Mégse</button><button class="button primary" id="savePlayerEditBtn" type="submit">Mentés</button></div>
+      </form>`;
+  }
+  function playerTransferHtml_(p){
+    const options=state.teams.filter(t=>t.active!==false&&text(t.id)!==text(p.teamId||p.team_id)).map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
+    return `<div class="player-detail-tabs"><button type="button" data-player-detail-tab="overview">Áttekintés</button><button type="button" data-player-detail-tab="edit">Szerkesztés</button><button class="active" type="button" data-player-detail-tab="transfer">Csapatváltás</button></div>
+      <div class="manager-player-transfer-head"><small>Jelenlegi csapat</small><b>${esc(p.teamName||'Nincs aktív csapat')}</b></div>
+      <form class="manager-player-edit-form" id="managerPlayerTransferForm">
+        <label class="full"><span>Új csapat</span><select id="transferPlayerTeam" required><option value="">Válassz…</option>${options}</select></label>
+        <label class="full"><span>Csapatváltás dátuma</span><input id="transferPlayerDate" type="date" value="${esc(localDateKey(new Date()))}" required></label>
+        <div class="manager-player-form-note full">A korábbi aktív csapattagság a váltást megelőző nappal lezárul. A művelet nem küld automatikus emailt vagy push értesítést.</div>
+        <div class="manager-player-form-actions full"><button class="button" type="button" data-player-detail-tab="overview">Mégse</button><button class="button primary" type="submit">Csapatváltás mentése</button></div>
+      </form>`;
+  }
+  function bindPlayerDetail_(p,mode){
+    $$('[data-player-detail-tab]').forEach(b=>b.addEventListener('click',()=>openPlayerDetail(p.playerId,b.dataset.playerDetailTab||'overview')));
+    if(mode==='edit')$('#managerPlayerEditForm')?.addEventListener('submit',async e=>{e.preventDefault();await savePlayerEdit_(p)});
+    if(mode==='transfer')$('#managerPlayerTransferForm')?.addEventListener('submit',async e=>{e.preventDefault();await savePlayerTransfer_(p)});
+  }
+  async function savePlayerEdit_(p){
+    if(!canAnyAction('competition.players','edit'))return;
+    const btn=$('#savePlayerEditBtn');if(btn)btn.disabled=true;
+    const payload={playerId:p.playerId,name:text($('#editPlayerName')?.value),displayName:text($('#editPlayerDisplayName')?.value),email:text(p.email),position:text($('#editPlayerPosition')?.value),jerseyNo:text($('#editPlayerJerseyNo')?.value),licenseNo:text($('#editPlayerLicenseNo')?.value),medicalValidUntil:text($('#editPlayerMedical')?.value),jerseySize:text($('#editPlayerJerseySize')?.value),shortsSize:text($('#editPlayerShortsSize')?.value)};
+    if(!payload.name){status('A teljes név kötelező.','error');if(btn)btn.disabled=false;return}
+    if(payload.jerseyNo&&!/^\d+$/.test(payload.jerseyNo)){status('A mezszám csak szám lehet.','error');if(btn)btn.disabled=false;return}
+    try{status('Játékos mentése…');await rpc('cc_manager_player_update_v1',{p_payload:payload});await loadPlayers();renderPlayers();openPlayerDetail(p.playerId,'overview');status('Játékos adatai mentve.','success')}catch(err){console.error(err);status(err.message||'A játékos mentése sikertelen.','error');if(btn)btn.disabled=false}
+  }
+  async function savePlayerTransfer_(p){
+    if(!canAnyAction('competition.players','edit'))return;
+    const teamId=text($('#transferPlayerTeam')?.value),date=text($('#transferPlayerDate')?.value);if(!teamId||!date){status('Válassz csapatot és dátumot.','error');return}
+    try{status('Csapatváltás mentése…');await rpc('cc_manager_player_transfer_v1',{p_player_id:p.playerId,p_team_id:teamId,p_starts_on:date});await Promise.all([loadPlayers(),loadTeams()]);renderPlayers();openPlayerDetail(p.playerId,'overview');status('Csapatváltás mentve.','success')}catch(err){console.error(err);status(err.message||'A csapatváltás mentése sikertelen.','error')}
+  }
+  function openPlayerDetail(id,mode='overview'){
+    const p=playerById(id);if(!p)return;state.selectedPlayer=id;
+    if(mode!=='overview'&&!canAnyAction('competition.players','edit'))mode='overview';
+    const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='VERSENYSPORT · JÁTÉKOS';title.textContent=p.name||p.displayName||'Játékos';
+    body.innerHTML=mode==='edit'?playerEditHtml_(p):mode==='transfer'?playerTransferHtml_(p):playerOverviewHtml_(p);
+    bindPlayerDetail_(p,mode);ccOpenDialogStable_(d);
+  }
 
   function startOfWeek(d){const x=new Date(d);x.setHours(0,0,0,0);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);return x}
   function calendarWindow(){const a=new Date(state.calendarAnchor);a.setHours(0,0,0,0);if(state.calendarMode==='day'){const to=new Date(a);to.setDate(to.getDate()+1);return{from:a,to}}if(state.calendarMode==='month'){return{from:new Date(a.getFullYear(),a.getMonth(),1),to:new Date(a.getFullYear(),a.getMonth()+1,1)}}if(state.calendarMode==='season'){const y=a.getMonth()>=7?a.getFullYear():a.getFullYear()-1;return{from:new Date(y,7,1),to:new Date(y+1,7,1)}}const from=startOfWeek(a),to=new Date(from);to.setDate(to.getDate()+7);return{from,to}}
