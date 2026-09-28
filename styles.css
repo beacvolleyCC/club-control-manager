@@ -922,3 +922,190 @@ html:not(.cc-keyboard-nav) .filter-toggle:focus-visible{
 .calendar-event.mass-calendar-event{width:100%;border:0;background:transparent;color:inherit;text-align:left;grid-template-columns:52px 6px minmax(0,1fr) auto;cursor:pointer}
 @media(max-width:900px){.mass-athlete-header{display:none}.mass-athlete-row{grid-template-columns:minmax(0,1fr) minmax(120px,.5fr) 20px}.mass-athlete-row>span:nth-child(3),.mass-athlete-row>span:nth-child(4),.mass-athlete-row>span:nth-child(5){grid-column:1/3}.mass-directory-toolbar{grid-template-columns:1fr 1fr}.mass-directory-toolbar>input{grid-column:1/-1}.mass-directory-toolbar .filter-reset{grid-column:1/-1;justify-self:end}.mass-pass-header{display:none}.mass-pass-row{grid-template-columns:1fr 1fr}.mass-pass-row>span:nth-child(2){text-align:right}.mass-pass-row>span:nth-child(n+3){padding-top:5px;border-top:1px solid color-mix(in srgb,var(--line) 65%,transparent)}.mass-directory-toolbar.passes{grid-template-columns:1fr 160px auto}}
 @media(max-width:600px){.mass-directory-toolbar,.mass-directory-toolbar.passes{grid-template-columns:1fr}.mass-directory-toolbar>input,.mass-directory-toolbar .filter-reset{grid-column:auto}.mass-athlete-row{grid-template-columns:1fr 20px}.mass-athlete-row>span:nth-child(n+2){grid-column:1}.mass-athlete-row>i{grid-column:2;grid-row:1/3}.mass-pass-row{grid-template-columns:1fr}.mass-pass-row>span:nth-child(2){text-align:left}.mass-pass-row>span:nth-child(n+2){padding-top:5px;border-top:1px solid color-mix(in srgb,var(--line) 65%,transparent)}}
+
+
+/* =========================================================
+   V0.5.0C — TÖMEGSPORT JELENLÉTI KÁRTYÁK / SLIDER BASE
+   GitHub-only UI foundation. No attendance writes.
+   ========================================================= */
+.mass-attendance-summary{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.mass-attendance-card-list{
+  display:grid;
+  gap:9px;
+}
+.mass-attendance-card{
+  position:relative;
+  overflow:hidden;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--card);
+  box-shadow:0 1px 0 rgba(0,0,0,.025);
+}
+.mass-attendance-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--mass-person-color,#f7b700) 11%,transparent) 0%,color-mix(in srgb,var(--mass-person-color,#f7b700) 3%,transparent) 38%,transparent 74%);
+}
+.mass-attendance-card>*{position:relative;z-index:1}
+.mass-attendance-card-head{
+  display:grid;
+  grid-template-columns:5px minmax(0,1fr) auto;
+  gap:9px;
+  align-items:center;
+}
+.mass-attendance-person-mark{
+  align-self:stretch;
+  min-height:40px;
+  border-radius:999px;
+  background:var(--mass-person-color,#f7b700);
+}
+.mass-attendance-person-copy{min-width:0}
+.mass-attendance-person-copy b{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:850;
+}
+.mass-attendance-person-copy small{
+  display:block;
+  margin-top:3px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--muted);
+  font-size:8.5px;
+}
+.mass-attendance-state-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:27px;
+  padding:0 9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:8px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.mass-attendance-state-badge.is-present{background:#dcefe0;border-color:#abd2b4;color:#174b27}
+.mass-attendance-state-badge.is-noshow{background:#f7dedd;border-color:#e1aaa7;color:#6b211d}
+.mass-attendance-state-badge.is-pending{background:var(--soft);color:var(--muted)}
+body.dark .mass-attendance-state-badge.is-present{background:#1d4d2d;border-color:#36704a;color:#e8fff0}
+body.dark .mass-attendance-state-badge.is-noshow{background:#5d2926;border-color:#86413c;color:#fff1ef}
+.mass-attendance-card-meta{
+  display:grid;
+  grid-template-columns:.75fr 1fr 1.15fr;
+  gap:7px;
+  margin-top:10px;
+}
+.mass-attendance-card-meta>span{
+  min-width:0;
+  padding:8px 9px;
+  border:1px solid color-mix(in srgb,var(--line) 78%,transparent);
+  border-radius:10px;
+  background:color-mix(in srgb,var(--soft) 74%,transparent);
+}
+.mass-attendance-card-meta small,.mass-attendance-card-meta b,.mass-attendance-card-meta i{display:block;min-width:0}
+.mass-attendance-card-meta small{color:var(--muted);font-size:7px;font-weight:650;text-transform:uppercase;letter-spacing:.04em}
+.mass-attendance-card-meta b{margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;font-weight:800}
+.mass-attendance-card-meta i{margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:7.5px;font-style:normal}
+.mass-attendance-note{margin-top:8px;padding:7px 9px;border-radius:9px;background:var(--soft);color:var(--muted);font-size:8px}
+.mass-attendance-control{
+  --attendance-pos:50%;
+  --attendance-accent:#aaa59b;
+  margin-top:11px;
+  padding:9px 10px 8px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--soft);
+}
+.mass-attendance-control.is-noshow{--attendance-pos:4%;--attendance-accent:#c45a54;background:color-mix(in srgb,#d96059 9%,var(--soft))}
+.mass-attendance-control.is-present{--attendance-pos:96%;--attendance-accent:#4c9a61;background:color-mix(in srgb,#55a86c 10%,var(--soft))}
+.mass-attendance-slider-labels{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:8px;
+  align-items:center;
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:650;
+}
+.mass-attendance-slider-labels span:last-child{text-align:right}
+.mass-attendance-slider-labels b{color:var(--text);font-size:8px;font-weight:850;text-align:center}
+.mass-attendance-slider-track{
+  position:relative;
+  display:block;
+  height:12px;
+  margin-top:8px;
+  border:1px solid color-mix(in srgb,var(--attendance-accent) 45%,var(--line));
+  border-radius:999px;
+  background:color-mix(in srgb,var(--card) 78%,var(--attendance-accent) 22%);
+}
+.mass-attendance-slider-progress{
+  position:absolute;
+  inset:0 auto 0 0;
+  width:var(--attendance-pos);
+  border-radius:inherit;
+  background:color-mix(in srgb,var(--attendance-accent) 32%,transparent);
+}
+.mass-attendance-slider-thumb{
+  position:absolute;
+  top:50%;
+  left:var(--attendance-pos);
+  width:26px;
+  height:26px;
+  border:2px solid color-mix(in srgb,var(--attendance-accent) 52%,#fff);
+  border-radius:50%;
+  background:var(--card);
+  box-shadow:0 2px 8px rgba(0,0,0,.18);
+  transform:translate(-50%,-50%);
+}
+.mass-attendance-readonly-note{
+  display:block;
+  margin-top:8px;
+  color:var(--muted);
+  font-size:7px;
+  line-height:1.35;
+  text-align:center;
+}
+.mass-wait-card-list{display:grid;gap:7px}
+.mass-wait-card{
+  display:grid;
+  grid-template-columns:minmax(180px,1.25fr) minmax(120px,.7fr) minmax(135px,.8fr);
+  gap:10px;
+  align-items:center;
+  padding:10px 11px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--card);
+}
+.mass-wait-card>div,.mass-wait-card>span{min-width:0}
+.mass-wait-card b,.mass-wait-card small,.mass-wait-card i{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mass-wait-card b{font-size:9px;font-weight:800}.mass-wait-card small{margin-top:2px;color:var(--muted);font-size:7.5px}.mass-wait-card i{margin-top:2px;color:var(--muted);font-size:7px;font-style:normal}
+@media(max-width:760px){
+  .mass-attendance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mass-attendance-card{padding:10px}
+  .mass-attendance-card-head{grid-template-columns:4px minmax(0,1fr)}
+  .mass-attendance-state-badge{grid-column:2;justify-self:start;margin-top:2px}
+  .mass-attendance-card-meta{grid-template-columns:1fr 1fr}
+  .mass-attendance-card-meta>span:last-child{grid-column:1/-1}
+  .mass-attendance-slider-labels{font-size:7px}
+  .mass-attendance-slider-labels b{font-size:7.5px}
+  .mass-wait-card{grid-template-columns:1fr 1fr}
+  .mass-wait-card>span:last-child{grid-column:1/-1}
+}
+@media(max-width:430px){
+  .mass-attendance-card-meta{grid-template-columns:1fr}
+  .mass-attendance-card-meta>span:last-child{grid-column:auto}
+  .mass-attendance-slider-labels{grid-template-columns:1fr 1fr}
+  .mass-attendance-slider-labels b{grid-column:1/-1;grid-row:1;text-align:center}
+  .mass-attendance-slider-labels span{grid-row:2}.mass-attendance-slider-labels span:last-child{text-align:right}
+  .mass-wait-card{grid-template-columns:1fr}
+  .mass-wait-card>span:last-child{grid-column:auto}
+}

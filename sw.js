@@ -1,4 +1,4 @@
-const CACHE='cc-manager-v0-5-0b-mass-core-parity-v1';
+const CACHE='cc-manager-v0-5-0c-mass-attendance-card-base';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest?v=0.4.2f3',
   './assets/player-animals.webp','./icons/icon-192.png?v=manager-double-ring-v1','./icons/icon-512.png?v=manager-double-ring-v1','./icons/apple-touch-icon.png?v=manager-double-ring-v1'

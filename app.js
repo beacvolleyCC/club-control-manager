@@ -393,8 +393,70 @@
     $('#massTrainingsRefresh')?.addEventListener('click',async()=>{try{status('Tömegsport edzések frissítése…');await loadMassTrainings();renderMassTrainings();status('Frissítve.','success')}catch(err){state.massLoadError=text(err?.message||'A Tömegsport modul nem tölthető be.');renderMassTrainings();status(state.massLoadError,'error')}});bindMassLegacyRows();
   }
 
-  function massPersonRow(r,kind='booking'){const attendance=text(r.attendance),sub=safeDate(r.submittedAt);return `<div class="mass-person-row"><div><b>${esc(r.name||'Névtelen')}</b><small>${esc(r.email||'–')}</small></div><div><b>${esc(r.passNumber||'–')}</b><small>${esc(r.passStatus||'')}</small></div><div><b>${esc(kind==='booking'?(attendance||'NINCS RÖGZÍTVE'):(r.status||'VÁRAKOZIK'))}</b><small>${sub?esc(fmtDate(sub)+' '+fmtTime(sub)):''}</small></div></div>`}
-  async function openMassEventDetail(eventId){const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if(!d||!body||!title)return;if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='TÖMEGSPORT · EDZÉS';title.textContent='Tömegsport edzés';body.innerHTML='<div class="loading-inline">Edzés betöltése…</div>';ccOpenDialogStable_(d);try{const data=await loadMassEventDetail(eventId,{force:true}),e=data?.event||{};const bookings=Array.isArray(data?.bookings)?data.bookings:[],wait=Array.isArray(data?.waitlist)?data.waitlist:[];title.textContent=e.level||'Edzés';body.innerHTML=`<div class="entity-hero event-entity-hero"><span class="event-detail-mark" style="background:${esc(e.color||'#f7b700')}"></span><div><b>${esc(e.level||'Edzés')}</b><span>${esc(fmtDate(e.startsAt))} · ${esc(fmtTime(e.startsAt))} · ${esc(e.court||'Pálya –')}</span></div></div><div class="attendance-detail"><div><small>Jelentkező</small><b>${bookings.length}</b><span>fő</span></div><div><small>Várólista</small><b>${wait.length}</b><span>fő</span></div><div><small>Kapacitás</small><b>${num(e.capacity)}</b><span>fő</span></div></div><div class="panel-subhead"><div><h4>Jelentkezők</h4><p>Aktív foglalások és rögzített jelenlét.</p></div></div><div class="mass-person-list">${bookings.map(r=>massPersonRow(r,'booking')).join('')||emptyInline('Nincs aktív jelentkező.')}</div><div class="panel-subhead"><div><h4>Várólista</h4><p>Várakozó és felajánlott helyek.</p></div></div><div class="mass-person-list">${wait.map(r=>massPersonRow(r,'wait')).join('')||emptyInline('A várólista üres.')}</div>`}catch(err){console.error(err);body.innerHTML=`<div class="migration-note error"><b>A részletes Tömegsport nézethez MGR004 szükséges.</b><span>${esc(err.message||'Betöltési hiba')}</span></div>`}}
+
+  function massAttendanceModel_(value){
+    const raw=text(value).toLocaleUpperCase('hu-HU');
+    if(raw==='MEGJELENT')return {key:'present',label:'Megjelent',short:'Jelen',value:1};
+    if(raw==='NEM JELENT MEG')return {key:'noshow',label:'Nem jelent meg',short:'Hiányzott',value:-1};
+    return {key:'pending',label:'Nincs rögzítve',short:'Nincs rögzítve',value:0};
+  }
+  function massAttendanceSliderBase_(value){
+    const model=massAttendanceModel_(value);
+    return `<div class="mass-attendance-control is-${esc(model.key)}" role="img" aria-label="Jelenlét: ${esc(model.label)}">
+      <div class="mass-attendance-slider-labels" aria-hidden="true"><span>Nem jelent meg</span><b>${esc(model.short)}</b><span>Megjelent</span></div>
+      <div class="mass-attendance-slider-track" aria-hidden="true"><span class="mass-attendance-slider-progress"></span><i class="mass-attendance-slider-thumb"></i></div>
+      <small class="mass-attendance-readonly-note">Jelenleg megtekintési mód · a slider mentése később kapcsolható be.</small>
+    </div>`;
+  }
+  function massPersonSort_(a,b){
+    return text(a?.name||a?.email).localeCompare(text(b?.name||b?.email),'hu-HU',{sensitivity:'base',numeric:true});
+  }
+  function massBookingCard_(r){
+    const attendance=text(r.attendance)||'NINCS RÖGZÍTVE',sub=safeDate(r.submittedAt),level=text(r.athleteLevel||r.extraLevel||''),color=massLevelColor({level:level||'Edzés'});
+    const bookingStatus=text(r.bookingStatus||r.status)||'AKTÍV';
+    return `<article class="mass-attendance-card" style="--mass-person-color:${esc(color)}">
+      <div class="mass-attendance-card-head">
+        <span class="mass-attendance-person-mark" aria-hidden="true"></span>
+        <div class="mass-attendance-person-copy"><b>${esc(r.name||'Névtelen')}</b><small>${esc(r.email||'–')}</small></div>
+        <span class="mass-attendance-state-badge is-${esc(massAttendanceModel_(attendance).key)}">${esc(massAttendanceModel_(attendance).label)}</span>
+      </div>
+      <div class="mass-attendance-card-meta">
+        <span><small>Szint</small><b>${esc(level||'–')}</b></span>
+        <span><small>Bérlet</small><b>${esc(r.passNumber||'–')}</b><i>${esc(r.passStatus||'')}</i></span>
+        <span><small>Jelentkezés</small><b>${sub?esc(fmtDate(sub)+' '+fmtTime(sub)):'–'}</b><i>${esc(bookingStatus)}</i></span>
+      </div>
+      ${r.note?`<div class="mass-attendance-note">${esc(r.note)}</div>`:''}
+      ${massAttendanceSliderBase_(attendance)}
+    </article>`;
+  }
+  function massWaitlistCard_(r){
+    const sub=safeDate(r.submittedAt),statusValue=text(r.status||r.waitlistStatus)||'VÁRAKOZIK';
+    return `<article class="mass-wait-card">
+      <div><b>${esc(r.name||'Névtelen')}</b><small>${esc(r.email||'–')}</small></div>
+      <span><small>Bérlet</small><b>${esc(r.passNumber||'–')}</b><i>${esc(r.passStatus||'')}</i></span>
+      <span><small>Állapot</small><b>${esc(statusValue)}</b><i>${sub?esc(fmtDate(sub)+' '+fmtTime(sub)):''}</i></span>
+    </article>`;
+  }
+  async function openMassEventDetail(eventId){
+    const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if(!d||!body||!title)return;
+    if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='TÖMEGSPORT · EDZÉS';
+    title.textContent='Tömegsport edzés';body.innerHTML='<div class="loading-inline">Edzés betöltése…</div>';ccOpenDialogStable_(d);
+    try{
+      const data=await loadMassEventDetail(eventId,{force:true}),e=data?.event||{};
+      const bookings=(Array.isArray(data?.bookings)?data.bookings:[]).slice().sort(massPersonSort_);
+      const wait=(Array.isArray(data?.waitlist)?data.waitlist:[]).slice().sort(massPersonSort_);
+      const present=bookings.filter(r=>massAttendanceModel_(r.attendance).key==='present').length;
+      const noshow=bookings.filter(r=>massAttendanceModel_(r.attendance).key==='noshow').length;
+      const pending=Math.max(0,bookings.length-present-noshow);
+      title.textContent=e.level||'Edzés';
+      body.innerHTML=`<div class="entity-hero event-entity-hero"><span class="event-detail-mark" style="background:${esc(e.color||'#f7b700')}"></span><div><b>${esc(e.level||'Edzés')}</b><span>${esc(fmtDate(e.startsAt))} · ${esc(fmtTime(e.startsAt))} · ${esc(e.court||'Pálya –')}</span></div></div>
+        <div class="attendance-detail mass-attendance-summary"><div><small>Jelentkező</small><b>${bookings.length}</b><span>fő</span></div><div><small>Megjelent</small><b>${present}</b><span>fő</span></div><div><small>Nincs rögzítve</small><b>${pending}</b><span>fő</span></div><div><small>Nem jelent meg</small><b>${noshow}</b><span>fő</span></div></div>
+        <div class="panel-subhead mass-attendance-heading"><div><h4>Jelenlét</h4><p>Kártyás névsor · a meglévő jelenléti állapotokkal. A slider mentése ebben a GitHub-only alapverzióban még nincs bekötve.</p></div></div>
+        <div class="mass-attendance-card-list">${bookings.map(massBookingCard_).join('')||emptyInline('Nincs aktív jelentkező.')}</div>
+        <div class="panel-subhead"><div><h4>Várólista</h4><p>Várakozó és felajánlott helyek, külön a jelenléti névsortól.</p></div></div>
+        <div class="mass-wait-card-list">${wait.map(massWaitlistCard_).join('')||emptyInline('A várólista üres.')}</div>`;
+    }catch(err){console.error(err);body.innerHTML=`<div class="migration-note error"><b>A részletes Tömegsport nézet nem tölthető be.</b><span>${esc(err.message||'Betöltési hiba')}</span></div>`}
+  }
   async function toggleMassRegistrationGate(eventId,closeToWaitlist){
     if(!canAction('mass.trainings','edit')||state.massActionBusy)return;
     const e=(state.massTrainings||[]).find(x=>text(x.eventId)===text(eventId));if(!e)return;
