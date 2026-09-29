@@ -925,8 +925,8 @@ html:not(.cc-keyboard-nav) .filter-toggle:focus-visible{
 
 
 /* =========================================================
-   V0.5.0C — TÖMEGSPORT JELENLÉTI KÁRTYÁK / SLIDER BASE
-   GitHub-only UI foundation. No attendance writes.
+   V0.5.0D — TÖMEGSPORT JELENLÉTI KÁRTYÁK / MŰKÖDŐ SLIDER
+   Native range interaction + MGR009 permission-scoped attendance write.
    ========================================================= */
 .mass-attendance-summary{
   grid-template-columns:repeat(4,minmax(0,1fr));
@@ -1038,37 +1038,58 @@ body.dark .mass-attendance-state-badge.is-noshow{background:#5d2926;border-color
 }
 .mass-attendance-slider-labels span:last-child{text-align:right}
 .mass-attendance-slider-labels b{color:var(--text);font-size:8px;font-weight:850;text-align:center}
-.mass-attendance-slider-track{
-  position:relative;
-  display:block;
+.mass-attendance-range{
+  --range-track:color-mix(in srgb,var(--attendance-accent) 34%,var(--card));
+  appearance:none;
+  -webkit-appearance:none;
+  width:100%;
+  height:38px;
+  margin:4px 0 0;
+  padding:0 4px;
+  border:0;
+  outline:0;
+  background:transparent;
+  cursor:grab;
+  touch-action:pan-y;
+}
+.mass-attendance-range:active{cursor:grabbing}
+.mass-attendance-range::-webkit-slider-runnable-track{
   height:12px;
-  margin-top:8px;
   border:1px solid color-mix(in srgb,var(--attendance-accent) 45%,var(--line));
   border-radius:999px;
-  background:color-mix(in srgb,var(--card) 78%,var(--attendance-accent) 22%);
+  background:linear-gradient(90deg,color-mix(in srgb,#c45a54 31%,var(--card)) 0%,color-mix(in srgb,#aaa59b 20%,var(--card)) 50%,color-mix(in srgb,#4c9a61 31%,var(--card)) 100%);
 }
-.mass-attendance-slider-progress{
-  position:absolute;
-  inset:0 auto 0 0;
-  width:var(--attendance-pos);
-  border-radius:inherit;
-  background:color-mix(in srgb,var(--attendance-accent) 32%,transparent);
-}
-.mass-attendance-slider-thumb{
-  position:absolute;
-  top:50%;
-  left:var(--attendance-pos);
-  width:26px;
-  height:26px;
-  border:2px solid color-mix(in srgb,var(--attendance-accent) 52%,#fff);
+.mass-attendance-range::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:32px;
+  height:32px;
+  margin-top:-11px;
+  border:2px solid color-mix(in srgb,var(--attendance-accent) 60%,#fff);
   border-radius:50%;
   background:var(--card);
-  box-shadow:0 2px 8px rgba(0,0,0,.18);
-  transform:translate(-50%,-50%);
+  box-shadow:0 2px 9px rgba(0,0,0,.22);
 }
-.mass-attendance-readonly-note{
+.mass-attendance-range::-moz-range-track{
+  height:12px;
+  border:1px solid color-mix(in srgb,var(--attendance-accent) 45%,var(--line));
+  border-radius:999px;
+  background:linear-gradient(90deg,color-mix(in srgb,#c45a54 31%,var(--card)) 0%,color-mix(in srgb,#aaa59b 20%,var(--card)) 50%,color-mix(in srgb,#4c9a61 31%,var(--card)) 100%);
+}
+.mass-attendance-range::-moz-range-thumb{
+  width:32px;
+  height:32px;
+  border:2px solid color-mix(in srgb,var(--attendance-accent) 60%,#fff);
+  border-radius:50%;
+  background:var(--card);
+  box-shadow:0 2px 9px rgba(0,0,0,.22);
+}
+.mass-attendance-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px color-mix(in srgb,var(--attendance-accent) 24%,transparent),0 2px 9px rgba(0,0,0,.22)}
+.mass-attendance-range:disabled{cursor:not-allowed;opacity:.62}
+.mass-attendance-control.is-saving{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--attendance-accent) 40%,transparent)}
+.mass-attendance-save-state{
   display:block;
-  margin-top:8px;
+  min-height:12px;
+  margin-top:3px;
   color:var(--muted);
   font-size:7px;
   line-height:1.35;
@@ -1109,3 +1130,31 @@ body.dark .mass-attendance-state-badge.is-noshow{background:#5d2926;border-color
   .mass-wait-card{grid-template-columns:1fr}
   .mass-wait-card>span:last-child{grid-column:auto}
 }
+
+/* V0.5.1A unified Manager UX — additive overrides */
+.desktop-area-switch,.mobile-area-button{display:none!important}
+.side-nav{overflow:auto;min-height:0;padding-right:2px;align-content:start}
+.side-area-group{display:grid;gap:3px;padding-bottom:9px;margin-bottom:7px;border-bottom:1px solid var(--line)}
+.side-area-group:last-child{border-bottom:0}
+.side-area-heading{display:flex;align-items:center;gap:7px;padding:5px 8px;color:var(--muted);font-size:8px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+.side-area-heading>span{font-size:12px}.mobile-menu-group{display:grid;gap:7px;margin-bottom:14px}.mobile-menu-group h3{margin:2px 2px 1px;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.filter-head-actions,.event-filter-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.page-intro>.filter-head-actions{justify-content:flex-end}
+.triangle-icon{transition:transform .14s ease-in-out!important}.triangle-icon::after{display:none!important}
+.matrix-filter-toggle.has-filter .triangle-icon::before,.filter-toggle.has-filter .triangle-icon::before{background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M2 3 L22 3 L12 20.3 Z' fill='black'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M2 3 L22 3 L12 20.3 Z' fill='black'/%3E%3C/svg%3E") center/contain no-repeat}
+.matrix-filter-toggle.open .triangle-icon,.filter-toggle.open .triangle-icon,.filter-toggle[aria-expanded="true"] .triangle-icon{transform:rotate(180deg)!important}
+
+.legacy-player-toolbar{grid-template-columns:minmax(230px,1fr) minmax(0,2fr) minmax(150px,190px);margin:-2px 0 10px}
+.legacy-player-row{width:100%;min-height:64px;grid-template-columns:minmax(260px,1.35fr) minmax(230px,.95fr) minmax(170px,.7fr) 18px;gap:10px;padding:8px 11px;border:0;border-bottom:1px solid var(--line);border-radius:0;color:inherit;text-align:left;cursor:pointer}
+.legacy-player-row:hover,.mass-athlete-row:hover{background:color-mix(in srgb,var(--player-team-color) 5%,var(--card))}
+.person-primary{display:flex;align-items:center;gap:9px;min-width:0}.person-primary>span:last-child{min-width:0}.person-chevron{font-style:normal;color:var(--muted);font-size:19px;text-align:right}.legacy-player-membership{display:flex;flex-direction:column;gap:3px}.legacy-player-membership>small{color:var(--muted);font-size:8px}.legacy-player-attendance{display:flex;flex-direction:column;gap:4px;font-size:8px;color:var(--muted)}.legacy-player-attendance b{color:var(--black)}
+.medical-badge{display:inline-flex;width:max-content;max-width:100%;align-items:center;min-height:21px;padding:0 7px;border-radius:999px;border:1px solid var(--line);font-size:7.5px;font-weight:850;white-space:nowrap}.medical-badge.valid{background:color-mix(in srgb,#56a46c 11%,var(--card));color:#2b6c3d}.medical-badge.expiring{background:color-mix(in srgb,#d5a11b 13%,var(--card));color:#8a6200}.medical-badge.expired{background:color-mix(in srgb,#c64640 11%,var(--card));color:#9b2c28}.medical-badge.missing{color:var(--muted);background:var(--soft)}
+.mass-athlete-header{display:none}.mass-athlete-row{grid-template-columns:minmax(250px,1.3fr) minmax(140px,.6fr) minmax(220px,.9fr) 18px;min-height:64px;gap:10px;padding:8px 11px}.mass-athlete-row .person-primary{display:flex}.mass-athlete-row::before{background:linear-gradient(90deg,color-mix(in srgb,var(--player-team-color) 11%,transparent) 0%,color-mix(in srgb,var(--player-team-color) 3.5%,transparent) 38%,transparent 77%)}
+
+.entity-dialog-card{width:min(860px,calc(100vw - 28px))}.player-detail-carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-inline:contain;scrollbar-width:none}.player-detail-carousel::-webkit-scrollbar{display:none}.player-detail-pane{flex:0 0 100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always;padding:1px 2px 4px}.avatar-editor-head>div{display:flex;align-items:center;gap:13px;margin-bottom:12px}.avatar-editor-head small{display:block;color:var(--muted);margin-top:3px}.avatar-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;max-height:48vh;overflow:auto;padding:2px}.avatar-choice{min-height:94px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:inherit;display:grid;place-items:center;align-content:center;gap:6px;cursor:pointer}.avatar-choice small{font-size:7.5px;color:var(--muted);text-transform:capitalize}.avatar-choice.selected{border-color:var(--yellow-dark);box-shadow:0 0 0 2px color-mix(in srgb,var(--yellow) 30%,transparent);background:color-mix(in srgb,var(--yellow) 8%,var(--card))}
+
+.player-month-shell{background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow)}.player-month-head{height:52px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;border-bottom:1px solid var(--line);background:var(--soft)}.player-month-head h4{margin:0;text-align:center;font-size:15px}.player-month-nav{height:100%;border:0;background:transparent;color:inherit;font-size:25px;cursor:pointer}.player-month-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line);background:var(--card)}.player-month-weekdays span{text-align:center;padding:7px 2px;font-size:10px;font-weight:850;border-right:1px solid var(--line)}.player-month-weekdays span:last-child{border-right:0}.player-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.player-month-day{min-height:112px;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px;min-width:0;background:var(--card);color:inherit;text-align:left;cursor:pointer}.player-month-day:nth-child(7n){border-right:0}.player-month-day.empty{background:var(--soft);opacity:.55;cursor:default}.player-month-day.today{box-shadow:inset 0 0 0 2px var(--yellow-dark)}.player-month-day.has-events{background:color-mix(in srgb,var(--yellow) 3%,var(--card))}.player-month-day-no{display:block;font-size:11px;font-weight:900;color:var(--muted);margin-bottom:5px}.player-month-events{display:grid;gap:4px}.player-month-event{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px;align-items:center;border-left:3px solid var(--event-color);border-radius:5px;padding:3px 4px;background:color-mix(in srgb,var(--event-color) 12%,var(--card));min-width:0}.player-month-event b{font-size:7px}.player-month-event em{font-size:7px;font-style:normal;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player-month-events>small{font-size:7px;color:var(--muted)}
+.calendar-event{border-left:4px solid var(--event-color,var(--line));background:linear-gradient(105deg,color-mix(in srgb,var(--event-color,#999) 14%,var(--card)),color-mix(in srgb,var(--event-color,#999) 4%,var(--card)))}
+
+@media(max-width:1050px){.side-area-heading b{display:none}.side-area-heading{justify-content:center}.legacy-player-row{grid-template-columns:minmax(230px,1.25fr) minmax(190px,.9fr) 18px}.legacy-player-attendance{grid-column:2}.mass-athlete-row{grid-template-columns:minmax(220px,1.2fr) minmax(160px,.7fr) 18px}.mass-athlete-row>span:nth-child(3){grid-column:2}}
+@media(max-width:779px){.filter-head-actions{width:100%;justify-content:flex-end}.legacy-player-toolbar{grid-template-columns:1fr}.legacy-player-row,.mass-athlete-row{grid-template-columns:minmax(0,1fr) 18px;gap:7px}.legacy-player-membership,.legacy-player-attendance,.mass-athlete-row>span:nth-child(n+2){grid-column:1}.person-chevron,.mass-athlete-row>i{grid-column:2;grid-row:1/4}.legacy-player-membership,.legacy-player-attendance{padding-left:41px}.entity-dialog-card{width:100vw}.player-month-day{min-height:72px;padding:3px}.player-month-day-no{font-size:9px;margin-bottom:2px}.player-month-weekdays span{font-size:9px;padding:5px 1px}.player-month-event{display:block;padding:2px 3px}.player-month-event b{display:block}.player-month-event em{display:block;font-size:6.5px}.avatar-picker{grid-template-columns:repeat(4,minmax(0,1fr));max-height:55vh}}
+@media(prefers-reduced-motion:reduce){.triangle-icon,.player-detail-carousel{transition:none!important;scroll-behavior:auto!important}}
