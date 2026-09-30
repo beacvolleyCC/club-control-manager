@@ -40,34 +40,11 @@
   </div>
 
   <div class="app-shell" id="appShell">
-    <aside class="sidebar" aria-label="Manager navigáció">
-      <div class="brand-block">
-        <span class="brand-mark" aria-hidden="true">CC</span>
-        <span class="brand-copy"><strong>Club Control</strong><small>MANAGER</small></span>
-      </div>
-
-      <button class="sidebar-area-selector" id="sidebarAreaBtn" type="button" aria-haspopup="dialog" aria-label="Terület váltása">
-        <span class="area-glyph" id="sidebarAreaGlyph">◇</span>
-        <span class="area-label" id="sidebarAreaLabel">Versenysport</span>
-        <span class="sidebar-area-chevron" aria-hidden="true">⌄</span>
-      </button>
-
-      <div class="side-section-label" id="sideSectionLabel">VERSENYSPORT</div>
-      <nav class="side-nav" id="sideNav"></nav>
-      <div class="sidebar-settings-slot" id="sidebarSettingsSlot"></div>
-
-      <div class="sidebar-foot">
-        <span class="sidebar-foot-copy" id="runtimeLabel">V0.5.1B</span>
-      </div>
-    </aside>
-
     <div class="workspace">
       <header class="topbar">
-        <div class="topbar-left">
-          <button class="mobile-area-button" id="mobileAreaBtn" type="button" aria-haspopup="dialog" aria-label="Terület váltása">
-            <span id="mobileAreaGlyph">◇</span><span id="mobileAreaLabel">Versenysport</span><span aria-hidden="true">⌄</span>
-          </button>
-          <div class="topbar-title">
+        <div class="topbar-left legacy-topbar-left">
+          <div class="legacy-topbar-brand"><span class="brand-mark" aria-hidden="true">CC</span><span><strong>BEAC Röplabda</strong><small>Manager · V0.5.2A</small></span></div>
+          <div class="topbar-title legacy-page-context">
             <span class="eyebrow" id="pageAreaLabel">VERSENYSPORT</span>
             <h1 id="pageTitle">Áttekintés</h1>
           </div>
@@ -82,6 +59,9 @@
         </div>
       </header>
 
+      <nav class="legacy-primary-nav" id="legacyPrimaryNav" aria-label="Manager főmenü"></nav>
+      <nav class="legacy-secondary-nav" id="legacySecondaryNav" aria-label="Manager almenü"></nav>
+
       <main class="content" id="mainContent">
         <div class="global-status hidden" id="globalStatus" role="status" aria-live="polite"></div>
 
@@ -91,25 +71,7 @@
       </main>
     </div>
 
-    <nav class="bottom-nav" id="bottomNav" aria-label="Mobil Manager navigáció"></nav>
   </div>
-
-  <dialog class="dialog mobile-sheet" id="mobileMoreDialog" tabindex="-1">
-    <div class="dialog-card sheet-card">
-      <div class="dialog-head"><div><span class="eyebrow" id="moreAreaLabel">VERSENYSPORT</span><h2>További modulok</h2></div><button class="dialog-close" id="mobileMoreClose" type="button" aria-label="Bezárás">×</button></div>
-      <div class="mobile-more-grid" id="mobileMoreGrid"></div>
-    </div>
-  </dialog>
-
-  <dialog class="dialog mobile-sheet" id="areaDialog" tabindex="-1">
-    <div class="dialog-card sheet-card compact-sheet">
-      <div class="dialog-head"><div><span class="eyebrow">CLUB CONTROL</span><h2>Terület</h2></div><button class="dialog-close" id="areaDialogClose" type="button" aria-label="Bezárás">×</button></div>
-      <div class="area-dialog-grid">
-        <button class="area-choice" data-area="mass" type="button"><span>△</span><div><b>Tömegsport</b><small>Edzések, sportolók, bérletek</small></div></button>
-        <button class="area-choice" data-area="competition" type="button"><span>◇</span><div><b>Versenysport</b><small>Csapatok, meccsek, játékosok, díjak</small></div></button>
-      </div>
-    </div>
-  </dialog>
 
   <dialog class="dialog" id="accountDialog" tabindex="-1">
     <div class="dialog-card">
@@ -117,7 +79,7 @@
       <span class="eyebrow">MANAGER FIÓK</span>
       <h2 id="accountDialogName">Manager</h2>
       <p id="accountDialogEmail">–</p>
-      <div class="account-runtime"><span id="dataModePill">MANAGER</span><small id="dataModeDetail">Club Control Manager · V0.5.1B</small></div>
+      <div class="account-runtime"><span id="dataModePill">MANAGER</span><small id="dataModeDetail">Club Control Manager · V0.5.2A</small></div>
       <button class="button danger full" id="logoutBtn" type="button">Kijelentkezés erről az eszközről</button>
     </div>
   </dialog>
@@ -130,7 +92,7 @@
   </dialog>
 
   <template id="overviewTemplate">
-    <div class="page-intro"><div><h2></h2><p></p></div><span class="read-only-badge">V0.5.1B</span></div>
+    <div class="page-intro"><div><h2></h2><p></p></div><span class="read-only-badge">V0.5.2A</span></div>
     <div class="metric-grid" data-slot="metrics"></div>
     <div class="overview-grid adaptive-overview-grid">
       <article class="panel wide-panel"><div class="panel-head"><div><h3 data-slot="primary-title"></h3><p data-slot="primary-copy"></p></div></div><div class="stack" data-slot="primary"></div></article>
