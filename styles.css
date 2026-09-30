@@ -1182,7 +1182,7 @@ body.dark .mass-attendance-state-badge.is-noshow{background:#5d2926;border-color
 @media(prefers-reduced-motion:reduce){.mass-attendance-range::-webkit-slider-thumb,.mass-attendance-range::-moz-range-thumb{transition:none!important}}
 
 /* ==========================================================================
-   V0.5.2A — LEGACY MANAGER STRUCTURE PARITY
+   V0.5.2A2 — LEGACY HYBRID RESTORE BASE
    Old Manager navigation + information-density shell on the new PWA runtime.
    ========================================================================== */
 :root{--legacy-nav-border:rgba(24,24,24,.14);--legacy-nav-bg:#fff;--legacy-nav-active:#f7b700}
@@ -1236,3 +1236,1362 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   .legacy-primary-nav{padding:0;grid-template-columns:repeat(4,1fr)}.legacy-primary-tab{min-height:50px;padding:6px 4px;font-size:11px}.legacy-secondary-nav{top:114px;padding:0;justify-content:flex-start}.legacy-secondary-tab{min-width:max-content;padding:7px 13px}
   .content{padding:14px 10px 30px!important}.legacy-archive-header{display:none}.legacy-archive-row{grid-template-columns:1fr auto;gap:6px 10px}.legacy-archive-row>span:nth-child(3),.legacy-archive-row>span:nth-child(4){grid-column:1/-1}.legacy-archive-row>span:nth-child(5){grid-column:2;grid-row:1/3}.legacy-planner-shell{grid-template-columns:1fr}.legacy-planner-teams{display:flex;overflow-x:auto}.legacy-planner-section-head{display:none}.legacy-planner-team{min-width:155px;border-bottom:0;border-right:1px solid var(--legacy-nav-border)}.legacy-planner-team>i{height:28px}.legacy-planner-detail{grid-column:auto}.planner-readonly-map{grid-template-columns:1fr 1fr}
 }
+
+
+  :root {
+    --cc-cal-slot-h: 34px;
+    --cc-cal-time-w: 58px;
+    --cc-cal-line: #e6e3dc;
+    --cc-cal-soft: #f5f3ed;
+    --cc-cal-unavailable: #d5d5d3;
+  }
+
+  .cc-manager-calendar-view {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cc-calendar-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .cc-calendar-head h2 {
+    margin: 0 0 4px;
+    font-size: 24px;
+  }
+
+  .cc-calendar-subtitle {
+    color: var(--beac-muted);
+    font-size: 13px;
+  }
+
+  .cc-calendar-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cc-calendar-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .cc-calendar-segment {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--beac-border);
+    border-radius: 10px;
+    background: #f3f2ee;
+  }
+
+  body.dark .cc-calendar-segment {
+    background: #211f1b;
+    border-color: rgba(255,255,255,.10);
+  }
+
+
+  /* Nézetválasztó: NAP / HÉT / HÓNAP / SZEZON mindig egy sorban. */
+  .cc-calendar-view-segment,
+  .cc-calendar-scope-segment {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cc-calendar-segment button {
+    min-height: 38px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #69655f;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .cc-calendar-segment button.active {
+    background: #fff;
+    color: #171717;
+    box-shadow: 0 1px 4px rgba(0,0,0,.10);
+  }
+
+  body.dark .cc-calendar-segment button {
+    color: #aaa397;
+  }
+
+  body.dark .cc-calendar-segment button.active {
+    background: #35312b;
+    color: #f6f1e7;
+  }
+
+  .cc-calendar-nav-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 50px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--beac-border);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  body.dark .cc-calendar-nav-row {
+    background: #171613;
+    border-color: rgba(255,255,255,.10);
+  }
+
+  .cc-calendar-nav-buttons {
+    display: flex;
+    gap: 5px;
+  }
+
+  .cc-calendar-nav-buttons button {
+    min-width: 40px;
+    min-height: 34px;
+    padding: 0 10px;
+    border: 1px solid #d4d1ca;
+    border-radius: 8px;
+    background: #fff;
+    color: #222;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  body.dark .cc-calendar-nav-buttons button {
+    background: #25221e;
+    color: #eee9df;
+    border-color: rgba(255,255,255,.12);
+  }
+
+  .cc-calendar-range-label {
+    min-width: 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .cc-calendar-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    color: #77716a;
+    font-size: 10px;
+    font-weight: 750;
+    white-space: nowrap;
+  }
+
+  .cc-calendar-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cc-calendar-legend i {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #d5d1c8;
+    border-radius: 3px;
+    background: #fff;
+  }
+
+  .cc-calendar-legend i.unavailable {
+    background: var(--cc-cal-unavailable);
+  }
+
+  .cc-calendar-status {
+    display: none;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .cc-calendar-status.open {
+    display: block;
+  }
+
+  .cc-calendar-status.info {
+    background: #fff8dc;
+    border: 1px solid #e6c85c;
+    color: #5d501f;
+  }
+
+  .cc-calendar-status.success {
+    background: #e8f6ec;
+    border: 1px solid #bddfc6;
+    color: #246a38;
+  }
+
+  .cc-calendar-status.error {
+    background: #fdeaea;
+    border: 1px solid #ecc1c1;
+    color: #9f2f2a;
+  }
+
+  .cc-calendar-canvas {
+    min-height: 220px;
+  }
+
+  .cc-calendar-scroll {
+    overflow: auto;
+    max-width: 100%;
+    border: 1px solid var(--beac-border);
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  body.dark .cc-calendar-scroll {
+    background: #171613;
+    border-color: rgba(255,255,255,.10);
+  }
+
+  .cc-week-board {
+    display: flex;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .cc-time-axis {
+    width: var(--cc-cal-time-w);
+    min-width: var(--cc-cal-time-w);
+    border-right: 2px solid #5b5954;
+    background: #f5f4f0;
+    position: sticky;
+    left: 0;
+    z-index: 18;
+  }
+
+  body.dark .cc-time-axis {
+    background: #211f1b;
+    border-right-color: #77716a;
+  }
+
+  .cc-time-axis-head {
+    height: 66px;
+    border-bottom: 2px solid #5b5954;
+  }
+
+  .cc-time-row {
+    position: relative;
+    height: var(--cc-cal-slot-h);
+    border-bottom: 1px solid var(--cc-cal-line);
+    padding: 5px 7px 0 0;
+    text-align: right;
+    color: #67625a;
+    font-size: 10px;
+    font-weight: 850;
+  }
+
+  .cc-day-column {
+    flex: 0 0 auto;
+    border-right: 1px solid #aaa69e;
+    min-width: 108px;
+  }
+
+  .cc-day-column:last-child {
+    border-right: 0;
+  }
+
+  .cc-day-head {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 8px;
+    border-bottom: 1px solid #bcb8af;
+    background: #faf9f5;
+    font-size: 11px;
+    font-weight: 900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body.dark .cc-day-head {
+    background: #211f1b;
+    border-bottom-color: rgba(255,255,255,.12);
+  }
+
+  .cc-day-head.today {
+    background: #fff3b0;
+    box-shadow: inset 0 -3px 0 #ffc400;
+  }
+
+  body.dark .cc-day-head.today {
+    background: #302912;
+  }
+
+  .cc-day-head small {
+    color: #7a756d;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .cc-court-heads,
+  .cc-day-lanes {
+    display: grid;
+  }
+
+  .cc-court-heads {
+    height: 28px;
+    border-bottom: 2px solid #5b5954;
+    background: #f2f1ed;
+  }
+
+  body.dark .cc-court-heads {
+    background: #25221e;
+  }
+
+  .cc-court-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    border-right: 1px solid #dedbd4;
+    font-size: 10px;
+    font-weight: 900;
+    overflow: hidden;
+  }
+
+  .cc-court-head:last-child {
+    border-right: 0;
+  }
+
+  .cc-court-head.match {
+    background: #fff6d6;
+    color: #6a5200;
+  }
+
+  body.dark .cc-court-head.match {
+    background: #302912;
+    color: #f2d86f;
+  }
+
+  .cc-match-lane {
+    position: relative;
+    min-width: 0;
+    border-right: 1px solid #b8a467;
+    background: #fffcf0;
+  }
+
+  body.dark .cc-match-lane {
+    background: #201d16;
+    border-right-color: #77683a;
+  }
+
+  .cc-match-slot {
+    height: var(--cc-cal-slot-h);
+    border-bottom: 1px solid var(--cc-cal-line);
+  }
+
+  .cc-court-head.collapsed {
+    color: #99958e;
+    background: #d7d7d5;
+  }
+
+  body.dark .cc-court-head.collapsed {
+    background: #383632;
+  }
+
+  .cc-court-lane {
+    position: relative;
+    min-width: 0;
+    border-right: 1px solid #dedbd4;
+  }
+
+  .cc-court-lane:last-child {
+    border-right: 0;
+  }
+
+  .cc-cal-slot {
+    height: var(--cc-cal-slot-h);
+    border-bottom: 1px solid var(--cc-cal-line);
+    background: #fff;
+  }
+
+  body.dark .cc-cal-slot {
+    background: #191815;
+    border-bottom-color: rgba(255,255,255,.07);
+  }
+
+  .cc-cal-slot.unavailable {
+    background: #d3d2ce;
+  }
+
+  body.dark .cc-cal-slot.unavailable {
+    background: #37342f;
+  }
+
+  .cc-cal-slot.occupied-other {
+    background: #e5e1d7;
+    box-shadow: inset 3px 0 0 #b79f67;
+  }
+
+  body.dark .cc-cal-slot.occupied-other {
+    background: #302d27;
+    box-shadow: inset 3px 0 0 #7f6c3f;
+  }
+
+  .cc-cal-slot.drag-over {
+    outline: 3px solid rgba(255,196,0,.76);
+    outline-offset: -3px;
+    background: #fff7cf;
+  }
+
+  .cc-cal-event {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    min-height: 30px;
+    padding: 7px 5px 5px;
+    border: 1px solid rgba(0,0,0,.18);
+    border-radius: 7px;
+    box-shadow: 0 2px 7px rgba(0,0,0,.13);
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    touch-action: auto;
+  }
+
+  .cc-cal-event.archived {
+    opacity: .58;
+    cursor: pointer;
+  }
+
+  .cc-cal-event:active {
+    cursor: grabbing;
+  }
+
+  .cc-cal-event.selected {
+    outline: 3px solid #ffc400;
+    outline-offset: 1px;
+    z-index: 10;
+  }
+
+  .cc-cal-event-edit {
+    display: none;
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    z-index: 12;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 1px solid rgba(0,0,0,.20);
+    border-radius: 7px;
+    background: rgba(255,255,255,.92);
+    color: #171717;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .cc-cal-event.selected .cc-cal-event-edit {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .cc-cal-event strong,
+  .cc-cal-event span,
+  .cc-cal-event small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cc-cal-event strong {
+    font-size: 9px;
+    line-height: 1.1;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .cc-cal-event span {
+    margin-top: 2px;
+    font-size: 8px;
+    font-weight: 850;
+  }
+
+  .cc-cal-event small {
+    margin-top: 3px;
+    font-size: 7.5px;
+    font-weight: 800;
+    opacity: .78;
+  }
+
+  .cc-cal-event-blue {
+    background: #4f86df;
+    color: #0d1725;
+  }
+
+  .cc-cal-event-red {
+    background: #df0808;
+    color: #fff;
+  }
+
+  .cc-cal-event-black {
+    background: #111;
+    color: #fff;
+  }
+
+  .cc-cal-event-orange {
+    background: #ee9a45;
+    color: #171717;
+  }
+
+  .cc-cal-event-green {
+    background: #6aa84f;
+    color: #111;
+  }
+
+  .cc-cal-event-brown {
+    background: #b76508;
+    color: #111;
+  }
+
+  .cc-cal-event-yellow {
+    background: #fff200;
+    color: #111;
+  }
+
+  .cc-cal-event-neutral {
+    background: #e6dfce;
+    color: #171717;
+  }
+
+  .cc-cal-event-team-conflict {
+    opacity: .46;
+    box-shadow:
+      inset 0 0 0 2px #c9342f,
+      0 2px 7px rgba(0,0,0,.13);
+  }
+
+  .cc-cal-event-team-conflict::before {
+    content: "!";
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 15px;
+    height: 15px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #c9342f;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 950;
+  }
+
+  .cc-cal-event-sport7 {
+    box-shadow:
+      inset 0 0 0 3px #ffc400,
+      0 2px 7px rgba(0,0,0,.13);
+  }
+
+  .cc-cal-event-match::after {
+    content: "MECCS";
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    padding: 2px 4px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.82);
+    color: #171717;
+    font-size: 6px;
+    font-weight: 950;
+  }
+
+  .cc-cal-resize-handle {
+    touch-action: none;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 9px;
+    z-index: 8;
+    cursor: ns-resize;
+  }
+
+  .cc-cal-resize-handle.top {
+    top: -1px;
+  }
+
+  .cc-cal-resize-handle.bottom {
+    bottom: -1px;
+  }
+
+  .cc-cal-resize-handle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 22px;
+    height: 3px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+  }
+
+  .cc-cal-resize-handle.top::after {
+    top: 2px;
+  }
+
+  .cc-cal-resize-handle.bottom::after {
+    bottom: 2px;
+  }
+
+  .cc-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid var(--beac-border);
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  body.dark .cc-month-grid {
+    background: #171613;
+    border-color: rgba(255,255,255,.10);
+  }
+
+  .cc-month-weekday {
+    padding: 9px 7px;
+    border-right: 1px solid var(--beac-border);
+    border-bottom: 1px solid var(--beac-border);
+    background: #f5f4ef;
+    text-align: center;
+    color: #706b63;
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .cc-month-day {
+    min-height: 116px;
+    padding: 7px;
+    border-right: 1px solid var(--beac-border);
+    border-bottom: 1px solid var(--beac-border);
+    overflow: hidden;
+  }
+
+  .cc-month-day.outside {
+    background: #f3f3f1;
+    opacity: .58;
+  }
+
+  body.dark .cc-month-day.outside {
+    background: #211f1b;
+  }
+
+  .cc-month-day.today {
+    background: #fff9d9;
+    box-shadow: inset 0 0 0 2px #ffc400;
+  }
+
+  body.dark .cc-month-day.today {
+    background: #2b2616;
+  }
+
+  .cc-month-day-number {
+    margin-bottom: 5px;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .cc-month-event {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 3px 0 0;
+    padding: 4px 5px;
+    border: 0;
+    border-radius: 6px;
+    background: #f2efe6;
+    color: #222;
+    text-align: left;
+    font: inherit;
+    font-size: 8px;
+    font-weight: 850;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.dark .cc-month-event {
+    background: #2a2722;
+    color: #eee8de;
+  }
+
+  .cc-month-event.cc-cal-event-blue { background: #4f86df; color: #0d1725; }
+  .cc-month-event.cc-cal-event-red { background: #df0808; color: #fff; }
+  .cc-month-event.cc-cal-event-black { background: #111; color: #fff; }
+  .cc-month-event.cc-cal-event-green { background: #6aa84f; color: #111; }
+  .cc-month-event.cc-cal-event-orange { background: #ee9a45; color: #171717; }
+  .cc-month-event.cc-cal-event-brown { background: #b76508; color: #111; }
+  .cc-month-event.cc-cal-event-yellow { background: #fff200; color: #111; }
+  .cc-month-event.cc-cal-event-neutral { background: #e6dfce; color: #171717; }
+
+  .cc-month-event.cc-month-event-match {
+    padding-left: 17px;
+  }
+
+  .cc-month-event.cc-month-event-match::before {
+    content: "⚑";
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+  }
+
+  .cc-month-more {
+    margin-top: 4px;
+    color: #77716a;
+    font-size: 8px;
+    font-weight: 800;
+  }
+
+  .cc-season-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .cc-season-card {
+    min-height: 132px;
+    padding: 14px;
+    border: 1px solid var(--beac-border);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  body.dark .cc-season-card {
+    background: #171613;
+    border-color: rgba(255,255,255,.10);
+  }
+
+  .cc-season-card.current {
+    border-color: #d7b232;
+    box-shadow: inset 0 0 0 2px #ffc400;
+  }
+
+  .cc-season-card:hover {
+    border-color: #d4a800;
+    background: #fffdf3;
+  }
+
+  body.dark .cc-season-card:hover {
+    background: #24211c;
+  }
+
+  .cc-season-card h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+  }
+
+  .cc-season-stat {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 0;
+    border-top: 1px solid #eeeae1;
+    color: #69645c;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .cc-season-stat strong {
+    color: #171717;
+  }
+
+  body.dark .cc-season-stat {
+    border-top-color: rgba(255,255,255,.08);
+    color: #aaa397;
+  }
+
+  body.dark .cc-season-stat strong {
+    color: #f2ece2;
+  }
+
+  .cc-calendar-pending-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid #d6b84b;
+    border-radius: 10px;
+    background: #fff8dc;
+    color: #4e431d;
+  }
+
+  .cc-calendar-pending-bar.open {
+    display: flex;
+  }
+
+  .cc-calendar-pending-bar strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+  }
+
+  .cc-calendar-pending-bar span {
+    display: block;
+    color: #74683f;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .cc-calendar-pending-actions {
+    display: flex;
+    gap: 7px;
+    flex: 0 0 auto;
+  }
+
+  .cc-calendar-pending-actions button {
+    min-height: 36px;
+    padding: 0 11px;
+    border: 1px solid #c9b66f;
+    border-radius: 8px;
+    background: #fff;
+    color: #171717;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .cc-calendar-pending-actions button.primary {
+    background: #ffc400;
+    border-color: #d9a600;
+  }
+
+  .cc-calendar-legend i.occupied {
+    background: #e5e1d7;
+    box-shadow: inset 3px 0 0 #b79f67;
+  }
+
+  body.dark .cc-calendar-pending-bar {
+    background: #302912;
+    border-color: #7c6928;
+    color: #eee2ae;
+  }
+
+  body.dark .cc-calendar-pending-bar span {
+    color: #bcb18b;
+  }
+
+  @media (max-width: 900px) {
+    .cc-calendar-toolbar {
+      grid-template-columns: 1fr;
+    }
+
+    .cc-calendar-nav-row {
+      grid-template-columns: auto 1fr;
+    }
+
+    .cc-calendar-legend {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+      white-space: normal;
+    }
+
+    .cc-season-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .cc-calendar-pending-bar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .cc-calendar-pending-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .cc-calendar-head {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .cc-calendar-head-actions .action-button {
+      width: 100%;
+    }
+
+    .cc-calendar-nav-row {
+      grid-template-columns: 1fr;
+    }
+
+    .cc-calendar-nav-buttons {
+      display: grid;
+      grid-template-columns: 44px 1fr 44px;
+    }
+
+    .cc-calendar-range-label {
+      text-align: left;
+    }
+
+    .cc-month-grid {
+      min-width: 720px;
+    }
+
+    .cc-season-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+
+  /* V0.50.0 – letisztult közös naptár */
+  .cc-calendar-legend { display: none !important; }
+  .cc-court-head,
+  .cc-court-lane { border-right-style: solid !important; border-right-color: #dedbd4 !important; }
+  body.dark .cc-court-head,
+  body.dark .cc-court-lane { border-right-color: rgba(255,255,255,.10) !important; }
+  .cc-cal-event { left: 0 !important; right: 0 !important; width: auto !important; border-radius: 8px !important; }
+  body.competition-training-mode #trainingView .section-actions .secondary { display: none !important; }
+  body.competition-training-mode #massTrainingCategoryFilterWrap,
+  body.competition-training-mode .mass-training-category-filter { display: none !important; }
+
+  .cc-month-day { display: flex; flex-direction: column; }
+  .cc-month-day-number { flex: 0 0 auto; }
+  .cc-month-day-events { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: 3px; }
+  .cc-month-day-events .cc-month-event { flex: 1 1 0; min-height: 22px; margin: 0 !important; }
+
+  .cc-season-list { display: block; max-width: 980px; margin: 0 auto; padding: 4px 2px 40px; }
+  .cc-season-month { margin: 0 0 24px; scroll-margin-top: 90px; }
+  .cc-season-month h3 { position: sticky; top: 0; z-index: 2; margin: 0 0 8px; padding: 10px 12px; border: 1px solid #e1dfd8; border-radius: 10px; background: rgba(247,247,245,.96); font-size: 14px; }
+  body.dark .cc-season-month h3 { background: rgba(25,23,20,.96); border-color: rgba(255,255,255,.09); }
+  .cc-season-event { width: 100%; display: grid; grid-template-columns: 82px 1fr auto; align-items: center; gap: 10px; margin: 0 0 6px; padding: 10px 12px; border: 1px solid #dfddd6; border-radius: 10px; background: #fff; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+  body.dark .cc-season-event { background: #191714; border-color: rgba(255,255,255,.09); }
+  .cc-season-event.past { opacity: .46; filter: grayscale(.8); }
+  .cc-season-event.today { box-shadow: 0 0 0 2px #ffc400 inset; }
+  .cc-season-date { font-weight: 900; font-size: 12px; }
+  .cc-season-main strong { display:block; font-size: 13px; }
+  .cc-season-main span { display:block; margin-top:2px; color:#777168; font-size:11px; }
+  .cc-season-kind { font-size:10px; font-weight:900; text-transform:uppercase; }
+
+  /* A saját picker a mezőre kattintva nyílik; külön ikon nem kell. */
+  #trainingDatePickerButton,
+  [data-time-picker-target] { display: none !important; }
+
+  /* Függőleges idő-carousel. */
+  .cc-time-picker-grid { display: block !important; max-height: 250px !important; overflow-y: auto !important; scroll-snap-type: y mandatory; padding: 82px 8px !important; }
+  .cc-time-picker-option { width: 100% !important; min-height: 42px !important; margin: 2px 0 !important; scroll-snap-align: center; border-radius: 9px !important; opacity: .62; }
+  .cc-time-picker-option.selected { opacity: 1; transform: scale(1.04); font-size: 16px !important; }
+
+  @media (max-width: 620px) {
+    .cc-season-event { grid-template-columns: 68px 1fr; }
+    .cc-season-kind { grid-column: 2; }
+  }
+
+
+
+  /* V2.3.9.0 – calendar cleanup: dinamikus pályák, inaktív idősávok, mini-hónapos szezon. */
+  .cc-week-board { background:#f7f6f2; }
+  body.dark .cc-week-board { background:#151411; }
+  .cc-day-column { background:#fff; }
+  body.dark .cc-day-column { background:#191815; }
+  .cc-day-head { border-bottom-color:#d6d2c9; }
+  .cc-court-heads { border-bottom-color:#77736b; }
+  .cc-time-axis-head { border-bottom-color:#77736b; }
+  .cc-cal-slot, .cc-match-slot { border-bottom-color:#eeece6; }
+  body.dark .cc-cal-slot, body.dark .cc-match-slot { border-bottom-color:rgba(255,255,255,.055); }
+  .cc-cal-slot.unavailable {
+    cursor:not-allowed;
+    background:repeating-linear-gradient(135deg,#d8d7d3 0,#d8d7d3 8px,#d1d0cc 8px,#d1d0cc 16px);
+  }
+  body.dark .cc-cal-slot.unavailable {
+    background:repeating-linear-gradient(135deg,#37342f 0,#37342f 8px,#312f2b 8px,#312f2b 16px);
+  }
+  .cc-cal-slot.unavailable.drag-over, .cc-cal-slot.occupied-other.drag-over { outline:none; }
+  .cc-day-empty-head { color:#99958e; background:#e2e1dd; }
+  body.dark .cc-day-empty-head { color:#827d75; background:#302e2a; }
+  .cc-day-empty-lane { position:relative; min-width:0; }
+  .cc-day-empty-lane .cc-cal-slot { pointer-events:none; }
+  .cc-court-head { white-space:nowrap; }
+
+  .cc-season-overview {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(220px,1fr));
+    gap:12px;
+    padding:2px;
+  }
+  .cc-season-mini-month {
+    overflow:hidden;
+    border:1px solid var(--beac-border);
+    border-radius:12px;
+    background:#fff;
+  }
+  body.dark .cc-season-mini-month { background:#191815; border-color:rgba(255,255,255,.10); }
+  .cc-season-mini-head {
+    width:100%;
+    min-height:42px;
+    padding:0 12px;
+    border:0;
+    border-bottom:1px solid #e7e3da;
+    background:#faf9f5;
+    color:inherit;
+    text-align:left;
+    font:inherit;
+    font-size:12px;
+    font-weight:950;
+    cursor:pointer;
+  }
+  body.dark .cc-season-mini-head { background:#211f1b; border-bottom-color:rgba(255,255,255,.08); }
+  .cc-season-mini-month.current .cc-season-mini-head { box-shadow:inset 0 -3px 0 #ffc400; }
+  .cc-season-mini-weekdays, .cc-season-mini-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); }
+  .cc-season-mini-weekdays span {
+    padding:6px 2px 4px;
+    text-align:center;
+    color:#8a857d;
+    font-size:8px;
+    font-weight:900;
+  }
+  .cc-season-mini-day {
+    position:relative;
+    min-height:42px;
+    padding:5px 4px 3px;
+    border:0;
+    border-top:1px solid #efede8;
+    border-right:1px solid #efede8;
+    background:transparent;
+    color:inherit;
+    text-align:left;
+    font:inherit;
+    cursor:pointer;
+  }
+  .cc-season-mini-day:nth-child(7n) { border-right:0; }
+  body.dark .cc-season-mini-day { border-color:rgba(255,255,255,.055); }
+  .cc-season-mini-day.outside { opacity:.24; cursor:default; }
+  .cc-season-mini-day.today { background:#fff7cc; box-shadow:inset 0 0 0 2px #ffc400; }
+  body.dark .cc-season-mini-day.today { background:#302912; }
+  .cc-season-mini-day-number {
+    position:relative;
+    z-index:2;
+    display:block;
+    font-size:9px;
+    font-weight:900;
+    line-height:1;
+  }
+  /* V2.3.9.3 – a Szezon ugyanazt az eseményszín-logikát használja, mint a Hónap.
+     A napcella alsó része az aznapi események között egyenlően oszlik fel. */
+  .cc-season-mini-events {
+    position:absolute;
+    left:3px;
+    right:3px;
+    bottom:3px;
+    top:17px;
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    overflow:hidden;
+    border-radius:4px;
+    pointer-events:none;
+  }
+  .cc-season-mini-event {
+    position:relative;
+    flex:1 1 0;
+    min-height:2px;
+    border-radius:2px;
+    background:#e6dfce;
+    overflow:hidden;
+  }
+  .cc-season-mini-event.cc-cal-event-blue { background:#4f86df; }
+  .cc-season-mini-event.cc-cal-event-red { background:#df0808; }
+  .cc-season-mini-event.cc-cal-event-black { background:#111; }
+  .cc-season-mini-event.cc-cal-event-green { background:#6aa84f; }
+  .cc-season-mini-event.cc-cal-event-orange { background:#ee9a45; }
+  .cc-season-mini-event.cc-cal-event-brown { background:#b76508; }
+  .cc-season-mini-event.cc-cal-event-yellow { background:#fff200; }
+  .cc-season-mini-event.cc-cal-event-neutral { background:#e6dfce; }
+  .cc-season-mini-event.cc-cal-event-custom {
+    background:color-mix(in srgb,var(--training-custom-color) 72%,white)!important;
+  }
+  body.dark .cc-season-mini-event.cc-cal-event-custom {
+    background:color-mix(in srgb,var(--training-custom-color) 55%,#171613)!important;
+  }
+  .cc-season-mini-event.match::after {
+    content:"⚑";
+    position:absolute;
+    right:2px;
+    top:50%;
+    transform:translateY(-50%);
+    color:rgba(0,0,0,.70);
+    font-size:6px;
+    line-height:1;
+  }
+  .cc-season-mini-event.cc-cal-event-black.match::after,
+  .cc-season-mini-event.cc-cal-event-red.match::after { color:rgba(255,255,255,.86); }
+  .cc-season-mini-more {
+    position:absolute;
+    right:2px;
+    bottom:1px;
+    z-index:3;
+    padding:0 2px;
+    border-radius:3px;
+    background:rgba(255,255,255,.82);
+    color:#55514b;
+    font-size:6px;
+    font-weight:950;
+    line-height:10px;
+  }
+  body.dark .cc-season-mini-more { background:rgba(23,22,19,.84); color:#eee8de; }
+
+  @media (max-width:1000px) { .cc-season-overview { grid-template-columns:repeat(2,minmax(220px,1fr)); } }
+  @media (max-width:620px) { .cc-season-overview { grid-template-columns:1fr; } }
+
+
+  /* V2.3.9.2 – SAFE weekly calendar visual cleanup.
+     A V2.3.9.0 esemény-render és drag/resize logika változatlan marad. */
+  .cc-calendar-scroll {
+    width: 100%;
+  }
+
+  .cc-week-board {
+    width: 100%;
+    min-width: 1180px;
+    gap: 4px;
+    background: #f7f6f2;
+  }
+  body.dark .cc-week-board { background: #151411; }
+
+  .cc-time-axis {
+    border-right: 0 !important;
+    background: #f7f6f2;
+  }
+  body.dark .cc-time-axis { background: #151411; }
+  .cc-time-axis-head,
+  .cc-time-row { border-bottom: 0 !important; }
+
+  /* Nagy kijelzőn a napok felveszik a rendelkezésre álló plusz szélességet.
+     A meglévő inline minimum/súly megmarad; kis kijelzőn a board scrollozható. */
+  .cc-day-column {
+    flex: 1 0 auto;
+    border-right: 0 !important;
+    background: transparent;
+  }
+  body.dark .cc-day-column { background: transparent; }
+
+  /* Nap és dátum két sorban, JS/DOM módosítás nélkül. */
+  .cc-day-head {
+    flex-direction: column;
+    gap: 1px;
+    border-bottom: 0 !important;
+    border-radius: 8px 8px 0 0;
+    line-height: 1.05;
+  }
+  .cc-day-head small {
+    display: block;
+    line-height: 1.05;
+  }
+
+  .cc-court-heads,
+  .cc-day-lanes {
+    column-gap: 4px;
+    background: #f7f6f2;
+  }
+  body.dark .cc-court-heads,
+  body.dark .cc-day-lanes { background: #151411; }
+
+  .cc-court-heads,
+  .cc-time-axis-head { border-bottom: 0 !important; }
+  .cc-court-head {
+    border-right: 0 !important;
+    border-radius: 0 0 6px 6px;
+    background: #f2f1ed;
+  }
+  body.dark .cc-court-head { background: #25221e; }
+
+  /* A látható táblázatrács eltűnik, a 30 perces DOM-slotok és snap logika megmaradnak. */
+  .cc-court-lane,
+  .cc-match-lane { border-right: 0 !important; }
+  .cc-cal-slot,
+  .cc-match-slot { border-bottom: 0 !important; }
+
+  /* Inaktív idősáv: homogén szürke, sraffozás és belső vonal nélkül. */
+  .cc-cal-slot.unavailable {
+    background: #d8d7d3 !important;
+    background-image: none !important;
+  }
+  body.dark .cc-cal-slot.unavailable {
+    background: #37342f !important;
+    background-image: none !important;
+  }
+
+  /* Másik szűrési kör által foglalt kapacitás: tömör passzív kitöltés, sárga oldalsáv nélkül. */
+  .cc-cal-slot.occupied-other {
+    background: #e5e1d7 !important;
+    box-shadow: none !important;
+  }
+  body.dark .cc-cal-slot.occupied-other {
+    background: #302d27 !important;
+    box-shadow: none !important;
+  }
+
+  /* Drag közben a snap-rács továbbra sem rajzolódik ki. */
+  .cc-cal-slot.drag-over {
+    outline: none !important;
+    outline-offset: 0 !important;
+    background: #fff !important;
+  }
+  body.dark .cc-cal-slot.drag-over { background: #191815 !important; }
+  .cc-cal-slot.unavailable.drag-over,
+  .cc-cal-slot.occupied-other.drag-over { outline: none !important; }
+
+  /* Vizuális levegő az eseménykártyák között a logikai top/height módosítása nélkül. */
+  .cc-cal-event {
+    left: 3px !important;
+    right: 3px !important;
+    width: auto !important;
+    border-radius: 8px !important;
+    border-top-width: 3px !important;
+    border-bottom-width: 3px !important;
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+    background-clip: padding-box !important;
+  }
+
+  /* V2.3.9.7 – Drag/drop cél-előnézet.
+     A logikai 30 perces rács továbbra is rejtett, de húzás közben egy
+     az edzéssel azonos méretű, áttetsző kártya mutatja a tényleges drop helyét. */
+  .cc-cal-event.is-dragging {
+    opacity: .22 !important;
+  }
+
+  .cc-cal-drop-preview {
+    z-index: 4 !important;
+    pointer-events: none !important;
+    opacity: .42 !important;
+    box-shadow: inset 0 0 0 2px rgba(255,196,0,.95), 0 2px 7px rgba(0,0,0,.10) !important;
+    filter: saturate(.78);
+  }
+
+  .cc-cal-drop-preview .cc-cal-resize-handle,
+  .cc-cal-drop-preview .cc-cal-event-edit {
+    display: none !important;
+  }
+
+  .cc-cal-drop-preview.invalid {
+    opacity: .34 !important;
+    box-shadow: inset 0 0 0 3px #c9342f, 0 2px 7px rgba(0,0,0,.10) !important;
+  }
+
+  body.dark .cc-cal-drop-preview {
+    box-shadow: inset 0 0 0 2px rgba(255,196,0,.95), 0 2px 7px rgba(0,0,0,.26) !important;
+  }
+
+  body.dark .cc-cal-drop-preview.invalid {
+    box-shadow: inset 0 0 0 3px #e25a52, 0 2px 7px rgba(0,0,0,.26) !important;
+  }
+
+  /* V2.3.9.5 – Nap nézet arányjavítás.
+     A napi rács nem húzza szét 1-2 pályát a teljes panelszélességre.
+     A lane-ek kényelmes célméretet kapnak; sok pályánál továbbra is kihasználja a panelt. */
+  .cc-calendar-scroll.cc-day-scroll {
+    display: block;
+  }
+  .cc-week-board.cc-day-board {
+    width: calc(var(--cc-day-lane-count, 1) * 340px + var(--cc-cal-time-w));
+    min-width: 520px;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cc-day-board .cc-day-column {
+    width: auto !important;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .cc-day-head[data-week-day] {
+    width: 100%;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    color: inherit;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .cc-day-head[data-week-day]:hover {
+    background: #fff6c8;
+  }
+  body.dark .cc-day-head[data-week-day]:hover {
+    background: #342d16;
+  }
+  .cc-month-day[data-month-day] {
+    cursor: pointer;
+  }
+  .cc-month-day[data-month-day]:hover {
+    background: #fffdf3;
+  }
+  body.dark .cc-month-day[data-month-day]:hover {
+    background: #24211c;
+  }
+
+
+
+/* ==========================================================================\n   V0.5.2A2 — LEGACY HYBRID RESTORE\n   Old Manager chrome/calendar + current Players + current Overview cards.\n   ========================================================================== */
+:root{--beac-muted:var(--muted);--beac-border:var(--line);--admin-card:var(--card)}
+
+/* Old Manager top navigation proportions */
+.legacy-primary-nav{display:flex!important;align-items:center;justify-content:flex-start!important;gap:28px!important;padding:0 clamp(12px,3vw,48px)!important}
+.legacy-primary-tab{flex:0 0 auto!important;min-width:0!important;min-height:52px!important;padding:15px 3px 12px!important;border-bottom:3px solid transparent!important;background:transparent!important;color:var(--muted)!important;font-size:14px!important;font-weight:850!important}
+.legacy-primary-tab:hover{color:var(--black)!important;background:transparent!important}
+.legacy-primary-tab.active{color:var(--black)!important;border-bottom-color:var(--yellow)!important;background:transparent!important}
+.legacy-secondary-nav{justify-content:flex-start!important;gap:6px!important;padding-top:8px!important;padding-bottom:8px!important;background:color-mix(in srgb,var(--card) 96%,var(--soft) 4%)!important}
+.legacy-secondary-tab{flex:0 0 auto!important;min-width:0!important;min-height:38px!important;padding:0 13px!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;color:var(--muted)!important;font-size:12px!important;font-weight:820!important}
+.legacy-secondary-tab:hover{background:var(--soft)!important;color:var(--black)!important}
+.legacy-secondary-tab.active{background:color-mix(in srgb,var(--yellow) 22%,var(--card))!important;border-color:color-mix(in srgb,var(--yellow-dark) 55%,var(--line))!important;color:var(--black)!important}
+
+/* Trainings deliberately share the Overview / next-match card language. */
+.competition-training-card-list{padding:14px!important}
+.training-gradient-row.past{opacity:.56}
+.training-gradient-row .rsvp-pills{justify-content:flex-end}
+
+/* Legacy calendar compatibility with current variables / read-only runtime. */
+.cc-filter-shell{margin-bottom:12px}
+.cc-filter-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cc-filter-toggle,.cc-filter-clear{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:9px;min-height:36px;padding:0 11px;font:inherit;font-size:11px;font-weight:850}
+.cc-filter-toggle{display:inline-flex;align-items:center;gap:8px}.cc-filter-clear{color:var(--muted)}
+.cc-filter-triangle{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid currentColor;transition:transform .14s ease}.cc-filter-toggle.open .cc-filter-triangle{transform:rotate(180deg)}
+.cc-filter-panel[hidden]{display:none!important}.cc-filter-panel{display:block}
+.legacy-calendar-extra-filters{display:grid;grid-template-columns:repeat(2,minmax(180px,260px));gap:8px;margin-top:10px}
+.cc-calendar-toolbar{margin-bottom:0!important}
+.cc-calendar-view-segment{grid-template-columns:repeat(4,minmax(0,1fr))!important}.cc-calendar-scope-segment{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.cc-calendar-segment button{border:0;border-radius:7px;background:transparent;color:var(--muted);min-height:34px;font:inherit;font-size:10px;font-weight:900}.cc-calendar-segment button.active{background:var(--card);color:var(--black);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.cc-calendar-nav-buttons button{min-height:35px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:0 10px;font:inherit;font-size:10px;font-weight:850;color:inherit}
+.cc-calendar-range-label{font-size:11px!important;font-weight:900!important}
+.cc-calendar-legend i{border-color:var(--line)!important}
+.cc-calendar-scroll{background:var(--card)!important;border-color:var(--line)!important}
+.cc-time-axis,.cc-time-axis-head{background:var(--soft)!important}
+.cc-day-head,.cc-court-head{background:var(--card)!important;color:var(--black)!important}
+.cc-day-head.today{background:color-mix(in srgb,var(--yellow) 18%,var(--card))!important}
+.cc-court-head.match{background:color-mix(in srgb,var(--yellow) 14%,var(--card))!important}
+.cc-court-lane{position:relative;display:grid;grid-auto-rows:calc(var(--cc-cal-slot-h) / 2);background:var(--card)}
+.cc-cal-slot{height:var(--cc-cal-slot-h);border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.cc-cal-event{left:3px;right:3px;position:absolute!important;border:1px solid color-mix(in srgb,var(--event-color) 38%,var(--line))!important;border-left:5px solid var(--event-color)!important;border-radius:7px!important;background:linear-gradient(105deg,color-mix(in srgb,var(--event-color) 18%,var(--card)),var(--card) 68%)!important;color:inherit!important;text-align:left!important;padding:5px 6px!important;overflow:hidden!important;z-index:3!important;box-shadow:none!important}
+.cc-cal-event:hover{z-index:5!important;filter:brightness(.985)}.cc-cal-event.past{opacity:.53}.cc-cal-event.match{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--event-color) 28%,transparent)!important}
+.cc-cal-event b,.cc-cal-event strong,.cc-cal-event span,.cc-cal-event small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cc-cal-event b{font-size:9px;color:var(--muted)}.cc-cal-event strong{font-size:11px;margin-top:1px}.cc-cal-event span{font-size:9px;font-weight:850;margin-top:1px}.cc-cal-event small{font-size:8px;color:var(--muted);margin-top:2px}
+.cc-month-event{display:block;width:100%;min-height:22px;margin:0 0 3px;padding:4px 5px;border:1px solid color-mix(in srgb,var(--event-color) 30%,var(--line));border-left:4px solid var(--event-color);border-radius:6px;background:linear-gradient(100deg,color-mix(in srgb,var(--event-color) 15%,var(--card)),var(--card));color:inherit;text-align:left;font:inherit;font-size:9px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cc-month-event.match{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--event-color) 25%,transparent)}
+.cc-season-mini-event{background:var(--event-color)!important}.cc-season-mini-event.match::after{content:"M"!important;color:#fff!important}
+
+@media(max-width:900px){.legacy-primary-nav{gap:18px!important}.legacy-calendar-extra-filters{grid-template-columns:1fr}.cc-calendar-toolbar{grid-template-columns:1fr!important}.cc-calendar-nav-row{grid-template-columns:1fr!important;align-items:start!important}.cc-calendar-range-label{text-align:left!important}.cc-calendar-legend{justify-content:flex-start!important}}
+@media(max-width:700px){.legacy-primary-nav{gap:0!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;padding:0!important}.legacy-primary-tab{padding:6px 4px!important;min-height:50px!important;font-size:11px!important}.legacy-secondary-nav{padding:8px 0!important}.cc-calendar-head{align-items:flex-start!important}.cc-calendar-head .read-only-badge{display:none}.cc-calendar-segment button{font-size:8px}.cc-calendar-scroll{border-radius:9px!important}.cc-time-axis{position:sticky!important;left:0!important;z-index:18!important}}
