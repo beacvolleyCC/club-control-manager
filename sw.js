@@ -1,4 +1,4 @@
-const CACHE='cc-manager-v0-5-2b4-federation-sync-v1';
+const CACHE='cc-manager-v0-5-2b5-mgr014-results-standings-v1';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest',
   './assets/player-animals.webp','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
