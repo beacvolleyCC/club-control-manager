@@ -2790,3 +2790,22 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   .standings-card{overflow-x:auto}.standings-table{min-width:440px}
   .rsvp-plain{gap:7px}.rsvp-plain i{font-size:6.5px}.rsvp-plain b{font-size:9px}
 }
+
+
+/* =========================================================
+   V0.5.2B5A — MGR014 403/UI hotfix
+   ========================================================= */
+.competition-sync-strip{min-width:0;max-width:100%;overflow:hidden}
+.competition-sync-strip>span:not(.sync-dot){min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word;line-height:1.35}
+.competition-sync-strip>b{min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word;text-align:right}
+.page-intro>.page-actions{min-width:0;max-width:100%;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.rsvp-plain{gap:13px!important}
+.rsvp-plain span{min-width:18px;justify-content:center}
+.rsvp-plain i{display:none!important}
+.rsvp-plain b{font-size:14px!important;line-height:1!important;font-weight:950!important;font-variant-numeric:tabular-nums}
+@media(max-width:720px){
+  .competition-sync-strip{display:grid;grid-template-columns:8px minmax(0,1fr);align-items:start}
+  .competition-sync-strip>b{grid-column:2;width:auto;margin:0;text-align:left}
+  .page-intro>.page-actions{width:100%;justify-content:flex-start}
+  .rsvp-plain{gap:10px!important}.rsvp-plain b{font-size:13px!important}
+}
