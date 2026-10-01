@@ -1,4 +1,4 @@
-const CACHE='cc-manager-v0-5-2b2-roster-slider-parity-v1';
+const CACHE='cc-manager-v0-5-2b3-brsz-match-import-v1';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest',
   './assets/player-animals.webp','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
