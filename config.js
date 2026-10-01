@@ -1,10 +1,10 @@
-/* Club Control Manager PWA V0.5.2A2 — Legacy Hybrid Restore V1
+/* Club Control Manager PWA V0.5.2B — Action Parity V1
  * SAFE DEFAULT: demo/read-only mode.
  * Browser config may contain only the Supabase URL + publishable key.
  * Never put service-role or other privileged secrets here.
  */
 window.CC_MANAGER_CONFIG = Object.freeze({
-  BUILD: 'manager-pwa-v0.5.2a2-legacy-hybrid-restore-v1',
+  BUILD: 'manager-pwa-v0.5.2b-action-parity-v1',
   DATA_MODE: 'supabase',
   SUPABASE_URL: 'https://snqsxlyhontaepembaic.supabase.co',
   SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_k1tiZDFFUHGu4aO8DbfIiw_YvBH-qPx',
