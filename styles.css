@@ -2604,3 +2604,6 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 /* V0.5.2B notification row alignment */
 .notification-recipient{min-height:54px}.notification-recipient em{justify-self:end;padding:4px 7px;border:1px solid var(--line);border-radius:999px;background:var(--soft);line-height:1.1}.notification-history-row .status-pill{justify-self:end;text-align:center}
 @media(max-width:560px){.notification-recipient{grid-template-columns:36px minmax(0,1fr) auto;gap:8px}.notification-recipient em{grid-column:auto;font-size:7px;max-width:92px;white-space:normal;text-align:center}.notification-recipient small{font-size:9px}}
+
+/* V0.5.2B1 — Matches use the same Overview gradient card language. */
+.match-gradient-row.past{opacity:.56}
