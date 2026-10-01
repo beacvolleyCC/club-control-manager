@@ -2607,3 +2607,85 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 
 /* V0.5.2B1 — Matches use the same Overview gradient card language. */
 .match-gradient-row.past{opacity:.56}
+
+/* V0.5.2B2 — roster sliders + legacy mass attendance cards */
+.competition-roster-list{gap:7px}
+.competition-roster-card{
+  display:grid!important;
+  grid-template-columns:34px minmax(150px,1fr) minmax(150px,190px) minmax(105px,140px)!important;
+  gap:9px!important;
+  align-items:center!important;
+  min-height:62px;
+  padding:8px 9px!important;
+  border:1px solid var(--line)!important;
+  border-radius:11px;
+  background:var(--card);
+  cursor:pointer;
+  transition:border-color .14s ease,background .14s ease,transform .14s ease;
+}
+.competition-roster-card:hover{border-color:color-mix(in srgb,var(--yellow) 52%,var(--line))!important;background:color-mix(in srgb,var(--yellow) 3%,var(--card))}
+.competition-roster-card:focus-visible{outline:2px solid color-mix(in srgb,var(--yellow) 70%,#000);outline-offset:2px}
+.competition-roster-card:last-child{border-bottom:1px solid var(--line)!important}
+.competition-roster-identity{min-width:0}.competition-roster-identity b,.competition-roster-identity small{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.competition-roster-identity small{margin-top:2px;color:var(--muted);font-size:7.5px}
+.cc-rsvp-control{
+  --rsvp-accent:#a49f96;
+  position:relative;
+  min-width:0;
+  padding:5px 8px 6px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--soft);
+  cursor:default;
+}
+.cc-rsvp-control.is-going{--rsvp-accent:#4c9a61;background:color-mix(in srgb,#55a86c 10%,var(--soft))}
+.cc-rsvp-control.is-not-going{--rsvp-accent:#c45a54;background:color-mix(in srgb,#d96059 9%,var(--soft))}
+.cc-rsvp-state{min-height:11px;color:var(--text);font-size:7.5px;font-weight:850;line-height:1;text-align:center}
+.cc-rsvp-labels{display:flex;justify-content:space-between;gap:8px;margin-top:1px;color:var(--muted);font-size:6.5px;font-weight:700}
+.cc-rsvp-range{
+  appearance:none;-webkit-appearance:none;width:100%;height:26px;margin:0;padding:0 3px;border:0;outline:0;background:transparent;cursor:grab;touch-action:pan-y
+}
+.cc-rsvp-range:active{cursor:grabbing}
+.cc-rsvp-range::-webkit-slider-runnable-track{height:8px;border:1px solid color-mix(in srgb,var(--rsvp-accent) 40%,var(--line));border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,#4c9a61 31%,var(--card)) 0%,color-mix(in srgb,#aaa59b 20%,var(--card)) 50%,color-mix(in srgb,#c45a54 31%,var(--card)) 100%)}
+.cc-rsvp-range::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-9px;border:2px solid color-mix(in srgb,var(--rsvp-accent) 62%,#fff);border-radius:50%;background:var(--card);box-shadow:0 2px 7px rgba(0,0,0,.2)}
+.cc-rsvp-range::-moz-range-track{height:8px;border:1px solid color-mix(in srgb,var(--rsvp-accent) 40%,var(--line));border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,#4c9a61 31%,var(--card)) 0%,color-mix(in srgb,#aaa59b 20%,var(--card)) 50%,color-mix(in srgb,#c45a54 31%,var(--card)) 100%)}
+.cc-rsvp-range::-moz-range-thumb{width:24px;height:24px;border:2px solid color-mix(in srgb,var(--rsvp-accent) 62%,#fff);border-radius:50%;background:var(--card);box-shadow:0 2px 7px rgba(0,0,0,.2)}
+.cc-rsvp-range:disabled{opacity:.62;cursor:not-allowed}
+.competition-attendance-field span{font-size:6.5px}.competition-attendance-field select{min-height:32px}
+
+/* Tömegsport: legacy Manager roster-card density, with the same positive-left / neutral-center / negative-right slider logic. */
+.legacy-mass-roster-card{
+  display:grid;
+  grid-template-columns:minmax(210px,1.05fr) minmax(220px,.95fr) minmax(300px,1.35fr);
+  gap:10px;
+  align-items:center;
+  padding:9px 10px;
+  border-radius:11px;
+}
+.legacy-mass-roster-identity{display:grid;grid-template-columns:5px minmax(0,1fr);gap:9px;align-items:stretch;min-width:0}
+.legacy-mass-roster-identity .mass-attendance-person-mark{min-height:52px}
+.legacy-mass-roster-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.legacy-mass-badge{display:inline-flex;align-items:center;min-height:20px;padding:0 6px;border:1px solid color-mix(in srgb,var(--mass-person-color) 36%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--mass-person-color) 9%,var(--card));font-size:6.5px;font-weight:850;white-space:nowrap}
+.legacy-mass-badge.soft{border-color:var(--line);background:var(--soft);color:var(--muted)}
+.legacy-mass-roster-meta{display:grid;grid-template-columns:.8fr 1.15fr .85fr;gap:5px;min-width:0}
+.legacy-mass-roster-meta>span{min-width:0;padding:5px 6px;border:1px solid color-mix(in srgb,var(--line) 74%,transparent);border-radius:8px;background:color-mix(in srgb,var(--soft) 70%,transparent)}
+.legacy-mass-roster-meta small,.legacy-mass-roster-meta b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.legacy-mass-roster-meta small{color:var(--muted);font-size:6px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}.legacy-mass-roster-meta b{margin-top:2px;font-size:7.5px}
+.legacy-mass-roster-card .mass-attendance-control{margin-top:0;padding:6px 8px 5px;border-radius:10px}
+.legacy-mass-roster-card .mass-attendance-slider-labels{font-size:6.5px}.legacy-mass-roster-card .mass-attendance-slider-labels b{font-size:7px}
+.legacy-mass-roster-card .mass-attendance-range{height:28px;margin-top:0}
+.legacy-mass-roster-card .mass-attendance-range::-webkit-slider-runnable-track{height:8px;background:linear-gradient(90deg,color-mix(in srgb,#4c9a61 31%,var(--card)) 0%,color-mix(in srgb,#aaa59b 20%,var(--card)) 50%,color-mix(in srgb,#c45a54 31%,var(--card)) 100%)}
+.legacy-mass-roster-card .mass-attendance-range::-moz-range-track{height:8px;background:linear-gradient(90deg,color-mix(in srgb,#4c9a61 31%,var(--card)) 0%,color-mix(in srgb,#aaa59b 20%,var(--card)) 50%,color-mix(in srgb,#c45a54 31%,var(--card)) 100%)}
+.legacy-mass-roster-card .mass-attendance-range::-webkit-slider-thumb{width:24px;height:24px;margin-top:-9px}
+.legacy-mass-roster-card .mass-attendance-range::-moz-range-thumb{width:24px;height:24px}
+.legacy-mass-roster-card .mass-attendance-save-state{display:none}
+.legacy-mass-roster-card .mass-attendance-note,.legacy-mass-roster-card .mass-booking-admin-actions{grid-column:1/-1;margin-top:0}
+
+@media(max-width:900px){
+  .competition-roster-card{grid-template-columns:34px minmax(130px,1fr) minmax(145px,180px)!important}.competition-roster-card .competition-attendance-field,.competition-roster-card>.roster-attendance{grid-column:2/-1;justify-self:stretch}
+  .legacy-mass-roster-card{grid-template-columns:minmax(190px,1fr) minmax(280px,1.35fr)}.legacy-mass-roster-meta{grid-column:1/-1;grid-row:2}.legacy-mass-roster-card .mass-attendance-control{grid-column:2;grid-row:1}
+}
+@media(max-width:620px){
+  .competition-roster-card{grid-template-columns:30px minmax(0,1fr)!important;padding:8px!important}.competition-roster-card .cc-rsvp-control{grid-column:1/-1}.competition-roster-card .competition-attendance-field,.competition-roster-card>.roster-attendance{grid-column:1/-1}.competition-roster-card>.avatar{grid-row:1}.competition-roster-identity{grid-column:2}
+  .legacy-mass-roster-card{grid-template-columns:1fr}.legacy-mass-roster-identity,.legacy-mass-roster-meta,.legacy-mass-roster-card .mass-attendance-control{grid-column:1;grid-row:auto}.legacy-mass-roster-meta{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:430px){.legacy-mass-roster-meta{grid-template-columns:1fr 1fr}.legacy-mass-roster-meta>span:last-child{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){.competition-roster-card{transition:none!important}}
