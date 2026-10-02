@@ -2818,7 +2818,7 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 .competition-live-status.error{border-color:color-mix(in srgb,var(--red) 55%,var(--line));background:color-mix(in srgb,var(--red) 6%,var(--card));color:var(--red)}
 
 /* =========================================================
-   V0.5.2B5J — Event card UX + 24h match form
+   V0.5.2B5K — Event card UX + 24h match form
    ========================================================= */
 .cc-event-card-panel{padding:0!important;overflow:hidden}
 .cc-event-card-panel>.panel-head{margin:0;padding:11px 12px 9px;border-bottom:1px solid var(--line)}
@@ -2869,7 +2869,7 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 }
 
 /* =========================================================
-   V0.5.2B5J — UX correction + Player slider parity
+   V0.5.2B5K — UX correction + Player slider parity
    ========================================================= */
 /* Exact Player-family three-state slider behavior/visual language. */
 .attendance-slider{
@@ -2962,3 +2962,24 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   .cc-player-training-slider .slider-zone{font-size:7px;padding:0 2px}
 }
 @media(prefers-reduced-motion:reduce){.attendance-slider .slider-thumb{transition:none!important}}
+
+
+/* V0.5.2B5K — reference order + live position composition */
+.cc-event-card{
+  grid-template-columns:52px 165px 150px minmax(250px,1fr) auto!important;
+}
+.cc-event-type-icon{grid-column:1;align-self:center!important}
+.cc-event-team-summary{grid-column:2}
+.cc-event-date{grid-column:3}
+.cc-event-main{grid-column:4}
+.cc-event-logos{grid-column:5}
+.cc-event-type-icon img{filter:brightness(0)!important;opacity:.88!important}
+.cc-event-type-icon small{color:#606060!important}
+@media(max-width:980px){
+  .cc-event-card{grid-template-columns:46px 150px 135px minmax(170px,1fr) auto!important}
+}
+@media(max-width:760px){
+  .cc-event-card{grid-template-columns:42px minmax(120px,1fr) minmax(115px,.9fr)!important;grid-template-areas:"icon team date" "main main logos"!important}
+  .cc-event-type-icon{grid-area:icon!important}.cc-event-team-summary{grid-area:team!important}.cc-event-date{grid-area:date!important}.cc-event-main{grid-area:main!important}.cc-event-logos{grid-area:logos!important}
+  .cc-event-card.training{grid-template-areas:"icon team date" "main main main"!important}
+}
