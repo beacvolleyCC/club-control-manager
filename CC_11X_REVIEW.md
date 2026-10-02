@@ -1,36 +1,73 @@
-# CC 11× Review — Manager V0.5.2B5G
+# Club Control Manager V0.5.2B5I — 11× review
 
-1. Product/function — PASS static: B5E BRSZ Browser Helper path retained; combined UI additions are additive.
-2. UX/IA — PASS static: event cards prioritize headcount; notification recipients use team -> player hierarchy.
-3. UI/visual consistency — PASS static: leading team stripe removed; stronger team gradient + white identity; Player-style RSVP control.
-4. Frontend/PWA — PASS static: app.js syntax valid; SW cache bumped to B5G.
-5. Backend/API — PASS static: no existing RPC signature changed; multi-recipient send reuses cc_manager_notification_send_v1 per unique player.
-6. DB/data integrity — PASS static: no schema migration and no destructive write path added. Event RSVP writes keep existing event_id.
-7. Architecture — PASS static: BRSZ Edge V1.5 contract untouched; notification fan-out remains Manager-side over existing notification RPC.
-8. Security — PASS static: no config/secrets bundled; existing Manager permission checks retained.
-9. QA/performance/accessibility — PASS static: buttons retain labels/aria; selection is de-duplicated; live browser smoke required.
-10. DevOps/deploy/rollback — PASS static: four-file frontend replacement; rollback target B5E.
-11. Motion/interaction — PASS static: Manager RSVP supports tap + horizontal drag with vertical scrolling preserved.
+Baseline: deployed V0.5.2B5E. Date: 2026-10-02.
 
-Included since B5E:
-- B5F no-stripe stronger team gradient.
-- Large X FŐ at the start of competition training/match cards.
-- Right-side position mix for players marked Jövök: F / C / SZ / Á / L / ?.
-- Past match result remains visible when an official result exists.
-- Player-style three-state roster RSVP control.
-- Hierarchical multi-recipient notification picker: whole team / partial team / individual players.
-- Name/email/team search and de-duplicated recipient count.
-- Push status wording: Push aktív · N eszköz / Push nincs engedélyezve.
-- Event detail Értesítés button prefills that event and its team.
+1. Product/function — PASS static
+- New training/match cards follow the approved compact roster-first UX.
+- Normal match has no finish time; friendly match requires one.
+- Home-match defaults: Women I court 3, Women II court 2, Men court 3; Bogdánfy venue/address.
+- Standings section remains in Matches.
 
-Not included in this frontend-only release:
-- Federation-change review/acknowledge + notify-after-sync workflow (requires MGR015 backend contract).
-- Sportorvosi post-appointment follow-up workflow (requires Player/Manager backend migration).
+2. UX / IA — PASS static
+- Large Going/roster count is first; position mix follows it.
+- Player event icons reused for training/home/away.
+- No fake opponent logo: opponent logo renders only when standings source provides logoUrl.
 
+3. UI / visual consistency — PASS static
+- No strong gradient / no extra team stripe in the new cards.
+- Flat, subtle team tint only.
+- Warning thresholds: total <6 red, 6–9 amber; F/L/A 0 red 1 amber; OH/MB 0–1 red 2 amber.
 
-## B5H delta
-- Visual-only gradient softening on competition training/match cards.
-- Leading stripe remains removed.
-- White identity/headcount text remains on the darker left zone.
-- BRSZ sync logic unchanged; app.js changes are build/version labels only.
-- No backend/RPC/schema changes.
+4. Frontend / PWA — PASS static
+- app.js syntax: PASS.
+- index duplicate IDs: 0.
+- service-worker cache bumped and four new assets included.
+- No native input[type=time] remains in the Manager build.
+
+5. Backend/API — PASS static contract / LIVE PENDING
+- B5I uses existing Manager RPC contracts; no browser secret added.
+- MGR015 only replaces cc_competition_sync_apply_team_v1 with a guarded identity-recovery extension.
+- MGR014 results/standings RPC is separate and not modified.
+
+6. DB / data integrity — PASS static / LIVE PENDING
+- Existing linked event ID wins.
+- If a technical source key changes, relink occurs only when exact home/away source-team pair is unique for the watched team/season.
+- Kickoff time is deliberately excluded from recovery identity so schedule changes can update the same event.
+- Ambiguous pair matches are not guessed.
+- Availability/RSVP rows remain because public.events.id is updated in place rather than replaced.
+
+7. Architecture — PASS
+- Supabase remains canonical.
+- Browser Helper only reads public BRSZ pages; Edge/service-role path remains privileged backend path.
+- BRSZ automated cloud bypass is not introduced.
+
+8. Security — PASS static / LIVE POSTCHECK REQUIRED
+- authenticated cannot execute apply-team.
+- service_role remains the only apply-team executor.
+- authenticated direct UPDATE on competition_source_matches remains denied.
+
+9. QA / performance / accessibility — PASS static / physical smoke pending
+- New event rows are buttons and preserve keyboard focus visibility.
+- Warning colors also retain numeric values; color is not the sole information carrier.
+- Card layout has desktop/tablet/mobile breakpoints.
+- Physical desktop/mobile smoke still required.
+
+10. DevOps / deploy / rollback — PASS
+- MGR015 includes read-only PRECHECK, INSTALL, POSTCHECK, and rollback.
+- Frontend update is isolated from config.js.
+- Browser Helper V1.1 is separately deployable/rollbackable.
+- Edge Function V1.5 does not need redeploy for this release.
+
+11. Motion / interaction — PASS static
+- Existing Player notification swipe is outside this repo and untouched.
+- No global gesture changes.
+- Card hover/press motion is minimal and reduced-motion-compatible through existing platform behavior.
+
+Release blockers before claiming live PASS:
+1. MGR015 PRECHECK all TRUE.
+2. MGR015 install + POSTCHECK all TRUE.
+3. Browser Helper V1.1 reload.
+4. Manager B5I deploy and hard refresh.
+5. BRSZ refresh smoke: changed kickoff updates same match; no duplicate; prior RSVP count remains.
+6. Home match creation smoke for all three teams.
+7. Normal/friendly match form smoke and 24-hour display smoke.
