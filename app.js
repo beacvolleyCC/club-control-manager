@@ -1,10 +1,10 @@
 (()=>{
   'use strict';
 
-  const FRONTEND_BUILD='manager-pwa-v0.5.2b5c-mgr014-html-id-fix';
+  const FRONTEND_BUILD='manager-pwa-v0.5.2b5d-brsz-browser-helper';
 
   const cfg=Object.freeze({...{
-    BUILD:'manager-pwa-v0.5.2b5c-mgr014-html-id-fix',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
+    BUILD:'manager-pwa-v0.5.2b5d-brsz-browser-helper',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
   },...(window.CC_MANAGER_CONFIG||{})});
 
   const AREAS={
@@ -179,7 +179,7 @@
   async function requestCode(){const email=text($('#loginEmail')?.value).toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){loginMessage('#loginMsg','Adj meg egy érvényes email címet.',true);return}const b=$('#requestCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginMsg','Kód küldése…');const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});if(error)throw error;state.pendingEmail=email;$('#loginEmailPreview').textContent=email;showLogin('loginCodeStep');loginMessage('#loginCodeMsg','A kódot elküldtük.')}catch(err){loginMessage('#loginMsg',err.message||'A kód küldése sikertelen.',true)}finally{if(b)b.disabled=false}}
   async function verifyCode(){const token=text($('#loginCode')?.value).replace(/\D/g,'');if(token.length<6){loginMessage('#loginCodeMsg','Írd be az emailben kapott kódot.',true);return}const b=$('#verifyCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginCodeMsg','Ellenőrzés…');const {data,error}=await state.supabase.auth.verifyOtp({email:state.pendingEmail,token,type:'email'});if(error)throw error;state.session=data.session||null;await loadLiveData();hideLogin()}catch(err){loginMessage('#loginCodeMsg',err.message||'A belépés sikertelen.',true)}finally{if(b)b.disabled=false}}
 
-  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='V0.5.2B5C';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · V0.5.2B5C';}
+  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='V0.5.2B5D';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · V0.5.2B5D';}
 
   async function loadLiveData(){
     state.loading=true;status('Manager adatok frissítése…');
@@ -893,19 +893,65 @@
     if(missing.length)throw new Error(`Hiányzó BRSZ oldal: ${missing.map(id=>CC_BRSZ_COMPETITION_HTML_V1[id]).join(', ')}.`);
     return Object.keys(CC_BRSZ_COMPETITION_HTML_V1).map(id=>byId.get(id));
   }
+  const CC_BRSZ_HELPER_PAGE_SOURCE='CC_MANAGER';
+  const CC_BRSZ_HELPER_SOURCE='CC_BRSZ_HELPER';
+  const ccBrszHelperPending_=new Map();
+  function ccBrszHelperMessage_(event){
+    if(event.source!==window)return;
+    const d=event.data||{};if(d.source!==CC_BRSZ_HELPER_SOURCE)return;
+    const requestId=text(d.requestId),pending=requestId?ccBrszHelperPending_.get(requestId):null;
+    if(d.type==='ACK'){
+      if(pending){pending.acked=true;clearTimeout(pending.installTimer);status(`BRSZ Helper kapcsolódva${d.version?` · v${text(d.version)}`:''}.`)}
+      return;
+    }
+    if(d.type==='PROGRESS'){
+      if(pending&&d.message)status(text(d.message));
+      return;
+    }
+    if(d.type==='RESULT'){
+      if(!pending)return;clearTimeout(pending.installTimer);ccBrszHelperPending_.delete(requestId);pending.resolve(Array.isArray(d.documents)?d.documents:[]);return;
+    }
+    if(d.type==='ERROR'){
+      if(!pending)return;clearTimeout(pending.installTimer);ccBrszHelperPending_.delete(requestId);pending.reject(new Error(text(d.message)||'A BRSZ Helper hibát jelzett.'));return;
+    }
+  }
+  window.addEventListener('message',ccBrszHelperMessage_,false);
+  function ccRequestBrszHelperDocuments_(){
+    return new Promise((resolve,reject)=>{
+      const requestId=(crypto.randomUUID?.()||`cc-${Date.now()}-${Math.random().toString(16).slice(2)}`),pending={resolve,reject,acked:false,installTimer:null};
+      pending.installTimer=setTimeout(()=>{
+        if(pending.acked)return;
+        ccBrszHelperPending_.delete(requestId);
+        reject(new Error('A Club Control BRSZ Helper nem érhető el. Telepítsd/engedélyezd a Chrome-kiegészítőt, majd frissítsd ezt az oldalt.'));
+      },1400);
+      ccBrszHelperPending_.set(requestId,pending);
+      window.postMessage({source:CC_BRSZ_HELPER_PAGE_SOURCE,type:'CC_BRSZ_HELPER_START',requestId,season:'2026/27'},window.location.origin);
+    });
+  }
+  function ccValidateHelperDocuments_(documents){
+    if(!Array.isArray(documents)||documents.length!==3)throw new Error('A BRSZ Helper nem adott vissza három bajnokságoldalt.');
+    const expected=new Set(Object.keys(CC_BRSZ_COMPETITION_HTML_V1)),seen=new Set();
+    for(const doc of documents){
+      const id=text(doc?.competitionId),html=String(doc?.html||'');
+      if(!expected.has(id))throw new Error(`Ismeretlen BRSZ bajnokságazonosító: ${id||'üres'}.`);
+      if(seen.has(id))throw new Error(`${CC_BRSZ_COMPETITION_HTML_V1[id]} kétszer érkezett a Helperből.`);
+      if(html.length<2000)throw new Error(`${CC_BRSZ_COMPETITION_HTML_V1[id]} oldala üres vagy nem teljes.`);
+      if(!html.includes(`bajnoksag_id=${id}`))throw new Error(`${CC_BRSZ_COMPETITION_HTML_V1[id]} oldala nem egyezik a várt forrással.`);
+      seen.add(id);
+    }
+    const missing=[...expected].filter(id=>!seen.has(id));if(missing.length)throw new Error(`Hiányzó BRSZ oldal: ${missing.map(id=>CC_BRSZ_COMPETITION_HTML_V1[id]).join(', ')}.`);
+    return documents.map(doc=>({competitionId:text(doc.competitionId),name:text(doc.name)||`brsz-${text(doc.competitionId)}.html`,html:String(doc.html||''),encoding:'utf-8'}));
+  }
   async function runCompetitionSourceSync_(){
     if(state.competitionSyncBusy)return;
     if(!state.supabase?.functions)throw new Error('A Supabase Edge Functions kliens nem érhető el.');
-    status('Válaszd ki egyszerre a három mentett BRSZ bajnokságoldalt.');
-    const files=await ccPickBrszHtmlFiles_();
-    if(!files.length){status('A BRSZ frissítés megszakítva.');return}
-    state.competitionSyncBusy=true;renderCompetitionMatchCards_();status('BRSZ HTML ellenőrzése…');
+    state.competitionSyncBusy=true;renderCompetitionMatchCards_();status('BRSZ Helper indítása…');
     try{
-      const documents=await ccPrepareBrszHtmlDocuments_(files);
+      const documents=ccValidateHelperDocuments_(await ccRequestBrszHelperDocuments_());
       status('BRSZ adatok feldolgozása…');
-      const {data,error}=await state.supabase.functions.invoke('cc-competition-sync',{body:{source:'brsz',season:'2026/27',mode:'html_import',documents}});
+      const {data,error}=await state.supabase.functions.invoke('cc-competition-sync',{body:{source:'brsz',season:'2026/27',mode:'browser_helper',documents}});
       if(error)throw error;
-      if(!data?.ok)throw new Error((data?.errors||[]).join(' · ')||data?.message||'A BRSZ HTML import sikertelen.');
+      if(!data?.ok)throw new Error((data?.errors||[]).join(' · ')||data?.message||'A BRSZ Browser Helper import sikertelen.');
       await Promise.all([loadCompetitionSyncStatus(),loadCompetitionResultsStandings().catch(()=>{}),loadActivityEvents(),loadCalendar()]);
       state.events=state.calendarEvents;
       renderCompetitionMatchCards_();
@@ -920,7 +966,7 @@
     state.eventFiltersOpen=filterOpen_('competition.matches',false);
     const rows=filteredActivityEvents(e=>eventType(e)==='match'),active=teamFilterIds_('events').length>0||state.eventPeriod!=='upcoming';
     const periodTitle=state.eventPeriod==='past'?'Elmúlt meccsek':state.eventPeriod==='all'?'Összes meccs':'Következő meccsek';
-    $('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Meccsek</h2><p>Hazai és idegenbeli mérkőzések az Áttekintéssel azonos kompakt, színkódolt kártyanézetben.</p></div><div class="page-actions">${canAnyAction('competition.matches','edit')?`<button class="button quiet small sync-button" id="competitionSourceSync" type="button" title="A három mentett BRSZ bajnokságoldal importálása" ${state.competitionSyncBusy?'disabled':''}>${state.competitionSyncBusy?'Frissítés…':'BRSZ frissítés'}</button><button class="button primary small" id="competitionMatchAdd" type="button">+ Új meccs</button>`:''}</div></div><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}</div><div class="event-filter-head"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button"><span class="triangle-icon"></span>Szűrők</button>${active?'<button class="filter-reset" id="eventFilterReset" type="button">Szűrők törlése</button>':''}</div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${state.eventPeriod==='upcoming'?'selected':''}>Aktuális / közelgő</option><option value="past" ${state.eventPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${state.eventPeriod==='all'?'selected':''}>Mind</option></select></label></div><article class="panel next-matches-card competition-match-card-list"><div class="panel-head"><div><h3>${periodTitle}</h3><p>${rows.length} mérkőzés a szűrésben</p></div></div><div class="legacy-overview-list gradient-match-list">${rows.map(e=>`<button type="button" class="legacy-overview-row gradient-match-row match-gradient-row ${isEventPast(e)?'past':''}" data-event-id="${esc(e.eventId||e.id)}" style="--team-color:${esc(e.color||teamById(eventTeamId(e))?.color||'#f7b700')}"><span class="legacy-overview-accent"></span><div><b>${esc(e.teamName||teamById(eventTeamId(e))?.name||'Csapat')}</b><small>${esc(e.title||'Meccs')}</small></div><div><b>${esc(fmtDate(eventStart(e)))}</b><small>${esc(fmtTime(eventStart(e)))}${eventEnd(e)?` – ${esc(fmtTime(eventEnd(e)))}`:''}</small></div><div><b>${esc(eventPlace(e))}</b><small>${esc(text(e.homeAway||e.home_away)==='home'?'Hazai':text(e.homeAway||e.home_away)==='away'?'Idegen':'Helyszín')}</small></div><div>${matchResultOrRsvp_(e)}</div></button>`).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article>${standingsSection_('events')}`;
+    $('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Meccsek</h2><p>Hazai és idegenbeli mérkőzések az Áttekintéssel azonos kompakt, színkódolt kártyanézetben.</p></div><div class="page-actions">${canAnyAction('competition.matches','edit')?`<button class="button quiet small sync-button" id="competitionSourceSync" type="button" title="BRSZ frissítés a Club Control Browser Helperrel" ${state.competitionSyncBusy?'disabled':''}>${state.competitionSyncBusy?'Frissítés…':'BRSZ frissítés'}</button><button class="button primary small" id="competitionMatchAdd" type="button">+ Új meccs</button>`:''}</div></div><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}</div><div class="event-filter-head"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button"><span class="triangle-icon"></span>Szűrők</button>${active?'<button class="filter-reset" id="eventFilterReset" type="button">Szűrők törlése</button>':''}</div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${state.eventPeriod==='upcoming'?'selected':''}>Aktuális / közelgő</option><option value="past" ${state.eventPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${state.eventPeriod==='all'?'selected':''}>Mind</option></select></label></div><article class="panel next-matches-card competition-match-card-list"><div class="panel-head"><div><h3>${periodTitle}</h3><p>${rows.length} mérkőzés a szűrésben</p></div></div><div class="legacy-overview-list gradient-match-list">${rows.map(e=>`<button type="button" class="legacy-overview-row gradient-match-row match-gradient-row ${isEventPast(e)?'past':''}" data-event-id="${esc(e.eventId||e.id)}" style="--team-color:${esc(e.color||teamById(eventTeamId(e))?.color||'#f7b700')}"><span class="legacy-overview-accent"></span><div><b>${esc(e.teamName||teamById(eventTeamId(e))?.name||'Csapat')}</b><small>${esc(e.title||'Meccs')}</small></div><div><b>${esc(fmtDate(eventStart(e)))}</b><small>${esc(fmtTime(eventStart(e)))}${eventEnd(e)?` – ${esc(fmtTime(eventEnd(e)))}`:''}</small></div><div><b>${esc(eventPlace(e))}</b><small>${esc(text(e.homeAway||e.home_away)==='home'?'Hazai':text(e.homeAway||e.home_away)==='away'?'Idegen':'Helyszín')}</small></div><div>${matchResultOrRsvp_(e)}</div></button>`).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article>${standingsSection_('events')}`;
     $('#competitionSourceSync')?.addEventListener('click',runCompetitionSourceSync_);
     $('#competitionMatchImport')?.addEventListener('click',openBRSZMatchImport_);
     $('#competitionMatchAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'match'));
@@ -1215,7 +1261,7 @@
   function collectAdminPermissionPayload(){const out=[];$$('[data-admin-module-row]').forEach(row=>{const key=row.dataset.adminModuleRow,view=row.querySelector('[data-right="view"]')?.checked===true,edit=row.querySelector('[data-right="edit"]')?.checked===true,notify=row.querySelector('[data-right="notify"]')?.checked===true;if(!(view||edit||notify))return;if(key.startsWith('competition.')){const all=row.querySelector('[data-scope-all]')?.checked===true,teams=Array.from(row.querySelectorAll('[data-scope-team]')).filter(x=>x.checked).map(x=>x.value);if(all||!teams.length)out.push({moduleKey:key,teamId:null,canView:view,canEdit:edit,canNotify:notify});else teams.forEach(teamId=>out.push({moduleKey:key,teamId,canView:view,canEdit:edit,canNotify:notify}))}else out.push({moduleKey:key,teamId:null,canView:view,canEdit:edit,canNotify:notify})});return out}
   async function saveAdminEditorSafe(){if(state.adminBusy)return;const email=text($('#adminEmail')?.value).toLowerCase(),name=text($('#adminDisplayName')?.value),active=$('#adminActive')?.checked!==false,payload=collectAdminPermissionPayload();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status('Adj meg érvényes admin email címet.','error');return}const existing=state.adminEditId==='__new__'?null:(state.admins||[]).find(a=>text(a.id)===text(state.adminEditId));state.adminBusy=true;renderSettings();try{status('Admin és jogosultságok mentése…');const saved=await rpc('cc_manager_admin_save_v1',{p_manager_id:existing?.id||null,p_email:email,p_display_name:name,p_active:active,p_permissions:payload});await loadAdmins();state.adminEditId=text(saved?.account?.id||existing?.id);status('Admin mentve.','success')}catch(err){console.error(err);status(err.message||'Az admin mentése sikertelen.','error')}finally{state.adminBusy=false;renderSettings()}}
   function bindAdminEditor(){$$('[data-admin-edit]').forEach(b=>b.addEventListener('click',()=>{state.adminEditId=b.dataset.adminEdit;renderSettings()}));$('#adminAddBtn')?.addEventListener('click',()=>{state.adminEditId='__new__';renderSettings()});$('#adminCancelBtn')?.addEventListener('click',()=>{state.adminEditId='';renderSettings()});$('#adminSaveBtn')?.addEventListener('click',saveAdminEditorSafe);$('#adminViewAllBtn')?.addEventListener('click',()=>{$$('[data-admin-module-row]').forEach(r=>{const v=r.querySelector('[data-right="view"]');if(v)v.checked=true});});$('#adminFullBtn')?.addEventListener('click',()=>{$$('[data-admin-module-row]').forEach(r=>{['view','edit','notify'].forEach(k=>{const x=r.querySelector(`[data-right="${k}"]`);if(x)x.checked=true});const all=r.querySelector('[data-scope-all]');if(all){all.checked=true;Array.from(r.querySelectorAll('[data-scope-team]')).forEach(x=>{x.checked=false;x.disabled=true})}})});$$('[data-scope-all]').forEach(x=>x.addEventListener('change',()=>{Array.from(x.closest('[data-admin-module-row]').querySelectorAll('[data-scope-team]')).forEach(t=>{t.disabled=x.checked;if(x.checked)t.checked=false})}))}
-  function renderSettings(){const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">V0.5.2B5C</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
+  function renderSettings(){const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">V0.5.2B5D</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
 
   function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`}
 
