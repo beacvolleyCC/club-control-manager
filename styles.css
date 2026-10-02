@@ -2984,3 +2984,89 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   .cc-event-card.training{grid-template-areas:"icon team date" "main main main"!important}
 }
 \n\n/* V0.5.2B5L — opponent logo inline; no own-team logo on event cards */\n.cc-event-card{grid-template-columns:52px 165px 150px minmax(250px,1fr)!important}\n.cc-event-type-icon{grid-column:1}.cc-event-team-summary{grid-column:2}.cc-event-date{grid-column:3}.cc-event-main{grid-column:4;min-width:0}\n.cc-event-logos{display:none!important}\n.cc-event-opponent-head{display:flex;align-items:center;gap:8px;min-width:0}\n.cc-event-opponent-head strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.cc-event-opponent-logo{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.08);display:grid;place-items:center;overflow:hidden}\n.cc-event-opponent-logo img{width:100%;height:100%;object-fit:contain;padding:3px}\n@media(max-width:980px){.cc-event-card{grid-template-columns:46px 150px 135px minmax(170px,1fr)!important}}\n@media(max-width:760px){\n  .cc-event-card{grid-template-columns:42px minmax(120px,1fr) minmax(115px,.9fr)!important;grid-template-areas:\"icon team date\" \"main main main\"!important}\n  .cc-event-type-icon{grid-area:icon!important}.cc-event-team-summary{grid-area:team!important}.cc-event-date{grid-area:date!important}.cc-event-main{grid-area:main!important}\n  .cc-event-opponent-logo{width:28px;height:28px;flex-basis:28px}\n}\n
+
+/* ==========================================================================
+   V0.5.2B5M — unified player / roster reference card
+   ========================================================================== */
+.cc-player-filter-toolbar{grid-template-columns:minmax(240px,1.45fr) minmax(210px,1fr) minmax(150px,.62fr) minmax(150px,.62fr)!important}
+.cc-player-directory-surface{padding:0!important;overflow:hidden}
+.cc-unified-player-list{display:grid;gap:0}
+.cc-player-wide-card{
+  width:100%;min-height:74px;display:grid;
+  grid-template-columns:58px minmax(330px,1.55fr) minmax(145px,.62fr) minmax(170px,.72fr) 34px;
+  align-items:center;gap:10px;padding:7px 12px;
+  border:0;border-bottom:1px solid var(--line);border-radius:0;background:var(--card);color:var(--black);
+  text-align:left;position:relative;cursor:pointer;transition:background .14s ease,opacity .14s ease;
+}
+.cc-player-wide-card:last-child{border-bottom:0}
+.cc-player-wide-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,color-mix(in srgb,var(--player-team-color,#aaa) 7%,transparent),transparent 42%);opacity:.55}
+.cc-player-wide-card:hover{background:color-mix(in srgb,var(--player-team-color,#aaa) 4%,var(--card))}
+.cc-player-wide-card.is-inactive{opacity:.58}
+.cc-player-avatar-license{display:grid;justify-items:center;gap:2px;position:relative;z-index:1}
+.cc-player-avatar-license .cc-avatar.table{width:34px;height:34px}
+.cc-player-avatar-license small{font-size:8px;font-weight:900;line-height:1;color:var(--black);min-height:8px}
+.cc-player-wide-main,.cc-player-wide-team,.cc-player-wide-stats,.cc-player-wide-actions,.cc-player-wide-chevron{position:relative;z-index:1;min-width:0}
+.cc-player-wide-main{display:grid;gap:5px}
+.cc-player-name-line{display:flex;align-items:baseline;gap:7px;min-width:0;white-space:nowrap;line-height:1}
+.cc-player-jersey{font-size:29px;line-height:.95;font-weight:500;letter-spacing:-1px;min-width:28px}
+.cc-player-name-line strong{font-size:26px;line-height:.95;font-weight:950;letter-spacing:.4px;overflow:hidden;text-overflow:ellipsis}
+.cc-player-name-line em{font-size:24px;line-height:.95;font-style:normal;font-weight:450;overflow:hidden;text-overflow:ellipsis}
+.cc-player-wide-chips{display:flex;gap:5px;align-items:center;min-width:0;flex-wrap:wrap}
+.cc-player-chip{font-size:7px;font-style:normal;font-weight:800;line-height:1;padding:4px 7px;border-radius:999px;background:var(--soft);color:#555;white-space:nowrap}
+.cc-player-chip.medical.expired,.cc-player-chip.medical.expiring{background:#fff0ee;color:#b82920}
+.cc-player-chip.medical.valid{background:#eef5ec;color:#426c35}
+.cc-player-chip.inactive{background:#eee;color:#777}
+.cc-player-wide-team{display:grid;gap:5px;align-content:center}
+.cc-player-wide-team b{font-size:12px;line-height:1.1}
+.cc-player-wide-team small{font-size:8px;color:var(--muted)}
+.cc-player-wide-stats{display:grid;gap:5px;font-size:9px;color:#777}
+.cc-player-wide-stats span{white-space:nowrap}
+.cc-player-wide-stats b{font-size:10px;color:var(--black)}
+.cc-player-wide-actions{display:flex;align-items:center;gap:8px;min-width:150px;justify-content:flex-end}
+.cc-player-wide-actions .cc-player-grid-slider{min-width:145px;max-width:180px}
+.cc-player-wide-actions .competition-attendance-field{min-width:105px}
+.cc-player-wide-chevron{font-style:normal;font-size:48px;line-height:.7;font-weight:200;text-align:center;color:#050505;transform:translateY(-1px)}
+.cc-player-team-groups{display:grid;gap:14px;padding:12px;background:var(--soft)}
+.cc-player-team-group{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.cc-player-team-group-head{min-height:48px;display:grid;grid-template-columns:5px 1fr auto;align-items:center;gap:10px;padding:0 12px 0 0;border-bottom:1px solid var(--line)}
+.cc-player-team-group-head>span{align-self:stretch;background:var(--group-team-color,#aaa)}
+.cc-player-team-group-head h3{margin:0;font-size:14px}
+.cc-player-team-group-head small{font-size:8px;color:var(--muted)}
+.cc-player-team-group-head>b{font-size:11px}
+.team-detail-panel .cc-unified-player-list{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.team-detail-panel .cc-player-wide-card{grid-template-columns:58px minmax(280px,1.45fr) minmax(145px,.65fr) minmax(160px,.72fr) 34px}
+.team-detail-panel .cc-player-wide-actions{display:none}
+.competition-roster-list.cc-unified-player-list{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.competition-roster-card{grid-template-columns:58px minmax(270px,1.35fr) minmax(135px,.6fr) minmax(155px,.7fr) minmax(260px,.9fr) 34px!important}
+.competition-roster-card .cc-player-grid-slider{grid-column:auto!important;min-width:145px}
+.competition-roster-card .competition-attendance-field{grid-column:auto!important}
+.cc-unified-roster-group>div{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.cc-unified-roster-group .cc-player-wide-card{grid-template-columns:52px minmax(260px,1.4fr) minmax(130px,.62fr) minmax(150px,.72fr) 30px;min-height:66px;padding:6px 9px}
+.cc-unified-roster-group .cc-player-jersey{font-size:24px}.cc-unified-roster-group .cc-player-name-line strong{font-size:20px}.cc-unified-roster-group .cc-player-name-line em{font-size:18px}
+
+@media(max-width:1150px){
+  .cc-player-wide-card{grid-template-columns:54px minmax(270px,1.35fr) minmax(130px,.58fr) minmax(155px,.68fr) 30px}
+  .cc-player-name-line strong{font-size:22px}.cc-player-name-line em{font-size:20px}.cc-player-jersey{font-size:25px}
+  .competition-roster-card{grid-template-columns:54px minmax(235px,1.25fr) minmax(120px,.55fr) minmax(145px,.65fr) minmax(220px,.9fr) 30px!important}
+}
+@media(max-width:850px){
+  .cc-player-filter-toolbar{grid-template-columns:1fr 1fr!important}
+  .cc-player-wide-card,.team-detail-panel .cc-player-wide-card,.competition-roster-card,.cc-unified-roster-group .cc-player-wide-card{
+    grid-template-columns:48px minmax(0,1fr) 30px!important;gap:8px;align-items:start
+  }
+  .cc-player-avatar-license{grid-column:1;grid-row:1/4}
+  .cc-player-wide-main{grid-column:2;grid-row:1}
+  .cc-player-wide-team{grid-column:2;grid-row:2}
+  .cc-player-wide-stats{grid-column:2;grid-row:3;display:flex;gap:12px;flex-wrap:wrap}
+  .cc-player-wide-actions{grid-column:1/-1;grid-row:4;justify-content:stretch;min-width:0}
+  .cc-player-wide-actions .cc-player-grid-slider{max-width:none;width:100%}
+  .cc-player-wide-chevron{grid-column:3;grid-row:1/4;align-self:center}
+  .cc-player-name-line{white-space:normal;flex-wrap:wrap;gap:5px}
+  .cc-player-name-line strong{font-size:19px}.cc-player-name-line em{font-size:18px}.cc-player-jersey{font-size:22px}
+}
+@media(max-width:560px){
+  .cc-player-filter-toolbar{grid-template-columns:1fr!important}
+  .cc-player-wide-card{padding:8px 7px}
+  .cc-player-wide-chips{gap:3px}.cc-player-chip{font-size:6.5px;padding:3px 5px}
+  .cc-player-team-groups{padding:7px;gap:9px}
+}
