@@ -26,3 +26,11 @@ Included since B5E:
 Not included in this frontend-only release:
 - Federation-change review/acknowledge + notify-after-sync workflow (requires MGR015 backend contract).
 - Sportorvosi post-appointment follow-up workflow (requires Player/Manager backend migration).
+
+
+## B5H delta
+- Visual-only gradient softening on competition training/match cards.
+- Leading stripe remains removed.
+- White identity/headcount text remains on the darker left zone.
+- BRSZ sync logic unchanged; app.js changes are build/version labels only.
+- No backend/RPC/schema changes.

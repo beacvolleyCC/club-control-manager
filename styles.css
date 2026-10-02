@@ -2841,7 +2841,7 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 }
 
 /* =========================================================
-   V0.5.2B5G — combined Manager UI round
+   V0.5.2B5H — combined Manager UI round (softened gradient)
    - stronger gradient cards without leading stripe
    - large headcount + position mix
    - Player-parity RSVP control
@@ -2853,11 +2853,11 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   min-height:58px;
   padding:8px 10px!important;
   background:linear-gradient(100deg,
-    color-mix(in srgb,var(--team-color) 64%,#111 36%) 0%,
-    color-mix(in srgb,var(--team-color) 72%,#171717 28%) 25%,
-    color-mix(in srgb,var(--team-color) 34%,var(--card)) 46%,
-    color-mix(in srgb,var(--team-color) 10%,var(--card)) 68%,
-    var(--card) 100%)!important;
+    color-mix(in srgb,var(--team-color) 42%,#202020 58%) 0%,
+    color-mix(in srgb,var(--team-color) 46%,#292929 54%) 16%,
+    color-mix(in srgb,var(--team-color) 18%,var(--card)) 34%,
+    color-mix(in srgb,var(--team-color) 5%,var(--card)) 52%,
+    var(--card) 74%)!important;
 }
 .event-headcount-big{display:flex;align-items:baseline;justify-content:flex-start;gap:4px;color:#fff;white-space:nowrap;min-width:0;text-shadow:0 1px 1px rgba(0,0,0,.18)}
 .event-headcount-big b{font-size:22px!important;line-height:1;font-weight:950!important;color:#fff!important;font-variant-numeric:tabular-nums}
@@ -2920,7 +2920,7 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   .event-position-mix{gap:3px}.event-position-mix>span{min-width:24px;padding:3px 4px}
 }
 @media(max-width:779px){
-  .gradient-match-row{grid-template-columns:52px minmax(0,1fr) auto!important;gap:8px!important;min-height:62px;background:linear-gradient(100deg,color-mix(in srgb,var(--team-color) 64%,#111 36%) 0%,color-mix(in srgb,var(--team-color) 70%,#171717 30%) 42%,color-mix(in srgb,var(--team-color) 20%,var(--card)) 68%,var(--card) 100%)!important}
+  .gradient-match-row{grid-template-columns:52px minmax(0,1fr) auto!important;gap:8px!important;min-height:62px;background:linear-gradient(100deg,color-mix(in srgb,var(--team-color) 42%,#202020 58%) 0%,color-mix(in srgb,var(--team-color) 45%,#292929 55%) 28%,color-mix(in srgb,var(--team-color) 14%,var(--card)) 52%,var(--card) 82%)!important}
   .gradient-match-row>div:nth-of-type(3),.gradient-match-row>div:nth-of-type(4){display:none}
   .gradient-match-row>div:last-child{grid-column:2/-1;justify-self:stretch;margin-top:2px}
   .event-position-mix{justify-content:flex-start;overflow-x:auto;padding-bottom:1px}.event-position-mix>span{flex:0 0 auto}

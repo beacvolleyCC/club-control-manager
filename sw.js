@@ -1,4 +1,4 @@
-const CACHE='cc-manager-v0-5-2b5g-combined-ui';
+const CACHE='cc-manager-v0-5-2b5h-soft-gradient';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest',
   './assets/player-animals.webp','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
