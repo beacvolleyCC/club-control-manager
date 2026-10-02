@@ -2793,7 +2793,7 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 
 
 /* =========================================================
-   V0.5.2B5A — MGR014 403/UI hotfix
+   V0.5.2B5B — MGR014 local HTML import
    ========================================================= */
 .competition-sync-strip{min-width:0;max-width:100%;overflow:hidden}
 .competition-sync-strip>span:not(.sync-dot){min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word;line-height:1.35}
