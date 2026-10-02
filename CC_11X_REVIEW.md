@@ -1,4 +1,4 @@
-# Club Control Manager V0.5.2B5K — Card order + position data correction
+# Club Control Manager V0.5.2B5L — Card order + position data correction
 
 Date: 2026-10-02
 Baseline: V0.5.2B5J
@@ -24,3 +24,10 @@ Baseline: V0.5.2B5J
 9. QA/performance/accessibility — matrix is one season RPC; roster cache only fallback. Live smoke pending.
 10. DevOps/rollback — frontend-only; rollback to B5J.
 11. Motion/interaction — unchanged.
+
+
+## B5L opponent logo correction
+- Own BEAC logo removed from event cards.
+- Opponent logo renders immediately before opponent name only when a real logoUrl exists.
+- No placeholder/empty logo slot when unavailable.
+- Opponent ranking remains in the muted metadata line.
