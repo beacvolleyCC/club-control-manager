@@ -1,4 +1,4 @@
-# Manager V0.5.2B5O — Overview Card + Player Grid Parity + Avatar60
+# Manager V0.5.2B5P — Overview Card + Player Grid Parity + Avatar60
 
 1. Product — PASS static: Overview upcoming matches reuse canonical match-card component; matrix RSVP editing uses Player-style 3-state capsules.
 2. UX — PASS static: same event-card language between Meccsek and Overview; grid keeps events vertical / players horizontal.
@@ -17,3 +17,5 @@ Regression lock:
 - BRSZ Edge/Helper: NOT MODIFIED
 - MGR015 schedule identity backend: NOT MODIFIED
 - live browser smoke: PENDING
+
+- B5P artwork refinement: Manager now uses the same corrected 60-avatar atlas as Player P10; original indices 0–51 remain unchanged.

@@ -3072,7 +3072,7 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 }
 
 
-/* V0.5.2B5O — Overview event card parity + Player-grid RSVP parity + Avatar60 */
+/* V0.5.2B5P — Overview event card parity + Player-grid RSVP parity + Avatar60 */
 .next-matches-card .overview-event-card-list{padding:8px;gap:6px}
 .next-matches-card .cc-event-card{width:100%;grid-template-columns:42px 128px 115px minmax(150px,1fr)!important;gap:8px!important;padding:7px 8px!important}
 .next-matches-card .cc-event-type-icon img{width:30px!important;height:30px!important}
