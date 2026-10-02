@@ -2818,7 +2818,7 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 .competition-live-status.error{border-color:color-mix(in srgb,var(--red) 55%,var(--line));background:color-mix(in srgb,var(--red) 6%,var(--card));color:var(--red)}
 
 /* =========================================================
-   V0.5.2B5I — Event card UX + 24h match form
+   V0.5.2B5J — Event card UX + 24h match form
    ========================================================= */
 .cc-event-card-panel{padding:0!important;overflow:hidden}
 .cc-event-card-panel>.panel-head{margin:0;padding:11px 12px 9px;border-bottom:1px solid var(--line)}
@@ -2867,3 +2867,98 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   .cc-event-card-list{padding:6px;gap:5px}.cc-event-card{grid-template-columns:minmax(110px,1fr) 42px minmax(0,1fr);gap:7px;padding:7px;border-radius:9px}
   .cc-event-team-summary>strong{font-size:11px}.cc-event-total{min-width:44px;padding:2px 4px}.cc-event-total b{font-size:18px}.cc-event-total i{font-size:9px}.cc-pos-breakdown{gap:2px}.cc-pos-breakdown span{padding:1px 3px;font-size:6.5px}.cc-event-type-icon img{width:34px;height:34px;padding:6px}.cc-event-type-icon small{font-size:5.8px}.cc-event-date b{font-size:11px}.cc-event-main strong{font-size:12px}.cc-event-date small,.cc-event-main small{font-size:6.5px}.cc-event-logo{width:34px;height:34px}
 }
+
+/* =========================================================
+   V0.5.2B5J — UX correction + Player slider parity
+   ========================================================= */
+/* Exact Player-family three-state slider behavior/visual language. */
+.attendance-slider{
+  position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;
+  height:38px;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--soft);
+  touch-action:pan-y!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;
+}
+.attendance-slider .slider-zone{
+  position:relative;z-index:2;border:0;background:transparent;color:var(--text);
+  font-size:11px;font-weight:900;cursor:pointer;touch-action:pan-y!important;-webkit-user-select:none!important;user-select:none!important;
+}
+.attendance-slider .slider-zone:disabled{cursor:not-allowed;opacity:.5}
+.attendance-slider .slider-thumb{
+  position:absolute;z-index:1;top:3px;left:33.333%;width:calc(33.333% - 4px);height:30px;border-radius:999px;
+  background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.13);
+  transition:left 200ms cubic-bezier(.2,.8,.2,1),background-color 120ms ease,box-shadow 120ms ease!important;will-change:left;
+}
+.attendance-slider.yes .slider-thumb{left:2px!important;background:#dcefe1}
+.attendance-slider.none .slider-thumb{left:33.333%!important}
+.attendance-slider.no .slider-thumb{left:66.666%!important;background:#f4dedd}
+.attendance-slider.cc-slider-dragging .slider-thumb{left:var(--cc-slider-left)!important;transition:none!important}
+.attendance-slider.cc-slider-snapping .slider-thumb{left:var(--cc-slider-left)!important;transition:left 200ms cubic-bezier(.2,.8,.2,1)!important}
+.attendance-slider.cc-slider-tap-snapping .slider-thumb{left:var(--cc-slider-left)!important;transition:left 140ms cubic-bezier(.2,.8,.2,1)!important}
+.attendance-slider.cc-slider-dragging{cursor:grabbing}
+.dark .attendance-slider .slider-thumb{background:#24211e}
+.dark .attendance-slider.yes .slider-thumb{background:#23422b}
+.dark .attendance-slider.no .slider-thumb{background:#4a2522}
+
+/* Versenysport = compact Player Rács slider. */
+.cc-player-grid-slider{height:34px;min-width:150px;width:100%;max-width:190px;justify-self:stretch}
+.cc-player-grid-slider .slider-thumb{height:26px}
+.cc-player-grid-slider .slider-zone{font-size:13px;line-height:1}
+.competition-roster-card .cc-player-grid-slider{grid-column:3;min-width:145px}
+
+/* Tömegsport = full Player Edzések-tab slider. Semantics stay Manager attendance. */
+.cc-player-training-slider{width:100%;min-width:260px}
+.cc-player-training-slider .slider-zone{font-size:8px;padding:0 5px;white-space:nowrap}
+.legacy-mass-roster-card .mass-attendance-control{padding:5px 7px 4px!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.legacy-mass-roster-card .mass-attendance-save-state{display:none!important}
+.legacy-mass-roster-card .cc-player-training-slider{min-width:0}
+.mass-attendance-control.is-saving .attendance-slider{opacity:.68}
+
+/* Remove obsolete range UI from the corrected build. */
+.cc-rsvp-control,.cc-rsvp-range,.mass-attendance-range,.mass-attendance-slider-labels{display:none!important}
+
+/* Reference-card proportions: flat/pale team tint, dense one-row scan, no gradient stripe. */
+.cc-event-card{
+  grid-template-columns:165px 52px 150px minmax(250px,1fr) auto!important;
+  gap:10px!important;min-height:58px;padding:6px 10px!important;border-radius:8px!important;
+  background:color-mix(in srgb,var(--team-color) 11%,#fff)!important;
+  border:1px solid color-mix(in srgb,var(--team-color) 22%,var(--line))!important;
+  box-shadow:none!important;
+}
+.cc-event-card:hover{background:color-mix(in srgb,var(--team-color) 14%,#fff)!important}
+.cc-event-team-summary{grid-template-columns:1fr!important;grid-template-areas:"name" "total" "pos"!important;gap:1px!important;align-items:start!important}
+.cc-event-team-summary>strong{font-size:12px!important;line-height:1!important}
+.cc-event-total{justify-content:flex-start!important;min-width:0!important;padding:0!important;border-radius:0!important;background:transparent!important;gap:3px!important}
+.cc-event-total b{font-size:23px!important;line-height:.95!important}.cc-event-total i{font-size:11px!important;color:var(--text)!important}
+.cc-event-total.warn{color:#9a6900!important}.cc-event-total.danger{color:#be3d36!important}.cc-event-total.ok{color:var(--black)!important}
+.cc-pos-breakdown{margin-top:1px!important;gap:5px!important;overflow:visible!important}.cc-pos-breakdown span{padding:0!important;background:transparent!important;border-radius:0!important;font-size:6.5px!important}.cc-pos-breakdown span b{font-size:6px!important}.cc-pos-breakdown span.warn{color:#9a6900!important}.cc-pos-breakdown span.danger{color:#be3d36!important}
+.cc-event-type-icon{gap:1px!important}.cc-event-type-icon img{width:34px!important;height:34px!important;padding:0!important;border-radius:0!important;background:transparent!important;object-fit:contain!important}.cc-event-type-icon small{font-size:5.8px!important;line-height:1!important}
+.cc-event-date b{font-size:17px!important;font-weight:500!important;line-height:1!important}.cc-event-date small{font-size:6.5px!important}.cc-event-main strong{font-size:17px!important;line-height:1!important}.cc-event-main small{font-size:6.5px!important}
+.cc-event-logos{gap:7px!important;align-items:center!important}.cc-event-logo{width:34px!important;height:34px!important}.cc-event-logo-wrap small{font-size:5.8px!important;max-width:72px!important}
+
+/* Event roster = closer to the linked Player-card hierarchy. */
+.competition-roster-card{
+  grid-template-columns:34px 46px minmax(180px,1fr) minmax(145px,190px) minmax(110px,140px)!important;
+  min-height:66px!important;gap:9px!important;padding:7px 9px!important;
+}
+.competition-roster-card>.cc-avatar{grid-column:1}
+.competition-roster-jersey{grid-column:2;font-size:22px;font-weight:950;line-height:1;text-align:center;color:var(--text)}
+.competition-roster-identity{grid-column:3}
+.competition-roster-identity b{font-size:11px!important;line-height:1.1}.competition-roster-identity small{font-size:7px!important;margin-top:3px!important}
+.competition-roster-meta{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.competition-roster-chip{display:inline-flex;align-items:center;min-height:18px;padding:0 5px;border:1px solid var(--line);border-radius:999px;background:var(--soft);font-size:6px;font-weight:800;color:var(--muted)}
+.competition-roster-card .cc-player-grid-slider{grid-column:4}
+.competition-roster-card .competition-attendance-field,.competition-roster-card>.roster-attendance{grid-column:5}
+
+@media(max-width:980px){
+  .cc-event-card{grid-template-columns:150px 46px 135px minmax(170px,1fr) auto!important}
+}
+@media(max-width:760px){
+  .cc-event-card{grid-template-columns:minmax(120px,1fr) 42px minmax(115px,.9fr)!important;grid-template-areas:"team icon date" "main main logos"!important}
+  .cc-event-team-summary{grid-area:team}.cc-event-type-icon{grid-area:icon}.cc-event-date{grid-area:date}.cc-event-main{grid-area:main}.cc-event-logos{grid-area:logos}
+  .cc-event-card.training{grid-template-areas:"team icon date" "main main main"!important}
+  .competition-roster-card{grid-template-columns:30px 38px minmax(0,1fr)!important}
+  .competition-roster-card>.cc-avatar{grid-column:1}.competition-roster-jersey{grid-column:2;font-size:18px}.competition-roster-identity{grid-column:3}
+  .competition-roster-card .cc-player-grid-slider,.competition-roster-card .competition-attendance-field,.competition-roster-card>.roster-attendance{grid-column:1/-1!important;max-width:none!important}
+}
+@media(max-width:520px){
+  .cc-player-training-slider .slider-zone{font-size:7px;padding:0 2px}
+}
+@media(prefers-reduced-motion:reduce){.attendance-slider .slider-thumb{transition:none!important}}
