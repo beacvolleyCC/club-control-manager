@@ -1,4 +1,4 @@
-const CACHE='cc-manager-v0-5-2b5m-unified-player-roster';
+const CACHE='cc-manager-v0-5-2b5n-player-card-polish';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest',
   './assets/player-animals.webp','./assets/event-training-mask.png','./assets/event-home-mask.png','./assets/event-away-mask.png','./assets/beac-logo-96.png','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'

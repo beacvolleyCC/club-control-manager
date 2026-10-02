@@ -1,4 +1,4 @@
-# Club Control Manager V0.5.2B5M — Unified Player / Roster UI
+# Club Control Manager V0.5.2B5N — Unified Player / Roster UI
 
 Date: 2026-10-02
 Baseline: V0.5.2B5L
@@ -54,3 +54,10 @@ Scope: frontend-only player/roster UI unification + player list grouping.
 5. Csapatok → verify same wide cards.
 6. Open a match and training → verify same wide cards + existing RSVP controls.
 7. BRSZ refresh button still functions.
+
+
+## B5N player-card polish
+- Player-card team tint now reuses the same 11% → 3.5% → transparent gradient language as the established team/player rows.
+- Name typography reduced; surname display remains Unicode-preserving and is uppercased by CSS in the Hungarian document locale.
+- `Nincs lezárva` attendance fallback renamed to `Nincs rögzítve`.
+- No BRSZ sync/backend changes.
