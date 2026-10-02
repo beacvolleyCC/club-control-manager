@@ -3098,3 +3098,85 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 .manager-player-matrix .matrix-control button:disabled{cursor:not-allowed;opacity:.7}
 .dark .manager-player-matrix .matrix-control{background:#1f1d1a}.dark .manager-player-matrix .matrix-control.yes button:first-child{background:#284a31}.dark .manager-player-matrix .matrix-control.no button:last-child{background:#512724}.dark .manager-player-matrix .matrix-control.none button:nth-child(2){background:#35322e;color:#ddd}
 .avatar-choice.taken,.avatar-choice:disabled{opacity:.28!important;cursor:not-allowed!important;filter:grayscale(1)}
+
+
+/* ========================================================================== 
+   V0.5.2B5Q — unified dropdowns, roster readability, mass-sport disclosures
+   ========================================================================== */
+/* Native dropdowns: one consistent filled triangle instead of platform V/caret. */
+select{
+  -webkit-appearance:none!important;appearance:none!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 6 5-6z' fill='%23555555'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;background-position:right 11px center!important;background-size:10px 7px!important;padding-right:30px!important;
+}
+.team-multi-filter>summary>i.team-multi-triangle,
+.legacy-mass-chevron .triangle-icon,
+.mass-person-toggle .triangle-icon,
+.roster-chevron .triangle-icon{
+  display:inline-block!important;width:0!important;height:0!important;background:none!important;
+  border-left:5px solid transparent!important;border-right:5px solid transparent!important;border-top:7px solid currentColor!important;
+  transition:transform .16s ease!important;opacity:.82;
+}
+.team-multi-filter[open]>summary>i.team-multi-triangle,
+.legacy-mass-chevron.open .triangle-icon,
+.mass-person-toggle.open .triangle-icon,
+.roster-chevron.open .triangle-icon{transform:rotate(180deg)!important}
+
+/* Player directory: compact original-style typography; surname semi-bold, given name regular. */
+.cc-player-name-line{gap:6px!important;line-height:1.05!important}
+.cc-player-jersey{font-size:20px!important;font-weight:500!important;letter-spacing:-.25px!important}
+.cc-player-name-line strong{font-size:16px!important;font-weight:700!important;letter-spacing:0!important;font-family:inherit!important;text-transform:uppercase!important}
+.cc-player-name-line em{font-size:16px!important;font-weight:400!important;font-family:inherit!important}
+.cc-player-wide-card{min-height:66px!important}
+.cc-player-filter-toolbar{grid-template-columns:minmax(260px,1.35fr) minmax(220px,1.05fr) repeat(4,minmax(145px,.58fr))!important;align-items:end!important}
+@media(max-width:1350px){.cc-player-filter-toolbar{grid-template-columns:1fr 1fr 1fr!important}}
+@media(max-width:760px){.cc-player-filter-toolbar{grid-template-columns:1fr!important}}
+
+/* Manager matrix is an overview, not an editor. */
+.manager-player-matrix .matrix-read-state{width:28px;height:28px;margin:auto;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:950;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+.manager-player-matrix .matrix-read-state.yes{background:#e6f3e8;color:#246235;border-color:#bdd9c4}
+.manager-player-matrix .matrix-read-state.no{background:#fae4e4;color:#8b2929;border-color:#e8bcbc}
+.manager-player-matrix .matrix-read-state.none{background:var(--card);color:#999}
+
+/* Competition roster: RSVP/message left, actual attendance slider right. */
+.cc-roster-rsvp-stack{display:grid;gap:4px;justify-items:end;min-width:120px}
+.cc-player-rsvp-note{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7.5px;color:var(--muted);font-weight:700}
+.cc-competition-attendance-slider{min-width:145px;max-width:175px}
+.competition-roster-card{grid-template-columns:54px minmax(250px,1.3fr) minmax(125px,.55fr) minmax(145px,.62fr) minmax(300px,1.1fr) 30px!important}
+
+/* Overview cards never spill outside their panel. */
+.next-matches-card,.overview-event-card-list,.next-matches-card .cc-event-card{min-width:0!important;max-width:100%!important}
+.next-matches-card .cc-event-card{overflow:hidden!important}
+.next-matches-card .cc-event-main,.next-matches-card .cc-event-opponent-head,.next-matches-card .cc-event-opponent-head strong{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+@media(max-width:1250px){.next-matches-card .cc-event-card{grid-template-columns:38px 108px 100px minmax(0,1fr)!important}.next-matches-card .cc-pos-breakdown{gap:3px!important}.next-matches-card .cc-event-opponent-logo{width:24px;height:24px;flex-basis:24px}}
+
+/* Mass training row + inline registration roster. */
+.legacy-mass-training-item{border-radius:10px;overflow:hidden;background:linear-gradient(90deg,rgba(var(--level-rgb),.12),rgba(var(--level-rgb),.035) 46%,transparent 78%);border:1px solid rgba(var(--level-rgb),.22);margin-bottom:6px}
+.legacy-mass-training-item .legacy-mass-training-row{border:0!important;border-radius:0!important;background:transparent!important;margin:0!important}
+.legacy-mass-inline-roster{border-top:1px solid rgba(var(--level-rgb),.17);padding:7px 10px;background:rgba(255,255,255,.44)}
+.mass-inline-roster-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px 10px}
+.mass-inline-person{min-height:30px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 7px;border-radius:8px;background:rgba(255,255,255,.62);font-size:8px}
+.mass-inline-person b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mass-coming{font-size:7px;font-weight:900}.mass-coming.yes{color:#27754a}.mass-coming.wait{color:#9a6900}
+
+/* Mass attendance: no gray stripe; level-tinted gradient; compact summary and expandable details. */
+.legacy-mass-roster-card{grid-template-columns:minmax(230px,1fr) 54px minmax(300px,1.25fr)!important;gap:10px!important;background:linear-gradient(90deg,rgba(var(--mass-person-rgb),.13),rgba(var(--mass-person-rgb),.035) 48%,rgba(255,255,255,.78) 86%)!important;border:1px solid rgba(var(--mass-person-rgb),.24)!important;padding:7px 9px!important}
+.mass-attendance-person-mark{display:none!important}
+.mass-person-toggle{border:0;background:transparent;color:inherit;display:grid;grid-template-columns:14px minmax(0,1fr);gap:7px;align-items:center;min-width:0;text-align:left;padding:2px 0;cursor:pointer}
+.mass-person-toggle .mass-attendance-person-copy{min-width:0}.mass-person-toggle b,.mass-person-toggle small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mass-person-toggle b{font-size:9px}.mass-person-toggle small{font-size:7px;color:var(--muted);margin-top:2px}
+.mass-booking-coming{font-size:8px;font-weight:900;color:#27754a;text-align:center}
+.mass-person-details{grid-column:1/-1;display:grid;gap:6px;padding-top:7px;border-top:1px solid rgba(var(--mass-person-rgb),.16)}
+.mass-person-details[hidden]{display:none!important}
+.mass-person-details .legacy-mass-roster-meta{grid-template-columns:1.35fr .8fr 1fr .7fr!important}
+.legacy-mass-roster-card .mass-attendance-control{grid-column:3!important;grid-row:1!important}
+.legacy-mass-roster-card .mass-booking-admin-actions{grid-column:1/-1!important;margin-top:2px!important}
+.mass-attendance-heading{align-items:center}.mass-attendance-heading>.button{margin-left:auto}
+@media(max-width:850px){.legacy-mass-roster-card{grid-template-columns:minmax(0,1fr) 50px!important}.legacy-mass-roster-card .mass-attendance-control{grid-column:1/-1!important;grid-row:auto!important}.mass-person-details{grid-column:1/-1!important}}
+
+/* Team group / mass rows use gradients instead of decorative gray stripes. */
+.cc-player-team-group-head>span{display:none!important}
+.cc-player-team-group-head{grid-template-columns:1fr auto!important;padding-left:12px!important;background:linear-gradient(90deg,color-mix(in srgb,var(--group-team-color,#aaa) 12%,transparent),transparent 70%)}
+
+/* B5Q final parity tweaks */
+.manager-player-matrix .matrix-read-state{width:auto!important;height:auto!important;border:0!important;border-radius:0!important;background:transparent!important;font-size:12px!important}
+.manager-player-matrix .matrix-cell.going .matrix-read-state{color:#246235!important}.manager-player-matrix .matrix-cell.not-going .matrix-read-state{color:#8b2929!important}.manager-player-matrix .matrix-cell.none .matrix-read-state{color:#aaa!important}
+.legacy-mass-roster-card.is-collapsed .mass-booking-admin-actions{display:none!important}
