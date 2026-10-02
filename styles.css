@@ -2809,3 +2809,10 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   .page-intro>.page-actions{width:100%;justify-content:flex-start}
   .rsvp-plain{gap:10px!important}.rsvp-plain b{font-size:13px!important}
 }
+
+
+/* V0.5.2B5E — BRSZ helper feedback belongs to the Matches content, not the sticky header. */
+.competition-live-status{display:flex;align-items:center;min-height:34px;margin:-4px 0 8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:12px;line-height:1.35;color:var(--ink);overflow-wrap:anywhere;word-break:break-word}
+.competition-live-status.hidden{display:none!important}
+.competition-live-status.success{border-color:color-mix(in srgb,var(--green) 45%,var(--line));background:color-mix(in srgb,var(--green) 7%,var(--card));color:var(--ink)}
+.competition-live-status.error{border-color:color-mix(in srgb,var(--red) 55%,var(--line));background:color-mix(in srgb,var(--red) 6%,var(--card));color:var(--red)}
