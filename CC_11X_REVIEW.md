@@ -18,3 +18,9 @@ Regression locks:
 - MGR015 schedule identity backend — NOT MODIFIED
 - player-animals.webp (approved 60-avatar atlas) — byte-identical to B5P — PASS
 - live authenticated browser smoke — PENDING
+
+
+## B5R avatar sprite cache hotfix
+- Manager avatar asset URL cache-busted: `./assets/player-animals.webp?v=avatar60-p10-b5r`.
+- Atlas remains 768x768 / 8x8; sprite math remains `%8`, `/8`, positions `100/7`.
+- No RSVP/BRSZ/backend logic changed.
