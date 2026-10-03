@@ -3251,3 +3251,152 @@ body.dark .ms-table tbody tr.focus td{background:linear-gradient(90deg,rgba(247,
   .ms-league-summary,.ms-team-summary{grid-template-columns:1fr 1fr}.ms-league-summary>div:nth-child(2),.ms-team-summary>div:nth-child(2){border-right:0}.ms-league-summary>div:nth-child(-n+2),.ms-team-summary>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .ms-stats-grid{grid-template-columns:1fr;}.ms-stat-card.chart{grid-column:auto}.ms-form-team-right{gap:6px}.ms-form-list>button{padding-inline:10px}.ms-panel-head{padding-inline:12px}
 }
+
+
+/* ==========================================================
+   MANAGER V0.5.2B6B — YELLOW HEADER + OVERVIEW TEAM CONTEXT
+   ========================================================== */
+/* Player-parity brand header: only the topbar is yellow; navigation remains neutral. */
+.topbar{
+  background:var(--yellow) !important;
+  background-image:none !important;
+  color:#171717 !important;
+  border-bottom-color:rgba(0,0,0,.14) !important;
+  backdrop-filter:none !important;
+  box-shadow:none !important;
+}
+.topbar .eyebrow,
+.topbar .legacy-topbar-brand small{
+  color:#171717 !important;
+  opacity:.62 !important;
+}
+.topbar .legacy-topbar-brand strong,
+.topbar .topbar-title h1{
+  color:#171717 !important;
+}
+.topbar .brand-mark{
+  background:#171717 !important;
+  color:var(--yellow) !important;
+  border:1px solid rgba(0,0,0,.12) !important;
+}
+.topbar .season-select select,
+.topbar .icon-button,
+.topbar .manager-chip,
+.topbar .mobile-area-button{
+  background:rgba(255,255,255,.72) !important;
+  color:#171717 !important;
+  border-color:rgba(0,0,0,.18) !important;
+  box-shadow:none !important;
+}
+.topbar .manager-chip-copy b,
+.topbar .manager-chip-copy small{color:#171717 !important;}
+.topbar .manager-chip-copy small{opacity:.62;}
+.topbar .profile-dot{
+  background:#171717 !important;
+  color:var(--yellow) !important;
+}
+body.dark .topbar{
+  background:var(--yellow) !important;
+  color:#171717 !important;
+}
+body.dark .topbar .season-select select,
+body.dark .topbar .icon-button,
+body.dark .topbar .manager-chip,
+body.dark .topbar .mobile-area-button{
+  background:rgba(255,255,255,.70) !important;
+  color:#171717 !important;
+  border-color:rgba(0,0,0,.20) !important;
+}
+
+.overview-context-intro{
+  align-items:center !important;
+}
+.overview-context-switch{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px;
+  padding:4px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--card);
+  box-shadow:var(--shadow);
+}
+.overview-context-chip{
+  min-height:31px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:0 11px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:var(--muted);
+  font:inherit;
+  font-size:9px;
+  font-weight:850;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.overview-context-chip i{
+  width:6px;
+  height:18px;
+  border-radius:99px;
+  flex:0 0 auto;
+}
+.overview-context-chip.active{
+  background:var(--yellow);
+  color:#171717;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+}
+.overview-context-chip:first-child i{display:none;}
+.overview-standings-section{
+  margin-top:12px;
+}
+.overview-section-title{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 2px 7px;
+}
+.overview-section-title h3{margin:0;font-size:15px;}
+.overview-section-title p{margin:0;color:var(--muted);font-size:9px;}
+.overview-standings-grid{
+  grid-template-columns:1fr !important;
+}
+/* The top context owns team selection; matrix filters are purely local controls. */
+#matrixFilterPanel.matrix-filter-panel{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:end;
+}
+#matrixFilterPanel.matrix-filter-panel label{
+  min-width:0;
+  margin:0;
+}
+#matrixFilterPanel.matrix-filter-panel select,
+#matrixFilterPanel.matrix-filter-panel input{
+  min-width:0;
+}
+#matrixFilterPanel.matrix-filter-panel:has(input[type="date"]){
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+@media(max-width:1199px){
+  #matrixFilterPanel.matrix-filter-panel,
+  #matrixFilterPanel.matrix-filter-panel:has(input[type="date"]){grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:779px){
+  .overview-context-intro{align-items:flex-start !important;}
+  .overview-context-switch{width:100%;border-radius:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));}
+  .overview-context-chip{justify-content:center;padding:0 6px;min-width:0;}
+  .overview-context-chip i{display:none;}
+  .overview-section-title{align-items:flex-start;flex-direction:column;gap:2px;}
+  #matrixFilterPanel.matrix-filter-panel,
+  #matrixFilterPanel.matrix-filter-panel:has(input[type="date"]){grid-template-columns:1fr;}
+}
+@media(max-width:430px){
+  .overview-context-switch{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+
+/* Overview/legacy standings: own team uses row tint only, no vertical accent stripe. */
+.standings-row.focus{box-shadow:none !important;}
