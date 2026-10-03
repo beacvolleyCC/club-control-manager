@@ -1,10 +1,10 @@
 (()=>{
   'use strict';
 
-  const FRONTEND_BUILD='manager-pwa-v0.5.2b5t-unified-test-player-detection';
+  const FRONTEND_BUILD='manager-pwa-v0.5.2b6a-standings-insights';
 
   const cfg=Object.freeze({...{
-    BUILD:'manager-pwa-v0.5.2b5t-unified-test-player-detection',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
+    BUILD:'manager-pwa-v0.5.2b6a-standings-insights',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
   },...(window.CC_MANAGER_CONFIG||{})});
 
   const AREAS={
@@ -12,7 +12,7 @@
       ['trainings','Edzések','◇'],['athletes','Sportolók','○'],['calendar','Naptár','□'],['archive','Archívum','⌁']
     ]},
     competition:{label:'Versenysport',glyph:'◇',modules:[
-      ['overview','Áttekintés','△'],['trainings','Edzések','◇'],['matches','Meccsek','◆'],['teams','Csapatok','▱'],['players','Játékosok','○'],['calendar','Naptár','□'],['notifications','Értesítések','◉']
+      ['overview','Áttekintés','△'],['trainings','Edzések','◇'],['matches','Meccsek','◆'],['standings','Tabella','≡'],['teams','Csapatok','▱'],['players','Játékosok','○'],['calendar','Naptár','□'],['notifications','Értesítések','◉']
     ]}
   };
 
@@ -27,7 +27,7 @@
 
   const state={
     mode:String(cfg.DATA_MODE||'demo').toLowerCase(),supabase:null,session:null,manager:null,permissions:[],teams:[],players:[],events:[],calendarEvents:[],activityEvents:[],massTrainings:[],massCalendarEvents:[],massArchiveEvents:[],massAthletes:[],massPasses:[],massLoadError:'',massDetailCache:new Map(),admins:[],adminTeams:[],adminsLoadError:'',adminEditId:'',adminBusy:false,overview:null,rsvpMatrix:{events:[],players:[],responses:[]},cardRsvpMatrix:{events:[],players:[],responses:[]},eventRosterCache:new Map(),matrixFilterOpen:false,eventFiltersOpen:false,calendarFiltersOpen:false,matrixFilters:{team:'',period:'14',kind:'ALL',status:'ALL',from:'',to:''},
-    area:['mass','competition'].includes(cfg.DEFAULT_AREA)?cfg.DEFAULT_AREA:'competition',module:'overview',calendarMode:'week',calendarAnchor:new Date(),calendarTeam:'',calendarType:'',calendarScope:'COMPETITION',massCalendarLevel:'',massCalendarSession:'',massAthleteSearch:'',massAthleteLevel:'',massAthleteStatus:'',massPassSearch:'',massPassMonth:'',playerTeam:'',playerSearch:'',playerMedical:'all',playerSort:(()=>{try{return localStorage.getItem('cc-manager-player-sort')||'name'}catch(_){return'name'}})(),playerSortDir:(()=>{try{return localStorage.getItem('cc-manager-player-sort-dir')||'asc'}catch(_){return'asc'}})(),playerListMode:(()=>{try{return localStorage.getItem('cc-manager-player-list-mode')==='grouped'?'grouped':'all'}catch(_){return'all'}})(),playerFiltersOpen:false,massAthleteFiltersOpen:false,massPassFiltersOpen:false,massCalendarFiltersOpen:false,eventTeam:'',eventPeriod:'upcoming',overviewTeam:'',selectedTeam:'',selectedPlayer:'',pendingEmail:'',loading:false,massActionBusy:'',massAttendanceBusy:new Set(),notificationRecipients:[],notificationHistory:[],notificationSelectedPlayerId:'',notificationSearch:'',notificationBusy:false,notificationLoadError:'',competitionSyncStatus:null,competitionSyncBusy:false,competitionResults:[],competitionStandings:[],competitionDataError:'',teamFilters:{overview:[],events:[],players:[],teams:[]},teamFilterOpen:{overview:false,events:false,players:false,teams:false},plannerTeam:''
+    area:['mass','competition'].includes(cfg.DEFAULT_AREA)?cfg.DEFAULT_AREA:'competition',module:'overview',calendarMode:'week',calendarAnchor:new Date(),calendarTeam:'',calendarType:'',calendarScope:'COMPETITION',massCalendarLevel:'',massCalendarSession:'',massAthleteSearch:'',massAthleteLevel:'',massAthleteStatus:'',massPassSearch:'',massPassMonth:'',playerTeam:'',playerSearch:'',playerMedical:'all',playerSort:(()=>{try{return localStorage.getItem('cc-manager-player-sort')||'name'}catch(_){return'name'}})(),playerSortDir:(()=>{try{return localStorage.getItem('cc-manager-player-sort-dir')||'asc'}catch(_){return'asc'}})(),playerListMode:(()=>{try{return localStorage.getItem('cc-manager-player-list-mode')==='grouped'?'grouped':'all'}catch(_){return'all'}})(),playerFiltersOpen:false,massAthleteFiltersOpen:false,massPassFiltersOpen:false,massCalendarFiltersOpen:false,eventTeam:'',eventPeriod:'upcoming',overviewTeam:'',selectedTeam:'',selectedPlayer:'',pendingEmail:'',loading:false,massActionBusy:'',massAttendanceBusy:new Set(),notificationRecipients:[],notificationHistory:[],notificationSelectedPlayerId:'',notificationSearch:'',notificationBusy:false,notificationLoadError:'',competitionSyncStatus:null,competitionSyncBusy:false,competitionResults:[],competitionStandings:[],competitionDataError:'',managerStandingsContext:(()=>{try{return localStorage.getItem('cc-manager-standings-context')||''}catch(_){return''}})(),managerStandingsTeam:(()=>{try{return localStorage.getItem('cc-manager-standings-team')||'all'}catch(_){return'all'}})(),managerLeagueInsights:{key:'',loading:false,loaded:false,error:'',data:null},teamFilters:{overview:[],events:[],players:[],teams:[]},teamFilterOpen:{overview:false,events:false,players:false,teams:false},plannerTeam:''
   };
 
   const $=sel=>document.querySelector(sel), $$=sel=>Array.from(document.querySelectorAll(sel));
@@ -169,6 +169,7 @@
   function canRoute(area,module){
     if(module==='planning')return can('competition.trainings')||can('mass.trainings');
     if(area==='competition'&&module==='notifications') return canAnyAction('competition.players','notify');
+    if(area==='competition'&&module==='standings') return can('competition.matches');
     if(area==='mass'&&module==='archive')return can('mass.trainings')||can('mass.calendar');
     return can(`${area}.${module}`);
   }
@@ -187,14 +188,14 @@
   async function requestCode(){const email=text($('#loginEmail')?.value).toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){loginMessage('#loginMsg','Adj meg egy érvényes email címet.',true);return}const b=$('#requestCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginMsg','Kód küldése…');const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});if(error)throw error;state.pendingEmail=email;$('#loginEmailPreview').textContent=email;showLogin('loginCodeStep');loginMessage('#loginCodeMsg','A kódot elküldtük.')}catch(err){loginMessage('#loginMsg',err.message||'A kód küldése sikertelen.',true)}finally{if(b)b.disabled=false}}
   async function verifyCode(){const token=text($('#loginCode')?.value).replace(/\D/g,'');if(token.length<6){loginMessage('#loginCodeMsg','Írd be az emailben kapott kódot.',true);return}const b=$('#verifyCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginCodeMsg','Ellenőrzés…');const {data,error}=await state.supabase.auth.verifyOtp({email:state.pendingEmail,token,type:'email'});if(error)throw error;state.session=data.session||null;await loadLiveData();hideLogin()}catch(err){loginMessage('#loginCodeMsg',err.message||'A belépés sikertelen.',true)}finally{if(b)b.disabled=false}}
 
-  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='V0.5.2B5S';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · V0.5.2B5S';}
+  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='V0.5.2B6A';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · V0.5.2B6A';}
 
   async function loadLiveData(){
     state.loading=true;status('Manager adatok frissítése…');
     try{
       const b=await rpc('cc_manager_bootstrap_v1');
       if(!b?.manager)throw new Error('A Manager bootstrap nem adott érvényes fiókot.');
-      state.manager=b.manager;state.permissions=Array.isArray(b.permissions)?b.permissions:[];state.teams=Array.isArray(b.teams)?b.teams:[];applyManager();ensureAuthorizedRoute_();
+      state.manager=b.manager;state.permissions=Array.isArray(b.permissions)?b.permissions:[];state.teams=Array.isArray(b.teams)?b.teams:[];state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};applyManager();ensureAuthorizedRoute_();
       const jobs=[];
       if(can('competition.overview'))jobs.push(loadOverview(),loadRsvpMatrix());else{state.overview={};state.rsvpMatrix={events:[],players:[],responses:[]}}
       if(can('competition.trainings')||can('competition.matches'))jobs.push(loadCardRsvpMatrix().catch(err=>{console.warn('Competition card RSVP matrix unavailable',err);state.cardRsvpMatrix=state.rsvpMatrix||{events:[],players:[],responses:[]}}));else state.cardRsvpMatrix={events:[],players:[],responses:[]}
@@ -332,6 +333,133 @@
   function standingsLogo_(r){if(text(r.logoUrl))return `<img src="${esc(r.logoUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;const initials=text(r.teamName).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()||'').join('')||'•';return `<span>${esc(initials)}</span>`}
   function standingsCard_(contextTeamId){const rows=standingsForContext_(contextTeamId),team=teamById(contextTeamId),meta=rows[0];if(!rows.length)return'';return `<article class="panel standings-card" style="--team-color:${esc(team?.color||'#f7b700')}"><div class="panel-head"><div><h3>Tabella</h3><p>${esc(meta?.competitionLabel||team?.name||'BRSZ')} · BRSZ sorrend</p></div></div><div class="standings-table"><div class="standings-row standings-head"><b>H</b><b>Csapat</b><b>M</b><b>GY</b><b>V</b><b>Szett</b><b>P</b></div>${rows.map(r=>`<div class="standings-row ${r.focus?'focus':''}"><b class="standing-pos">${esc(r.position||'–')}</b><div class="standing-team"><span class="standing-logo">${standingsLogo_(r)}</span><strong>${esc(r.teamName)}</strong></div><span>${num(r.played)}</span><span>${num(r.wins)}</span><span>${num(r.losses)}</span><span>${num(r.setsFor)}:${num(r.setsAgainst)}</span><b>${num(r.tablePoints)}</b></div>`).join('')}</div></article>`}
   function standingsSection_(scope='overview'){const ids=teamFilterIds_(scope),contexts=(ids.length?ids:state.teams.map(t=>text(t.id))).filter(id=>standingsForContext_(id).length);if(!contexts.length)return state.competitionDataError?`<article class="panel standings-card standings-unavailable"><div class="panel-head"><div><h3>Tabella</h3><p>MGR014 még nincs telepítve vagy nem érhető el.</p></div></div></article>`:'';return `<div class="standings-grid">${contexts.map(standingsCard_).join('')}</div>`}
+
+
+  // ---------------------------------------------------------------------------
+  // V0.5.2B6A — standalone Manager standings / league insights page.
+  // MGR014 remains the canonical results+standings read layer. MGR015 adds the
+  // read-only history/full-league payload needed for Player-parity statistics.
+  // ---------------------------------------------------------------------------
+  function msNorm_(value){return text(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+  function msContextCandidates_(){
+    const active=(state.teams||[]).filter(t=>t.active!==false);
+    const mapped=new Set((state.competitionStandings||[]).map(r=>text(r.contextTeamId)).filter(Boolean));
+    const list=mapped.size?active.filter(t=>mapped.has(text(t.id))):active;
+    return list.length?list:active;
+  }
+  function msContextTeam_(){
+    const list=msContextCandidates_();
+    let id=text(state.managerStandingsContext);
+    if(!id||!list.some(t=>text(t.id)===id)) id=text(list[0]?.id||'');
+    if(id!==text(state.managerStandingsContext)){
+      state.managerStandingsContext=id;
+      try{localStorage.setItem('cc-manager-standings-context',id)}catch(_){}
+    }
+    return state.teams.find(t=>text(t.id)===id)||null;
+  }
+  function msData_(){return state.managerLeagueInsights?.data||null}
+  function msRows_(){
+    const d=msData_();
+    const list=(Array.isArray(d?.teams)?d.teams:[]).map(t=>({
+      ...(t?.current||{}),sourceTeamId:text(t?.sourceTeamId),teamName:text(t?.teamName),focus:t?.focus===true,history:Array.isArray(t?.history)?t.history:[]
+    }));
+    if(!list.length)return list;
+    const hasPoints=list.some(r=>{const n=Number(String(r?.tablePoints??'').replace(',','.'));return Number.isFinite(n)&&n!==0});
+    if(hasPoints)return list.sort((a,b)=>(Number(a.position)||9999)-(Number(b.position)||9999)||text(a.teamName).localeCompare(text(b.teamName),'hu'));
+    return list.sort((a,b)=>text(a.teamName).localeCompare(text(b.teamName),'hu',{sensitivity:'base'})).map((r,i)=>({...r,position:i+1,provisionalAlphabetical:true}));
+  }
+  function msStandingSourceRow_(sourceTeamId,name){
+    const ctx=text(msContextTeam_()?.id),sid=text(sourceTeamId),nk=msNorm_(name);
+    return (state.competitionStandings||[]).find(r=>text(r.contextTeamId)===ctx&&((sid&&text(r.sourceTeamId)===sid)||(nk&&msNorm_(r.teamName)===nk)))||null;
+  }
+  function msLogoHtml_(sourceTeamId,name,extra=''){
+    const row=msStandingSourceRow_(sourceTeamId,name),url=text(row?.logoUrl),initial=(text(name).match(/[A-Za-zÁÉÍÓÖŐÚÜŰ0-9]/u)||['?'])[0].toLocaleUpperCase('hu-HU');
+    return url?`<img class="ms-team-logo ${extra}" src="${esc(url)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ms-team-logo ms-monogram ${extra}" aria-hidden="true">${esc(initial)}</span>`;
+  }
+  function msRatio_(explicit,a,b){
+    const raw=Number(explicit);if(Number.isFinite(raw)&&raw!==0)return raw.toFixed(3);
+    const aa=Number(a),bb=Number(b);if(!Number.isFinite(aa)||!Number.isFinite(bb))return'0.000';if(bb===0)return aa>0?'∞':'0.000';return(aa/bb).toFixed(3)
+  }
+  function msPair_(a,b){return`${Number.isFinite(Number(a))?Number(a):0}–${Number.isFinite(Number(b))?Number(b):0}`}
+  function msSelectedRow_(rows=msRows_()){
+    const id=text(state.managerStandingsTeam||'all');
+    if(!id||id==='all')return null;
+    const row=rows.find(r=>text(r.sourceTeamId)===id)||null;
+    if(!row){state.managerStandingsTeam='all';try{localStorage.setItem('cc-manager-standings-team','all')}catch(_){}return null}
+    return row;
+  }
+  function msFocusRow_(rows=msRows_()){return rows.find(r=>r.focus)||rows[0]||null}
+  function msHistoryPoints_(history){
+    const rows=(Array.isArray(history)?history:[]).filter(x=>Number.isFinite(Number(x?.position))).slice().sort((a,b)=>new Date(a?.snapshotAt||0)-new Date(b?.snapshotAt||0)),out=[];
+    rows.forEach(row=>{const item={...row,position:Number(row.position),played:Number(row?.played||0)};const prev=out[out.length-1];if(prev&&prev.position===item.position&&prev.played===item.played)out[out.length-1]=item;else out.push(item)});return out
+  }
+  function msPositionDelta_(history,currentPosition,currentPlayed){
+    const pts=msHistoryPoints_(history),current=Number(currentPosition),played=Number(currentPlayed||0);if(!Number.isFinite(current)||pts.length<2)return null;let previous=null;
+    for(let i=pts.length-1;i>=0;i--){if(Number(pts[i]?.played)<played){previous=pts[i];break}}
+    if(!previous)for(let i=pts.length-2;i>=0;i--){if(Number(pts[i]?.position)!==current){previous=pts[i];break}}
+    if(!previous||!Number.isFinite(Number(previous.position)))return null;return Number(previous.position)-current
+  }
+  function msOutcome_(m,sourceId){const id=text(sourceId),home=text(m?.homeSourceTeamId)===id,away=text(m?.awaySourceTeamId)===id;if(!home&&!away)return'';const hs=Number(m?.homeSets),as=Number(m?.awaySets);if(!Number.isFinite(hs)||!Number.isFinite(as)||hs===as)return'';return(home?hs>as:as>hs)?'W':'L'}
+  function msOpponentId_(m,sourceId){return text(m?.homeSourceTeamId)===text(sourceId)?text(m?.awaySourceTeamId):text(m?.homeSourceTeamId)}
+  function msStatsModel_(row){
+    const d=msData_()||{},sourceId=text(row?.sourceTeamId),opponents=new Map((Array.isArray(d?.teams)?d.teams:[]).map(t=>[text(t?.sourceTeamId),Number(t?.current?.position)||null]));
+    const matches=(Array.isArray(d?.matches)?d.matches:[]).filter(m=>{if(text(m?.homeSourceTeamId)!==sourceId&&text(m?.awaySourceTeamId)!==sourceId)return false;return !!msOutcome_(m,sourceId)}).slice().sort((a,b)=>new Date(a?.startsAt||0)-new Date(b?.startsAt||0));
+    const recent=matches.slice(-5),outcomes=recent.map(m=>msOutcome_(m,sourceId)),latest=outcomes.at(-1)||'',streak=latest?outcomes.slice().reverse().findIndex(x=>x!==latest):-1,streakN=latest?(streak===-1?outcomes.length:streak):0;
+    const home={w:0,l:0},away={w:0,l:0};matches.forEach(m=>{const b=text(m?.homeSourceTeamId)===sourceId?home:away;msOutcome_(m,sourceId)==='W'?b.w++:b.l++});
+    const total=Math.max(1,Number(d?.totalTeams)||opponents.size||1),topEnd=Math.ceil(total/3),midEnd=Math.ceil(total*2/3),strength={top:{w:0,l:0},mid:{w:0,l:0},bottom:{w:0,l:0}};
+    matches.forEach(m=>{const pos=opponents.get(msOpponentId_(m,sourceId));if(!pos)return;const key=pos<=topEnd?'top':pos<=midEnd?'mid':'bottom';msOutcome_(m,sourceId)==='W'?strength[key].w++:strength[key].l++});
+    return{matches,recent,outcomes,latest,streak:streakN,home,away,strength}
+  }
+  function msTrendHtml_(delta){if(delta==null)return'';if(delta>0)return`<em class="ms-trend up">↑${delta}</em>`;if(delta<0)return`<em class="ms-trend down">↓${Math.abs(delta)}</em>`;return`<em class="ms-trend flat">→</em>`}
+  function msFormHtml_(outcomes){const x=(Array.isArray(outcomes)?outcomes:[]).slice(-5);return x.length?`<span class="ms-form">${x.map(v=>`<i class="${v==='W'?'win':'loss'}"></i>`).join('')}</span>`:'<span class="ms-form-empty">–</span>'}
+  function msChart_(history,totalTeams){
+    const pts=msHistoryPoints_(history);if(pts.length<2)return`<div class="ms-chart-empty">A helyezésgrafikon a következő tabellafrissítésekkel épül fel.</div>`;
+    const W=360,H=120,l=28,r=12,t=12,b=22,total=Math.max(2,Number(totalTeams)||Math.max(...pts.map(p=>p.position))),x=i=>l+(W-l-r)*(i/(pts.length-1)),y=p=>t+(H-t-b)*((p-1)/(total-1));
+    const poly=pts.map((p,i)=>`${x(i).toFixed(1)},${y(p.position).toFixed(1)}`).join(' '),dots=pts.map((p,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(p.position).toFixed(1)}" r="3"></circle>`).join('');
+    return`<svg class="ms-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Helyezés alakulása"><line x1="${l}" x2="${W-r}" y1="${t}" y2="${t}"/><line x1="${l}" x2="${W-r}" y1="${H-b}" y2="${H-b}"/><text x="4" y="${t+4}">1.</text><text x="4" y="${H-b+4}">${total}.</text><polyline points="${poly}"/>${dots}</svg>`
+  }
+  function msTeamStatus_(row){const model=msStatsModel_(row),delta=msPositionDelta_(row?.history,row?.position,row?.played);return`<small>${Number(row?.position)||'–'}. hely ${msTrendHtml_(delta)} ${msFormHtml_(model.outcomes)}</small>`}
+  function msMatchDate_(m){const d=safeDate(m?.startsAt);return d?new Intl.DateTimeFormat('hu-HU',{month:'short',day:'numeric',timeZone:'Europe/Budapest'}).format(d).replace(/\.$/,''):'–'}
+  function msMatchTime_(m){const d=safeDate(m?.startsAt);return d?fmtTime(d):''}
+  function msRowBySource_(id){return msRows_().find(r=>text(r.sourceTeamId)===text(id))||null}
+  function msMatchesHtml_(rows,selected){
+    const target=selected||msFocusRow_(rows),sid=text(target?.sourceTeamId),matches=(Array.isArray(msData_()?.matches)?msData_().matches:[]).filter(m=>text(m?.homeSourceTeamId)===sid||text(m?.awaySourceTeamId)===sid).slice().sort((a,b)=>new Date(a?.startsAt||0)-new Date(b?.startsAt||0));
+    const title=selected?`Meccsek · ${text(selected.teamName)}`:'Meccsek';
+    if(!matches.length)return`<section class="ms-panel"><div class="ms-panel-head"><b>${esc(title)}</b><span>0 meccs</span></div><div class="ms-empty">Ehhez a csapathoz még nincs elérhető meccsadat.</div></section>`;
+    return`<section class="ms-panel"><div class="ms-panel-head"><b>${esc(title)}</b><span>${matches.length} meccs</span></div><div class="ms-match-list">${matches.map(m=>{const h=msRowBySource_(m?.homeSourceTeamId),a=msRowBySource_(m?.awaySourceTeamId),hs=Number(m?.homeSets),as=Number(m?.awaySets),score=Number.isFinite(hs)&&Number.isFinite(as)?`${hs}–${as}`:'–';return`<div class="ms-match-row"><div class="ms-match-date"><b>${esc(msMatchDate_(m))}</b><span>${esc(msMatchTime_(m))}</span></div><button type="button" class="ms-match-team ${h?.focus?'is-own':''}" data-ms-team="${esc(text(h?.sourceTeamId))}">${msLogoHtml_(h?.sourceTeamId,m?.homeName,'match')}<span><b>${esc(m?.homeName||'–')}</b>${h?msTeamStatus_(h):''}</span></button><strong class="ms-score">${esc(score)}</strong><button type="button" class="ms-match-team away ${a?.focus?'is-own':''}" data-ms-team="${esc(text(a?.sourceTeamId))}"><span><b>${esc(m?.awayName||'–')}</b>${a?msTeamStatus_(a):''}</span>${msLogoHtml_(a?.sourceTeamId,m?.awayName,'match')}</button><div class="ms-match-place">${esc(m?.venue||'')}</div></div>`}).join('')}</div></section>`
+  }
+  function msLeagueStatsHtml_(rows){
+    const entries=rows.map(row=>{const model=msStatsModel_(row),delta=msPositionDelta_(row?.history,row?.position,row?.played);return{row,model,delta,wins5:model.outcomes.filter(x=>x==='W').length}}),byForm=entries.slice().sort((a,b)=>b.wins5-a.wins5||(Number(a.row.position)||999)-(Number(b.row.position)||999)),bestForm=byForm[0],risers=entries.filter(x=>x.delta>0).sort((a,b)=>b.delta-a.delta),fallers=entries.filter(x=>x.delta<0).sort((a,b)=>a.delta-b.delta),bestRatio=entries.slice().sort((a,b)=>(Number(b.row.setRatio)||0)-(Number(a.row.setRatio)||0))[0];
+    const card=(label,x,value)=>`<div><span>${esc(label)}</span><b>${esc(x?.row?.teamName||'–')}</b><small>${esc(value||'Nincs elég adat')}</small></div>`;
+    return`<section class="ms-panel ms-stats"><div class="ms-panel-head"><b>Statisztika</b><span>Bajnokság képe</span></div><div class="ms-league-summary">${card('Legjobb forma',bestForm,bestForm?.model?.outcomes?.length?`${bestForm.wins5}/${bestForm.model.outcomes.length} győzelem`:'Még nincs eredmény')}${card('Legnagyobb feljövő',risers[0],risers[0]?`↑${risers[0].delta} hely`:'–')}${card('Legjobb szettarány',bestRatio,bestRatio?msRatio_(bestRatio.row.setRatio,bestRatio.row.setsFor,bestRatio.row.setsAgainst):'–')}${card('Legnagyobb visszaeső',fallers[0],fallers[0]?`↓${Math.abs(fallers[0].delta)} hely`:'–')}</div><div class="ms-form-list"><div class="ms-insight-title"><b>Erőviszonyok és forma</b><span>aktuális helyezés · változás · utolsó 5</span></div>${entries.slice().sort((a,b)=>(Number(a.row.position)||999)-(Number(b.row.position)||999)).map(x=>`<button type="button" data-ms-team="${esc(x.row.sourceTeamId)}"><span class="ms-form-team-main">${msLogoHtml_(x.row.sourceTeamId,x.row.teamName,'league')}<span><b>${esc(x.row.teamName)}</b><small>${Number(x.row.position)||'–'}. hely ${msTrendHtml_(x.delta)}</small></span></span><span class="ms-form-team-right">${msFormHtml_(x.model.outcomes)}<em>${x.model.matches.length?`${x.model.matches.filter(m=>msOutcome_(m,x.row.sourceTeamId)==='W').length}–${x.model.matches.filter(m=>msOutcome_(m,x.row.sourceTeamId)==='L').length}`:'–'}</em></span></button>`).join('')}</div></section>`
+  }
+  function msTeamStatsHtml_(row){
+    const model=msStatsModel_(row),delta=msPositionDelta_(row?.history,row?.position,row?.played),pos=Number(row?.position),form=model.outcomes.length?model.outcomes.map(x=>`<b class="${x==='W'?'win':'loss'}">${x}</b>`).join(''):'<span>–</span>',streak=model.latest&&model.streak?`${model.streak}× ${model.latest}`:'–',strength=(label,key)=>`<div><span>${label}</span><b>${model.strength[key].w}–${model.strength[key].l}</b></div>`,official=Number(row?.played)||0,captured=model.matches.length;
+    return`<section class="ms-panel ms-stats"><div class="ms-panel-head"><b>Statisztika</b><span>${esc(row?.teamName||'Csapat')}</span></div><div class="ms-team-summary"><div><span>Helyezés</span><b>${Number.isFinite(pos)?`${pos}.`:'–'} ${msTrendHtml_(delta)}</b></div><div><span>Mérleg</span><b>${num(row?.wins)}–${num(row?.losses)}</b></div><div class="form"><span>Utolsó ${model.outcomes.length||5}</span><div>${form}</div></div><div><span>Sorozat</span><b>${esc(streak)}</b></div></div><div class="ms-stats-grid"><div class="ms-stat-card chart"><div class="ms-insight-title"><b>Helyezés alakulása</b><span>meccsek / frissítések</span></div>${msChart_(row?.history,msData_()?.totalTeams)}</div><div class="ms-stat-card"><div class="ms-insight-title"><b>Hazai / idegen</b></div><div class="ms-record"><div><span>Hazai</span><b>${model.home.w}–${model.home.l}</b></div><div><span>Idegen</span><b>${model.away.w}–${model.away.l}</b></div></div></div><div class="ms-stat-card"><div class="ms-insight-title"><b>Ellenfél erőssége</b><span>aktuális helyezés alapján</span></div><div class="ms-record">${strength('Felső harmad','top')}${strength('Közép','mid')}${strength('Alsó harmad','bottom')}</div></div></div>${captured<official?`<div class="ms-coverage">Részleges BRSZ-adat: ${captured}/${official} lejátszott meccs érhető el ehhez a csapathoz.</div>`:''}</section>`
+  }
+  async function msEnsureInsights_(){
+    const team=msContextTeam_(),key=text(team?.id);if(!configured()||!key)return;
+    if(state.managerLeagueInsights.key===key&&(state.managerLeagueInsights.loading||state.managerLeagueInsights.loaded))return;
+    state.managerLeagueInsights={key,loading:true,loaded:false,error:'',data:null};
+    try{const d=await rpc('cc_manager_competition_league_insights_v1',{p_context_team_id:key});if(state.managerLeagueInsights.key!==key)return;state.managerLeagueInsights={key,loading:false,loaded:true,error:'',data:d||{}}}
+    catch(err){if(state.managerLeagueInsights.key!==key)return;state.managerLeagueInsights={key,loading:false,loaded:true,error:text(err?.message||err||'A bajnoki statisztikák nem érhetők el.'),data:null}}
+    if(state.area==='competition'&&state.module==='standings')renderManagerStandings_()
+  }
+  function msSetTeam_(sourceId){state.managerStandingsTeam=text(sourceId)||'all';try{localStorage.setItem('cc-manager-standings-team',state.managerStandingsTeam)}catch(_){}renderManagerStandings_()}
+  function msBind_(){
+    $('#msContextSelect')?.addEventListener('change',e=>{state.managerStandingsContext=text(e.target.value);state.managerStandingsTeam='all';state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};try{localStorage.setItem('cc-manager-standings-context',state.managerStandingsContext);localStorage.setItem('cc-manager-standings-team','all')}catch(_){}renderManagerStandings_()});
+    $('#msTeamSelect')?.addEventListener('change',e=>msSetTeam_(e.target.value));
+    $$('[data-ms-team]').forEach(b=>b.addEventListener('click',()=>{const id=text(b.dataset.msTeam);if(id)msSetTeam_(id)}));
+  }
+  function renderManagerStandings_(){
+    const team=msContextTeam_(),contextOptions=msContextCandidates_();
+    if(!team){$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Tabella</h2><p>Aktuális bajnoki állás, meccsek és statisztikák.</p></div></div><article class="panel"><div class="ms-empty">Nincs aktív versenycsapat.</div></article>`;return}
+    const li=state.managerLeagueInsights;if(li.key!==text(team.id)||(!li.loaded&&!li.loading)){msEnsureInsights_();}
+    const loading=li.key!==text(team.id)||li.loading||(!li.loaded&&!li.error),d=li.key===text(team.id)?li.data:null,rows=d?msRows_():[],selected=d?msSelectedRow_(rows):null,meta=d?[d.competitionLabel,d.source].filter(Boolean).join(' · '):'',updated=rows.map(r=>safeDate(r?.updatedAt)).filter(Boolean).sort((a,b)=>b-a)[0];
+    $('#viewContent').innerHTML=`<div class="page-intro ms-page-intro"><div><h2>Tabella</h2><p>Aktuális bajnoki állás · teljes meccslista · statisztikák.</p></div><div class="ms-context-controls"><label><span>BEAC csapat</span><select id="msContextSelect">${contextOptions.map(t=>`<option value="${esc(t.id)}" ${text(t.id)===text(team.id)?'selected':''}>${esc(t.name)}</option>`).join('')}</select></label>${rows.length?`<label><span>Liga csapat</span><select id="msTeamSelect"><option value="all">Minden csapat</option>${rows.map(r=>`<option value="${esc(r.sourceTeamId)}" ${text(state.managerStandingsTeam)===text(r.sourceTeamId)?'selected':''}>${esc(r.teamName)}</option>`).join('')}</select></label>`:''}</div></div>${loading?`<article class="panel"><div class="ms-empty"><b>Tabella betöltése…</b><span>A bajnoki adatok és statisztikák frissítése folyamatban van.</span></div></article>`:li.error?`<article class="panel"><div class="ms-empty error"><b>A tabella most nem érhető el</b><span>${esc(li.error)}</span></div></article>`:!rows.length?`<article class="panel"><div class="ms-empty"><b>Még nincs tabellaadat</b><span>Amint érkezik hivatalos bajnoki tabella, itt automatikusan megjelenik.</span></div></article>`:`<article class="panel ms-standings-card"><div class="ms-title"><div><h3>${esc(team.name)}</h3><p>${esc(meta||'Bajnoki tabella')}${updated?` · Frissítve: ${esc(fmtDate(updated))} ${esc(fmtTime(updated))}`:''}</p></div></div><div class="ms-table-scroll"><table class="ms-table"><thead><tr><th>#</th><th class="team">Csapat</th><th>M</th><th>GY</th><th>V</th><th class="group-end">P</th><th>SZ</th><th>SZA</th><th>P</th><th>PA</th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.focus?'focus':''}"><td><b>${esc(r.position||'–')}</b></td><td class="team"><button type="button" data-ms-team="${esc(r.sourceTeamId)}">${msLogoHtml_(r.sourceTeamId,r.teamName)}<strong>${esc(r.teamName)}</strong></button></td><td>${num(r.played)}</td><td>${num(r.wins)}</td><td>${num(r.losses)}</td><td class="group-end"><b>${num(r.tablePoints)}</b></td><td>${esc(msPair_(r.setsFor,r.setsAgainst))}</td><td>${esc(msRatio_(r.setRatio,r.setsFor,r.setsAgainst))}</td><td>${esc(msPair_(r.pointsFor,r.pointsAgainst))}</td><td>${esc(msRatio_(r.pointRatio,r.pointsFor,r.pointsAgainst))}</td></tr>`).join('')}</tbody></table></div></article>${msMatchesHtml_(rows,selected)}${selected?msTeamStatsHtml_(selected):msLeagueStatsHtml_(rows)}`}`;
+    msBind_()
+  }
+
   function eventPlace(e){return text(e.court)||text(e.venue)||'–'}
   function ccDisplayEventTitle_(e){return eventType(e)==='training'?'Edzés':(e.title||'Meccs')}
   function ccDisplayEventPlace_(e){return eventType(e)==='training'?(text(e.court)||'–'):eventPlace(e)}
@@ -699,6 +827,7 @@
     if(state.area==='competition'&&m==='notifications'){renderNotifications();return}
     if(state.area==='competition'&&m==='trainings'){renderCompetitionTrainingCards_();return}
     if(state.area==='competition'&&m==='matches'){renderCompetitionMatchCards_();return}
+    if(state.area==='competition'&&m==='standings'){renderManagerStandings_();return}
     if(state.area==='competition'&&m==='fees'){renderPlaceholder('Díjak','A jelenlegi havi díj-/fizetési mátrix production parityje ide kerül.',['Játékosonkénti havi státusz','Edzői díj','Bérlet','Audit / felülírás']);return}
     if(state.area==='competition'&&m==='competition'){renderPlaceholder('Versenyadatok','Competition Core: tabella, teljes meccslista, BRSZ/MRSZ források és konfliktusok.',['054 Competition Core backend előtt nincs production adat','Saját csapatok meccsei az events bridge-en keresztül','Külső liga-meccsek nem kerülnek az events táblába']);return}
     if(state.area==='mass'&&m==='trainings'){renderMassTrainings();return}
@@ -1529,7 +1658,7 @@
   function collectAdminPermissionPayload(){const out=[];$$('[data-admin-module-row]').forEach(row=>{const key=row.dataset.adminModuleRow,view=row.querySelector('[data-right="view"]')?.checked===true,edit=row.querySelector('[data-right="edit"]')?.checked===true,notify=row.querySelector('[data-right="notify"]')?.checked===true;if(!(view||edit||notify))return;if(key.startsWith('competition.')){const all=row.querySelector('[data-scope-all]')?.checked===true,teams=Array.from(row.querySelectorAll('[data-scope-team]')).filter(x=>x.checked).map(x=>x.value);if(all||!teams.length)out.push({moduleKey:key,teamId:null,canView:view,canEdit:edit,canNotify:notify});else teams.forEach(teamId=>out.push({moduleKey:key,teamId,canView:view,canEdit:edit,canNotify:notify}))}else out.push({moduleKey:key,teamId:null,canView:view,canEdit:edit,canNotify:notify})});return out}
   async function saveAdminEditorSafe(){if(state.adminBusy)return;const email=text($('#adminEmail')?.value).toLowerCase(),name=text($('#adminDisplayName')?.value),active=$('#adminActive')?.checked!==false,payload=collectAdminPermissionPayload();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status('Adj meg érvényes admin email címet.','error');return}const existing=state.adminEditId==='__new__'?null:(state.admins||[]).find(a=>text(a.id)===text(state.adminEditId));state.adminBusy=true;renderSettings();try{status('Admin és jogosultságok mentése…');const saved=await rpc('cc_manager_admin_save_v1',{p_manager_id:existing?.id||null,p_email:email,p_display_name:name,p_active:active,p_permissions:payload});await loadAdmins();state.adminEditId=text(saved?.account?.id||existing?.id);status('Admin mentve.','success')}catch(err){console.error(err);status(err.message||'Az admin mentése sikertelen.','error')}finally{state.adminBusy=false;renderSettings()}}
   function bindAdminEditor(){$$('[data-admin-edit]').forEach(b=>b.addEventListener('click',()=>{state.adminEditId=b.dataset.adminEdit;renderSettings()}));$('#adminAddBtn')?.addEventListener('click',()=>{state.adminEditId='__new__';renderSettings()});$('#adminCancelBtn')?.addEventListener('click',()=>{state.adminEditId='';renderSettings()});$('#adminSaveBtn')?.addEventListener('click',saveAdminEditorSafe);$('#adminViewAllBtn')?.addEventListener('click',()=>{$$('[data-admin-module-row]').forEach(r=>{const v=r.querySelector('[data-right="view"]');if(v)v.checked=true});});$('#adminFullBtn')?.addEventListener('click',()=>{$$('[data-admin-module-row]').forEach(r=>{['view','edit','notify'].forEach(k=>{const x=r.querySelector(`[data-right="${k}"]`);if(x)x.checked=true});const all=r.querySelector('[data-scope-all]');if(all){all.checked=true;Array.from(r.querySelectorAll('[data-scope-team]')).forEach(x=>{x.checked=false;x.disabled=true})}})});$$('[data-scope-all]').forEach(x=>x.addEventListener('change',()=>{Array.from(x.closest('[data-admin-module-row]').querySelectorAll('[data-scope-team]')).forEach(t=>{t.disabled=x.checked;if(x.checked)t.checked=false})}))}
-  function renderSettings(){const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">V0.5.2B5S</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
+  function renderSettings(){const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">V0.5.2B6A</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
 
   function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`}
 
