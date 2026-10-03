@@ -188,7 +188,7 @@
   async function requestCode(){const email=text($('#loginEmail')?.value).toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){loginMessage('#loginMsg','Adj meg egy érvényes email címet.',true);return}const b=$('#requestCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginMsg','Kód küldése…');const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});if(error)throw error;state.pendingEmail=email;$('#loginEmailPreview').textContent=email;showLogin('loginCodeStep');loginMessage('#loginCodeMsg','A kódot elküldtük.')}catch(err){loginMessage('#loginMsg',err.message||'A kód küldése sikertelen.',true)}finally{if(b)b.disabled=false}}
   async function verifyCode(){const token=text($('#loginCode')?.value).replace(/\D/g,'');if(token.length<6){loginMessage('#loginCodeMsg','Írd be az emailben kapott kódot.',true);return}const b=$('#verifyCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginCodeMsg','Ellenőrzés…');const {data,error}=await state.supabase.auth.verifyOtp({email:state.pendingEmail,token,type:'email'});if(error)throw error;state.session=data.session||null;await loadLiveData();hideLogin()}catch(err){loginMessage('#loginCodeMsg',err.message||'A belépés sikertelen.',true)}finally{if(b)b.disabled=false}}
 
-  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='V0.5.2B6B';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · V0.5.2B6B';}
+  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='V0.5.2B6C';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · V0.5.2B6C';}
 
   async function loadLiveData(){
     state.loading=true;status('Manager adatok frissítése…');
@@ -354,17 +354,55 @@
   function competitionResultByEvent_(eventId){return (state.competitionResults||[]).find(r=>text(r.eventId)===text(eventId))||null}
   function matchResultOrRsvp_(e){const r=competitionResultByEvent_(e.eventId||e.id);if(!r||r.homeSets==null||r.awaySets==null)return rsvpPills(e);const sets=Array.isArray(r.setScores)?r.setScores:[];return `<div class="match-result-compact"><strong>${num(r.homeSets)} : ${num(r.awaySets)}</strong>${sets.length?`<small>${sets.map(x=>`${num(x.home)}:${num(x.away)}`).join(' · ')}</small>`:''}</div>`}
   function standingsForContext_(teamId){return (state.competitionStandings||[]).filter(r=>text(r.contextTeamId)===text(teamId)).sort((a,b)=>(Number(a.position)||9999)-(Number(b.position)||9999)||text(a.teamName).localeCompare(text(b.teamName),'hu'))}
-  function standingsLogo_(r){if(text(r.logoUrl))return `<img src="${esc(r.logoUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;const initials=text(r.teamName).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()||'').join('')||'•';return `<span>${esc(initials)}</span>`}
+  function standingsLogo_(r){const html=ccTeamLogoHtml_(r?.teamName,r?.logoUrl,'standing-logo-asset',text(r?.teamName).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()||'').join('')||'•');return html.replace(/^<img class="ms-team-logo standing-logo-asset"/,'<img class="standing-logo-img"').replace(/^<span class="ms-team-logo ms-monogram standing-logo-asset"/,'<span class="standing-logo-text"')}
   function standingsCard_(contextTeamId){const rows=standingsForContext_(contextTeamId),team=teamById(contextTeamId),meta=rows[0];if(!rows.length)return'';return `<article class="panel standings-card" style="--team-color:${esc(team?.color||'#f7b700')}"><div class="panel-head"><div><h3>Tabella</h3><p>${esc(meta?.competitionLabel||team?.name||'BRSZ')} · BRSZ sorrend</p></div></div><div class="standings-table"><div class="standings-row standings-head"><b>H</b><b>Csapat</b><b>M</b><b>GY</b><b>V</b><b>Szett</b><b>P</b></div>${rows.map(r=>`<div class="standings-row ${r.focus?'focus':''}"><b class="standing-pos">${esc(r.position||'–')}</b><div class="standing-team"><span class="standing-logo">${standingsLogo_(r)}</span><strong>${esc(r.teamName)}</strong></div><span>${num(r.played)}</span><span>${num(r.wins)}</span><span>${num(r.losses)}</span><span>${num(r.setsFor)}:${num(r.setsAgainst)}</span><b>${num(r.tablePoints)}</b></div>`).join('')}</div></article>`}
   function standingsSection_(scope='overview'){const ids=teamFilterIds_(scope),base=scope==='overview'?overviewContextTeams_():state.teams,contexts=(ids.length?ids:base.map(t=>text(t.id))).filter(id=>standingsForContext_(id).length);if(!contexts.length)return state.competitionDataError?`<article class="panel standings-card standings-unavailable"><div class="panel-head"><div><h3>Tabella</h3><p>MGR014 még nincs telepítve vagy nem érhető el.</p></div></div></article>`:'';return `<div class="standings-grid ${scope==='overview'?'overview-standings-grid':''}">${contexts.map(standingsCard_).join('')}</div>`}
 
 
   // ---------------------------------------------------------------------------
-  // V0.5.2B6B — standalone Manager standings / league insights page.
+  // V0.5.2B6C — standalone Manager standings / league insights page.
   // MGR014 remains the canonical results+standings read layer. MGR015 adds the
   // read-only history/full-league payload needed for Player-parity statistics.
   // ---------------------------------------------------------------------------
   function msNorm_(value){return text(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+  const CC_TEAM_LOGO_ASSETS_=[
+    {match:['beac'],light:'assets/team-logos/beac.png'},
+    {match:['bdse emericus','bdse'],light:'assets/team-logos/bdseemericus.png',dark:'assets/team-logos/bdseemericus_dark.png'},
+    {match:['bunnies'],light:'assets/team-logos/bunnies.png'},
+    {match:['dag','dag kse'],light:'assets/team-logos/dag.png'},
+    {match:['obudai egyetem kando','kando'],light:'assets/team-logos/kando.png'},
+    {match:['keac'],light:'assets/team-logos/keac.png'},
+    {match:['kispest'],light:'assets/team-logos/kispest.png',dark:'assets/team-logos/kispest_dark.png'},
+    {match:['kozgaz','corvinus'],light:'assets/team-logos/kozgaz.png'},
+    {match:['kre'],light:'assets/team-logos/kre.png'},
+    {match:['kse'],light:'assets/team-logos/kse.png'},
+    {match:['mafc','schonherz','schönherz','vasarhelyi','vásárhelyi'],light:'assets/team-logos/mafc.png'},
+    {match:['mozdulj'],light:'assets/team-logos/mozdulj.png'},
+    {match:['mtk'],light:'assets/team-logos/mtk.png'},
+    {match:['ossc'],light:'assets/team-logos/ossc.png',dark:'assets/team-logos/ossc_dark.png'},
+    {match:['panorama','panoráma'],light:'assets/team-logos/panorama.png',dark:'assets/team-logos/panorama_dark.png'},
+    {match:['pase'],light:'assets/team-logos/pase.png'},
+    {match:['rackeve','ráckeve'],light:'assets/team-logos/rackeve.png'},
+    {match:['rksk'],light:'assets/team-logos/rksk.png'},
+    {match:['semmelweis','semmeilweis'],light:'assets/team-logos/semmeilweis.png'},
+    {match:['taksony'],light:'assets/team-logos/taksony.png'},
+    {match:['ute'],light:'assets/team-logos/ute.png'}
+  ];
+  function ccTeamLogoAsset_(name){
+    const norm=msNorm_(name);
+    if(!norm)return'';
+    const hit=CC_TEAM_LOGO_ASSETS_.find(entry=>Array.isArray(entry.match)&&entry.match.some(key=>norm.includes(msNorm_(key))));
+    if(!hit)return'';
+    const dark=document.body.classList.contains('dark');
+    return dark && text(hit.dark) ? hit.dark : hit.light;
+  }
+  function ccTeamLogoHtml_(name,remoteUrl,extraClass='',fallbackLabel=''){
+    const localUrl=ccTeamLogoAsset_(name);
+    const finalUrl=text(localUrl)||text(remoteUrl);
+    const initial=(text(fallbackLabel)||text(name)).match(/[A-Za-zÁÉÍÓÖŐÚÜŰ0-9]/u);
+    const monogram=(initial?.[0]||'?').toLocaleUpperCase('hu-HU');
+    return finalUrl?`<img class="${esc(('ms-team-logo '+text(extraClass)).trim())}" src="${esc(finalUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="${esc(('ms-team-logo ms-monogram '+text(extraClass)).trim())}" aria-hidden="true">${esc(monogram)}</span>`;
+  }
   function msContextCandidates_(){
     const active=(state.teams||[]).filter(t=>t.active!==false);
     const mapped=new Set((state.competitionStandings||[]).map(r=>text(r.contextTeamId)).filter(Boolean));
@@ -397,8 +435,8 @@
     return (state.competitionStandings||[]).find(r=>text(r.contextTeamId)===ctx&&((sid&&text(r.sourceTeamId)===sid)||(nk&&msNorm_(r.teamName)===nk)))||null;
   }
   function msLogoHtml_(sourceTeamId,name,extra=''){
-    const row=msStandingSourceRow_(sourceTeamId,name),url=text(row?.logoUrl),initial=(text(name).match(/[A-Za-zÁÉÍÓÖŐÚÜŰ0-9]/u)||['?'])[0].toLocaleUpperCase('hu-HU');
-    return url?`<img class="ms-team-logo ${extra}" src="${esc(url)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ms-team-logo ms-monogram ${extra}" aria-hidden="true">${esc(initial)}</span>`;
+    const row=msStandingSourceRow_(sourceTeamId,name);
+    return ccTeamLogoHtml_(name,row?.logoUrl,extra,name);
   }
   function msRatio_(explicit,a,b){
     const raw=Number(explicit);if(Number.isFinite(raw)&&raw!==0)return raw.toFixed(3);
@@ -1683,7 +1721,7 @@
   function collectAdminPermissionPayload(){const out=[];$$('[data-admin-module-row]').forEach(row=>{const key=row.dataset.adminModuleRow,view=row.querySelector('[data-right="view"]')?.checked===true,edit=row.querySelector('[data-right="edit"]')?.checked===true,notify=row.querySelector('[data-right="notify"]')?.checked===true;if(!(view||edit||notify))return;if(key.startsWith('competition.')){const all=row.querySelector('[data-scope-all]')?.checked===true,teams=Array.from(row.querySelectorAll('[data-scope-team]')).filter(x=>x.checked).map(x=>x.value);if(all||!teams.length)out.push({moduleKey:key,teamId:null,canView:view,canEdit:edit,canNotify:notify});else teams.forEach(teamId=>out.push({moduleKey:key,teamId,canView:view,canEdit:edit,canNotify:notify}))}else out.push({moduleKey:key,teamId:null,canView:view,canEdit:edit,canNotify:notify})});return out}
   async function saveAdminEditorSafe(){if(state.adminBusy)return;const email=text($('#adminEmail')?.value).toLowerCase(),name=text($('#adminDisplayName')?.value),active=$('#adminActive')?.checked!==false,payload=collectAdminPermissionPayload();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status('Adj meg érvényes admin email címet.','error');return}const existing=state.adminEditId==='__new__'?null:(state.admins||[]).find(a=>text(a.id)===text(state.adminEditId));state.adminBusy=true;renderSettings();try{status('Admin és jogosultságok mentése…');const saved=await rpc('cc_manager_admin_save_v1',{p_manager_id:existing?.id||null,p_email:email,p_display_name:name,p_active:active,p_permissions:payload});await loadAdmins();state.adminEditId=text(saved?.account?.id||existing?.id);status('Admin mentve.','success')}catch(err){console.error(err);status(err.message||'Az admin mentése sikertelen.','error')}finally{state.adminBusy=false;renderSettings()}}
   function bindAdminEditor(){$$('[data-admin-edit]').forEach(b=>b.addEventListener('click',()=>{state.adminEditId=b.dataset.adminEdit;renderSettings()}));$('#adminAddBtn')?.addEventListener('click',()=>{state.adminEditId='__new__';renderSettings()});$('#adminCancelBtn')?.addEventListener('click',()=>{state.adminEditId='';renderSettings()});$('#adminSaveBtn')?.addEventListener('click',saveAdminEditorSafe);$('#adminViewAllBtn')?.addEventListener('click',()=>{$$('[data-admin-module-row]').forEach(r=>{const v=r.querySelector('[data-right="view"]');if(v)v.checked=true});});$('#adminFullBtn')?.addEventListener('click',()=>{$$('[data-admin-module-row]').forEach(r=>{['view','edit','notify'].forEach(k=>{const x=r.querySelector(`[data-right="${k}"]`);if(x)x.checked=true});const all=r.querySelector('[data-scope-all]');if(all){all.checked=true;Array.from(r.querySelectorAll('[data-scope-team]')).forEach(x=>{x.checked=false;x.disabled=true})}})});$$('[data-scope-all]').forEach(x=>x.addEventListener('change',()=>{Array.from(x.closest('[data-admin-module-row]').querySelectorAll('[data-scope-team]')).forEach(t=>{t.disabled=x.checked;if(x.checked)t.checked=false})}))}
-  function renderSettings(){const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">V0.5.2B6B</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
+  function renderSettings(){const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">V0.5.2B6C</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
 
   function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`}
 
