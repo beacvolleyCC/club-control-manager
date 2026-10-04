@@ -3835,3 +3835,45 @@ html,body{max-width:100%;overflow-x:hidden!important}
   .finance-matrix{min-width:max-content!important;width:max-content!important;}
   .finance-filter-panel{width:100%!important;}
 }
+
+
+/* ==========================================================
+   MANAGER V0.5.2B6L — authoritative attendance + BEAC import + standings geometry
+   ========================================================== */
+/* Wide league tables are fixed-width on phones: sticky team cells can no
+   longer consume the viewport while numeric columns are pushed off-screen. */
+@media(max-width:760px){
+  .ms-table{
+    table-layout:fixed!important;
+    width:620px!important;
+    min-width:620px!important;
+    max-width:620px!important;
+  }
+  .ms-table th:first-child,.ms-table td:first-child{
+    width:34px!important;min-width:34px!important;max-width:34px!important;
+  }
+  .ms-table th.team,.ms-table td.team{
+    width:190px!important;min-width:190px!important;max-width:190px!important;
+    overflow:hidden!important;
+  }
+  .ms-table th:not(:first-child):not(.team),
+  .ms-table td:not(:first-child):not(.team){
+    width:49px!important;min-width:49px!important;max-width:49px!important;
+    padding-left:3px!important;padding-right:3px!important;
+  }
+  .ms-table td.team button{min-width:0!important;max-width:100%!important;overflow:hidden!important}
+  .ms-table td.team strong{min-width:0!important;max-width:128px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+}
+/* The root page never participates in a table's horizontal scroll. */
+html,body,.app-shell,.workspace,#mainContent,#view-dynamic,#viewContent{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  margin-left:0!important;margin-right:0!important;
+}
+body{overflow-x:clip!important}
+.ms-table-scroll,.finance-matrix-scroll,.matrix-scroll{contain:inline-size!important}
+
+/* Attendance save acknowledgement without rerendering/reopening the dialog. */
+.cc-competition-attendance-slider[aria-busy="true"]{opacity:.58!important;pointer-events:none!important}
+
+/* Restored source-data entry point. */
+.legacy-secondary-tab[data-route-module="passes"]{font-weight:900}
