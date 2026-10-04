@@ -2558,7 +2558,10 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 
 
 
-/* ==========================================================================\n   V0.5.2A2 — LEGACY HYBRID RESTORE\n   Old Manager chrome/calendar + current Players + current Overview cards.\n   ========================================================================== */
+/* ==========================================================================
+   V0.5.2A2 — LEGACY HYBRID RESTORE
+   Old Manager chrome/calendar + current Players + current Overview cards.
+   ========================================================================== */
 :root{--beac-muted:var(--muted);--beac-border:var(--line);--admin-card:var(--card)}
 
 /* Old Manager top navigation proportions */
@@ -2993,7 +2996,23 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
   .cc-event-type-icon{grid-area:icon!important}.cc-event-team-summary{grid-area:team!important}.cc-event-date{grid-area:date!important}.cc-event-main{grid-area:main!important}.cc-event-logos{grid-area:logos!important}
   .cc-event-card.training{grid-template-areas:"icon team date" "main main main"!important}
 }
-\n\n/* V0.5.2B5L — opponent logo inline; no own-team logo on event cards */\n.cc-event-card{grid-template-columns:52px 165px 150px minmax(250px,1fr)!important}\n.cc-event-type-icon{grid-column:1}.cc-event-team-summary{grid-column:2}.cc-event-date{grid-column:3}.cc-event-main{grid-column:4;min-width:0}\n.cc-event-logos{display:none!important}\n.cc-event-opponent-head{display:flex;align-items:center;gap:8px;min-width:0}\n.cc-event-opponent-head strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.cc-event-opponent-logo{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.08);display:grid;place-items:center;overflow:hidden}\n.cc-event-opponent-logo img{width:100%;height:100%;object-fit:contain;padding:3px}\n@media(max-width:980px){.cc-event-card{grid-template-columns:46px 150px 135px minmax(170px,1fr)!important}}\n@media(max-width:760px){\n  .cc-event-card{grid-template-columns:42px minmax(120px,1fr) minmax(115px,.9fr)!important;grid-template-areas:\"icon team date\" \"main main main\"!important}\n  .cc-event-type-icon{grid-area:icon!important}.cc-event-team-summary{grid-area:team!important}.cc-event-date{grid-area:date!important}.cc-event-main{grid-area:main!important}\n  .cc-event-opponent-logo{width:28px;height:28px;flex-basis:28px}\n}\n
+
+
+/* V0.5.2B5L — opponent logo inline; no own-team logo on event cards */
+.cc-event-card{grid-template-columns:52px 165px 150px minmax(250px,1fr)!important}
+.cc-event-type-icon{grid-column:1}.cc-event-team-summary{grid-column:2}.cc-event-date{grid-column:3}.cc-event-main{grid-column:4;min-width:0}
+.cc-event-logos{display:none!important}
+.cc-event-opponent-head{display:flex;align-items:center;gap:8px;min-width:0}
+.cc-event-opponent-head strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc-event-opponent-logo{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,.08);display:grid;place-items:center;overflow:hidden}
+.cc-event-opponent-logo img{width:100%;height:100%;object-fit:contain;padding:3px}
+@media(max-width:980px){.cc-event-card{grid-template-columns:46px 150px 135px minmax(170px,1fr)!important}}
+@media(max-width:760px){
+  .cc-event-card{grid-template-columns:42px minmax(120px,1fr) minmax(115px,.9fr)!important;grid-template-areas:"icon team date" "main main main"!important}
+  .cc-event-type-icon{grid-area:icon!important}.cc-event-team-summary{grid-area:team!important}.cc-event-date{grid-area:date!important}.cc-event-main{grid-area:main!important}
+  .cc-event-opponent-logo{width:28px;height:28px;flex-basis:28px}
+}
+
 
 /* ==========================================================================
    V0.5.2B5N — unified player / roster reference card polish
@@ -3748,3 +3767,71 @@ html,body{max-width:100%;overflow-x:hidden!important}
 /* B6I header app icon: crop away legacy yellow icon surround; only the circular mark remains visible. */
 .app-brand-mark{background:transparent!important;border:0!important;overflow:hidden!important;border-radius:999px!important}
 .app-brand-mark img:not(.fallback-asset){width:136%!important;height:136%!important;max-width:none!important;object-fit:cover!important;border-radius:0!important}
+
+
+/* ==========================================================
+   MANAGER V0.5.2B6J — root X lock + finance display hotfix
+   ========================================================== */
+/* A previously scrollable wide Manager build can leave the document with a
+   restored horizontal offset even after overflow-x becomes hidden. The JS
+   resets root scrollLeft; these guards ensure the content itself never owns
+   an accidental left offset or half-width geometry. */
+#mainContent,#view-dynamic,#viewContent{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin-left:0!important;
+  margin-right:0!important;
+}
+#view-dynamic,#viewContent{position:relative!important;left:auto!important;right:auto!important}
+@media(max-width:1279px){
+  .manager-overview-main{width:100%!important;max-width:100%!important;min-width:0!important;margin-inline:0!important}
+  .manager-overview-main>.panel{min-width:0!important;max-width:100%!important}
+}
+
+/* ==========================================================
+   MANAGER V0.5.2B6K — standings/finance scroll + Teams coach RSVP
+   ========================================================== */
+/* Wide tables own horizontal movement. The page shell never follows them. */
+.ms-standings-card,
+.overview-ms-standings,
+.finance-matrix-panel{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin-inline:0!important;
+  overflow:hidden!important;
+}
+.ms-table-scroll,
+.finance-matrix-scroll{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-x:contain!important;
+  touch-action:pan-x pan-y!important;
+}
+.ms-table,.finance-matrix{margin:0!important;max-width:none!important;}
+/* Finance title/filter remain anchored; only the matrix below scrolls. */
+.finance-filter-toolbar,.finance-filter-panel,.finance-matrix-panel>.panel-head,.finance-legend{
+  width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important;
+}
+/* Coach RSVP belongs to Teams > Rács only. Make the three choices clearly tappable. */
+.team-season-grid .coach-matrix-control{width:54px!important;height:28px!important;min-width:54px!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+.team-season-grid .coach-matrix-control button{min-width:0!important;width:100%!important;height:100%!important;padding:0!important;touch-action:manipulation!important;}
+@media(max-width:760px){
+  /* On phones the team column is compact, avoiding a visually 'shifted' table. */
+  .ms-table th:first-child,.ms-table td:first-child{width:34px!important;min-width:34px!important;max-width:34px!important;left:0!important;padding-inline:5px!important;}
+  .ms-table th.team,.ms-table td.team{left:34px!important;min-width:156px!important;width:156px!important;max-width:156px!important;padding-inline:6px!important;}
+  .ms-table td.team button{gap:5px!important;}
+  .ms-team-logo{width:24px!important;height:24px!important;min-width:24px!important;}
+  .ms-table{min-width:610px!important;}
+  .finance-matrix{min-width:max-content!important;width:max-content!important;}
+  .finance-filter-panel{width:100%!important;}
+}
