@@ -3545,7 +3545,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behav
 @media(max-width:760px){.legacy-primary-tab{padding-inline:14px!important}.manager-player-grid{--mgr-grid-event:112px;--mgr-grid-count:34px;--mgr-grid-cell:38px;--mgr-grid-row:40px}.manager-player-matrix .matrix-player-head,.manager-player-matrix .matrix-cell{width:38px!important;min-width:38px!important;max-width:38px!important}.team-season-grid-head{align-items:flex-start;flex-direction:column}.finance-player-col{min-width:132px!important;max-width:132px!important}.cc-event-card{grid-template-columns:38px 62px minmax(0,1fr) 92px!important;grid-template-areas:"icon kind team date" "icon kind main date"!important}}
 
 /* ==========================================================
-   MANAGER V0.5.2B6F — permission compatibility + responsive density hotfix
+   MANAGER V0.5.2B6G — permission compatibility + responsive density hotfix
    ========================================================== */
 /* One-line feedback toast: never becomes a page-sized panel. */
 .global-status.cc-top-toast{
@@ -3620,3 +3620,61 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behav
 @media(max-width:520px){
   .cc-event-card.cc-event-card-b6f{grid-template-columns:36px minmax(0,1fr) 78px!important;padding:6px!important}.cc-event-card-b6f .cc-event-card-title{font-size:11px!important}.cc-event-card-b6f .cc-event-card-sub{gap:4px}.cc-event-card-b6f .cc-event-card-sub i{display:none}.cc-event-card-b6f .cc-event-date b{font-size:9px!important}
 }
+
+
+/* ==========================================================
+   MANAGER V0.5.2B6G — mass density, compact toolbars, coach RSVP
+   ========================================================== */
+/* App icon with resilient fallback; top controls share one baseline. */
+.topbar{min-height:92px!important;align-items:flex-start!important;padding-bottom:35px!important}
+.legacy-topbar-brand,.topbar-actions{align-self:flex-start;min-height:48px;display:flex;align-items:center}
+.app-brand-mark{overflow:hidden;padding:0!important;display:grid!important;place-items:center!important}
+.app-brand-mark img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}.app-brand-mark.fallback::after{content:'CC';font-weight:950}
+.global-status.cc-top-toast{position:absolute!important;left:max(14px,env(safe-area-inset-left))!important;right:max(14px,env(safe-area-inset-right))!important;bottom:5px!important;top:auto!important;width:auto!important;max-width:none!important;min-height:24px!important;max-height:27px!important;border-radius:7px!important;padding:4px 9px!important;background:rgba(255,255,255,.58)!important;box-shadow:none!important;border-color:rgba(0,0,0,.12)!important;color:#171717!important}
+.global-status.cc-top-toast.error{background:rgba(255,235,235,.9)!important;color:#8a2525!important}.global-status.cc-top-toast.success{background:rgba(233,248,236,.9)!important;color:#245b31!important}
+
+/* Compact list toolbars: filter + create/sync stay together. */
+.competition-list-intro{align-items:flex-end!important}.competition-list-toolbar{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:6px!important;flex-wrap:wrap!important}.event-filter-head-inline-hidden{display:none!important}
+.compact-brsz .brsz-short{display:none}.competition-sync-strip{margin-top:8px!important;margin-bottom:10px!important}
+@media(max-width:620px){.competition-list-intro{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}.competition-list-intro>div:first-child p{display:none}.competition-list-toolbar{max-width:54vw!important}.competition-list-toolbar .button,.competition-list-toolbar .matrix-filter-toggle,.competition-list-toolbar .filter-reset{min-height:36px!important;padding-inline:9px!important;font-size:8px!important}.compact-brsz .brsz-long{display:none}.compact-brsz .brsz-short{display:inline}.overview-context-intro{padding-inline:5px!important}.overview-team-select{width:max-content!important;max-width:100%!important;grid-template-columns:auto auto!important}.overview-team-select select{width:auto!important;max-width:190px!important}}
+
+/* Event detail: 3 equal primary facts + 3 equal RSVP blocks. */
+.event-detail-primary-grid.is-training{grid-template-columns:repeat(3,minmax(0,1fr))!important}.rsvp-detail.compact-three{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}.rsvp-detail.compact-three>div{min-width:0!important;text-align:left!important}.rsvp-detail.compact-three>div>span{display:flex!important;align-items:baseline!important;gap:4px!important;margin-top:4px!important;font-size:9px!important}.rsvp-detail.compact-three b{font-size:22px!important;line-height:1!important}.rsvp-subhead{margin-bottom:5px!important}
+@media(max-width:520px){.event-detail-primary-grid.is-training{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important}.event-detail-primary-grid.is-training>div{padding:8px 7px!important}.rsvp-detail.compact-three{gap:5px!important}.rsvp-detail.compact-three>div{padding:8px 7px!important}.rsvp-detail.compact-three b{font-size:18px!important}}
+
+/* Position breakdown must remain visible on narrow screens. */
+@media(max-width:900px){.cc-event-card-b6f .cc-pos-breakdown{display:flex!important;gap:2px!important;flex-wrap:wrap!important;justify-content:flex-end!important}.cc-event-card-b6f .cc-pos-breakdown span{font-size:5.5px!important;padding:1px 2px!important}.cc-event-card-b6f .cc-event-attendance{flex-direction:column!important;align-items:flex-end!important;gap:2px!important}}
+
+/* Mass sport: no Player avatars; compact Player-like cards. */
+.cc-avatar.mass{display:none!important}.mass-person-toggle{grid-template-columns:14px minmax(0,1fr)!important}.mass-inline-identity{gap:0!important}
+.legacy-mass-training-header{display:none!important}.legacy-mass-training-list{display:grid!important;gap:7px!important}.legacy-mass-training-item.mass-card-v2{border-radius:12px!important;overflow:hidden!important;background:linear-gradient(90deg,rgba(var(--level-rgb),.12),rgba(var(--level-rgb),.035) 55%,transparent 100%)!important;border:1px solid rgba(var(--level-rgb),.24)!important;margin:0!important}.mass-card-v2 .legacy-mass-training-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:'main count'!important;min-height:64px!important;padding:8px 11px!important;gap:8px!important;align-items:center!important}.mass-card-v2 .legacy-mass-main{grid-area:main!important;display:grid!important;gap:4px!important;min-width:0!important}.mass-level-status{display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important}.mass-level-status>b{font-size:12px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mass-level-status .training-active-pill{font-size:6.5px!important;min-height:18px!important;padding-inline:6px!important}.mass-card-v2 .legacy-mass-main>small{color:var(--muted)!important;font-size:8px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mass-card-v2 .legacy-mass-count{grid-area:count!important;text-align:right!important;min-width:72px!important}.mass-card-v2 .legacy-mass-count>b{font-size:22px!important;line-height:1!important}.mass-card-v2 .legacy-mass-count>b span{font-size:10px!important}.mass-card-v2 .legacy-mass-count>small{font-size:7px!important;margin-top:3px!important}.mass-roster-strip{width:100%!important;min-height:29px!important;border:0!important;border-top:1px solid rgba(var(--level-rgb),.18)!important;border-radius:0!important;background:rgba(255,255,255,.34)!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;color:var(--muted)!important;font-size:8px!important;font-weight:900!important}.mass-roster-strip .triangle-icon{width:8px!important;height:8px!important}.mass-card-v2.archived{filter:saturate(.7);opacity:.9}.archive-parity{padding:8px!important}
+
+/* Mass detail header + counters. */
+.mass-detail-hero{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important}.mass-detail-titleline{display:flex!important;align-items:center!important;gap:7px!important;min-width:0}.mass-detail-level{font-size:15px!important;font-weight:950!important}.mass-detail-big-count{font-size:26px!important;line-height:1!important;text-align:right!important}.mass-detail-big-count small{font-size:9px!important}.mass-detail-actions{grid-column:1/-1!important}.mass-detail-primary-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.mass-attendance-summary{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}.mass-attendance-summary>div{display:grid!important;align-content:center!important;justify-items:start!important;min-width:0!important;padding:9px 10px!important}.mass-attendance-summary>div>span{display:flex!important;align-items:baseline!important;gap:4px!important;margin-top:4px!important;font-size:8px!important}.mass-attendance-summary b{font-size:19px!important;line-height:1!important}.mass-attendance-summary small{font-size:7px!important}
+@media(max-width:560px){.mass-detail-primary-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important}.mass-detail-primary-grid>div{padding:7px 6px!important}.mass-attendance-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}.mass-training-page-head{align-items:flex-start!important}.mass-training-page-actions{display:flex!important;flex-wrap:nowrap!important}.mass-training-page-actions .button{padding-inline:8px!important}.mass-card-v2 .legacy-mass-count>b{font-size:20px!important}}
+
+/* Team page: filter is the selector; selected team owns one gradient panel. */
+.single-team-detail{grid-template-columns:1fr!important}.team-gradient-head{margin:-1px -1px 10px!important;padding:12px 14px!important;border-radius:12px 12px 0 0!important;background:linear-gradient(100deg,color-mix(in srgb,var(--team-color) 20%,var(--card)),color-mix(in srgb,var(--team-color) 6%,var(--card)) 58%,var(--card))!important}.team-gradient-head h3{margin:2px 0 0!important}.team-info-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.team-season-legend i.coach{background:#6a5acd!important}.coach-head{background:color-mix(in srgb,var(--yellow) 8%,var(--card))!important}.coach-avatar{background:#171717!important;color:var(--yellow)!important}.coach-cell{padding:0!important}.coach-matrix-control{margin:auto!important}
+@media(max-width:620px){.team-info-grid{grid-template-columns:1fr 1fr!important}}
+
+/* Result can deep-link to source match/report when backend provides a URL. */
+.ms-score-link{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;cursor:pointer}.ms-score-link:hover{color:var(--yellow-dark)}
+
+
+/* B6G final density corrections */
+.mass-attendance-summary{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.mass-attendance-summary>div{justify-items:start!important}
+.mass-attendance-summary>div>span{display:inline-flex!important;align-items:baseline!important;gap:3px!important;white-space:nowrap!important}
+.mass-attendance-summary>div>span b{font-size:18px!important;line-height:1!important}
+.mass-attendance-summary>div>span{font-size:8px!important;line-height:1!important}
+.mass-athlete-row.mass-no-avatar .person-primary{padding-left:0!important}
+@media(max-width:560px){
+  .mass-attendance-summary{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3px!important}
+  .mass-attendance-summary>div{padding:6px 4px!important}
+  .mass-attendance-summary small{font-size:5.7px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
+  .mass-attendance-summary>div>span b{font-size:14px!important}
+  .mass-attendance-summary>div>span{font-size:6.5px!important;gap:2px!important}
+}
+
+.app-brand-mark{border-radius:999px!important;background:var(--yellow)!important;border:1px solid rgba(0,0,0,.16)!important}
+.app-brand-mark img{width:100%!important;height:100%!important;object-fit:cover!important;padding:0!important;border-radius:999px!important}.app-brand-mark img.fallback-asset{object-fit:contain!important;padding:7px!important;filter:brightness(0)!important}
