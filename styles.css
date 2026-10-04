@@ -3545,7 +3545,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behav
 @media(max-width:760px){.legacy-primary-tab{padding-inline:14px!important}.manager-player-grid{--mgr-grid-event:112px;--mgr-grid-count:34px;--mgr-grid-cell:38px;--mgr-grid-row:40px}.manager-player-matrix .matrix-player-head,.manager-player-matrix .matrix-cell{width:38px!important;min-width:38px!important;max-width:38px!important}.team-season-grid-head{align-items:flex-start;flex-direction:column}.finance-player-col{min-width:132px!important;max-width:132px!important}.cc-event-card{grid-template-columns:38px 62px minmax(0,1fr) 92px!important;grid-template-areas:"icon kind team date" "icon kind main date"!important}}
 
 /* ==========================================================
-   MANAGER V0.5.2B6G — permission compatibility + responsive density hotfix
+   MANAGER V0.5.2B6H — permission compatibility + responsive density hotfix
    ========================================================== */
 /* One-line feedback toast: never becomes a page-sized panel. */
 .global-status.cc-top-toast{
@@ -3623,7 +3623,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behav
 
 
 /* ==========================================================
-   MANAGER V0.5.2B6G — mass density, compact toolbars, coach RSVP
+   MANAGER V0.5.2B6H — mass density, compact toolbars, coach RSVP
    ========================================================== */
 /* App icon with resilient fallback; top controls share one baseline. */
 .topbar{min-height:92px!important;align-items:flex-start!important;padding-bottom:35px!important}
@@ -3678,3 +3678,19 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behav
 
 .app-brand-mark{border-radius:999px!important;background:var(--yellow)!important;border:1px solid rgba(0,0,0,.16)!important}
 .app-brand-mark img{width:100%!important;height:100%!important;object-fit:cover!important;padding:0!important;border-radius:999px!important}.app-brand-mark img.fallback-asset{object-fit:contain!important;padding:7px!important;filter:brightness(0)!important}
+
+
+/* ==========================================================
+   MANAGER V0.5.2B6H — Mass roster pass month/filter/state persistence
+   ========================================================== */
+.mass-detail-hero{margin-bottom:6px!important}
+.mass-attendance-summary{margin-top:6px!important;margin-bottom:8px!important}
+.mass-detail-primary-grid{margin-top:0!important;margin-bottom:8px!important}
+.mass-detail-actions{margin:0 0 8px!important}
+.mass-detail-roster-filters{display:grid;grid-template-columns:minmax(170px,220px) minmax(170px,220px) auto;gap:7px;align-items:end;margin:0 0 9px;padding:8px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}
+.mass-detail-roster-filters label{display:grid;gap:4px;min-width:0}.mass-detail-roster-filters label>span{font-size:7px;color:var(--muted);font-weight:850}.mass-detail-roster-filters select{min-height:34px;width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--black);padding:0 8px;font-size:8px;font-weight:850}
+.mass-roster-filter-count{align-self:center;justify-self:end;font-size:8px;color:var(--muted);font-weight:900;white-space:nowrap}
+.legacy-mass-badge.pass-error{background:#f9dddd!important;border-color:#e2aaa6!important;color:#8d2722!important}.dark .legacy-mass-badge.pass-error{background:#4a211f!important;border-color:#713a36!important;color:#f0aaa5!important}
+.legacy-mass-badge.pass-ok{background:#e3f1e6!important;border-color:#b9d6bf!important;color:#285f35!important}.dark .legacy-mass-badge.pass-ok{background:#17371f!important;border-color:#315f3d!important;color:#a5d8af!important}
+.mass-attendance-card[data-pass-check="needs-check"]{box-shadow:inset 3px 0 0 #c74a43!important}
+@media(max-width:650px){.mass-detail-roster-filters{grid-template-columns:1fr 1fr}.mass-roster-filter-count{grid-column:1/-1;justify-self:start}.mass-detail-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
