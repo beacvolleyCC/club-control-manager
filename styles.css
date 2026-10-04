@@ -3510,3 +3510,36 @@ body.dark .topbar .mobile-area-button{
 
 /* B6D final mass list header parity: 6 columns, same geometry as clickable rows. */
 @media(min-width:561px){.legacy-mass-training-header{grid-template-columns:minmax(180px,1.3fr) minmax(130px,.9fr) 85px 100px 110px 28px!important}}
+
+
+/* ==========================================================
+   MANAGER V0.5.2B6E — dense grids, shared standings, native page scroll
+   ========================================================== */
+html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behavior-y:auto!important;touch-action:pan-y pinch-zoom}
+.app-shell,.workspace,.content,#viewContent{min-width:0;max-width:100%;overflow-x:hidden}
+/* Only explicit internal surfaces may scroll horizontally. */
+.legacy-primary-nav,.legacy-secondary-nav,.matrix-scroll,.ms-table-scroll,.finance-matrix-scroll,.finance-tabs,.team-detail-tabs,.week-grid-wrap,.cc-calendar-scroll{max-width:100%;overflow-x:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;touch-action:pan-x pan-y}
+.legacy-primary-nav::-webkit-scrollbar,.legacy-secondary-nav::-webkit-scrollbar,.matrix-scroll::-webkit-scrollbar,.ms-table-scroll::-webkit-scrollbar,.finance-matrix-scroll::-webkit-scrollbar,.finance-tabs::-webkit-scrollbar,.team-detail-tabs::-webkit-scrollbar{display:none}
+/* Primary nav stays one line, including Beállítások. */
+.legacy-primary-nav{display:flex!important;grid-template-columns:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;gap:0!important;white-space:nowrap!important;padding-left:max(10px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important}
+.legacy-primary-tab{flex:0 0 auto!important;min-width:max-content!important;padding-inline:18px!important}
+/* Exact Player-parity density: B5P's 82 px late override is neutralized here. */
+.manager-player-matrix{width:max-content!important;min-width:max-content!important;table-layout:auto!important}
+.manager-player-grid{--mgr-grid-event:118px;--mgr-grid-count:36px;--mgr-grid-cell:42px;--mgr-grid-head:44px;--mgr-grid-row:42px}
+.manager-player-matrix .matrix-player-head,.manager-player-matrix .matrix-cell{width:var(--mgr-grid-cell)!important;min-width:var(--mgr-grid-cell)!important;max-width:var(--mgr-grid-cell)!important;padding-inline:2px!important}
+.manager-player-matrix .matrix-control{width:38px!important;height:25px!important}
+.manager-player-matrix .matrix-control button{font-size:9px!important}
+/* Shared Overview standings = full Tabella component and scroll behavior. */
+.overview-ms-standings{padding:0!important;overflow:hidden!important}.overview-ms-standings .panel-head{padding:12px 12px 7px}.overview-ms-standings .ms-table-scroll{border-top:1px solid var(--line);border-radius:0!important}.overview-ms-standings .ms-table{min-width:720px!important}
+/* Team season grid / coach attendance. */
+.team-season-grid-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:4px 0 8px}.team-season-grid-head h4{margin:0;font-size:14px}.team-season-grid-head p{margin:3px 0 0;color:var(--muted);font-size:8px}.team-season-legend{display:flex;gap:9px;flex-wrap:wrap;color:var(--muted);font-size:7px;font-weight:800}.team-season-legend span{display:flex;align-items:center;gap:4px}.team-season-legend i{width:8px;height:8px;border-radius:50%;background:var(--muted)}.team-season-legend i.present{background:var(--green)}.team-season-legend i.absent{background:var(--red)}.team-season-legend i.rsvp{background:var(--yellow)}
+.team-season-grid{max-height:min(62vh,620px)!important}.team-season-cell{padding:0!important}.team-season-att{width:100%;height:100%;min-height:38px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:950}.team-season-att.present{background:#e6f3e8;color:#246235}.team-season-att.absent{background:#fae4e4;color:#8b2929}.team-season-att.unset.rsvp-going{color:#2d7b44;background:color-mix(in srgb,#e6f3e8 45%,var(--card))}.team-season-att.unset.rsvp-not-going{color:#a44a43;background:color-mix(in srgb,#fae4e4 42%,var(--card))}.team-season-att.unset.rsvp-none{color:#aaa}.team-season-att:disabled{opacity:.62;cursor:default}.dark .team-season-att.present{background:#17351e;color:#9ed6aa}.dark .team-season-att.absent{background:#3a1919;color:#e8a2a2}.dark .team-season-att.unset.rsvp-going{background:#14241a;color:#75b986}.dark .team-season-att.unset.rsvp-not-going{background:#2a1817;color:#c67d77}
+/* Finance: season is Sep–Jun; license uses one unit, every month two units. */
+.finance-matrix th:not(.finance-player-col):not(.finance-license-col),.finance-matrix td:not(.finance-player-col):not(.finance-license-col){min-width:68px!important;width:68px!important;max-width:68px!important}.finance-license-col{min-width:34px!important;width:34px!important;max-width:34px!important;padding:2px!important}.finance-license-short{display:block;font-size:6.5px;font-weight:950;letter-spacing:-.02em}.finance-license-col .finance-cell{min-width:28px!important;width:28px!important;max-width:28px!important;height:34px!important;margin:auto}.finance-license-col .finance-cell small{display:none!important}
+/* Finance permission is club-level View/Edit only. */
+.finance-permission-row .admin-team-scope{opacity:.72}.admin-right-placeholder{display:grid;place-items:center;color:var(--muted)}
+/* Competition event cards are denser on both Edzések and Meccsek. */
+.cc-event-card{grid-template-columns:44px 72px minmax(120px,.7fr) 112px minmax(150px,1fr)!important;gap:6px!important;min-height:58px!important;padding:6px 8px!important}.cc-event-type-icon img{width:32px!important;height:32px!important}.cc-event-kind strong{font-size:9px!important}.cc-event-team-summary>strong,.cc-event-date b,.cc-event-main strong{font-size:9px!important}.cc-event-total b{font-size:14px!important}
+/* Player-like pull-to-refresh feedback. */
+.cc-pull-refresh-indicator{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translate(-50%,-140%);z-index:120;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--black);box-shadow:var(--shadow);font-size:10px;font-weight:900;transition:transform .16s ease;pointer-events:none}.cc-pull-refresh-indicator.show{transform:translate(-50%,0)}
+@media(max-width:760px){.legacy-primary-tab{padding-inline:14px!important}.manager-player-grid{--mgr-grid-event:112px;--mgr-grid-count:34px;--mgr-grid-cell:38px;--mgr-grid-row:40px}.manager-player-matrix .matrix-player-head,.manager-player-matrix .matrix-cell{width:38px!important;min-width:38px!important;max-width:38px!important}.team-season-grid-head{align-items:flex-start;flex-direction:column}.finance-player-col{min-width:132px!important;max-width:132px!important}.cc-event-card{grid-template-columns:38px 62px minmax(0,1fr) 92px!important;grid-template-areas:"icon kind team date" "icon kind main date"!important}}
