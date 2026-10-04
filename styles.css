@@ -3694,3 +3694,57 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behav
 .legacy-mass-badge.pass-ok{background:#e3f1e6!important;border-color:#b9d6bf!important;color:#285f35!important}.dark .legacy-mass-badge.pass-ok{background:#17371f!important;border-color:#315f3d!important;color:#a5d8af!important}
 .mass-attendance-card[data-pass-check="needs-check"]{box-shadow:inset 3px 0 0 #c74a43!important}
 @media(max-width:650px){.mass-detail-roster-filters{grid-template-columns:1fr 1fr}.mass-roster-filter-count{grid-column:1/-1;justify-self:start}.mass-detail-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+
+/* ==========================================================
+   MANAGER V0.5.2B6I — match/card parity, mobile standings, team grid polish
+   ========================================================== */
+html,body{max-width:100%;overflow-x:hidden!important}
+/* Event cards: date/time in the middle, only attendance/positions on the right. */
+.cc-event-card.cc-event-card-b6f,
+.next-matches-card .cc-event-card.cc-event-card-b6f{
+  grid-template-columns:40px minmax(0,1fr) 132px minmax(150px,max-content)!important;
+  grid-template-areas:"icon primary date attendance"!important;
+  align-items:center!important;
+  width:100%!important;
+}
+.cc-event-card-b6f .cc-event-date{justify-self:center!important;text-align:center!important;min-width:0!important}
+.cc-event-card-b6f .cc-event-date-line{display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;white-space:nowrap!important}
+.cc-event-card-b6f .cc-event-attendance{justify-self:end!important;align-items:flex-end!important;min-width:max-content!important}
+.cc-event-card-b6f .cc-pos-breakdown{display:flex!important;flex-wrap:nowrap!important;white-space:nowrap!important;gap:3px!important;overflow:visible!important;margin:0!important}
+.cc-event-card-b6f .cc-pos-breakdown span{flex:0 0 auto!important;font-size:6px!important;padding:1px 2px!important}
+.cc-event-card-b6f .cc-pos-breakdown span b{font-size:5.7px!important}
+.next-matches-card .cc-event-card-list{padding:8px!important;gap:6px!important}
+.next-matches-card .cc-event-card-b6f{min-height:58px!important}
+@media(max-width:760px){
+  .cc-event-card.cc-event-card-b6f,.next-matches-card .cc-event-card.cc-event-card-b6f{
+    grid-template-columns:36px minmax(0,1fr) 104px!important;
+    grid-template-areas:"icon primary date" "icon primary attendance"!important;
+    gap:3px 7px!important;
+  }
+  .cc-event-card-b6f .cc-event-date{justify-self:center!important;text-align:center!important}
+  .cc-event-card-b6f .cc-event-attendance{justify-self:end!important;align-self:start!important;flex-direction:column!important;gap:1px!important}
+  .cc-event-card-b6f .cc-pos-breakdown{display:flex!important;flex-wrap:nowrap!important;gap:1px!important}
+  .cc-event-card-b6f .cc-pos-breakdown span{font-size:5.1px!important;padding:0 1px!important;gap:1px!important}
+  .cc-event-card-b6f .cc-pos-breakdown span b{font-size:4.9px!important}
+}
+/* Standings own scroll surface on mobile; page itself remains vertical-only. */
+.ms-standings-card,.overview-ms-standings,.standings-grid,.overview-standings-grid{min-width:0!important;max-width:100%!important}
+.ms-table-scroll{display:block!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x pan-y!important;overscroll-behavior-inline:contain!important}
+.ms-table{width:max-content!important;min-width:720px!important;max-width:none!important}
+@media(max-width:760px){.ms-table-scroll{margin-inline:0!important}.ms-table{min-width:680px!important}}
+/* Team header gradient is a complete rounded card, not top-only. */
+.team-gradient-head{border-radius:12px!important;overflow:hidden!important;margin:-1px -1px 10px!important}
+/* Manager medical booking indicator. */
+.medical-appointment-badge{display:inline-flex;align-items:center;min-height:20px;padding:2px 6px;border-radius:999px;font-size:7px;font-style:normal;font-weight:900;white-space:nowrap}
+.medical-appointment-badge.booked{background:color-mix(in srgb,var(--green) 12%,var(--card));color:var(--green)}
+.medical-appointment-badge.missing{background:var(--soft);color:var(--muted)}
+
+
+/* B6I finance filtering + unified pass catalog */
+.finance-filter-toolbar{display:flex;align-items:center;gap:7px;min-height:38px;margin:0 0 8px;flex-wrap:wrap}.finance-filter-toolbar>span{margin-left:auto;color:var(--muted);font-size:8px;font-weight:900}.finance-filter-panel{display:grid;grid-template-columns:minmax(170px,1.4fr) repeat(4,minmax(110px,.8fr));gap:7px;margin:0 0 10px;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}.finance-filter-panel input,.finance-filter-panel select,.finance-settings-team-row select{width:100%;min-height:36px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);padding:0 8px}.finance-filter-panel label,.finance-settings-team-row label{display:grid;gap:3px}.finance-filter-panel label>span,.finance-settings-team-row label>span{font-size:7px;font-weight:900;color:var(--muted)}.finance-month-pair.single{grid-template-columns:1fr!important}.finance-pass-catalog{display:grid}.finance-pass-catalog-head,.finance-pass-catalog-row{display:grid;grid-template-columns:1.05fr 1.35fr .85fr .9fr .75fr;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line)}.finance-pass-catalog-head{font-size:7px;font-weight:950;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.finance-pass-catalog-row>span{min-width:0;display:grid;gap:2px}.finance-pass-catalog-row b{font-size:9px;overflow:hidden;text-overflow:ellipsis}.finance-pass-catalog-row small{font-size:7px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}.pass-status{font-weight:950!important}.pass-status.current{color:var(--green)!important}.pass-status.expired{color:var(--red)!important}.pass-status.future{color:#9a6900!important}.finance-settings-team-row{max-width:330px;margin:0 0 12px}.finance-lock-help{margin:-4px 0 10px;padding:7px 9px;border-radius:8px;background:var(--soft);font-size:8px;color:var(--muted);line-height:1.35}
+@media(max-width:760px){.finance-filter-panel{grid-template-columns:1fr 1fr}.finance-filter-panel>input{grid-column:1/-1}.finance-pass-catalog{overflow-x:auto;-webkit-overflow-scrolling:touch}.finance-pass-catalog-head,.finance-pass-catalog-row{min-width:720px}.finance-filter-toolbar>span{width:100%;margin-left:0}.finance-settings-team-row{max-width:none}}
+
+/* B6I header app icon: crop away legacy yellow icon surround; only the circular mark remains visible. */
+.app-brand-mark{background:transparent!important;border:0!important;overflow:hidden!important;border-radius:999px!important}
+.app-brand-mark img:not(.fallback-asset){width:136%!important;height:136%!important;max-width:none!important;object-fit:cover!important;border-radius:0!important}
