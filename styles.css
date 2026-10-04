@@ -581,11 +581,11 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
 .player-parity-team .matrix-team-title strong i{width:5px;height:18px;border-radius:999px;background:var(--team-color);display:inline-block}
 .player-parity-team .matrix-team-title span{font-size:8px}
 .manager-player-grid{
-  --mgr-grid-event:clamp(92px,11vw,104px);
-  --mgr-grid-count:30px;
-  --mgr-grid-cell:clamp(34px,3vw,40px);
-  --mgr-grid-head:42px;
-  --mgr-grid-row:39px;
+  --mgr-grid-event:118px;
+  --mgr-grid-count:36px;
+  --mgr-grid-cell:42px;
+  --mgr-grid-head:44px;
+  --mgr-grid-row:44px;
   position:relative;
   width:100%;
   max-height:min(54vh,470px);
@@ -601,7 +601,7 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
 .manager-player-grid::-webkit-scrollbar{display:none;width:0;height:0}
 .manager-player-matrix{
   width:max-content!important;
-  min-width:100%!important;
+  min-width:max-content!important;
   border-collapse:separate!important;
   border-spacing:0!important;
   table-layout:fixed!important;
@@ -661,7 +661,7 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
   background:var(--card)!important;
   box-shadow:1px 0 0 color-mix(in srgb,var(--team-color) 52%,var(--line))!important;
 }
-.manager-player-matrix thead .matrix-count-head{z-index:15!important;height:46px!important;font-size:8px!important;font-weight:950!important}
+.manager-player-matrix thead .matrix-count-head{z-index:15!important;height:var(--mgr-grid-head)!important;font-size:8px!important;font-weight:950!important}
 .manager-player-matrix .matrix-player-head,
 .manager-player-matrix .matrix-cell{
   width:var(--mgr-grid-cell)!important;
@@ -673,7 +673,7 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
   vertical-align:middle!important;
 }
 .manager-player-matrix .grid-player-head-inner{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:0}
-.manager-player-matrix .matrix-player-head .cc-avatar{width:17px!important;height:17px!important;min-width:17px!important;margin:0 auto 1px!important}
+.manager-player-matrix .matrix-player-head .cc-avatar{width:18px!important;height:18px!important;min-width:18px!important;margin:0 auto 1px!important}
 .manager-player-matrix .grid-player-label{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px!important;line-height:1!important;font-weight:900}
 .manager-player-matrix .matrix-event-side-btn{display:block;width:100%;border:0;background:transparent;color:inherit;padding:0;text-align:left;min-width:0}
 .manager-player-matrix .matrix-event-copy{display:block;min-width:0}
@@ -763,7 +763,7 @@ body.dark .mass-training-row.waitlist-only{background:rgba(247,183,0,.06)}
   .compact-kpi-strip>div{min-width:132px!important;flex:0 0 132px}
   .manager-player-grid{--mgr-grid-event:112px;--mgr-grid-count:34px;max-height:calc(100dvh - 315px)}
   .manager-player-matrix .matrix-player-head,.manager-player-matrix .matrix-cell{width:38px!important;min-width:38px!important;max-width:38px!important}
-  .manager-player-matrix .matrix-player-head .cc-avatar{width:17px!important;height:17px!important;min-width:17px!important}
+  .manager-player-matrix .matrix-player-head .cc-avatar{width:18px!important;height:18px!important;min-width:18px!important}
   .manager-player-matrix .grid-player-label{font-size:7px!important}
   .gradient-match-row{grid-template-columns:5px minmax(0,1fr) auto!important}
   .gradient-match-row>div:nth-of-type(3),.gradient-match-row>div:nth-of-type(4){grid-column:2/-1}
@@ -3410,3 +3410,103 @@ body.dark .topbar .mobile-area-button{
 
 /* Overview/legacy standings: own team uses row tint only, no vertical accent stripe. */
 .standings-row.focus{box-shadow:none !important;}
+
+/* ==========================================================
+   MANAGER V0.5.2B6D — parity + finance/equipment final overrides
+   ========================================================== */
+/* Overview: one compact dropdown controls the whole page. */
+.overview-team-select{display:grid;grid-template-columns:auto minmax(150px,210px);align-items:center;gap:9px;padding:5px 6px 5px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:var(--shadow)}
+.overview-team-select>span{font-size:8px;font-weight:850;color:var(--muted)}
+.overview-team-select select{min-height:34px;border:0;background:transparent;color:var(--black);font:inherit;font-size:9px;font-weight:900;padding:0 28px 0 4px}
+.overview-context-switch{display:none!important}
+.overview-standings-grid{grid-template-columns:1fr!important;gap:10px!important}
+
+/* Player-parity matrix: never stretch cells to fill a desktop panel. */
+.manager-player-matrix{width:max-content!important;min-width:max-content!important}
+.manager-player-grid{--mgr-grid-event:118px;--mgr-grid-count:36px;--mgr-grid-cell:42px;--mgr-grid-head:44px;--mgr-grid-row:44px}
+.manager-player-matrix .matrix-player-head .cc-avatar{width:18px!important;height:18px!important;min-width:18px!important}
+
+/* Teams: compact filter/edit row, tabs, summary after roster. */
+.team-page-actions.compact{display:flex;align-items:flex-end;gap:7px;flex-wrap:nowrap}
+.team-page-actions.compact .team-multi-filter{width:190px;min-width:160px}
+.team-page-actions.compact .button{flex:0 0 auto}
+.team-detail-tabs{display:flex;gap:4px;margin:0 0 10px;padding:3px;border:1px solid var(--line);border-radius:10px;background:var(--soft);width:max-content}
+.team-detail-tabs button{min-height:31px;border:0;border-radius:7px;background:transparent;color:var(--muted);padding:0 12px;font:inherit;font-size:8.5px;font-weight:900}
+.team-detail-tabs button.active{background:var(--card);color:var(--black);box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.team-summary-bottom{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.equipment-list{display:grid;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.equipment-row{display:grid;grid-template-columns:minmax(180px,1.3fr) 100px 80px 100px minmax(130px,.8fr) minmax(120px,.75fr) 20px;align-items:center;gap:8px;min-height:58px;padding:7px 10px;border:0;border-bottom:1px solid var(--line);background:var(--card);color:inherit;text-align:left}
+.equipment-row:last-child{border-bottom:0}.equipment-row:not(:disabled):hover{background:var(--soft)}
+.equipment-row span{min-width:0}.equipment-row span>small,.equipment-row span>b{display:block}.equipment-row span>small{font-size:7px;color:var(--muted);font-weight:750}.equipment-row span>b{margin-top:2px;font-size:8.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.equipment-person>b{font-size:9.5px!important}.equipment-pay.paid>b{color:var(--green)}.equipment-pay.partial>b{color:var(--amber)}.equipment-pay.due>b{color:var(--red)}.equipment-row>i{font-style:normal;color:var(--muted);font-size:17px}.equipment-form-grid textarea{resize:vertical}
+
+/* Mass training list: full card opens details, no registration button on list. */
+.legacy-mass-training-row{cursor:pointer}
+.legacy-mass-training-row:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:-2px}
+.legacy-mass-training-row{grid-template-columns:minmax(180px,1.3fr) minmax(130px,.9fr) 85px 100px 110px 28px!important}
+.legacy-mass-main{display:flex;align-items:center;min-width:0;padding:0;border:0;background:transparent;color:inherit;text-align:left}
+.legacy-mass-actions{display:none!important}
+.mass-detail-hero{display:block!important;margin-bottom:10px!important}
+.mass-detail-hero>div:first-child>span{color:var(--muted);font-size:9px;font-weight:750}
+.mass-detail-actions{margin:10px 0 0!important;width:100%;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px!important}
+.mass-detail-actions .button{width:100%;min-width:0;padding-inline:7px!important;white-space:normal;line-height:1.15}
+.mass-attendance-summary{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}
+.mass-attendance-summary>div{min-width:0!important;padding:9px!important}
+.mass-attendance-summary small{font-size:7px!important}.mass-attendance-summary b{font-size:18px!important}
+.legacy-mass-roster-card{grid-template-columns:minmax(210px,1fr) minmax(280px,1.25fr)!important;gap:10px!important}
+.legacy-mass-roster-card .mass-attendance-control{grid-column:2!important;grid-row:1!important}
+.mass-booking-coming{display:none!important}
+.mass-person-details .legacy-mass-roster-meta.compact-three{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.mass-booking-admin-actions{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+.mass-booking-admin-actions>select{min-height:32px;max-width:190px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--black);padding:0 8px;font-size:8px}
+.mass-booking-admin-right{margin-left:auto;display:flex;gap:6px;align-items:center}
+.legacy-mass-roster-card.is-collapsed .mass-booking-admin-actions{display:none!important}
+.mass-wait-card{display:grid!important;grid-template-columns:minmax(180px,1.2fr) minmax(120px,.75fr) minmax(140px,.85fr)!important;gap:8px!important;align-items:center!important;min-height:52px!important;padding:7px 9px!important;border:1px solid var(--line)!important;border-radius:10px!important;background:var(--card)!important;margin-bottom:6px!important}
+
+/* Mass attendance slider: transparent while neutral, whole control green/red after commit. */
+.legacy-mass-roster-card .mass-attendance-control{background:transparent!important;border:0!important}
+.legacy-mass-roster-card .attendance-slider{border-color:var(--line)!important;background:transparent!important;transition:background-color .16s ease,border-color .16s ease}
+.legacy-mass-roster-card .attendance-slider.none{background:transparent!important}
+.legacy-mass-roster-card .attendance-slider.yes{background:#dcefe1!important;border-color:#a8d2b3!important}
+.legacy-mass-roster-card .attendance-slider.no{background:#f4dedd!important;border-color:#deb0ac!important}
+.dark .legacy-mass-roster-card .attendance-slider.none{background:transparent!important}
+.dark .legacy-mass-roster-card .attendance-slider.yes{background:#1d4629!important;border-color:#39734a!important}
+.dark .legacy-mass-roster-card .attendance-slider.no{background:#552522!important;border-color:#85433e!important}
+.legacy-mass-roster-card .attendance-slider.yes .slider-thumb,.legacy-mass-roster-card .attendance-slider.no .slider-thumb{background:rgba(255,255,255,.72)!important}
+.dark .legacy-mass-roster-card .attendance-slider.yes .slider-thumb,.dark .legacy-mass-roster-card .attendance-slider.no .slider-thumb{background:rgba(0,0,0,.24)!important}
+
+/* Competition cards: icon -> event kind -> team/headcount -> date -> detail. */
+.cc-event-card{grid-template-columns:52px 92px minmax(150px,.8fr) 140px minmax(190px,1.1fr)!important;gap:9px!important;align-items:center!important;min-height:66px!important}
+.cc-event-type-icon{display:grid!important;place-items:center!important;align-self:center!important}.cc-event-type-icon img{width:38px!important;height:38px!important;padding:6px!important}.cc-event-type-icon small{display:none!important}
+.cc-event-kind{display:grid;gap:2px;min-width:0;text-align:left}.cc-event-kind strong{font-size:11px;line-height:1}.cc-event-kind small{font-size:7px;color:var(--muted);font-weight:750}
+.cc-event-team-summary{display:grid!important;grid-template-columns:1fr!important;grid-template-areas:none!important;gap:3px!important}.cc-event-team-summary>strong{font-size:10px!important}.cc-event-team-bottom{display:flex;align-items:center;gap:6px;min-width:0}.cc-event-total b{font-size:16px!important}.cc-event-total i{font-size:8px!important}.cc-event-date b{font-size:10px!important}.cc-event-date small{font-size:7px!important}.cc-event-main strong{font-size:10px!important}.cc-event-main small{font-size:7px!important}
+
+/* Finance */
+.finance-tabs{display:flex;gap:4px;margin:0 0 11px;padding:3px;border:1px solid var(--line);border-radius:11px;background:var(--soft);width:max-content;max-width:100%;overflow:auto}
+.finance-tabs button{min-height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);padding:0 13px;font:inherit;font-size:9px;font-weight:900;white-space:nowrap}.finance-tabs button.active{background:var(--card);color:var(--black);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.finance-team-select{display:grid;grid-template-columns:auto minmax(150px,210px);gap:8px;align-items:center}.finance-team-select>span{font-size:8px;color:var(--muted);font-weight:850}.finance-team-select select{min-height:34px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--black);padding:0 9px;font-size:9px;font-weight:850}
+.finance-matrix-panel{padding:0!important;overflow:hidden}.finance-matrix-scroll{width:100%;overflow:auto;-webkit-overflow-scrolling:touch}.finance-matrix{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-size:8px}.finance-matrix th,.finance-matrix td{min-width:62px;height:48px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-align:center}.finance-matrix thead th{position:sticky;top:0;z-index:3;background:var(--soft);color:var(--muted)}.finance-player-col{position:sticky!important;left:0;z-index:4!important;min-width:170px!important;max-width:170px!important;text-align:left!important;background:var(--card)!important;padding-left:9px!important}.finance-matrix thead .finance-player-col{z-index:6!important;background:var(--soft)!important}.finance-player-col b,.finance-player-col small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.finance-player-col b{font-size:9px;color:var(--black)}.finance-player-col small{font-size:7px;color:var(--muted);margin-top:2px}.finance-license-col{min-width:82px!important}.finance-matrix thead th>b,.finance-matrix thead th>small{display:block}.finance-matrix thead th small{font-size:6.5px;margin-top:2px}.finance-month-pair{display:grid;grid-template-columns:1fr 1fr;gap:3px}.finance-cell{min-width:25px;height:34px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--muted);display:grid;place-items:center;padding:1px;font:inherit}.finance-cell b{font-size:11px}.finance-cell small{font-size:5.5px;font-weight:900}.finance-cell.paid{background:#e5f3e8;border-color:#bdd9c4;color:#246235}.finance-cell.due{background:#fae4e4;border-color:#e8bcbc;color:#8b2929}.finance-cell.waived{background:var(--soft);color:var(--muted)}.dark .finance-cell.paid{background:#17351e;border-color:#315e3c;color:#9ed6aa}.dark .finance-cell.due{background:#3a1919;border-color:#673331;color:#e8a2a2}.finance-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:9px 12px;color:var(--muted);font-size:7px}.finance-legend span{display:flex;align-items:center;gap:4px}.finance-legend i{width:8px;height:8px;border-radius:50%;background:var(--soft)}.finance-legend i.paid{background:var(--green)}.finance-legend i.due{background:var(--red)}.finance-legend i.waived{background:var(--muted)}
+.finance-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:10px}.finance-kpis>div{min-height:80px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}.finance-kpis span{display:block;font-size:8px;color:var(--muted);font-weight:800}.finance-kpis b{display:block;margin-top:7px;font-size:20px}.finance-chart-panel,.finance-pass-list{margin-top:10px}.finance-bar-chart{display:grid;gap:7px;padding:12px}.finance-bar-row{display:grid;grid-template-columns:70px minmax(120px,1fr) 135px;gap:9px;align-items:center;font-size:8px}.finance-bar-row>div{height:12px;border-radius:99px;background:var(--soft);overflow:hidden}.finance-bar-row i{display:block;height:100%;border-radius:99px;background:var(--yellow)}.finance-bar-row>b{text-align:right;font-size:8px}.finance-pass-list .mass-pass-row{grid-template-columns:.7fr 1fr 1fr .7fr!important}.finance-settings-panel{max-width:980px}.finance-source-note{padding:9px 10px;border-radius:9px;background:var(--soft);color:var(--muted);font-size:8px}.finance-audit-list{display:grid}.finance-audit-row{display:grid;grid-template-columns:minmax(190px,1fr) minmax(180px,1fr) minmax(160px,.7fr);gap:10px;align-items:center;min-height:58px;padding:8px 12px;border-bottom:1px solid var(--line)}.finance-audit-row:last-child{border-bottom:0}.finance-audit-row b,.finance-audit-row small,.finance-audit-row span{display:block}.finance-audit-row b{font-size:9px}.finance-audit-row small{margin-top:2px;color:var(--muted);font-size:7px}
+
+/* Landscape safe area / Dynamic Island on iOS and cutouts on Android. */
+@media (orientation:landscape){
+  .topbar,.legacy-primary-nav,.legacy-secondary-nav,.content{padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(14px,env(safe-area-inset-right))!important}
+  .dialog-card{margin-left:max(8px,env(safe-area-inset-left));margin-right:max(8px,env(safe-area-inset-right))}
+}
+
+@media(max-width:850px){
+  .equipment-row{grid-template-columns:minmax(150px,1fr) 80px 100px 20px}.equipment-row>span:nth-child(3),.equipment-row>span:nth-child(4){display:none}
+  .legacy-mass-roster-card{grid-template-columns:1fr!important}.legacy-mass-roster-card .mass-attendance-control{grid-column:1!important;grid-row:auto!important}
+  .mass-booking-admin-actions{display:grid!important;grid-template-columns:1fr auto!important}.mass-booking-admin-right{margin-left:0}
+  .cc-event-card{grid-template-columns:44px minmax(80px,.55fr) minmax(0,1fr) 108px!important;grid-template-areas:"icon kind team date" "icon kind main date"!important;gap:5px 8px!important}.cc-event-type-icon{grid-area:icon}.cc-event-kind{grid-area:kind}.cc-event-team-summary{grid-area:team}.cc-event-date{grid-area:date}.cc-event-main{grid-area:main}.cc-event-team-bottom{gap:4px}.cc-pos-breakdown{display:none!important}
+  .finance-kpis{grid-template-columns:1fr}.finance-audit-row{grid-template-columns:1fr}.finance-bar-row{grid-template-columns:54px minmax(90px,1fr) 100px}
+}
+@media(max-width:560px){
+  .overview-team-select{grid-template-columns:auto minmax(110px,1fr);width:100%}.team-page-actions.compact{width:100%}.team-page-actions.compact .team-multi-filter{min-width:0;width:auto;flex:1 1 auto}
+  .mass-detail-actions{grid-template-columns:1fr 1fr!important}.mass-attendance-summary{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important}.mass-attendance-summary>div{padding:6px 4px!important}.mass-attendance-summary small{font-size:6px!important}.mass-attendance-summary b{font-size:15px!important}
+  .mass-person-details .legacy-mass-roster-meta.compact-three{grid-template-columns:1fr!important}.mass-wait-card{grid-template-columns:1fr!important}
+  .cc-event-card{grid-template-columns:40px minmax(72px,.55fr) minmax(0,1fr)!important;grid-template-areas:"icon kind team" "icon kind date" "main main main"!important}.cc-event-date{text-align:left!important}.cc-event-main{padding-top:4px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+  .finance-player-col{min-width:135px!important;max-width:135px!important}.finance-tabs{width:100%}.finance-tabs button{flex:1 0 auto}
+}
+
+/* B6D final mass list header parity: 6 columns, same geometry as clickable rows. */
+@media(min-width:561px){.legacy-mass-training-header{grid-template-columns:minmax(180px,1.3fr) minmax(130px,.9fr) 85px 100px 110px 28px!important}}
