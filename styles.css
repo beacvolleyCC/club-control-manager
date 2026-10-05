@@ -4548,3 +4548,30 @@ body{overflow-x:clip!important}
   .cc-training-card-panel .cc-event-date b{font-size:10.5px!important}
   .cc-training-card-panel .cc-event-date small{font-size:8px!important}
 }
+
+
+/* R1 mass detail — separate bordered actions */
+.mass-detail-actions.cc-icon-toolbar{
+  display:grid!important;
+  gap:6px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+.mass-detail-actions.cc-icon-toolbar .cc-toolbar-text,
+.mass-detail-actions.cc-icon-toolbar .matrix-filter-toggle{
+  border:1px solid var(--line)!important;
+  border-radius:9px!important;
+  background:var(--card)!important;
+  box-shadow:none!important;
+}
+.mass-detail-actions.cc-icon-toolbar .cc-toolbar-text.primary{
+  background:var(--yellow)!important;
+  color:#171717!important;
+  border-color:color-mix(in srgb,var(--yellow-dark) 68%,var(--line))!important;
+}
+.mass-detail-actions.cc-icon-toolbar .cc-toolbar-text.warning{
+  background:var(--card)!important;
+  color:var(--red)!important;
+}
