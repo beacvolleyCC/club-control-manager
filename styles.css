@@ -4263,3 +4263,111 @@ body{overflow-x:clip!important}
   .cc-mass-athlete-filters{grid-template-columns:1fr!important}
   .cc-mass-athlete-filters>input{grid-column:auto!important}
 }
+
+
+/* R1 UI1.1 — white page headers + larger Manager filter control */
+.cc-page-header-panel{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  min-height:70px!important;
+  margin:0 0 10px!important;
+  padding:11px 12px!important;
+  border:1px solid var(--line)!important;
+  border-radius:13px!important;
+  background:var(--card)!important;
+  box-shadow:none!important;
+}
+.cc-page-header-panel>div:first-child{min-width:0!important}
+.cc-page-header-panel h2{margin:0!important}
+.cc-page-header-panel p{margin:4px 0 0!important}
+
+/* Manager controls are intentionally a touch larger than Player controls. */
+.cc-icon-toolbar,
+.matrix-head-filter-actions{
+  background:var(--card)!important;
+}
+.cc-icon-toolbar .triangle-icon,
+.matrix-head-filter-actions .triangle-icon{
+  width:15px!important;
+  height:14px!important;
+}
+.cc-icon-toolbar .matrix-filter-toggle,
+.matrix-head-filter-actions .matrix-filter-toggle{
+  min-width:34px!important;
+  width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+}
+.cc-icon-toolbar .cc-add-square,
+.cc-icon-toolbar .cc-refresh-icon,
+.cc-icon-toolbar .cc-toolbar-text{
+  height:34px!important;
+  min-height:34px!important;
+}
+
+/* Standings controls live inside the regular filter surface. */
+.ms-context-filter-panel{
+  display:flex!important;
+  justify-content:flex-end!important;
+  padding:9px!important;
+  margin:-2px 0 10px!important;
+  background:var(--card)!important;
+}
+.ms-context-filter-panel[hidden]{display:none!important}
+.ms-context-filter-panel .ms-context-controls{
+  width:min(100%,520px)!important;
+  margin:0!important;
+}
+.ms-page-intro .cc-icon-toolbar{flex:0 0 auto!important}
+
+/* Team mode switch lives on the right edge of the team header. */
+.team-gradient-head .team-icon-tabs{
+  margin-left:auto!important;
+  align-self:center!important;
+}
+.team-icon-tabs{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:2px!important;
+  background:var(--card)!important;
+}
+.team-icon-tabs button{
+  background:var(--card)!important;
+  border:0!important;
+}
+.team-icon-tabs button.active{
+  background:var(--yellow)!important;
+  color:#171717!important;
+}
+.cc-grid-menu-icon{
+  position:relative!important;
+  display:block!important;
+  width:16px!important;
+  height:12px!important;
+  border-top:2px solid currentColor!important;
+  border-bottom:2px solid currentColor!important;
+  box-sizing:border-box!important;
+}
+.cc-grid-menu-icon::after{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  top:50%!important;
+  height:2px!important;
+  background:currentColor!important;
+  transform:translateY(-50%)!important;
+  border-radius:2px!important;
+}
+
+/* Keep the team filter/editor group compact and visually attached. */
+.team-page-actions.cc-icon-toolbar{flex:0 0 auto!important}
+.team-page-actions .cc-toolbar-text{padding-inline:9px!important}
+
+@media(max-width:700px){
+  .cc-page-header-panel{align-items:flex-start!important}
+  .cc-page-header-panel .cc-icon-toolbar{align-self:flex-start!important}
+  .ms-context-filter-panel .ms-context-controls{width:100%!important}
+}
