@@ -4,7 +4,7 @@
  * Never put service-role or other privileged secrets here.
  */
 window.CC_MANAGER_CONFIG = Object.freeze({
-  BUILD: 'manager-r1-ui1-7-2026-10-05',
+  BUILD: 'manager-r1-ui1-8-2026-10-06',
   DATA_MODE: 'supabase',
   SUPABASE_URL: 'https://snqsxlyhontaepembaic.supabase.co',
   SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_k1tiZDFFUHGu4aO8DbfIiw_YvBH-qPx',
