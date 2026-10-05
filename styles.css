@@ -4774,3 +4774,398 @@ body{overflow-x:clip!important}
     font-size:8px!important;
   }
 }
+
+
+/* R1 UI1.7 — unified Manager visual system */
+:root{--cc-manager-control:40px}
+
+/* Top yellow Manager bar: thinner and geometrically centered. */
+.topbar{
+  min-height:68px!important;
+  height:68px!important;
+  padding:7px clamp(12px,2.2vw,28px)!important;
+  align-items:center!important;
+}
+.legacy-topbar-left,
+.legacy-topbar-brand,
+.topbar-actions{
+  min-height:0!important;
+  height:100%!important;
+  align-self:center!important;
+  align-items:center!important;
+}
+.legacy-topbar-brand{gap:9px!important}
+.app-brand-mark{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  align-self:center!important;
+}
+.legacy-topbar-brand>span:last-child{
+  justify-content:center!important;
+  align-self:center!important;
+}
+.topbar-actions{
+  display:flex!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+}
+.topbar .season-select,
+.topbar .manager-chip{
+  height:42px!important;
+  min-height:42px!important;
+  margin:0!important;
+  align-self:center!important;
+}
+.topbar .season-select{
+  display:flex!important;
+  align-items:center!important;
+}
+.topbar .season-select select{
+  height:42px!important;
+  min-height:42px!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+  line-height:40px!important;
+}
+.topbar .manager-chip{
+  display:flex!important;
+  align-items:center!important;
+  padding-block:0!important;
+}
+.topbar .profile-dot{
+  align-self:center!important;
+  margin-block:0!important;
+}
+.legacy-primary-nav{top:68px!important}
+@media(max-width:980px){
+  .topbar{min-height:64px!important;height:64px!important;padding:6px 10px!important}
+  .legacy-primary-nav{top:64px!important}
+}
+
+/* One borderless icon-control system. Only yellow primary actions keep a visible edge. */
+.cc-icon-toolbar,
+.matrix-head-filter-actions,
+.filter-head-actions{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:6px!important;
+  min-height:var(--cc-manager-control)!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.cc-icon-toolbar .matrix-filter-toggle,
+.cc-icon-toolbar .cc-toolbar-icon,
+.cc-icon-toolbar .cc-toolbar-reset,
+.matrix-head-filter-actions .matrix-filter-toggle,
+.matrix-head-filter-actions .filter-reset,
+.filter-head-actions .matrix-filter-toggle,
+.filter-head-actions .cc-toolbar-reset{
+  appearance:none!important;
+  display:grid!important;
+  place-items:center!important;
+  width:var(--cc-manager-control)!important;
+  min-width:var(--cc-manager-control)!important;
+  height:var(--cc-manager-control)!important;
+  min-height:var(--cc-manager-control)!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:var(--black)!important;
+  box-shadow:none!important;
+}
+.cc-icon-toolbar .matrix-filter-toggle:hover,
+.cc-icon-toolbar .cc-refresh-icon:hover,
+.cc-icon-toolbar .cc-toolbar-reset:hover,
+.matrix-head-filter-actions .matrix-filter-toggle:hover,
+.matrix-head-filter-actions .filter-reset:hover{
+  background:var(--soft)!important;
+}
+.cc-icon-toolbar .cc-add-square{
+  border:1px solid color-mix(in srgb,var(--yellow-dark) 72%,var(--line))!important;
+  border-radius:10px!important;
+  background:var(--yellow)!important;
+  color:#171717!important;
+}
+.cc-icon-toolbar .triangle-icon,
+.matrix-head-filter-actions .triangle-icon,
+.filter-head-actions .triangle-icon{
+  width:21px!important;
+  height:20px!important;
+}
+.matrix-filter-toggle.open .triangle-icon{transform:rotate(180deg)!important}
+
+/* Shared page-header rhythm. */
+.cc-page-header-panel{
+  min-height:70px!important;
+  padding:10px 12px!important;
+  align-items:center!important;
+}
+.cc-page-header-panel h2{font-size:21px!important;line-height:1.05!important}
+.cc-page-header-panel p{font-size:8.5px!important;line-height:1.25!important}
+
+/* Filter text/field sizing is identical across modules. */
+.filter-panel .field>span,
+.filter-panel label>span,
+.ms-context-controls label>span,
+.overview-team-select>span,
+.matrix-filter-panel label,
+.cc-player-filter-toolbar .field>span{
+  font-size:8px!important;
+  line-height:1.1!important;
+  font-weight:850!important;
+  color:var(--muted)!important;
+}
+.filter-panel select,
+.filter-panel input,
+.ms-context-controls select,
+.overview-team-select select,
+.matrix-filter-panel select,
+.matrix-filter-panel input{
+  font-size:10px!important;
+  font-weight:800!important;
+}
+
+/* Header + open filter panel behave as a single card; divider matches the normal panel border. */
+.cc-training-page-header:has(+ .event-filter-head + .parity-event-filters:not([hidden])),
+.cc-match-page-header:has(+ .event-filter-head + .parity-event-filters:not([hidden])),
+.cc-player-page-header:has(+ .cc-player-filter-toolbar:not([hidden])),
+.cc-team-page-header:has(+ .team-filter-panel:not([hidden])),
+.ms-page-intro:has(+ .ms-context-filter-panel:not([hidden])){
+  margin-bottom:0!important;
+  border-bottom-left-radius:0!important;
+  border-bottom-right-radius:0!important;
+}
+.cc-training-page-header + .event-filter-head + .parity-event-filters,
+.cc-match-page-header + .event-filter-head + .parity-event-filters,
+.cc-player-page-header + .cc-player-filter-toolbar,
+.cc-team-page-header + .team-filter-panel,
+.ms-page-intro + .ms-context-filter-panel{
+  width:100%!important;
+  max-width:none!important;
+  margin:0 0 10px!important;
+  padding:9px 12px!important;
+  border:1px solid var(--line)!important;
+  border-top:1px solid var(--line)!important;
+  border-radius:0 0 13px 13px!important;
+  background:var(--card)!important;
+  box-shadow:none!important;
+}
+.cc-training-page-header + .event-filter-head + .parity-event-filters[hidden],
+.cc-match-page-header + .event-filter-head + .parity-event-filters[hidden],
+.cc-player-page-header + .cc-player-filter-toolbar[hidden],
+.cc-team-page-header + .team-filter-panel[hidden],
+.ms-page-intro + .ms-context-filter-panel[hidden]{display:none!important}
+
+/* Standings: use all available width; only the inner table scrolls on narrow screens. */
+.ms-context-filter-panel{justify-content:stretch!important}
+.ms-context-filter-panel .ms-context-controls{
+  width:100%!important;
+  max-width:none!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+.ms-standings-card{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.ms-standings-card .ms-table-scroll{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+.ms-standings-card .ms-table{
+  width:100%!important;
+  min-width:720px!important;
+  max-width:none!important;
+  table-layout:auto!important;
+}
+.ms-standings-card .ms-table th,
+.ms-standings-card .ms-table td{white-space:nowrap!important}
+@media(max-width:760px){
+  .ms-context-filter-panel .ms-context-controls{grid-template-columns:1fr!important}
+}
+
+/* Overview attendance matrix: more breathing room until its own horizontal scroll takes over. */
+.manager-overview-main .matrix-scroll{
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+}
+.manager-overview-main .manager-player-grid{
+  --mgr-grid-event:136px!important;
+  --mgr-grid-count:40px!important;
+  --mgr-grid-cell:48px!important;
+  --mgr-grid-head:48px!important;
+  --mgr-grid-row:46px!important;
+}
+.manager-overview-main .manager-player-matrix{
+  width:max-content!important;
+  min-width:100%!important;
+}
+.manager-overview-main .manager-player-matrix .matrix-player-head,
+.manager-overview-main .manager-player-matrix .matrix-cell{
+  width:var(--mgr-grid-cell)!important;
+  min-width:var(--mgr-grid-cell)!important;
+  max-width:var(--mgr-grid-cell)!important;
+}
+.parity-matrix-head .matrix-head-filter-actions{
+  min-width:var(--cc-manager-control)!important;
+}
+@media(max-width:900px){
+  .manager-overview-main .manager-player-grid{
+    --mgr-grid-event:122px!important;
+    --mgr-grid-count:36px!important;
+    --mgr-grid-cell:43px!important;
+    --mgr-grid-head:44px!important;
+    --mgr-grid-row:42px!important;
+  }
+  .manager-overview-main .manager-player-matrix{min-width:700px!important}
+}
+
+/* Teams: filter stays in the page header; edit moves into the team header. */
+.team-page-actions{width:auto!important;justify-content:flex-end!important}
+.team-head-actions{
+  margin-left:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  flex:0 0 auto!important;
+}
+.team-edit-circle{
+  display:grid!important;
+  place-items:center!important;
+  width:var(--cc-manager-control)!important;
+  min-width:var(--cc-manager-control)!important;
+  height:var(--cc-manager-control)!important;
+  min-height:var(--cc-manager-control)!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:var(--card)!important;
+  color:#171717!important;
+  font-size:18px!important;
+  font-weight:900!important;
+  cursor:pointer!important;
+}
+.team-icon-tabs{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+.team-icon-tabs button{
+  width:var(--cc-manager-control)!important;
+  min-width:var(--cc-manager-control)!important;
+  height:var(--cc-manager-control)!important;
+  min-height:var(--cc-manager-control)!important;
+  padding:0!important;
+  border-radius:10px!important;
+  font-size:12px!important;
+  font-weight:950!important;
+  box-shadow:none!important;
+}
+.team-icon-tabs .team-tab-yellow{
+  background:var(--yellow)!important;
+  color:#171717!important;
+  border:1px solid color-mix(in srgb,var(--yellow-dark) 65%,var(--line))!important;
+}
+.team-icon-tabs .team-tab-yellow.active{
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.16)!important;
+}
+.team-icon-tabs .team-tab-grid{
+  background:transparent!important;
+  color:var(--black)!important;
+  border:0!important;
+}
+.team-icon-tabs .team-tab-grid.active{background:var(--soft)!important}
+.team-icon-tabs .cc-grid-menu-icon{width:18px!important;height:18px!important}
+
+/* Players + Notifications use the same title surface as the rest. */
+.cc-player-page-header,
+.cc-notification-page-header{margin-bottom:10px!important}
+
+/* Tömegsport inline roster: compact chips/rows, with @ and ! directly after the name. */
+.mass-inline-roster-list{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  gap:4px 6px!important;
+  padding:7px 9px!important;
+}
+.mass-inline-person{
+  width:auto!important;
+  min-width:0!important;
+  min-height:28px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  padding:4px 7px!important;
+  border:1px solid var(--line)!important;
+  border-radius:8px!important;
+  background:var(--card)!important;
+}
+.mass-inline-person.wait{opacity:.72!important}
+.mass-inline-identity{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  min-width:0!important;
+}
+.mass-inline-identity b{
+  font-size:9px!important;
+  white-space:nowrap!important;
+}
+.mass-inline-flag{
+  width:16px!important;
+  min-width:16px!important;
+  height:16px!important;
+  min-height:16px!important;
+  border-radius:4px!important;
+  font-size:10px!important;
+}
+.mass-person-name-line{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  min-width:0!important;
+  max-width:100%!important;
+}
+.mass-person-name-line>b{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+/* Mobile control sizes stay equal, only slightly smaller. */
+@media(max-width:620px){
+  :root{--cc-manager-control:36px}
+  .cc-page-header-panel h2{font-size:19px!important}
+  .cc-page-header-panel p{font-size:8px!important}
+  .cc-icon-toolbar .triangle-icon,
+  .matrix-head-filter-actions .triangle-icon,
+  .filter-head-actions .triangle-icon{width:19px!important;height:18px!important}
+  .team-gradient-head{align-items:center!important}
+  .team-head-actions{gap:4px!important}
+  .mass-inline-roster-list{gap:4px!important}
+}
