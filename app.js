@@ -1041,6 +1041,212 @@
     $('#massTrainingsRefresh')?.addEventListener('click',async()=>{try{status('Tömegsport edzések frissítése…');await Promise.all([loadMassTrainings(),loadMassArchive().catch(()=>{})]);renderMassTrainings();status('Frissítve.','success')}catch(err){state.massLoadError=text(err?.message||'A Tömegsport modul nem tölthető be.');renderMassTrainings();status(state.massLoadError,'error')}});bindMassLegacyRows();
   }
 
+  function massAttendanceModel_(value){
+    const raw=text(value).toLocaleUpperCase('hu-HU');
+    if(raw==='MEGJELENT')return {key:'present',label:'Megjelent',short:'Jelen',value:-1};
+    if(raw==='NEM JELENT MEG')return {key:'noshow',label:'Nem jelent meg',short:'Hiányzott',value:1};
+    return {key:'pending',label:'Nincs rögzítve',short:'Nincs rögzítve',value:0};
+  }
+  function massAttendanceBySliderValue_(value){
+    const n=Number(value);
+    if(n<=-1)return {key:'present',label:'Megjelent',short:'Jelen',value:-1,db:'MEGJELENT'};
+    if(n>=1)return {key:'noshow',label:'Nem jelent meg',short:'Hiányzott',value:1,db:'NEM JELENT MEG'};
+    return {key:'pending',label:'Nincs rögzítve',short:'Nincs rögzítve',value:0,db:'NINCS RÖGZÍTVE'};
+  }
+  function massAttendanceSliderBase_(row){
+    const model=massAttendanceModel_(row?.attendance),bookingId=text(row?.bookingId||row?.id),canEdit=canAction('mass.trainings','edit')&&!!bookingId;
+    const stateClass=model.key==='present'?'yes':model.key==='noshow'?'no':'none';
+    return `<div class="mass-attendance-control is-${esc(model.key)}" data-mass-attendance-control="${esc(bookingId)}">
+      <div class="attendance-slider cc-player-training-slider ${stateClass}" data-manager-slider data-manager-slider-kind="mass" data-mass-attendance="${esc(bookingId)}" data-slider-state="${stateClass}" ${canEdit?'':'data-slider-disabled="1"'} aria-label="${esc(row?.name||'Sportoló')} jelenléte: ${esc(model.label)}">
+        <button class="slider-zone left" type="button" data-slider-action="yes" ${canEdit?'':'disabled'}>Megjelent</button>
+        <button class="slider-zone center" type="button" data-slider-action="none" ${canEdit?'':'disabled'}>Nincs rögzítve</button>
+        <button class="slider-zone right" type="button" data-slider-action="no" ${canEdit?'':'disabled'}>Nem jelent meg</button>
+        <span class="slider-thumb"></span>
+      </div>
+      <small class="mass-attendance-save-state" data-mass-attendance-state>${canEdit?'Húzd vagy koppints · elengedéskor ment.':'Csak megtekintés · nincs szerkesztési jogosultság.'}</small>
+    </div>`;
+  }
+  function syncMassAttendancePreview_(input,value,message=''){
+    if(!input)return;
+    const model=massAttendanceBySliderValue_(value),control=input.closest('.mass-attendance-control'),card=input.closest('.mass-attendance-card');
+    if(control){
+      control.classList.remove('is-present','is-noshow','is-pending');control.classList.add(`is-${model.key}`);
+      const center=control.querySelector('[data-mass-attendance-center]');if(center)center.textContent=model.short;
+      const stateEl=control.querySelector('[data-mass-attendance-state]');if(stateEl&&message)stateEl.textContent=message;
+    }
+    if(card){
+      card.dataset.attendanceKey=model.key;
+      const badge=card.querySelector('.mass-attendance-state-badge');
+      if(badge){badge.classList.remove('is-present','is-noshow','is-pending');badge.classList.add(`is-${model.key}`);badge.textContent=model.label;}
+    }
+  }
+  function refreshMassAttendanceSummary_(){
+    const cards=$$('.mass-attendance-card'),counts={present:0,pending:0,noshow:0};
+    cards.forEach(card=>{const key=text(card.dataset.attendanceKey)||'pending';if(Object.prototype.hasOwnProperty.call(counts,key))counts[key]++});
+    const total=$('[data-mass-attendance-count="total"]'),present=$('[data-mass-attendance-count="present"]'),pending=$('[data-mass-attendance-count="pending"]'),noshow=$('[data-mass-attendance-count="noshow"]');
+    if(total)total.textContent=String(cards.length);if(present)present.textContent=String(counts.present);if(pending)pending.textContent=String(counts.pending);if(noshow)noshow.textContent=String(counts.noshow);
+  }
+  function updateMassAttendanceCache_(eventId,bookingId,result){
+    const detail=state.massDetailCache.get(text(eventId));if(!detail||!Array.isArray(detail.bookings))return;
+    const row=detail.bookings.find(x=>text(x.bookingId||x.id)===text(bookingId));if(!row)return;
+    row.attendance=text(result?.attendance)||row.attendance;
+    if(result?.bookingStatus)row.bookingStatus=result.bookingStatus;
+  }
+  async function saveMassAttendance_(eventId,input){
+    if(!input||!canAction('mass.trainings','edit'))return;
+    const bookingId=text(input.dataset.massAttendance),oldValue=Number(input.dataset.attendanceCurrent||0),nextValue=Number(input.value);
+    if(!bookingId||![-1,0,1].includes(nextValue)){input.value=String(oldValue);syncMassAttendancePreview_(input,oldValue,'Érvénytelen állapot.');return}
+    if(nextValue===oldValue){syncMassAttendancePreview_(input,nextValue,'Nincs változás.');return}
+    if(state.massAttendanceBusy.has(bookingId)){input.value=String(oldValue);syncMassAttendancePreview_(input,oldValue,'Mentés folyamatban…');return}
+    const model=massAttendanceBySliderValue_(nextValue),control=input.closest('.mass-attendance-control'),stateEl=control?.querySelector('[data-mass-attendance-state]');
+    state.massAttendanceBusy.add(bookingId);input.disabled=true;control?.classList.add('is-saving');if(stateEl)stateEl.textContent='Mentés…';
+    try{
+      const result=await rpc('cc_manager_mass_attendance_r1_v1',{p_booking_id:bookingId,p_attendance:model.db});
+      const saved=massAttendanceModel_(result?.attendance||model.db);input.value=String(saved.value);input.dataset.attendanceCurrent=String(saved.value);
+      syncMassAttendancePreview_(input,saved.value,'Mentve.');updateMassAttendanceCache_(eventId,bookingId,result||{});refreshMassAttendanceSummary_();
+      status(`${text(input.closest('.mass-attendance-card')?.querySelector('.mass-attendance-person-copy b')?.textContent)||'Sportoló'} · ${saved.label}`,'success');
+    }catch(err){
+      input.value=String(oldValue);syncMassAttendancePreview_(input,oldValue,'A mentés sikertelen · az előző állapot visszaállítva.');
+      status(err?.message||'A jelenlét mentése sikertelen.','error');
+    }finally{
+      state.massAttendanceBusy.delete(bookingId);input.disabled=!canAction('mass.trainings','edit');control?.classList.remove('is-saving');
+    }
+  }
+  function bindStickyAttendanceDetent_(input){
+    if(!input||input.dataset.stickyDetentBound==='1')return;
+    input.dataset.stickyDetentBound='1';
+    let startX=0,released=false,activePointer=null;
+    const clear=()=>{input.classList.remove('cc-detent-hold','cc-detent-stretch-left','cc-detent-stretch-right','cc-detent-release');released=false;activePointer=null};
+    input.addEventListener('pointerdown',e=>{
+      if(input.disabled)return;
+      startX=e.clientX;released=false;activePointer=e.pointerId;input.classList.add('cc-detent-hold');
+    },{passive:true});
+    input.addEventListener('pointermove',e=>{
+      if(activePointer!==e.pointerId||released||input.disabled)return;
+      const dx=e.clientX-startX,abs=Math.abs(dx);
+      if(abs<2)return;
+      input.classList.toggle('cc-detent-stretch-right',dx>0);input.classList.toggle('cc-detent-stretch-left',dx<0);
+      if(abs>=12){released=true;input.classList.remove('cc-detent-hold','cc-detent-stretch-left','cc-detent-stretch-right');input.classList.add('cc-detent-release');setTimeout(()=>input.classList.remove('cc-detent-release'),130)}
+    },{passive:true});
+    ['pointerup','pointercancel','lostpointercapture'].forEach(type=>input.addEventListener(type,clear,{passive:true}));
+  }
+  function bindMassAttendanceSliders_(eventId){
+    $$('[data-manager-slider-kind="mass"]').forEach(slider=>{
+      ccBindPlayerStyleSlider_(slider,{onCommit:async state=>{
+        const bookingId=text(slider.dataset.massAttendance);if(!bookingId||!canAction('mass.trainings','edit'))return;
+        const model=state==='yes'?massAttendanceBySliderValue_(-1):state==='no'?massAttendanceBySliderValue_(1):massAttendanceBySliderValue_(0);
+        const control=slider.closest('.mass-attendance-control'),stateEl=control?.querySelector('[data-mass-attendance-state]');
+        if(state.massAttendanceBusy.has(bookingId))return;
+        state.massAttendanceBusy.add(bookingId);slider.dataset.sliderDisabled='1';control?.classList.add('is-saving');if(stateEl)stateEl.textContent='Mentés…';
+        try{
+          const result=await rpc('cc_manager_mass_attendance_r1_v1',{p_booking_id:bookingId,p_attendance:model.db});
+          const saved=massAttendanceModel_(result?.attendance||model.db),savedState=saved.key==='present'?'yes':saved.key==='noshow'?'no':'none';
+          ccSetPlayerStyleSliderState_(slider,savedState);
+          ccSyncMassAttendanceCardState_(slider,saved);updateMassAttendanceCache_(eventId,bookingId,result||{});refreshMassAttendanceSummary_();
+          if(stateEl)stateEl.textContent='Mentve.';status(`${text(slider.closest('.mass-attendance-card')?.querySelector('.mass-attendance-person-copy b')?.textContent)||'Sportoló'} · ${saved.label}`,'success');
+        }catch(err){
+          const previous=text(slider.dataset.sliderPrevious)||text(slider.dataset.sliderState)||'none';ccSetPlayerStyleSliderState_(slider,previous);
+          if(stateEl)stateEl.textContent='A mentés sikertelen · az előző állapot visszaállítva.';status(err?.message||'A jelenlét mentése sikertelen.','error');
+        }finally{state.massAttendanceBusy.delete(bookingId);delete slider.dataset.sliderDisabled;control?.classList.remove('is-saving')}
+      }});
+    });
+  }
+  function massPersonSort_(a,b){return comparePlayersBySurname_(a,b)}
+  function massDetailUiFor_(eventId){const key=text(eventId);if(!state.massDetailUi.has(key))state.massDetailUi.set(key,{sort:'surname-asc',pass:'all',open:[],scrollTop:0});return state.massDetailUi.get(key)}
+  function massEventMonth_(e){const d=safeDate(e?.startsAt||e?.eventDate);if(!d)return'';return new Intl.DateTimeFormat('sv-SE',{year:'numeric',month:'2-digit',timeZone:'Europe/Budapest'}).format(d)}
+  function massPassRecordForBooking_(r){
+    const pn=text(r?.passNumber).toLowerCase(),email=text(r?.email).toLowerCase();if(!pn&&!email)return null;
+    const rows=(state.massPasses||[]).filter(p=>(pn&&text(p.passNumber).toLowerCase()===pn)||(!pn&&email&&text(p.email).toLowerCase()===email));
+    rows.sort((a,b)=>{const ae=text(a.email).toLowerCase()===email?1:0,be=text(b.email).toLowerCase()===email?1:0;if(ae!==be)return be-ae;return (safeDate(b.purchaseDate)?.getTime()||0)-(safeDate(a.purchaseDate)?.getTime()||0)});
+    return rows[0]||null
+  }
+  function massPassInfo_(r,e){
+    const matched=massPassRecordForBooking_(r),passNumber=text(r?.passNumber||matched?.passNumber),month=text(r?.passMonth||r?.validMonth||r?.currentPassMonth||matched?.validMonth),rawStatus=text(r?.passStatus),normalized=rawStatus.toLocaleUpperCase('hu-HU'),eventMonth=massEventMonth_(e),personType=text(r?.personType||r?.bookingType||r?.type).toLocaleUpperCase('hu-HU'),exempt=/FIRST|ELSŐ|ELSO|GUEST|VENDÉG|VENDEG/.test(personType);
+    const explicitlyInvalid=/ÉRVÉNYTELEN|ERVENYTELEN|HIB|ELUTAS/.test(normalized),waiting=/ELLENŐR|ELLENORIZ|VÁR|VAR|PENDING|CHECK/.test(normalized),monthMismatch=!!(month&&eventMonth&&month!==eventMonth),missing=!passNumber&&!exempt,unmatched=!!passNumber&&!month&&!matched;
+    const needsCheck=explicitlyInvalid||waiting||monthMismatch||missing||unmatched;
+    const valid=!needsCheck&&(/ÉRVÉNYES|ERVENYES|OK|VALID/.test(normalized)||!!month||exempt);
+    let label=rawStatus||'';if(monthMismatch)label='Hónapeltérés';else if(explicitlyInvalid)label='Érvénytelen';else if(waiting||unmatched||missing)label='Ellenőrzendő';else if(valid&&!label)label='Érvényes';
+    return {passNumber,month,eventMonth,label,needsCheck,valid,exempt,matched}
+  }
+  function captureMassDetailUi_(eventId,root=$('#entityDialogBody')){
+    const ui=massDetailUiFor_(eventId),dialog=$('#entityDialog');if(root){ui.open=Array.from(root.querySelectorAll('.mass-attendance-card:not(.is-collapsed)')).map(x=>text(x.dataset.bookingId)).filter(Boolean);ui.sort=text(root.querySelector('#massRosterSort')?.value||ui.sort);ui.pass=text(root.querySelector('#massRosterPassFilter')?.value||ui.pass);ui.scrollTop=Math.max(root.scrollTop||0,dialog?.scrollTop||0)}return ui
+  }
+  function restoreMassDetailUi_(eventId,root=$('#entityDialogBody')){
+    const ui=massDetailUiFor_(eventId);if(!root)return;const open=new Set(ui.open||[]);root.querySelectorAll('.mass-attendance-card').forEach(card=>{if(!open.has(text(card.dataset.bookingId)))return;const btn=card.querySelector('[data-mass-person-toggle]'),details=card.querySelector('[data-mass-person-details]');if(btn&&details){details.hidden=false;card.classList.remove('is-collapsed');btn.setAttribute('aria-expanded','true');btn.classList.add('open')}});const all=root.querySelector('#massToggleAllPeople');if(all){const toggles=Array.from(root.querySelectorAll('[data-mass-person-toggle]'));all.textContent=toggles.length&&toggles.every(x=>x.getAttribute('aria-expanded')==='true')?'Mind becsuk':'Mind kinyit'}requestAnimationFrame(()=>{const dialog=$('#entityDialog');if(root.scrollTop!==undefined)root.scrollTop=ui.scrollTop||0;if(dialog&&dialog.scrollTop!==undefined)dialog.scrollTop=ui.scrollTop||0})
+  }
+  function massBookingCard_(r,eventLevel='',event={}){
+    const attendance=text(r.attendance)||'NINCS RÖGZÍTVE',sub=safeDate(r.submittedAt),level=text(r.athleteLevel||r.extraLevel||eventLevel||''),color=massLevelColor({level:level||eventLevel||'Edzés'}),attendanceModel=massAttendanceModel_(attendance);
+    const bookingStatus=text(r.bookingStatus||r.status)||'AKTÍV',pass=massPassInfo_(r,event),bookingId=esc(r.bookingId||r.id||'');
+    return `<article class="mass-attendance-card legacy-mass-roster-card is-collapsed" data-booking-id="${bookingId}" data-attendance-key="${esc(attendanceModel.key)}" data-pass-check="${pass.needsCheck?'needs-check':(pass.valid?'valid':'neutral')}" style="--mass-person-color:${esc(color)};--mass-person-rgb:${esc(hexRgb(color))}">
+      <button class="mass-person-toggle" type="button" data-mass-person-toggle aria-expanded="false"><span class="triangle-icon"></span><span class="mass-attendance-person-copy"><b>${esc(r.name||'Névtelen')}</b><small>${esc(level||'Sportoló')}</small></span></button>
+      ${massAttendanceSliderBase_(r)}
+      <div class="mass-person-details" data-mass-person-details hidden>
+        <div class="legacy-mass-roster-meta compact-three"><span><small>Email</small><b>${esc(r.email||'–')}</b></span><span><small>Jelentkezés</small><b>${sub?esc(fmtDate(sub)+' '+fmtTime(sub)):'–'}</b></span><span><small>Állapot</small><b>${esc(bookingStatus)}</b></span></div>
+        <div class="legacy-mass-roster-badges"><span class="legacy-mass-badge ${pass.needsCheck?'pass-error':''}">Bérlet: ${esc(pass.passNumber||'–')}${pass.month?` · ${esc(pass.month)}`:''}</span>${pass.label?`<span class="legacy-mass-badge ${pass.needsCheck?'pass-error':(pass.valid?'pass-ok':'')}">${esc(pass.label)}</span>`:''}${level?`<span class="legacy-mass-badge soft">${esc(level)}</span>`:''}</div>
+        ${r.note?`<div class="mass-attendance-note"><b>Megjegyzés:</b> ${esc(r.note)}</div>`:''}
+      </div>
+    </article>`;
+  }
+  function massWaitlistCard_(r){
+    const sub=safeDate(r.submittedAt),statusValue=text(r.status||r.waitlistStatus)||'VÁRAKOZIK',matched=massPassRecordForBooking_(r),month=text(r.passMonth||r.validMonth||r.currentPassMonth||matched?.validMonth);
+    return `<article class="mass-wait-card">
+      <div><b>${esc(r.name||'Névtelen')}</b><small>${esc(r.email||'–')}</small></div>
+      <span><small>Bérlet</small><b>${esc(r.passNumber||'–')}${month?` · ${esc(month)}`:''}</b><i>${esc(r.passStatus||'')}</i></span>
+      <span><small>Állapot</small><b>${esc(statusValue)}</b><i>${sub?esc(fmtDate(sub)+' '+fmtTime(sub)):''}</i></span>
+    </article>`;
+  }
+  function massEventPayloadFromForm_(existing={}){const date=$('#meDate')?.value,start=ccNormalizeTime24_($('#meStart')?.value),end=ccNormalizeTime24_($('#meEnd')?.value),session=text($('#meSession')?.value||existing.sessionType||'TÖMEGSPORT').toUpperCase();if(!date||!start||!end)throw new Error('A dátum, kezdés és befejezés kötelező; az idő HH:MM formátumú legyen.');if(end<=start)throw new Error('A befejezésnek később kell lennie a kezdésnél.');return {eventDate:date,startTime:start,endTime:end,level:text($('#meLevel')?.value),court:text($('#meCourt')?.value),capacity:Number($('#meCapacity')?.value||0),cancellationHours:Number($('#meCancelHours')?.value||0),active:$('#meActive')?.checked!==false,oldLimit:0,newLimit:Number($('#meCapacity')?.value||0),publicRegistrationActive:session!=='VERSENYSPORT',sessionType:session,teamId:'',visibility:'PUBLIC',seriesId:text(existing.seriesId||''),recurrenceRule:'',seriesEnd:null,exceptionType:'',eventType:'EDZÉS',color:text($('#meColor')?.value||existing.color||'#f7b700')}}
+  async function openMassEventEditor_(eventId=null){if(!canAction('mass.trainings','edit')){status('Nincs Tömegsport szerkesztési jogosultságod.','error');return}let data=null,e={};if(eventId){data=await loadMassEventDetail(eventId,{force:true});e=data?.event||{}}const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='TÖMEGSPORT · EDZÉS · SZERKESZTÉS';title.textContent=eventId?'Edzés szerkesztése':'Új Tömegsport edzés';const st=safeDate(e.startsAt)||new Date(),en=safeDate(e.endsAt)||new Date(st.getTime()+90*60000);body.innerHTML=`<form id="massEventForm" class="action-form"><div class="action-form-grid"><label class="field"><span>Dátum</span><input id="meDate" type="date" value="${esc(ccDateInputValue_(st))}" required></label><label class="field"><span>Kezdés</span><input id="meStart" type="text" inputmode="numeric" autocomplete="off" placeholder="HH:MM" pattern="(?:[01]\d|2[0-3]):[0-5]\d" maxlength="5" value="${esc(ccTimeInputValue_(st))}" required></label><label class="field"><span>Befejezés</span><input id="meEnd" type="text" inputmode="numeric" autocomplete="off" placeholder="HH:MM" pattern="(?:[01]\d|2[0-3]):[0-5]\d" maxlength="5" value="${esc(ccTimeInputValue_(en))}" required></label><label class="field"><span>Szint</span><select id="meLevel"><option value="KEZDŐ" ${text(e.level).toUpperCase()==='KEZDŐ'?'selected':''}>Kezdő</option><option value="KÖZÉPHALADÓ" ${text(e.level).toUpperCase()==='KÖZÉPHALADÓ'?'selected':''}>Középhaladó</option><option value="HALADÓ" ${text(e.level).toUpperCase()==='HALADÓ'?'selected':''}>Haladó</option></select></label><label class="field"><span>Pálya</span><input id="meCourt" value="${esc(e.court||'')}"></label><label class="field"><span>Férőhely</span><input id="meCapacity" type="number" min="1" max="40" value="${esc(e.capacity||e.totalLimit||18)}"></label><label class="field"><span>Lemondási határ (óra)</span><input id="meCancelHours" type="number" min="0" max="72" step="0.5" value="${esc(e.cancellationHours??6)}"></label><label class="field"><span>Típus</span><select id="meSession"><option value="TÖMEGSPORT" ${text(e.sessionType).toUpperCase()!=='SPORT7'?'selected':''}>Tömegsport</option><option value="SPORT7" ${text(e.sessionType).toUpperCase()==='SPORT7'?'selected':''}>SPORT7</option></select></label><label class="field"><span>Szín</span><input id="meColor" type="color" value="${esc(e.color||massLevelColor(e)||'#f7b700')}"></label></div><label class="action-checkbox"><input id="meActive" type="checkbox" ${e.active===false?'':'checked'}> <span>Aktív edzés</span></label>${!eventId?`<div class="action-form-repeat"><label><input id="meRepeat" type="checkbox"> Hetente ismétlődjön</label><label class="field compact"><span>Ismétlés vége</span><input id="meRepeatEnd" type="date" disabled></label></div>`:''}<div class="dialog-action-row"><button type="button" class="button quiet" id="meCancel">Mégse</button>${eventId?'<button type="button" class="button danger" id="meDelete">Törlés</button>':''}<button type="submit" class="button primary" id="meSave">Mentés</button></div></form>`;ccOpenDialogStable_(d);$('#meCancel')?.addEventListener('click',ccCloseEntityDialog_);$('#meRepeat')?.addEventListener('change',ev=>{if($('#meRepeatEnd'))$('#meRepeatEnd').disabled=!ev.target.checked});$('#massEventForm')?.addEventListener('submit',async ev=>{ev.preventDefault();const btn=$('#meSave');if(btn)btn.disabled=true;try{const base=massEventPayloadFromForm_(e);if(eventId){await rpc('cc_manager_mass_event_save_v1',{p_event_id:eventId,p_payload:base});await rpc('cc_manager_mass_event_set_active_v1',{p_event_id:eventId,p_active:base.active})}else{const repeat=$('#meRepeat')?.checked===true,endDate=text($('#meRepeatEnd')?.value),dates=[base.eventDate],series=repeat&&window.crypto?.randomUUID?window.crypto.randomUUID():'';if(repeat){if(!endDate||endDate<base.eventDate)throw new Error('Adj meg érvényes ismétlési végdátumot.');let cur=new Date(`${base.eventDate}T12:00:00`),last=new Date(`${endDate}T12:00:00`);while(dates.length<26){cur=new Date(cur);cur.setDate(cur.getDate()+7);if(cur>last)break;dates.push(localDateKey(cur))}}const payloads=dates.map(day=>({...base,eventDate:day,seriesId:series,recurrenceRule:repeat?'WEEKLY':'',seriesEnd:repeat?endDate:null}));if(repeat)await rpc('cc_manager_mass_event_series_create_v1',{p_payloads:payloads});else await rpc('cc_manager_mass_event_save_v1',{p_event_id:null,p_payload:payloads[0]})}state.massDetailCache.clear();await Promise.all([loadMassTrainings(),loadMassCalendar(),loadMassArchive()]);ccCloseEntityDialog_();renderMassTrainings();status('Tömegsport edzés mentve.','success')}catch(err){console.error(err);status(err.message||'Az edzés mentése sikertelen.','error');if(btn)btn.disabled=false}});$('#meDelete')?.addEventListener('click',async()=>{if(!eventId||!window.confirm('Biztosan törlöd ezt az edzést? Csak olyan jövőbeli edzés törölhető, amelynek nincs jelentkezési/várólista előzménye.'))return;try{await rpc('cc_manager_mass_event_delete_v1',{p_event_id:eventId});state.massDetailCache.clear();await Promise.all([loadMassTrainings(),loadMassCalendar()]);ccCloseEntityDialog_();renderMassTrainings();status('Edzés törölve.','success')}catch(err){status(err.message||'Az edzés nem törölhető.','error')}})}
+  function openMassAddAthlete_(eventId){const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='TÖMEGSPORT · SPORTOLÓ HOZZÁADÁSA';title.textContent='Sportoló hozzáadása';body.innerHTML=`<form id="massAddAthleteForm" class="action-form"><div class="action-form-grid"><label class="field"><span>Név</span><input id="maName" required maxlength="100"></label><label class="field"><span>Email</span><input id="maEmail" type="email"></label><label class="field"><span>Típus</span><select id="maType"><option value="NORMAL">Normál</option><option value="FIRST">Első edzés</option><option value="GUEST">Vendég</option></select></label><label class="field"><span>Bérletszám</span><input id="maPass"></label><label class="field span-2"><span>Admin megjegyzés</span><input id="maNote" maxlength="1000"></label></div><label class="action-checkbox"><input id="maPresent" type="checkbox"> <span>Megjelentként rögzítés</span></label><div class="dialog-action-row"><button type="button" class="button quiet" id="maCancel">Mégse</button><button type="submit" class="button primary" id="maSave">Hozzáadás</button></div></form>`;ccOpenDialogStable_(d);$('#maCancel')?.addEventListener('click',ccCloseEntityDialog_);$('#massAddAthleteForm')?.addEventListener('submit',async ev=>{ev.preventDefault();const btn=$('#maSave');if(btn)btn.disabled=true;try{await rpc('cc_manager_mass_booking_add_v1',{p_event_id:eventId,p_payload:{name:text($('#maName').value),email:text($('#maEmail').value),personType:$('#maType').value,passNumber:text($('#maPass').value),note:text($('#maNote').value),present:$('#maPresent').checked,capacityBucket:'ADMIN'}});state.massDetailCache.delete(eventId);ccCloseEntityDialog_();await openMassEventDetail(eventId);status('Sportoló hozzáadva.','success')}catch(err){status(err.message||'A sportoló hozzáadása sikertelen.','error');if(btn)btn.disabled=false}})}
+  async function massBookingPatch_(eventId,bookingId,patch){captureMassDetailUi_(eventId);try{await rpc('cc_manager_mass_booking_patch_v1',{p_booking_id:bookingId,p_patch:patch});state.massDetailCache.delete(eventId);await openMassEventDetail(eventId);status('Jelentkezés frissítve.','success')}catch(err){status(err.message||'A módosítás sikertelen.','error')}}
+  async function massBookingRemove_(eventId,bookingId){if(!window.confirm('Biztosan kiveszed a sportolót erről az edzésről?'))return;captureMassDetailUi_(eventId);try{await rpc('cc_manager_mass_booking_remove_v1',{p_booking_id:bookingId});state.massDetailCache.delete(eventId);await openMassEventDetail(eventId);status('Sportoló kivéve az edzésről.','success')}catch(err){status(err.message||'A sportoló kivétele sikertelen.','error')}}
+  function bindMassPersonDisclosure_(root,eventId=''){
+    if(!root)return;const toggles=Array.from(root.querySelectorAll('[data-mass-person-toggle]')),all=root.querySelector('#massToggleAllPeople');
+    const remember=()=>{if(eventId)captureMassDetailUi_(eventId,root)};
+    const setOne=(btn,open)=>{const card=btn.closest('.mass-attendance-card'),details=card?.querySelector('[data-mass-person-details]');if(!card||!details)return;details.hidden=!open;card.classList.toggle('is-collapsed',!open);btn.setAttribute('aria-expanded',String(open));btn.classList.toggle('open',open)};
+    toggles.forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setOne(btn,btn.getAttribute('aria-expanded')!=='true');if(all){const allOpen=toggles.length&&toggles.every(x=>x.getAttribute('aria-expanded')==='true');all.textContent=allOpen?'Mind becsuk':'Mind kinyit'}remember()}));
+    all?.addEventListener('click',()=>{const open=!toggles.every(x=>x.getAttribute('aria-expanded')==='true');toggles.forEach(x=>setOne(x,open));all.textContent=open?'Mind becsuk':'Mind kinyit';remember()});
+  }
+  async function openMassEventDetail(eventId,{force=true}={}){
+    const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if(!d||!body||!title)return;
+    const ui=massDetailUiFor_(eventId);captureMassDetailUi_(eventId,body);
+    if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='TÖMEGSPORT · EDZÉS';
+    title.textContent='Tömegsport edzés';body.innerHTML='<div class="loading-inline">Edzés betöltése…</div>';ccOpenDialogStable_(d);
+    try{
+      const data=await loadMassEventDetail(eventId,{force}),e=data?.event||{},editable=canAction('mass.trainings','edit');
+      let bookings=(Array.isArray(data?.bookings)?data.bookings:[]).slice();
+      const wait=(Array.isArray(data?.waitlist)?data.waitlist:[]).slice().sort(massPersonSort_);
+      const allBookings=bookings.slice(),present=allBookings.filter(r=>massAttendanceModel_(r.attendance).key==='present').length,noshow=allBookings.filter(r=>massAttendanceModel_(r.attendance).key==='noshow').length,pending=Math.max(0,allBookings.length-present-noshow),gate=text(e.registrationMode)==='WAITLIST_ONLY';
+      if(ui.pass==='needs-check')bookings=bookings.filter(r=>massPassInfo_(r,e).needsCheck);else if(ui.pass==='valid')bookings=bookings.filter(r=>massPassInfo_(r,e).valid&&!massPassInfo_(r,e).needsCheck);else if(ui.pass==='missing')bookings=bookings.filter(r=>!massPassInfo_(r,e).passNumber&&!massPassInfo_(r,e).exempt);
+      bookings.sort((a,b)=>ui.sort==='surname-desc'?-comparePlayersBySurname_(a,b):comparePlayersBySurname_(a,b));
+      const needsCheckCount=allBookings.filter(r=>massPassInfo_(r,e).needsCheck).length;
+      title.textContent=e.level||'Edzés';
+      body.innerHTML=`<div class="entity-hero event-entity-hero mass-detail-hero"><div class="mass-detail-titleline"><span class="mass-detail-level">${esc(e.level||'Edzés')}</span><span class="training-active-pill ${e.active===false?'off':''} ${gate?'waitlist':''}">${e.active===false?'INAKTÍV':(gate?'CSAK VÁRÓLISTA':'AKTÍV')}</span></div><strong class="mass-detail-big-count">${allBookings.length} <small>fő</small></strong></div>
+        <div class="attendance-detail mass-attendance-summary"><div><small>Jelentkező</small><span><b data-mass-attendance-count="total">${allBookings.length}</b> fő</span></div><div><small>Megjelent</small><span><b data-mass-attendance-count="present">${present}</b> fő</span></div><div><small>Nincs rögzítve</small><span><b data-mass-attendance-count="pending">${pending}</b> fő</span></div><div><small>Nem jelent meg</small><span><b data-mass-attendance-count="noshow">${noshow}</b> fő</span></div></div>
+        <div class="detail-grid mass-detail-primary-grid">${detailPair('Kezdés',`${fmtDate(e.startsAt)} ${fmtTime(e.startsAt)}`)}${detailPair('Befejezés',e.endsAt?fmtTime(e.endsAt):'–')}${detailPair('Pálya',e.court||'–')}</div>
+        ${editable?`<div class="entity-hero-actions mass-detail-actions"><button class="button primary small" id="massAddAthleteBtn" type="button">+ Sportoló</button><button class="button quiet small" id="massEventEditBtn" type="button">Edzés szerkesztése</button><button class="button quiet small" id="massToggleAllPeople" type="button">Mind kinyit</button><button class="button ${gate?'quiet':'warning'} small" id="massEventGateBtn" type="button">${gate?'Jelentkezés megnyitása':'Jelentkezés lezárása'}</button></div>`:''}
+        <div class="mass-detail-roster-filters"><label><span>Sorrend</span><select id="massRosterSort"><option value="surname-asc" ${ui.sort==='surname-asc'?'selected':''}>Vezetéknév A–Z</option><option value="surname-desc" ${ui.sort==='surname-desc'?'selected':''}>Vezetéknév Z–A</option></select></label><label><span>Bérlet</span><select id="massRosterPassFilter"><option value="all" ${ui.pass==='all'?'selected':''}>Mindenki</option><option value="needs-check" ${ui.pass==='needs-check'?'selected':''}>Ellenőrzendő (${needsCheckCount})</option><option value="valid" ${ui.pass==='valid'?'selected':''}>Érvényes</option><option value="missing" ${ui.pass==='missing'?'selected':''}>Bérlet nélkül</option></select></label><span class="mass-roster-filter-count">${bookings.length} / ${allBookings.length} fő</span></div>
+        <div class="panel-subhead mass-attendance-heading"><div><h4>Jelenlét</h4><p>Név és jelenléti csúszka; a részletek játékosonként lenyithatók.</p></div></div>
+        <div class="mass-attendance-card-list">${bookings.map(r=>{const base=massBookingCard_(r,e.level,e);if(!editable)return base;return base.replace('</article>',`<div class="mass-booking-admin-actions"><select data-mass-pass-status="${esc(r.bookingId||r.id)}"><option value="">Bérlet állapota…</option><option value="ÉRVÉNYES">Érvényes</option><option value="ÉRVÉNYTELEN">Érvénytelen</option><option value="ELLENŐRIZENDŐ">Ellenőrzendő</option></select><div class="mass-booking-admin-right"><button class="button quiet tiny" data-mass-note="${esc(r.bookingId||r.id)}" data-current-note="${esc(r.note||'')}">Megjegyzés</button><button class="button danger tiny" data-mass-remove="${esc(r.bookingId||r.id)}">Kivétel</button></div></div></article>`) }).join('')||emptyInline('Nincs a szűrésnek megfelelő jelentkező.')}</div>
+        <div class="panel-subhead"><div><h4>Várólista</h4><p>Várakozó és felajánlott helyek, azonos kompakt formában.</p></div></div><div class="mass-wait-card-list">${wait.map(massWaitlistCard_).join('')||emptyInline('A várólista üres.')}</div>`;
+      bindMassAttendanceSliders_(eventId);bindMassPersonDisclosure_(body,eventId);restoreMassDetailUi_(eventId,body);
+      $('#massRosterSort')?.addEventListener('change',ev=>{ui.sort=ev.target.value;captureMassDetailUi_(eventId,body);openMassEventDetail(eventId,{force:false})});
+      $('#massRosterPassFilter')?.addEventListener('change',ev=>{ui.pass=ev.target.value;ui.scrollTop=0;captureMassDetailUi_(eventId,body);openMassEventDetail(eventId,{force:false})});
+      $('#massEventEditBtn')?.addEventListener('click',()=>{captureMassDetailUi_(eventId,body);openMassEventEditor_(eventId)});$('#massAddAthleteBtn')?.addEventListener('click',()=>{captureMassDetailUi_(eventId,body);openMassAddAthlete_(eventId)});$('#massEventGateBtn')?.addEventListener('click',()=>{captureMassDetailUi_(eventId,body);toggleMassRegistrationGate(eventId,!gate,{keepDetail:true})});Array.from(body.querySelectorAll('[data-mass-pass-status]')).forEach(x=>x.addEventListener('change',()=>{if(x.value)massBookingPatch_(eventId,x.dataset.massPassStatus,{passStatus:x.value})}));Array.from(body.querySelectorAll('[data-mass-note]')).forEach(x=>x.addEventListener('click',()=>{captureMassDetailUi_(eventId,body);const note=window.prompt('Admin megjegyzés:',x.dataset.currentNote||'');if(note!==null)massBookingPatch_(eventId,x.dataset.massNote,{note})}));Array.from(body.querySelectorAll('[data-mass-remove]')).forEach(x=>x.addEventListener('click',()=>massBookingRemove_(eventId,x.dataset.massRemove)));
+    }catch(err){console.error(err);body.innerHTML=`<div class="migration-note error"><b>A részletes Tömegsport nézet nem tölthető be.</b><span>${esc(err.message||'Betöltési hiba')}</span></div>`}
+  }
+
+  async function toggleMassRegistrationGate(eventId,closeToWaitlist,{keepDetail=false}={}){
+    if(!canAction('mass.trainings','edit')||state.massActionBusy)return;
+    const e=(state.massTrainings||[]).find(x=>text(x.eventId)===text(eventId));if(!e)return;
+    const label=`${e.level||'Edzés'} · ${fmtDate(e.startsAt)} ${fmtTime(e.startsAt)}`;
+    const question=closeToWaitlist?`${label}\n\nLezárod a közvetlen jelentkezést?\n\nA meglévő jelentkezések megmaradnak. Új sportoló csak várólistára kerülhet, és a várólista automatikus előreléptetése szünetel.`:`${label}\n\nÚjra megnyitod a közvetlen jelentkezést?\n\nA meglévő kapacitás ismét közvetlen jelentkezésre használható, és az új jelentkezők közvetlenül bekerülhetnek.`;
+    if(!window.confirm(question))return;
+    state.massActionBusy=text(eventId);renderMassTrainings();
+    try{status(closeToWaitlist?'Jelentkezés lezárása…':'Jelentkezés megnyitása…');await rpc('cc_manager_mass_registration_gate_v1',{p_event_id:eventId,p_waitlist_only:closeToWaitlist});await loadMassTrainings();status(closeToWaitlist?'Jelentkezés lezárva: csak várólista.':'Jelentkezés újra megnyitva.','success')}
+    catch(err){console.error(err);status(err.message||'A jelentkezési állapot módosítása sikertelen.','error')}
+    finally{state.massActionBusy='';if(keepDetail){state.massDetailCache.delete(text(eventId));await openMassEventDetail(eventId)}else renderMassTrainings()}
+  }
 
   function normalizeMassLevelLabel_(value){
     const raw=text(value),key=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
