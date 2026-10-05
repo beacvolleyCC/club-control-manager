@@ -1093,6 +1093,15 @@
     row.attendance=text(result?.attendance)||row.attendance;
     if(result?.bookingStatus)row.bookingStatus=result.bookingStatus;
   }
+  async function verifyMassAttendanceReadback_(eventId,bookingId,expectedAttendance){
+    const rows=await rpc('cc_manager_mass_attendance_snapshot_r1_v1',{p_event_id:text(eventId)});
+    const list=Array.isArray(rows)?rows:[],saved=list.find(r=>text(r.bookingId||r.id)===text(bookingId));
+    if(!saved)throw new Error('ATTENDANCE_READBACK_ROW_MISSING');
+    const actual=text(saved.attendance)||'NINCS RÖGZÍTVE';
+    if(actual!==expectedAttendance)throw new Error(`ATTENDANCE_READBACK_MISMATCH: ${actual}`);
+    updateMassAttendanceCache_(eventId,bookingId,saved);
+    return saved;
+  }
   async function saveMassAttendance_(eventId,input){
     if(!input||!canAction('mass.trainings','edit'))return;
     const bookingId=text(input.dataset.massAttendance),oldValue=Number(input.dataset.attendanceCurrent||0),nextValue=Number(input.value);
@@ -1141,10 +1150,12 @@
         state.massAttendanceBusy.add(bookingId);slider.dataset.sliderDisabled='1';control?.classList.add('is-saving');if(stateEl)stateEl.textContent='Mentés…';
         try{
           const result=await rpc('cc_manager_mass_attendance_r1_v1',{p_booking_id:bookingId,p_attendance:model.db});
-          const saved=massAttendanceModel_(result?.attendance||model.db),savedState=saved.key==='present'?'yes':saved.key==='noshow'?'no':'none';
+          const verified=await verifyMassAttendanceReadback_(eventId,bookingId,model.db);
+          const saved=massAttendanceModel_(verified?.attendance||result?.attendance||model.db),savedState=saved.key==='present'?'yes':saved.key==='noshow'?'no':'none';
           ccSetPlayerStyleSliderState_(slider,savedState);
-          ccSyncMassAttendanceCardState_(slider,saved);updateMassAttendanceCache_(eventId,bookingId,result||{});refreshMassAttendanceSummary_();
-          if(stateEl)stateEl.textContent='Mentve.';status(`${text(slider.closest('.mass-attendance-card')?.querySelector('.mass-attendance-person-copy b')?.textContent)||'Sportoló'} · ${saved.label}`,'success');
+          slider.dataset.sliderPrevious=savedState;
+          ccSyncMassAttendanceCardState_(slider,saved);refreshMassAttendanceSummary_();
+          if(stateEl)stateEl.textContent='Mentve · visszaellenőrizve.';status(`${text(slider.closest('.mass-attendance-card')?.querySelector('.mass-attendance-person-copy b')?.textContent)||'Sportoló'} · ${saved.label} · tárolva`,'success');
         }catch(err){
           const previous=text(slider.dataset.sliderPrevious)||text(slider.dataset.sliderState)||'none';ccSetPlayerStyleSliderState_(slider,previous);
           if(stateEl)stateEl.textContent='A mentés sikertelen · az előző állapot visszaállítva.';status(err?.message||'A jelenlét mentése sikertelen.','error');
