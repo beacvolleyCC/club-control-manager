@@ -1142,25 +1142,55 @@
   }
   function bindMassAttendanceSliders_(eventId){
     $$('[data-manager-slider-kind="mass"]').forEach(slider=>{
-      ccBindPlayerStyleSlider_(slider,{onCommit:async state=>{
+      if(slider.dataset.massSliderBound==='1')return;slider.dataset.massSliderBound='1';
+      const states=['yes','none','no'];
+      const current=()=>states.includes(slider.dataset.sliderState)?slider.dataset.sliderState:(slider.classList.contains('yes')?'yes':slider.classList.contains('no')?'no':'none');
+      const modelFor=state=>state==='yes'?massAttendanceBySliderValue_(-1):state==='no'?massAttendanceBySliderValue_(1):massAttendanceBySliderValue_(0);
+      const control=slider.closest('.mass-attendance-control'),stateEl=control?.querySelector('[data-mass-attendance-state]');
+      let dragStartX=null,dragStartState='none',dragging=false;
+
+      const commit=async(nextState)=>{
         const bookingId=text(slider.dataset.massAttendance);if(!bookingId||!canAction('mass.trainings','edit'))return;
-        const model=state==='yes'?massAttendanceBySliderValue_(-1):state==='no'?massAttendanceBySliderValue_(1):massAttendanceBySliderValue_(0);
-        const control=slider.closest('.mass-attendance-control'),stateEl=control?.querySelector('[data-mass-attendance-state]');
-        if(state.massAttendanceBusy.has(bookingId))return;
+        if(!states.includes(nextState)||nextState===current()||state.massAttendanceBusy.has(bookingId))return;
+        const previous=current(),model=modelFor(nextState);
+        slider.dataset.sliderPrevious=previous;
+        ccSetPlayerStyleSliderState_(slider,nextState);
+        ccSyncMassAttendanceCardState_(slider,model);refreshMassAttendanceSummary_();
         state.massAttendanceBusy.add(bookingId);slider.dataset.sliderDisabled='1';control?.classList.add('is-saving');if(stateEl)stateEl.textContent='Mentés…';
         try{
           const result=await rpc('cc_manager_mass_attendance_r1_v1',{p_booking_id:bookingId,p_attendance:model.db});
-          const verified=await verifyMassAttendanceReadback_(eventId,bookingId,model.db);
-          const saved=massAttendanceModel_(verified?.attendance||result?.attendance||model.db),savedState=saved.key==='present'?'yes':saved.key==='noshow'?'no':'none';
-          ccSetPlayerStyleSliderState_(slider,savedState);
-          slider.dataset.sliderPrevious=savedState;
-          ccSyncMassAttendanceCardState_(slider,saved);refreshMassAttendanceSummary_();
-          if(stateEl)stateEl.textContent='Mentve · visszaellenőrizve.';status(`${text(slider.closest('.mass-attendance-card')?.querySelector('.mass-attendance-person-copy b')?.textContent)||'Sportoló'} · ${saved.label} · tárolva`,'success');
+          const saved=massAttendanceModel_(result?.attendance||model.db),savedState=saved.key==='present'?'yes':saved.key==='noshow'?'no':'none';
+          ccSetPlayerStyleSliderState_(slider,savedState);slider.dataset.sliderPrevious=savedState;
+          ccSyncMassAttendanceCardState_(slider,saved);updateMassAttendanceCache_(eventId,bookingId,result||{});refreshMassAttendanceSummary_();
+          if(stateEl)stateEl.textContent='Mentve.';status(`${text(slider.closest('.mass-attendance-card')?.querySelector('.mass-attendance-person-copy b')?.textContent)||'Sportoló'} · ${saved.label}`,'success');
         }catch(err){
-          const previous=text(slider.dataset.sliderPrevious)||text(slider.dataset.sliderState)||'none';ccSetPlayerStyleSliderState_(slider,previous);
+          ccSetPlayerStyleSliderState_(slider,previous);ccSyncMassAttendanceCardState_(slider,modelFor(previous));refreshMassAttendanceSummary_();
           if(stateEl)stateEl.textContent='A mentés sikertelen · az előző állapot visszaállítva.';status(err?.message||'A jelenlét mentése sikertelen.','error');
         }finally{state.massAttendanceBusy.delete(bookingId);delete slider.dataset.sliderDisabled;control?.classList.remove('is-saving')}
-      }});
+      };
+
+      slider.querySelectorAll('[data-slider-action]').forEach(btn=>btn.addEventListener('click',e=>{
+        e.preventDefault();e.stopPropagation();
+        const map={yes:'yes',none:'none',no:'no'};void commit(map[btn.dataset.sliderAction]||'none');
+      }));
+
+      slider.addEventListener('pointerdown',e=>{
+        if(slider.dataset.sliderDisabled==='1'||e.button!==0)return;
+        dragStartX=e.clientX;dragStartState=current();dragging=false;
+      },{passive:true});
+      slider.addEventListener('pointermove',e=>{
+        if(dragStartX==null||slider.dataset.sliderDisabled==='1')return;
+        const dx=e.clientX-dragStartX;if(Math.abs(dx)>=14)dragging=true;
+      },{passive:true});
+      slider.addEventListener('pointerup',e=>{
+        if(dragStartX==null)return;
+        const dx=e.clientX-dragStartX,start=dragStartState;dragStartX=null;
+        if(!dragging)return;
+        dragging=false;
+        const i=states.indexOf(start),next=dx>0?states[Math.min(2,i+1)]:states[Math.max(0,i-1)];
+        void commit(next);
+      },{passive:true});
+      slider.addEventListener('pointercancel',()=>{dragStartX=null;dragging=false},{passive:true});
     });
   }
   function massPersonSort_(a,b){return comparePlayersBySurname_(a,b)}
