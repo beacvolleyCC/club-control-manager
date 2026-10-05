@@ -1,10 +1,10 @@
 (()=>{
   'use strict';
 
-  const FRONTEND_BUILD='manager-pwa-v0.5.2b6m2-nav-routing-hardening';
+  const FRONTEND_BUILD='manager-r1-attendance-canonical-2026-10-05';
 
   const cfg=Object.freeze({...{
-    BUILD:'manager-pwa-v0.5.2b6m2-nav-routing-hardening',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
+    BUILD:'manager-r1-attendance-canonical-2026-10-05',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
   },...(window.CC_MANAGER_CONFIG||{})});
 
   const AREAS={
@@ -272,7 +272,7 @@
     if(!force&&state.massDetailCache.has(id))return state.massDetailCache.get(id);
     const [detail,snapshot]=await Promise.all([
       rpc('cc_manager_mass_event_detail_v1',{p_event_id:id}),
-      rpc('cc_manager_mass_attendance_snapshot_v1',{p_event_id:id})
+      rpc('cc_manager_mass_attendance_snapshot_r1_v1',{p_event_id:id})
     ]);
     const data=(detail&&typeof detail==='object')?detail:{};
     const rows=Array.isArray(snapshot)?snapshot:[];
@@ -1095,7 +1095,7 @@
     const model=massAttendanceBySliderValue_(nextValue),control=input.closest('.mass-attendance-control'),stateEl=control?.querySelector('[data-mass-attendance-state]');
     state.massAttendanceBusy.add(bookingId);input.disabled=true;control?.classList.add('is-saving');if(stateEl)stateEl.textContent='Mentés…';
     try{
-      const result=await rpc('cc_manager_mass_attendance_v1',{p_booking_id:bookingId,p_attendance:model.db});
+      const result=await rpc('cc_manager_mass_attendance_r1_v1',{p_booking_id:bookingId,p_attendance:model.db});
       const saved=massAttendanceModel_(result?.attendance||model.db);input.value=String(saved.value);input.dataset.attendanceCurrent=String(saved.value);
       syncMassAttendancePreview_(input,saved.value,'Mentve.');updateMassAttendanceCache_(eventId,bookingId,result||{});refreshMassAttendanceSummary_();
       status(`${text(input.closest('.mass-attendance-card')?.querySelector('.mass-attendance-person-copy b')?.textContent)||'Sportoló'} · ${saved.label}`,'success');
@@ -1133,7 +1133,7 @@
         if(state.massAttendanceBusy.has(bookingId))return;
         state.massAttendanceBusy.add(bookingId);slider.dataset.sliderDisabled='1';control?.classList.add('is-saving');if(stateEl)stateEl.textContent='Mentés…';
         try{
-          const result=await rpc('cc_manager_mass_attendance_v1',{p_booking_id:bookingId,p_attendance:model.db});
+          const result=await rpc('cc_manager_mass_attendance_r1_v1',{p_booking_id:bookingId,p_attendance:model.db});
           const saved=massAttendanceModel_(result?.attendance||model.db),savedState=saved.key==='present'?'yes':saved.key==='noshow'?'no':'none';
           ccSetPlayerStyleSliderState_(slider,savedState);
           ccSyncMassAttendanceCardState_(slider,saved);updateMassAttendanceCache_(eventId,bookingId,result||{});refreshMassAttendanceSummary_();
