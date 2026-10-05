@@ -344,7 +344,7 @@
     bindDynamicNavigation();
   }
   function bindDynamicNavigation(){
-    $('[data-main-section]').forEach(b=>b.onclick=()=>{const section=b.dataset.mainSection;if(section==='competition'||section==='mass')switchArea(section);else if(section==='calendar'){const area=canRoute(state.area,'calendar')?state.area:(canRoute('competition','calendar')?'competition':'mass');setRoute(area,'calendar')}else setRoute(state.area,section)});
+    Array.from(document.querySelectorAll('[data-main-section]')).forEach(b=>b.onclick=()=>{const section=b.dataset.mainSection;if(section==='competition'||section==='mass')switchArea(section);else if(section==='calendar'){const area=canRoute(state.area,'calendar')?state.area:(canRoute('competition','calendar')?'competition':'mass');setRoute(area,'calendar')}else setRoute(state.area,section)});
     $$('[data-route-module]').forEach(b=>b.onclick=()=>setRoute(b.dataset.routeArea||state.area,b.dataset.routeModule));
   }
 
