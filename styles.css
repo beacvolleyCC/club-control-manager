@@ -4575,3 +4575,34 @@ body{overflow-x:clip!important}
   background:var(--card)!important;
   color:var(--red)!important;
 }
+
+
+/* R1 UI1.5 — dialog-local status toast */
+#entityDialog .global-status.cc-top-toast.cc-dialog-toast{
+  position:sticky!important;
+  top:0!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  z-index:30!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:8px 0 10px!important;
+  min-height:30px!important;
+  max-height:none!important;
+  padding:7px 10px!important;
+  border:1px solid var(--line)!important;
+  border-radius:9px!important;
+  background:var(--card)!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.10)!important;
+}
+#entityDialog .global-status.cc-top-toast.cc-dialog-toast.success{
+  background:#edf7ef!important;
+  color:#245b31!important;
+  border-color:#cfe5d4!important;
+}
+#entityDialog .global-status.cc-top-toast.cc-dialog-toast.error{
+  background:#fff0f0!important;
+  color:#8a2525!important;
+  border-color:#efcaca!important;
+}
