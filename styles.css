@@ -5169,3 +5169,79 @@ body{overflow-x:clip!important}
   .team-head-actions{gap:4px!important}
   .mass-inline-roster-list{gap:4px!important}
 }
+
+
+/* R1 UI1.8 — overview header/filter parity + final action-button treatment */
+.cc-overview-page-header:has(+ .overview-filter-panel:not([hidden])){
+  margin-bottom:0!important;
+  border-bottom-left-radius:0!important;
+  border-bottom-right-radius:0!important;
+}
+.cc-overview-page-header + .overview-filter-panel{
+  width:100%!important;
+  max-width:none!important;
+  margin:0 0 10px!important;
+  padding:9px 12px!important;
+  border:1px solid var(--line)!important;
+  border-top:1px solid var(--line)!important;
+  border-radius:0 0 13px 13px!important;
+  background:var(--card)!important;
+  box-shadow:none!important;
+}
+.cc-overview-page-header + .overview-filter-panel[hidden]{display:none!important}
+.overview-filter-panel .overview-team-select{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+}
+.overview-filter-panel .overview-team-select select{
+  width:100%!important;
+  min-width:0!important;
+}
+
+/* Neutral Manager icon controls: no resting border; soft gray hover only. */
+.cc-icon-toolbar button:not(.cc-add-square):not(.team-tab-yellow),
+.matrix-head-filter-actions button,
+.filter-head-actions button,
+.team-icon-tabs .team-tab-grid{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.cc-icon-toolbar button:not(.cc-add-square):not(.team-tab-yellow):hover,
+.matrix-head-filter-actions button:hover,
+.filter-head-actions button:hover,
+.team-icon-tabs .team-tab-grid:hover{
+  border:0!important;
+  background:var(--soft)!important;
+  box-shadow:none!important;
+}
+.cc-icon-toolbar .cc-add-square,
+.team-icon-tabs .team-tab-yellow,
+.team-edit-circle{
+  border:0!important;
+  background:var(--yellow)!important;
+  color:#171717!important;
+  box-shadow:none!important;
+}
+.cc-icon-toolbar .cc-add-square:hover,
+.team-icon-tabs .team-tab-yellow:hover,
+.team-edit-circle:hover{
+  border:0!important;
+  background:color-mix(in srgb,var(--yellow) 86%,#000)!important;
+  color:#171717!important;
+  box-shadow:none!important;
+}
+
+/* Teams: grid first, then yellow edit, players, equipment, info. */
+.team-edit-circle{
+  width:var(--cc-manager-control)!important;
+  min-width:var(--cc-manager-control)!important;
+  height:var(--cc-manager-control)!important;
+  min-height:var(--cc-manager-control)!important;
+  padding:0!important;
+  border-radius:10px!important;
+  font-size:17px!important;
+}
