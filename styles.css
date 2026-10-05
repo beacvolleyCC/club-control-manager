@@ -4051,18 +4051,25 @@ body{overflow-x:clip!important}
   gap:10px!important;
 }
 .overview-ms-standings{
-  width:fit-content!important;
+  width:min(100%,780px)!important;
   max-width:100%!important;
   min-width:0!important;
   align-self:flex-start!important;
 }
 .overview-ms-standings .ms-table-scroll{
+  display:block!important;
   width:100%!important;
   max-width:100%!important;
   min-width:0!important;
   overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
 }
-.overview-ms-standings .ms-table{width:max-content!important;min-width:720px!important;max-width:none!important}
+.overview-ms-standings .ms-table{
+  width:100%!important;
+  min-width:720px!important;
+  max-width:none!important;
+}
 
 /* Teams: filter panel below toolbar, compact icon tabs aligned right in the team header. */
 .team-filter-panel{margin:0 0 10px auto!important;width:min(100%,440px)!important;background:var(--card)!important}
