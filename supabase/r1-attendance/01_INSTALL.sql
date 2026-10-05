@@ -60,7 +60,7 @@ BEGIN
     )
     FROM public.mass_bookings b
     WHERE b.event_id=v_event_id
-      AND b.booking_status IN ('AKTÍV','NEM JELENT MEG')
+      AND coalesce(b.booking_status,'') NOT IN ('LEMONDVA','KÉSŐN LEMONDVA')
   );
 END
 $$;
