@@ -4371,3 +4371,138 @@ body{overflow-x:clip!important}
   .cc-page-header-panel .cc-icon-toolbar{align-self:flex-start!important}
   .ms-context-filter-panel .ms-context-controls{width:100%!important}
 }
+
+
+/* R1 UI1.2 — training screen final geometry */
+/* Training header: Player-like standalone buttons, no shared outer capsule. */
+.cc-training-page-header .cc-icon-toolbar{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+.cc-training-page-header .cc-icon-toolbar .matrix-filter-toggle,
+.cc-training-page-header .cc-icon-toolbar .cc-toolbar-icon,
+.cc-training-page-header .cc-icon-toolbar .cc-toolbar-reset{
+  width:40px!important;
+  min-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  border:1px solid var(--line)!important;
+  border-radius:10px!important;
+  background:var(--card)!important;
+  box-shadow:none!important;
+}
+.cc-training-page-header .cc-icon-toolbar .cc-add-square{
+  background:var(--yellow)!important;
+  color:#171717!important;
+  border-color:color-mix(in srgb,var(--yellow-dark) 70%,var(--line))!important;
+}
+.cc-training-page-header .cc-icon-toolbar .triangle-icon{
+  width:18px!important;
+  height:17px!important;
+}
+
+/* Training cards: exact three-anchor layout.
+   Left content is left aligned, the date is anchored to the physical card centre,
+   attendance is anchored to the right edge. */
+.cc-training-card-panel .cc-event-card-b6f{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) 118px!important;
+  grid-template-areas:"icon primary attendance"!important;
+  align-items:center!important;
+  min-height:66px!important;
+  padding:8px 12px!important;
+  gap:8px!important;
+}
+.cc-training-card-panel .cc-event-card-b6f .cc-event-type-icon{
+  grid-area:icon!important;
+  justify-self:start!important;
+  align-self:center!important;
+}
+.cc-training-card-panel .cc-event-card-b6f .cc-event-primary{
+  grid-area:primary!important;
+  justify-self:start!important;
+  align-self:center!important;
+  width:100%!important;
+  min-width:0!important;
+  padding-right:92px!important;
+  text-align:left!important;
+}
+.cc-training-card-panel .cc-event-card-b6f .cc-event-date{
+  position:absolute!important;
+  left:50%!important;
+  right:auto!important;
+  top:50%!important;
+  margin:0!important;
+  transform:translate(-50%,-50%)!important;
+  width:132px!important;
+  max-width:132px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  justify-self:auto!important;
+  align-self:auto!important;
+  text-align:center!important;
+  pointer-events:none!important;
+  z-index:2!important;
+}
+.cc-training-card-panel .cc-event-card-b6f .cc-event-date-line{
+  justify-content:center!important;
+  text-align:center!important;
+}
+.cc-training-card-panel .cc-event-card-b6f .cc-event-attendance{
+  grid-area:attendance!important;
+  justify-self:end!important;
+  align-self:center!important;
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-end!important;
+  text-align:right!important;
+  z-index:3!important;
+}
+.cc-training-card-panel .cc-event-card-b6f .cc-pos-breakdown{
+  justify-content:flex-end!important;
+  text-align:right!important;
+}
+
+/* Keep the same anchors on narrower Manager windows instead of moving date off-centre. */
+@media(max-width:760px){
+  .cc-training-card-panel .cc-event-card-b6f{
+    grid-template-columns:36px minmax(0,1fr) 96px!important;
+    grid-template-areas:"icon primary attendance"!important;
+  }
+  .cc-training-card-panel .cc-event-card-b6f .cc-event-primary{
+    padding-right:82px!important;
+  }
+  .cc-training-card-panel .cc-event-card-b6f .cc-event-date{
+    position:absolute!important;
+    left:50%!important;
+    top:50%!important;
+    transform:translate(-50%,-50%)!important;
+    width:118px!important;
+    max-width:118px!important;
+  }
+  .cc-training-card-panel .cc-event-card-b6f .cc-event-attendance{
+    align-self:center!important;
+  }
+}
+@media(max-width:520px){
+  .cc-training-card-panel .cc-event-card-b6f{
+    grid-template-columns:32px minmax(0,1fr) 78px!important;
+    min-height:74px!important;
+  }
+  .cc-training-card-panel .cc-event-card-b6f .cc-event-primary{
+    padding-right:72px!important;
+  }
+  .cc-training-card-panel .cc-event-card-b6f .cc-event-date{
+    width:104px!important;
+    max-width:104px!important;
+  }
+}
