@@ -1,0 +1,26 @@
+B6M2 NAV / ROUTING QA
+
+Static checks completed:
+- app.js syntax: PASS (node --check)
+- route generation helper present: PASS
+- popstate generation bump: PASS
+- native picker callback route guard: PASS
+- notification debounce route guard: PASS
+- competition post-write reload route guard: PASS
+- top-level view render guards: PASS
+- service-worker cache version bumped: PASS
+- frontend build labels consistent: PASS
+- SQL/database changes: NONE
+
+Manual smoke after deploy:
+1. Rapidly click: Versenysport > Játékosok > Meccsek > Áttekintés > Naptár.
+   Expected: content always matches the highlighted menu after data finishes loading.
+2. Open Pénzügyek, immediately switch to Versenysport > Játékosok while it is loading.
+   Expected: Pénzügyek must NOT redraw over Játékosok later.
+3. Open Értesítések, type in search, immediately switch away.
+   Expected: notification results must NOT redraw the old page.
+4. Change a filter/select and immediately switch menus before the native picker fully closes.
+   Expected: old page must NOT redraw.
+5. Browser Back/Forward across competition, mass, planning, finance, settings.
+   Expected: primary/secondary active menu and content stay aligned.
+6. Planning visibility should not depend on whether Competition or Mass was previously open.
