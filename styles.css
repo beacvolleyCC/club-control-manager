@@ -5841,3 +5841,36 @@ body{overflow-x:clip!important}
   .team-season-grid-head{align-items:stretch!important;flex-direction:column!important}
   .team-grid-period-filter{width:100%!important;min-width:0!important;max-width:none!important;flex:0 0 auto!important}
 }
+
+
+/* R1 UI1.9H — Teams grid period filter moves into the team header */
+.team-gradient-head .team-grid-period-filter-head{
+  width:190px!important;
+  min-width:190px!important;
+  max-width:190px!important;
+  flex:0 0 190px!important;
+  margin-left:auto!important;
+  margin-right:0!important;
+  align-self:center!important;
+}
+.team-gradient-head .team-grid-period-filter-head select{
+  height:42px!important;
+  min-height:42px!important;
+  max-height:42px!important;
+}
+.team-gradient-head .team-head-attendance{
+  margin-left:0!important;
+}
+.team-season-grid-head{
+  margin-top:0!important;
+}
+@media(max-width:900px){
+  .team-gradient-head .team-grid-period-filter-head{
+    order:2!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    flex:1 1 100%!important;
+    margin-left:0!important;
+  }
+}
