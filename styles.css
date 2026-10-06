@@ -5390,3 +5390,18 @@ body{overflow-x:clip!important}
   }
   .ms-match-filters{width:100%!important;justify-content:flex-start!important}
 }
+
+
+/* UI1.9 consistency: standalone team filter uses the same reference width. */
+.team-filter-panel .team-multi-filter{
+  width:var(--cc-filter-width)!important;
+  min-width:var(--cc-filter-width)!important;
+  max-width:var(--cc-filter-width)!important;
+}
+@media(max-width:760px){
+  .team-filter-panel .team-multi-filter{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+}
