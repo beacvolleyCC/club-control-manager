@@ -5425,3 +5425,246 @@ body{overflow-x:clip!important}
 }
 .team-season-grid-head h4{margin:0!important;font-size:12px!important}
 .team-season-grid-head p{margin:3px 0 0!important;font-size:8px!important;color:var(--muted)!important}
+
+
+/* R1 UI1.9D — Teams grid/icon/alignment + topbar geometry */
+
+/* Exact Player grid-view icon: square in square. */
+.team-icon-tabs .cc-team-grid-icon{
+  width:22px!important;
+  height:22px!important;
+  display:block!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:2!important;
+  vector-effect:non-scaling-stroke!important;
+}
+.team-icon-tabs .team-tab-grid{
+  color:#171717!important;
+}
+.team-icon-tabs .team-tab-grid.active{
+  background:var(--soft)!important;
+  color:#171717!important;
+}
+
+/* Coach header monogram must sit on the same optical center as player avatars. */
+.team-season-grid .coach-head{
+  padding:0 2px!important;
+  vertical-align:middle!important;
+}
+.team-season-grid .coach-head .grid-player-head-inner{
+  width:100%!important;
+  height:100%!important;
+  min-height:var(--mgr-grid-head,48px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:2px!important;
+  padding:0!important;
+  margin:0!important;
+}
+.team-season-grid .coach-head .coach-avatar{
+  width:18px!important;
+  height:18px!important;
+  min-width:18px!important;
+  min-height:18px!important;
+  display:grid!important;
+  place-items:center!important;
+  margin:0 auto 1px!important;
+  padding:0!important;
+  line-height:18px!important;
+  font-size:7px!important;
+  text-align:center!important;
+  vertical-align:middle!important;
+  transform:none!important;
+}
+.team-season-grid .coach-head .grid-player-label{
+  width:100%!important;
+  margin:0!important;
+  text-align:center!important;
+  line-height:1!important;
+}
+.team-season-grid .coach-cell{
+  vertical-align:middle!important;
+}
+.team-season-grid .coach-matrix-control{
+  display:grid!important;
+  align-items:center!important;
+  justify-items:center!important;
+  margin:0 auto!important;
+}
+
+/* Attendance is always visible in Teams, including Grid view. */
+.team-gradient-head .team-head-main{
+  min-width:170px!important;
+  flex:0 1 auto!important;
+}
+.team-head-attendance{
+  margin-left:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+}
+.team-head-attendance>span{
+  min-width:88px!important;
+  min-height:42px!important;
+  display:grid!important;
+  align-content:center!important;
+  gap:2px!important;
+  padding:5px 9px!important;
+  border:1px solid color-mix(in srgb,var(--line) 80%,transparent)!important;
+  border-radius:9px!important;
+  background:rgba(255,255,255,.58)!important;
+}
+.team-head-attendance small{
+  color:var(--muted)!important;
+  font-size:7px!important;
+  font-weight:850!important;
+  line-height:1!important;
+}
+.team-head-attendance b{
+  color:var(--black)!important;
+  font-size:10px!important;
+  font-weight:950!important;
+  line-height:1!important;
+}
+.team-gradient-head .team-head-actions{
+  margin-left:0!important;
+}
+
+/* Header: force brand, season/date selector and Manager account to one true center line. */
+.topbar{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+}
+.legacy-topbar-left{
+  display:flex!important;
+  align-items:center!important;
+  align-self:center!important;
+  height:auto!important;
+  min-height:42px!important;
+}
+.legacy-topbar-brand{
+  display:flex!important;
+  align-items:center!important;
+  align-self:center!important;
+  height:42px!important;
+  min-height:42px!important;
+}
+.app-brand-mark{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  margin:0!important;
+  padding:0!important;
+  align-self:center!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+}
+.app-brand-mark img{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  margin:0!important;
+  transform:none!important;
+}
+.legacy-topbar-brand>span:last-child{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-self:center!important;
+  height:38px!important;
+  margin:0!important;
+}
+.topbar-actions{
+  height:42px!important;
+  min-height:42px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  align-self:center!important;
+  gap:8px!important;
+  margin:0!important;
+}
+.topbar-actions .season-select,
+.topbar-actions .manager-chip{
+  height:42px!important;
+  min-height:42px!important;
+  max-height:42px!important;
+  margin:0!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+  align-self:center!important;
+  box-sizing:border-box!important;
+}
+.topbar-actions .season-select{
+  display:flex!important;
+  align-items:center!important;
+}
+.topbar-actions .season-select select{
+  height:42px!important;
+  min-height:42px!important;
+  max-height:42px!important;
+  margin:0!important;
+  padding:0 30px 0 10px!important;
+  line-height:normal!important;
+  display:block!important;
+  box-sizing:border-box!important;
+}
+.topbar-actions .manager-chip{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+}
+.topbar-actions .manager-chip .profile-dot{
+  width:30px!important;
+  height:30px!important;
+  min-width:30px!important;
+  min-height:30px!important;
+  margin:0!important;
+  align-self:center!important;
+  display:grid!important;
+  place-items:center!important;
+  line-height:1!important;
+}
+.topbar-actions .manager-chip-copy{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-self:center!important;
+  margin:0!important;
+  line-height:1.05!important;
+}
+
+@media(max-width:900px){
+  .team-gradient-head{
+    flex-wrap:wrap!important;
+  }
+  .team-head-attendance{
+    order:3!important;
+    width:100%!important;
+    margin-left:0!important;
+  }
+  .team-head-attendance>span{
+    flex:1 1 0!important;
+  }
+}
+@media(max-width:700px){
+  .topbar{
+    grid-template-columns:minmax(0,1fr) auto!important;
+  }
+  .topbar-actions .manager-chip-copy{display:none!important}
+  .topbar-actions .manager-chip{
+    width:42px!important;
+    min-width:42px!important;
+    padding:0 6px!important;
+    justify-content:center!important;
+  }
+}
