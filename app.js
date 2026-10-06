@@ -1,10 +1,10 @@
 (()=>{
   'use strict';
 
-  const FRONTEND_BUILD='manager-r1-ui1-9f-2026-10-07';
+  const FRONTEND_BUILD='manager-r1-ui1-9g-2026-10-07';
 
   const cfg=Object.freeze({...{
-    BUILD:'manager-r1-ui1-9f-2026-10-07',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
+    BUILD:'manager-r1-ui1-9g-2026-10-07',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
   },...(window.CC_MANAGER_CONFIG||{})});
 
   const AREAS={
@@ -274,7 +274,7 @@
     }finally{if(b)b.disabled=false}
   }
 
-  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='R1 UI1.9F';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · R1 UI1.9F';}
+  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='R1 UI1.9G';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · R1 UI1.9G';}
 
   async function loadLiveData(){
     state.loading=true;status('Manager adatok frissítése…');
@@ -676,7 +676,7 @@
     $('#msTeamSelect')?.addEventListener('change',e=>msSetTeam_(e.target.value));
     $('#msMatchTeamSelect')?.addEventListener('change',e=>msSetTeam_(e.target.value));
     $('#msMatchScopeSelect')?.addEventListener('change',e=>{state.managerStandingsMatchScope=e.target.value==='beac'?'beac':'all';try{localStorage.setItem('cc-manager-standings-match-scope',state.managerStandingsMatchScope)}catch(_){}renderManagerStandings_()});
-    $('[data-ms-team]').forEach(b=>b.addEventListener('click',()=>{const id=text(b.dataset.msTeam);if(id)msSetTeam_(id)}));
+    $$('[data-ms-team]').forEach(b=>b.addEventListener('click',()=>{const id=text(b.dataset.msTeam);if(id)msSetTeam_(id)}));
   }
   function renderManagerStandings_(){if(!ccRouteIs_('competition','standings'))return;
     const team=msContextTeam_(),contextOptions=msContextCandidates_(),standingsFiltersOpen=filterOpen_('competition.standings',true);
@@ -1729,7 +1729,7 @@
   async function teamSeasonAttendanceWrite_(button){if(!button||button.disabled)return;const eventId=text(button.dataset.eventId),playerId=text(button.dataset.playerId),current=text(button.dataset.attState),next=current==='present'?'absent':current==='absent'?'':'present',db=next||'clear';button.disabled=true;try{const result=await ccCompetitionAttendanceRpc_(eventId,playerId,db),saved=text(result?.status||'');if(saved!==next)throw new Error('A jelenlét mentése nem igazolható vissza.');ccPatchAttendanceCaches_(eventId,playerId,saved);renderTeams();status('Jelenlét mentve.','success')}catch(err){button.disabled=false;status(err.message||'A jelenlét mentése sikertelen.','error')}}
   function bindTeamSeasonGrid_(){
     $('#teamGridPeriodSelect')?.addEventListener('change',e=>{state.teamGridPeriod=e.target.value==='all'?'all':'upcoming';try{localStorage.setItem('cc-manager-team-grid-period',state.teamGridPeriod)}catch(_){}renderTeams()});
-    $('[data-team-season-att]').forEach(b=>b.addEventListener('click',()=>teamSeasonAttendanceWrite_(b)));
+    $$('[data-team-season-att]').forEach(b=>b.addEventListener('click',()=>teamSeasonAttendanceWrite_(b)));
     bindCoachAvailabilityControls_($('#viewContent')||document);bindEventDetailActions()
   }
 
@@ -2263,7 +2263,7 @@
     $('#viewContent').innerHTML=`<div class="page-intro finance-page-intro"><div><h2>Pénzügyek</h2><p>Versenyengedély, bérlet/tagdíj, edzői díj, értékesítés és teljes módosítási napló.</p></div></div><div class="finance-top-tabs">${financeTabsHtml_()}</div>${content}`;bindFinance_()
   }
 
-  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9F</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
+  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9G</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
 
   function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`;requestAnimationFrame(ccForceRootHorizontalZero_)}
 
