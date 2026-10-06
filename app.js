@@ -1,10 +1,10 @@
 (()=>{
   'use strict';
 
-  const FRONTEND_BUILD='manager-r1-ui1-9e-2026-10-07';
+  const FRONTEND_BUILD='manager-r1-ui1-9f-2026-10-07';
 
   const cfg=Object.freeze({...{
-    BUILD:'manager-r1-ui1-9e-2026-10-07',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
+    BUILD:'manager-r1-ui1-9f-2026-10-07',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
   },...(window.CC_MANAGER_CONFIG||{})});
 
   const AREAS={
@@ -221,7 +221,7 @@
     const b=$('#requestCodeBtn');if(b)b.disabled=true;
     try{
       loginMessage('#loginMsg','Kód küldése…');
-      const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
+      const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
       if(error)throw error;
       state.pendingEmail=email;
       if($('#loginEmailPreview'))$('#loginEmailPreview').textContent=email;
@@ -238,7 +238,7 @@
     const b=$('#resendCodeBtn');if(b)b.disabled=true;
     try{
       loginMessage('#loginCodeMsg','Új kód küldése…');
-      const {error}=await state.supabase.auth.signInWithOtp({email:state.pendingEmail,options:{shouldCreateUser:false}});
+      const {error}=await state.supabase.auth.signInWithOtp({email:state.pendingEmail,options:{shouldCreateUser:true}});
       if(error)throw error;
       if($('#loginCode'))$('#loginCode').value='';
       loginMessage('#loginCodeMsg','Új kódot küldtünk. A korábbi kód már nem használható.')
@@ -274,7 +274,7 @@
     }finally{if(b)b.disabled=false}
   }
 
-  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='R1 UI1.9E';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · R1 UI1.9E';}
+  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='R1 UI1.9F';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · R1 UI1.9F';}
 
   async function loadLiveData(){
     state.loading=true;status('Manager adatok frissítése…');
@@ -2263,7 +2263,7 @@
     $('#viewContent').innerHTML=`<div class="page-intro finance-page-intro"><div><h2>Pénzügyek</h2><p>Versenyengedély, bérlet/tagdíj, edzői díj, értékesítés és teljes módosítási napló.</p></div></div><div class="finance-top-tabs">${financeTabsHtml_()}</div>${content}`;bindFinance_()
   }
 
-  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9E</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
+  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9F</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
 
   function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`;requestAnimationFrame(ccForceRootHorizontalZero_)}
 
@@ -2288,9 +2288,41 @@
   }
 
   async function boot(){
-    if(localStorage.getItem('cc-manager-theme')==='dark')document.body.classList.add('dark');resolveInitialRoute();bindStaticUi();installManagerPullToRefresh_();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW:',err));
+    if(localStorage.getItem('cc-manager-theme')==='dark')document.body.classList.add('dark');
+    resolveInitialRoute();bindStaticUi();installManagerPullToRefresh_();
+
+    const localTest=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+    if('serviceWorker'in navigator){
+      if(localTest){
+        try{
+          const regs=await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r=>r.unregister()));
+          if('caches'in window){
+            const keys=await caches.keys();
+            await Promise.all(keys.filter(k=>/^cc-manager-/i.test(k)).map(k=>caches.delete(k)));
+          }
+        }catch(err){console.warn('Local Manager cache cleanup:',err)}
+      }else{
+        navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW:',err))
+      }
+    }
+
     if(!configured()){hideLogin();status('Manager PWA konfigurációs hiba: a Supabase kapcsolat nincs beállítva.','error');renderChrome();renderView();return}
-    try{state.supabase=await createSupabase();showLogin('loginLoadingStep');const {data:{session},error}=await state.supabase.auth.getSession();if(error)throw error;state.session=session||null;if(!session){showLogin('loginEmailStep');return}await loadLiveData();hideLogin();if(!location.hash)setRoute(state.area,legacyDefaultModule_(state.area),{replace:true})}catch(err){console.error(err);status(err.message||'Manager indítási hiba.','error');showLogin('loginEmailStep')}
+    try{
+      state.supabase=await createSupabase();
+      showLogin('loginLoadingStep');
+      const {data:{session},error}=await state.supabase.auth.getSession();
+      if(error)throw error;
+      state.session=session||null;
+      if(!session){showLogin('loginEmailStep');return}
+      await loadLiveData();
+      hideLogin();
+      if(!location.hash)setRoute(state.area,legacyDefaultModule_(state.area),{replace:true})
+    }catch(err){
+      console.error(err);
+      status(err.message||'Manager indítási hiba.','error');
+      showLogin('loginEmailStep')
+    }
   }
 
   boot();
