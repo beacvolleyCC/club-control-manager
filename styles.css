@@ -5405,3 +5405,23 @@ body{overflow-x:clip!important}
     max-width:100%!important;
   }
 }
+
+
+/* R1 UI1.9A — Teams grid uses season events + coach signup data. */
+.team-grid-empty{
+  min-height:120px!important;
+  display:grid!important;
+  place-content:center!important;
+  gap:5px!important;
+  padding:18px!important;
+  text-align:center!important;
+  color:var(--muted)!important;
+}
+.team-grid-empty b{font-size:10px!important;color:var(--black)!important}
+.team-grid-empty span{font-size:8px!important;max-width:520px!important}
+.team-season-grid .coach-head,
+.team-season-grid .coach-cell{
+  background:color-mix(in srgb,var(--yellow) 7%,var(--card))!important;
+}
+.team-season-grid-head h4{margin:0!important;font-size:12px!important}
+.team-season-grid-head p{margin:3px 0 0!important;font-size:8px!important;color:var(--muted)!important}
