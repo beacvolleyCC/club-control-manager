@@ -1,10 +1,10 @@
 (()=>{
   'use strict';
 
-  const FRONTEND_BUILD='manager-r1-ui1-7-2026-10-05';
+  const FRONTEND_BUILD='manager-r1-ui1-9k-2026-10-07';
 
   const cfg=Object.freeze({...{
-    BUILD:'manager-r1-ui1-7-2026-10-05',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
+    BUILD:'manager-r1-ui1-9k-2026-10-07',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
   },...(window.CC_MANAGER_CONFIG||{})});
 
   const AREAS={
@@ -27,7 +27,7 @@
 
   const state={
     mode:String(cfg.DATA_MODE||'demo').toLowerCase(),supabase:null,session:null,manager:null,permissions:[],teams:[],players:[],events:[],calendarEvents:[],activityEvents:[],massTrainings:[],massCalendarEvents:[],massArchiveEvents:[],massAthletes:[],massPasses:[],massLoadError:'',massDetailCache:new Map(),massDetailUi:new Map(),admins:[],adminTeams:[],adminsLoadError:'',adminEditId:'',adminBusy:false,overview:null,rsvpMatrix:{events:[],players:[],responses:[]},cardRsvpMatrix:{events:[],players:[],responses:[]},eventRosterCache:new Map(),matrixFilterOpen:false,eventFiltersOpen:false,calendarFiltersOpen:false,matrixFilters:{team:'',period:'14',kind:'ALL',status:'ALL',from:'',to:''},
-    area:['mass','competition'].includes(cfg.DEFAULT_AREA)?cfg.DEFAULT_AREA:'competition',module:'overview',calendarMode:'week',calendarAnchor:new Date(),calendarTeam:'',calendarType:'',calendarScope:'COMPETITION',massCalendarLevel:'',massCalendarSession:'',massAthleteSearch:'',massAthleteLevel:'',massAthleteStatus:'',massPassSearch:'',massPassMonth:'',playerTeam:'',playerSearch:'',playerMedical:'all',playerSort:(()=>{try{return localStorage.getItem('cc-manager-player-sort')||'name'}catch(_){return'name'}})(),playerSortDir:(()=>{try{return localStorage.getItem('cc-manager-player-sort-dir')||'asc'}catch(_){return'asc'}})(),playerListMode:(()=>{try{return localStorage.getItem('cc-manager-player-list-mode')==='grouped'?'grouped':'all'}catch(_){return'all'}})(),playerFiltersOpen:false,massAthleteFiltersOpen:false,massPassFiltersOpen:false,massCalendarFiltersOpen:false,massTrainingFiltersOpen:false,massTrainingPeriod:'upcoming',massAthleteMonth:'',massAthletePass:'all',massAthleteFirst:'all',teamFiltersOpen:false,eventTeam:'',eventPeriod:'upcoming',overviewTeam:'',selectedTeam:'',selectedPlayer:'',pendingEmail:'',loading:false,massActionBusy:'',massAttendanceBusy:new Set(),notificationRecipients:[],notificationHistory:[],notificationSelectedPlayerId:'',notificationSearch:'',notificationBusy:false,notificationLoadError:'',competitionSyncStatus:null,competitionSyncBusy:false,competitionResults:[],competitionStandings:[],competitionDataError:'',managerStandingsContext:(()=>{try{return localStorage.getItem('cc-manager-standings-context')||''}catch(_){return''}})(),managerStandingsTeam:(()=>{try{return localStorage.getItem('cc-manager-standings-team')||'all'}catch(_){return'all'}})(),managerLeagueInsights:{key:'',loading:false,loaded:false,error:'',data:null},financeTab:'competition',financeTeam:'',financeData:null,financeAudit:[],financeSettings:null,financeSettingsTeam:'',financePassCatalog:[],financePassCatalogLoaded:false,financePassSearch:'',financePassType:'',financePassLevel:'',financePassTeam:'',financePassMonth:'',financePassStatus:'',financeCompetitionSearch:'',financeCompetitionMonth:'',financeCompetitionStatus:'',financeCompetitionType:'',financeCompetitionFiltersOpen:false,financePassFiltersOpen:false,financeLoading:false,teamDetailTab:'grid',equipmentByTeam:new Map(),equipmentLoading:new Set(),coachAvailability:[],coachAvailabilityBusy:new Set(),managerMedicalAppointments:[],teamFilters:{overview:[],events:[],players:[],teams:[]},teamFilterOpen:{overview:false,events:false,players:false,teams:false},plannerTeam:''
+    area:['mass','competition'].includes(cfg.DEFAULT_AREA)?cfg.DEFAULT_AREA:'competition',module:'overview',calendarMode:'week',calendarAnchor:new Date(),calendarTeam:'',calendarType:'',calendarScope:'COMPETITION',massCalendarLevel:'',massCalendarSession:'',massAthleteSearch:'',massAthleteLevel:'',massAthleteStatus:'',massPassSearch:'',massPassMonth:'',playerTeam:'',playerSearch:'',playerMedical:'all',playerSort:(()=>{try{return localStorage.getItem('cc-manager-player-sort')||'name'}catch(_){return'name'}})(),playerSortDir:(()=>{try{return localStorage.getItem('cc-manager-player-sort-dir')||'asc'}catch(_){return'asc'}})(),playerListMode:(()=>{try{return localStorage.getItem('cc-manager-player-list-mode')==='grouped'?'grouped':'all'}catch(_){return'all'}})(),playerFiltersOpen:false,massAthleteFiltersOpen:false,massPassFiltersOpen:false,massCalendarFiltersOpen:false,massTrainingFiltersOpen:false,massTrainingPeriod:'upcoming',massAthleteMonth:'',massAthletePass:'all',massAthleteFirst:'all',teamFiltersOpen:false,eventTeam:'',eventPeriod:'upcoming',overviewTeam:'',selectedTeam:'',selectedPlayer:'',pendingEmail:'',loading:false,massActionBusy:'',massAttendanceBusy:new Set(),notificationRecipients:[],notificationHistory:[],notificationSelectedPlayerId:'',notificationSearch:'',notificationBusy:false,notificationLoadError:'',competitionSyncStatus:null,competitionSyncBusy:false,competitionResults:[],competitionStandings:[],competitionDataError:'',managerStandingsContext:(()=>{try{return localStorage.getItem('cc-manager-standings-context')||''}catch(_){return''}})(),managerStandingsTeam:(()=>{try{return localStorage.getItem('cc-manager-standings-team')||'all'}catch(_){return'all'}})(),managerStandingsMatchScope:(()=>{try{return localStorage.getItem('cc-manager-standings-match-scope')==='beac'?'beac':'all'}catch(_){return'all'}})(),managerLeagueInsights:{key:'',loading:false,loaded:false,error:'',data:null},financeTab:'competition',financeTeam:'',financeData:null,financeAudit:[],financeSettings:null,financeSettingsTeam:'',financePassCatalog:[],financePassCatalogLoaded:false,financePassSearch:'',financePassType:'',financePassLevel:'',financePassTeam:'',financePassMonth:'',financePassStatus:'',financeCompetitionSearch:'',financeCompetitionMonth:'',financeCompetitionStatus:'',financeCompetitionType:'',financeCompetitionFiltersOpen:false,financePassFiltersOpen:false,financeLoading:false,teamDetailTab:'grid',teamGridPeriod:(()=>{try{return localStorage.getItem('cc-manager-team-grid-period')==='all'?'all':'upcoming'}catch(_){return'upcoming'}})(),equipmentByTeam:new Map(),equipmentLoading:new Set(),coachAvailability:[],coachAvailabilityBusy:new Set(),managerMedicalAppointments:[],teamFilters:{overview:[],events:[],players:[],teams:[]},teamFilterOpen:{overview:false,events:false,players:false,teams:false},plannerTeam:''
   };
 
   const $=sel=>document.querySelector(sel), $$=sel=>Array.from(document.querySelectorAll(sel));
@@ -209,10 +209,72 @@
   function showLogin(step){const o=$('#loginOverlay');if(!o)return;o.classList.remove('hidden');['loginLoadingStep','loginEmailStep','loginCodeStep'].forEach(id=>$('#'+id)?.classList.toggle('hidden',id!==step));if(step==='loginEmailStep')setTimeout(()=>$('#loginEmail')?.focus(),20);if(step==='loginCodeStep')setTimeout(()=>$('#loginCode')?.focus(),20)}
   function hideLogin(){$('#loginOverlay')?.classList.add('hidden')}
   function loginMessage(id,msg,error=false){const el=$(id);if(!el)return;el.textContent=msg||'';el.classList.toggle('error',!!error)}
-  async function requestCode(){const email=text($('#loginEmail')?.value).toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){loginMessage('#loginMsg','Adj meg egy érvényes email címet.',true);return}const b=$('#requestCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginMsg','Kód küldése…');const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});if(error)throw error;state.pendingEmail=email;$('#loginEmailPreview').textContent=email;showLogin('loginCodeStep');loginMessage('#loginCodeMsg','A kódot elküldtük.')}catch(err){loginMessage('#loginMsg',err.message||'A kód küldése sikertelen.',true)}finally{if(b)b.disabled=false}}
-  async function verifyCode(){const token=text($('#loginCode')?.value).replace(/\D/g,'');if(token.length<6){loginMessage('#loginCodeMsg','Írd be az emailben kapott kódot.',true);return}const b=$('#verifyCodeBtn');if(b)b.disabled=true;try{loginMessage('#loginCodeMsg','Ellenőrzés…');const {data,error}=await state.supabase.auth.verifyOtp({email:state.pendingEmail,token,type:'email'});if(error)throw error;state.session=data.session||null;await loadLiveData();hideLogin()}catch(err){loginMessage('#loginCodeMsg',err.message||'A belépés sikertelen.',true)}finally{if(b)b.disabled=false}}
+  function managerOtp_(value){return text(value).replace(/\D/g,'').slice(0,10)}
+  function managerOtpError_(err){
+    const raw=text(err?.message||err||'');
+    if(/expired|invalid|otp|token/i.test(raw))return 'A kód érvénytelen vagy lejárt. Ha több kódot kértél, csak a legutóbbi használható.';
+    return raw||'A belépés sikertelen.'
+  }
+  async function requestCode(){
+    const email=text($('#loginEmail')?.value).toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){loginMessage('#loginMsg','Adj meg egy érvényes email címet.',true);return}
+    const b=$('#requestCodeBtn');if(b)b.disabled=true;
+    try{
+      loginMessage('#loginMsg','Kód küldése…');
+      const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
+      if(error)throw error;
+      state.pendingEmail=email;
+      if($('#loginEmailPreview'))$('#loginEmailPreview').textContent=email;
+      if($('#loginCode'))$('#loginCode').value='';
+      showLogin('loginCodeStep');
+      loginMessage('#loginCodeMsg','A kódot elküldtük. Mindig a legutóbb kapott kódot használd.')
+    }catch(err){
+      console.error('Manager OTP request failed',err);
+      loginMessage('#loginMsg',err.message||'A kód küldése sikertelen. Ellenőrizd, hogy ez az email rendelkezik-e Manager-fiókkal.',true)
+    }finally{if(b)b.disabled=false}
+  }
+  async function resendCode(){
+    if(!state.pendingEmail){showLogin('loginEmailStep');return}
+    const b=$('#resendCodeBtn');if(b)b.disabled=true;
+    try{
+      loginMessage('#loginCodeMsg','Új kód küldése…');
+      const {error}=await state.supabase.auth.signInWithOtp({email:state.pendingEmail,options:{shouldCreateUser:true}});
+      if(error)throw error;
+      if($('#loginCode'))$('#loginCode').value='';
+      loginMessage('#loginCodeMsg','Új kódot küldtünk. A korábbi kód már nem használható.')
+    }catch(err){
+      console.error('Manager OTP resend failed',err);
+      loginMessage('#loginCodeMsg',err.message||'Nem sikerült új kódot küldeni.',true)
+    }finally{if(b)b.disabled=false}
+  }
+  async function verifyCode(){
+    const token=managerOtp_($('#loginCode')?.value);
+    if(token.length<6||token.length>10){loginMessage('#loginCodeMsg','Írd be az emailben kapott teljes kódot.',true);return}
+    if(!state.pendingEmail){loginMessage('#loginCodeMsg','Az email cím elveszett a munkamenetből. Menj vissza és kérj új kódot.',true);return}
+    const b=$('#verifyCodeBtn');if(b)b.disabled=true;
+    try{
+      loginMessage('#loginCodeMsg','Kód ellenőrzése…');
+      const {data,error}=await state.supabase.auth.verifyOtp({email:state.pendingEmail,token,type:'email'});
+      if(error)throw error;
+      state.session=data?.session||null;
+      if(!state.session)throw new Error('A kód elfogadása után nem érkezett Supabase munkamenet.');
+      loginMessage('#loginCodeMsg','Kód elfogadva · Manager adatok betöltése…');
+      try{
+        await loadLiveData()
+      }catch(loadErr){
+        console.error('Manager bootstrap after OTP failed',loadErr);
+        const raw=text(loadErr?.message||loadErr);
+        if(/bootstrap|manager|permission|unauthor|forbidden|not.*allowed/i.test(raw))throw new Error('A kód jó, de ehhez az emailhez nincs érvényes Manager-hozzáférés.');
+        throw loadErr
+      }
+      hideLogin()
+    }catch(err){
+      console.error('Manager OTP verify failed',err);
+      loginMessage('#loginCodeMsg',managerOtpError_(err),true)
+    }finally{if(b)b.disabled=false}
+  }
 
-  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='R1 UI1.8';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · R1 UI1.8';}
+  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='R1 UI1.9K';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · R1 UI1.9K';}
 
   async function loadLiveData(){
     state.loading=true;status('Manager adatok frissítése…');
@@ -368,6 +430,40 @@
   function pct(a,b){const aa=num(a),bb=num(b);return bb>0?Math.round(aa*100/bb):null}
   function pctText(a,b){const p=pct(a,b);return p==null?'–':`${p}%`}
   function teamById(id){return state.teams.find(t=>text(t.id)===text(id))||null}
+  let ccTeamSelectorObserver_=null,ccTeamSelectorRaf_=0;
+  function ccTeamSelectorColor_(value,label=''){
+    const v=text(value),name=text(label);
+    let team=teamById(v);
+    if(!team&&name)team=(state.teams||[]).find(t=>text(t.name)===name||text(t.name).replace(/^BEAC\s+/i,'')===name.replace(/^BEAC\s+/i,''));
+    return /^#[0-9a-f]{6}$/i.test(text(team?.color))?text(team.color):'#b7b7b7'
+  }
+  function ccDecorateTeamSelectors_(){
+    document.querySelectorAll('label').forEach(label=>{
+      const select=label.querySelector('select');if(!select)return;
+      const caption=text(label.querySelector(':scope > span')?.textContent||label.querySelector('span')?.textContent);
+      if(!/csapat/i.test(caption))return;
+      const option=select.selectedOptions?.[0],color=ccTeamSelectorColor_(select.value,option?.textContent||'');
+      label.classList.add('cc-team-select-wrap');
+      label.style.setProperty('--cc-team-color',color);
+      label.classList.toggle('cc-team-select-neutral',color==='#b7b7b7');
+    });
+    $$('[data-team-filter-details]').forEach(details=>{
+      const scope=text(details.dataset.teamFilterDetails),ids=teamFilterIds_(scope),color=ids.length===1?ccTeamSelectorColor_(ids[0],teamById(ids[0])?.name||''):'#b7b7b7';
+      details.classList.add('cc-team-select-details');
+      details.style.setProperty('--cc-team-color',color);
+      details.classList.toggle('cc-team-select-neutral',color==='#b7b7b7');
+    })
+  }
+  function ccScheduleTeamSelectorDecorate_(){
+    if(ccTeamSelectorRaf_)cancelAnimationFrame(ccTeamSelectorRaf_);
+    ccTeamSelectorRaf_=requestAnimationFrame(()=>{ccTeamSelectorRaf_=0;ccDecorateTeamSelectors_()})
+  }
+  function ccInstallTeamSelectorDecorator_(){
+    if(ccTeamSelectorObserver_)return;
+    ccTeamSelectorObserver_=new MutationObserver(()=>ccScheduleTeamSelectorDecorate_());
+    ccTeamSelectorObserver_.observe(document.body,{childList:true,subtree:true});
+    ccScheduleTeamSelectorDecorate_()
+  }
   function playerById(id){return state.players.find(p=>text(p.playerId||p.id)===text(id))||null}
   function eventStart(e){return safeDate(e.startsAt||e.starts_at)}
   function eventEnd(e){return safeDate(e.endsAt||e.ends_at)||eventStart(e)}
@@ -574,10 +670,22 @@
   function msMatchTime_(m){const d=safeDate(m?.startsAt);return d?fmtTime(d):''}
   function msRowBySource_(id){return msRows_().find(r=>text(r.sourceTeamId)===text(id))||null}
   function msMatchesHtml_(rows,selected){
-    const target=selected||msFocusRow_(rows),sid=text(target?.sourceTeamId),matches=(Array.isArray(msData_()?.matches)?msData_().matches:[]).filter(m=>text(m?.homeSourceTeamId)===sid||text(m?.awaySourceTeamId)===sid).slice().sort((a,b)=>new Date(a?.startsAt||0)-new Date(b?.startsAt||0));
-    const title=selected?`Meccsek · ${text(selected.teamName)}`:'Meccsek';
-    if(!matches.length)return`<section class="ms-panel"><div class="ms-panel-head"><b>${esc(title)}</b><span>0 meccs</span></div><div class="ms-empty">Ehhez a csapathoz még nincs elérhető meccsadat.</div></section>`;
-    return`<section class="ms-panel"><div class="ms-panel-head"><b>${esc(title)}</b><span>${matches.length} meccs</span></div><div class="ms-match-list">${matches.map(m=>{const h=msRowBySource_(m?.homeSourceTeamId),a=msRowBySource_(m?.awaySourceTeamId),hs=Number(m?.homeSets),as=Number(m?.awaySets),score=Number.isFinite(hs)&&Number.isFinite(as)?`${hs}–${as}`:'–',sourceUrl=text(m?.sourceUrl||m?.matchUrl||m?.reportUrl||m?.brszUrl||m?.mrszUrl);return`<div class="ms-match-row"><div class="ms-match-date"><b>${esc(msMatchDate_(m))}</b><span>${esc(msMatchTime_(m))}</span></div><button type="button" class="ms-match-team ${h?.focus?'is-own':''}" data-ms-team="${esc(text(h?.sourceTeamId))}">${msLogoHtml_(h?.sourceTeamId,m?.homeName,'match')}<span><b>${esc(m?.homeName||'–')}</b>${h?msTeamStatus_(h):''}</span></button>${sourceUrl&&score!=='–'?`<a class="ms-score ms-score-link" href="${esc(sourceUrl)}" target="_blank" rel="noopener" title="Mérkőzés / jegyzőkönyv megnyitása">${esc(score)}</a>`:`<strong class="ms-score">${esc(score)}</strong>`}<button type="button" class="ms-match-team away ${a?.focus?'is-own':''}" data-ms-team="${esc(text(a?.sourceTeamId))}"><span><b>${esc(m?.awayName||'–')}</b>${a?msTeamStatus_(a):''}</span>${msLogoHtml_(a?.sourceTeamId,m?.awayName,'match')}</button><div class="ms-match-place">${esc(m?.venue||'')}</div></div>`}).join('')}</div></section>`
+    const allMatches=Array.isArray(msData_()?.matches)?msData_().matches:[],focus=msFocusRow_(rows),focusId=text(focus?.sourceTeamId),selectedId=text(selected?.sourceTeamId),scope=state.managerStandingsMatchScope==='beac'?'beac':'all';
+    let matches=allMatches.filter(m=>!selectedId||text(m?.homeSourceTeamId)===selectedId||text(m?.awaySourceTeamId)===selectedId);
+    if(scope==='beac'&&focusId){
+      matches=matches.filter(m=>{
+        const home=text(m?.homeSourceTeamId),away=text(m?.awaySourceTeamId),hasFocus=home===focusId||away===focusId;
+        if(!hasFocus)return false;
+        return !selectedId||selectedId===focusId||home===selectedId||away===selectedId;
+      });
+    }
+    matches=matches.slice().sort((a,b)=>new Date(a?.startsAt||0)-new Date(b?.startsAt||0));
+    const title=selected?`Meccsek · ${text(selected.teamName)}`:'Bajnoki meccsek';
+    const teamOptions=`<option value="all" ${selectedId?'':'selected'}>Minden csapat</option>${rows.map(r=>`<option value="${esc(r.sourceTeamId)}" ${selectedId===text(r.sourceTeamId)?'selected':''}>${esc(r.teamName)}</option>`).join('')}`;
+    const scopeAllLabel=selected?'Minden meccse':'Minden bajnoki meccs',scopeBeacLabel=selected&&selectedId!==focusId?'Csak BEAC ellen':'Csak BEAC meccsek';
+    const controls=`<div class="ms-match-filters"><label><span>Csapat</span><select id="msMatchTeamSelect">${teamOptions}</select></label><label><span>Mérkőzések</span><select id="msMatchScopeSelect"><option value="all" ${scope==='all'?'selected':''}>${esc(scopeAllLabel)}</option><option value="beac" ${scope==='beac'?'selected':''}>${esc(scopeBeacLabel)}</option></select></label></div>`;
+    if(!matches.length)return`<section class="ms-panel ms-match-panel"><div class="ms-panel-head ms-match-panel-head"><div><b>${esc(title)}</b><span>0 meccs</span></div>${controls}</div><div class="ms-empty">Ebben a szűrésben még nincs elérhető meccsadat.</div></section>`;
+    return`<section class="ms-panel ms-match-panel"><div class="ms-panel-head ms-match-panel-head"><div><b>${esc(title)}</b><span>${matches.length} meccs</span></div>${controls}</div><div class="ms-match-list">${matches.map(m=>{const h=msRowBySource_(m?.homeSourceTeamId),a=msRowBySource_(m?.awaySourceTeamId),hs=Number(m?.homeSets),as=Number(m?.awaySets),score=Number.isFinite(hs)&&Number.isFinite(as)?`${hs}–${as}`:'–',sourceUrl=text(m?.sourceUrl||m?.matchUrl||m?.reportUrl||m?.brszUrl||m?.mrszUrl);return`<div class="ms-match-row"><div class="ms-match-date"><b>${esc(msMatchDate_(m))}</b><span>${esc(msMatchTime_(m))}</span></div><button type="button" class="ms-match-team ${h?.focus?'is-own':''}" data-ms-team="${esc(text(h?.sourceTeamId))}">${msLogoHtml_(h?.sourceTeamId,m?.homeName,'match')}<span><b>${esc(m?.homeName||'–')}</b>${h?msTeamStatus_(h):''}</span></button>${sourceUrl&&score!=='–'?`<a class="ms-score ms-score-link" href="${esc(sourceUrl)}" target="_blank" rel="noopener" title="Mérkőzés / jegyzőkönyv megnyitása">${esc(score)}</a>`:`<strong class="ms-score">${esc(score)}</strong>`}<button type="button" class="ms-match-team away ${a?.focus?'is-own':''}" data-ms-team="${esc(text(a?.sourceTeamId))}"><span><b>${esc(m?.awayName||'–')}</b>${a?msTeamStatus_(a):''}</span>${msLogoHtml_(a?.sourceTeamId,m?.awayName,'match')}</button><div class="ms-match-place">${esc(m?.venue||'')}</div></div>`}).join('')}</div></section>`
   }
   function msLeagueStatsHtml_(rows){
     const entries=rows.map(row=>{const model=msStatsModel_(row),delta=msPositionDelta_(row?.history,row?.position,row?.played);return{row,model,delta,wins5:model.outcomes.filter(x=>x==='W').length}}),byForm=entries.slice().sort((a,b)=>b.wins5-a.wins5||(Number(a.row.position)||999)-(Number(b.row.position)||999)),bestForm=byForm[0],risers=entries.filter(x=>x.delta>0).sort((a,b)=>b.delta-a.delta),fallers=entries.filter(x=>x.delta<0).sort((a,b)=>a.delta-b.delta),bestRatio=entries.slice().sort((a,b)=>(Number(b.row.setRatio)||0)-(Number(a.row.setRatio)||0))[0];
@@ -598,8 +706,10 @@
   }
   function msSetTeam_(sourceId){state.managerStandingsTeam=text(sourceId)||'all';try{localStorage.setItem('cc-manager-standings-team',state.managerStandingsTeam)}catch(_){}renderManagerStandings_()}
   function msBind_(){
-    $('#msContextSelect')?.addEventListener('change',e=>{state.managerStandingsContext=text(e.target.value);state.managerStandingsTeam='all';state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};try{localStorage.setItem('cc-manager-standings-context',state.managerStandingsContext);localStorage.setItem('cc-manager-standings-team','all')}catch(_){}renderManagerStandings_()});
+    $('#msContextSelect')?.addEventListener('change',e=>{state.managerStandingsContext=text(e.target.value);state.managerStandingsTeam='all';state.managerStandingsMatchScope='all';state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};try{localStorage.setItem('cc-manager-standings-context',state.managerStandingsContext);localStorage.setItem('cc-manager-standings-team','all');localStorage.setItem('cc-manager-standings-match-scope','all')}catch(_){}renderManagerStandings_()});
     $('#msTeamSelect')?.addEventListener('change',e=>msSetTeam_(e.target.value));
+    $('#msMatchTeamSelect')?.addEventListener('change',e=>msSetTeam_(e.target.value));
+    $('#msMatchScopeSelect')?.addEventListener('change',e=>{state.managerStandingsMatchScope=e.target.value==='beac'?'beac':'all';try{localStorage.setItem('cc-manager-standings-match-scope',state.managerStandingsMatchScope)}catch(_){}renderManagerStandings_()});
     $$('[data-ms-team]').forEach(b=>b.addEventListener('click',()=>{const id=text(b.dataset.msTeam);if(id)msSetTeam_(id)}));
   }
   function renderManagerStandings_(){if(!ccRouteIs_('competition','standings'))return;
@@ -631,7 +741,7 @@
     '10000000-0000-4000-8000-000000000003':{court:'3',venue:'BEAC csarnok',address:'1117 Budapest, Bogdánfy u. 10/B.'}
   });
   function ccNormalizeTime24_(value){const v=text(value).replace('.',':');const m=v.match(/^(\d{1,2}):(\d{2})$/);if(!m)return'';const h=Number(m[1]),min=Number(m[2]);if(h<0||h>23||min<0||min>59)return'';return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`}
-  function ccTimeField_(id,label,value,{required=false,wrapId='',cls=''}={}){return `<label class="field ${cls}" ${wrapId?`id="${esc(wrapId)}"`:''}><span>${esc(label)}</span><input id="${esc(id)}" type="text" inputmode="numeric" autocomplete="off" placeholder="HH:MM" pattern="(?:[01]\\d|2[0-3]):[0-5]\\d" maxlength="5" value="${esc(value||'')}" ${required?'required':''}></label>`}
+  function ccTimeField_(id,label,value,{required=false,wrapId='',cls=''}={}){return `<label class="field cc-native-time-field ${cls}" ${wrapId?`id="${esc(wrapId)}"`:''}><span>${esc(label)}</span><input id="${esc(id)}" type="time" step="60" autocomplete="off" value="${esc(ccNormalizeTime24_(value)||'')}" ${required?'required':''}></label>`}
   function ccHomeDefaultsForTeam_(teamId){return CC_HOME_MATCH_DEFAULTS_[text(teamId)]||null}
   function ccTeamBaseDefaults_(teamId){const d=ccHomeDefaultsForTeam_(teamId);return d?{defaultVenue:`${d.venue} · ${d.address}`,defaultCourt:`${d.court}. pálya`}:null}
   function ccTeamDefaultVenue_(team){return ccTeamBaseDefaults_(team?.id)?.defaultVenue||text(team?.defaultVenue)||'BEAC csarnok · 1117 Budapest, Bogdánfy u. 10/B.'}
@@ -769,9 +879,9 @@
       ev.preventDefault();const btn=$('#ceSave');if(btn)btn.disabled=true;
       try{
         const date=$('#ceDate').value,start=ccNormalizeTime24_($('#ceStart').value),matchKind=actualKind==='match'?(text($('#ceMatchKind')?.value)||'official'):'',rawEnd=text($('#ceEnd')?.value),end=rawEnd?ccNormalizeTime24_(rawEnd):'',startsAt=ccLocalIso_(date,start);
-        if(!start||!startsAt)throw new Error('Adj meg érvényes dátumot és 24 órás kezdést (pl. 19:30).');
-        if(actualKind==='match'&&matchKind==='friendly'&&!end)throw new Error('Edzőmeccsnél add meg a befejezést is 24 órás formátumban.');
-        if(rawEnd&&!end)throw new Error('A befejezés formátuma HH:MM legyen (pl. 21:00).');
+        if(!start||!startsAt)throw new Error('Válassz érvényes dátumot és kezdési időpontot.');
+        if(actualKind==='match'&&matchKind==='friendly'&&!end)throw new Error('Edzőmeccsnél válaszd ki a befejezési időpontot is.');
+        if(rawEnd&&!end)throw new Error('Válassz érvényes befejezési időpontot.');
         const endForSave=(actualKind==='match'&&matchKind==='official')?'':end,endsAt=endForSave?ccLocalIso_(date,endForSave):null;
         if(endsAt&&new Date(endsAt)<=new Date(startsAt))throw new Error('A befejezésnek később kell lennie a kezdésnél.');
         const base={eventType:actualKind,teamId:$('#ceTeam').value,title:text($('#ceTitle').value),startsAt,endsAt,venue:text($('#ceVenue').value),address:text($('#ceAddress').value),court:text($('#ceCourt').value),color:teamById($('#ceTeam').value)?.color||e?.color||null};
@@ -779,7 +889,7 @@
           base.homeAway=text($('#ceHomeAway').value);
           if(base.homeAway==='home')ccApplyHomeMatchDefaults_({force:false});
           base.venue=text($('#ceVenue').value);base.address=text($('#ceAddress').value);base.court=text($('#ceCourt').value);
-          const mtRaw=text($('#ceMeetingTime').value),mt=mtRaw?ccNormalizeTime24_(mtRaw):'';if(mtRaw&&!mt)throw new Error('A találkozó időpontja HH:MM formátumú legyen.');
+          const mtRaw=text($('#ceMeetingTime').value),mt=mtRaw?ccNormalizeTime24_(mtRaw):'';if(mtRaw&&!mt)throw new Error('Válassz érvényes találkozási időpontot.');
           base.meetingAt=mt?ccLocalIso_(date,mt):null;base.meetingPlace=text($('#ceMeetingPlace').value);
         }
         const notify=$('#ceNotify')?.checked===true;
@@ -906,6 +1016,11 @@
   function matrixMonthLabel(e){const d=eventStart(e);return d?new Intl.DateTimeFormat('hu-HU',{year:'numeric',month:'long',timeZone:'Europe/Budapest'}).format(d):''}
   function matrixCountClass(n){const x=num(n);return x<=6?'low':(x<10?'mid':'high')}
   function coachNames_(team){return text(team?.coaches).split(/[,;/]+/).map(x=>x.trim()).filter(Boolean).slice(0,4)}
+  function teamGridCoachNames_(team){
+    const tid=text(team?.id),names=[...coachNames_(team)];
+    (state.coachAvailability||[]).filter(r=>!text(r?.teamId)||text(r?.teamId)===tid).forEach(r=>{const n=text(r?.coachName);if(n&&!names.some(x=>x.toLocaleLowerCase('hu-HU')===n.toLocaleLowerCase('hu-HU')))names.push(n)});
+    return names.slice(0,6)
+  }
   function coachAvailabilityMap_(){const m=new Map();(state.coachAvailability||[]).forEach(r=>m.set(`${text(r.eventId)}:${text(r.coachName)}`,r));return m}
   function coachMonogram_(name){const p=text(name).split(/\s+/).filter(Boolean);return (p.length>1?(p[0][0]+p[p.length-1][0]):(p[0]||'E').slice(0,2)).toLocaleUpperCase('hu-HU')}
   function coachCanEditFallback_(teamId,coachName){const mine=text(state.manager?.displayName||state.manager?.name).toLocaleLowerCase('hu-HU'),target=text(coachName).toLocaleLowerCase('hu-HU'),full=canAction('settings','edit');return full||(mine&&target&&mine===target&&(canAction('competition.overview','edit',teamId)||canAction('competition.teams','edit',teamId)))}
@@ -1262,8 +1377,8 @@
       <span><small>Állapot</small><b>${esc(statusValue)}</b><i>${sub?esc(fmtDate(sub)+' '+fmtTime(sub)):''}</i></span>
     </article>`;
   }
-  function massEventPayloadFromForm_(existing={}){const date=$('#meDate')?.value,start=ccNormalizeTime24_($('#meStart')?.value),end=ccNormalizeTime24_($('#meEnd')?.value),session=text($('#meSession')?.value||existing.sessionType||'TÖMEGSPORT').toUpperCase();if(!date||!start||!end)throw new Error('A dátum, kezdés és befejezés kötelező; az idő HH:MM formátumú legyen.');if(end<=start)throw new Error('A befejezésnek később kell lennie a kezdésnél.');return {eventDate:date,startTime:start,endTime:end,level:text($('#meLevel')?.value),court:text($('#meCourt')?.value),capacity:Number($('#meCapacity')?.value||0),cancellationHours:Number($('#meCancelHours')?.value||0),active:$('#meActive')?.checked!==false,oldLimit:0,newLimit:Number($('#meCapacity')?.value||0),publicRegistrationActive:session!=='VERSENYSPORT',sessionType:session,teamId:'',visibility:'PUBLIC',seriesId:text(existing.seriesId||''),recurrenceRule:'',seriesEnd:null,exceptionType:'',eventType:'EDZÉS',color:text($('#meColor')?.value||existing.color||'#f7b700')}}
-  async function openMassEventEditor_(eventId=null){if(!canAction('mass.trainings','edit')){status('Nincs Tömegsport szerkesztési jogosultságod.','error');return}let data=null,e={};if(eventId){data=await loadMassEventDetail(eventId,{force:true});e=data?.event||{}}const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='TÖMEGSPORT · EDZÉS · SZERKESZTÉS';title.textContent=eventId?'Edzés szerkesztése':'Új Tömegsport edzés';const st=safeDate(e.startsAt)||new Date(),en=safeDate(e.endsAt)||new Date(st.getTime()+90*60000);body.innerHTML=`<form id="massEventForm" class="action-form"><div class="action-form-grid"><label class="field"><span>Dátum</span><input id="meDate" type="date" value="${esc(ccDateInputValue_(st))}" required></label><label class="field"><span>Kezdés</span><input id="meStart" type="text" inputmode="numeric" autocomplete="off" placeholder="HH:MM" pattern="(?:[01]\d|2[0-3]):[0-5]\d" maxlength="5" value="${esc(ccTimeInputValue_(st))}" required></label><label class="field"><span>Befejezés</span><input id="meEnd" type="text" inputmode="numeric" autocomplete="off" placeholder="HH:MM" pattern="(?:[01]\d|2[0-3]):[0-5]\d" maxlength="5" value="${esc(ccTimeInputValue_(en))}" required></label><label class="field"><span>Szint</span><select id="meLevel"><option value="KEZDŐ" ${text(e.level).toUpperCase()==='KEZDŐ'?'selected':''}>Kezdő</option><option value="KÖZÉPHALADÓ" ${text(e.level).toUpperCase()==='KÖZÉPHALADÓ'?'selected':''}>Középhaladó</option><option value="HALADÓ" ${text(e.level).toUpperCase()==='HALADÓ'?'selected':''}>Haladó</option></select></label><label class="field"><span>Pálya</span><input id="meCourt" value="${esc(e.court||'')}"></label><label class="field"><span>Férőhely</span><input id="meCapacity" type="number" min="1" max="40" value="${esc(e.capacity||e.totalLimit||18)}"></label><label class="field"><span>Lemondási határ (óra)</span><input id="meCancelHours" type="number" min="0" max="72" step="0.5" value="${esc(e.cancellationHours??6)}"></label><label class="field"><span>Típus</span><select id="meSession"><option value="TÖMEGSPORT" ${text(e.sessionType).toUpperCase()!=='SPORT7'?'selected':''}>Tömegsport</option><option value="SPORT7" ${text(e.sessionType).toUpperCase()==='SPORT7'?'selected':''}>SPORT7</option></select></label><label class="field"><span>Szín</span><input id="meColor" type="color" value="${esc(e.color||massLevelColor(e)||'#f7b700')}"></label></div><label class="action-checkbox"><input id="meActive" type="checkbox" ${e.active===false?'':'checked'}> <span>Aktív edzés</span></label>${!eventId?`<div class="action-form-repeat"><label><input id="meRepeat" type="checkbox"> Hetente ismétlődjön</label><label class="field compact"><span>Ismétlés vége</span><input id="meRepeatEnd" type="date" disabled></label></div>`:''}<div class="dialog-action-row"><button type="button" class="button quiet" id="meCancel">Mégse</button>${eventId?'<button type="button" class="button danger" id="meDelete">Törlés</button>':''}<button type="submit" class="button primary" id="meSave">Mentés</button></div></form>`;ccOpenDialogStable_(d);$('#meCancel')?.addEventListener('click',ccCloseEntityDialog_);$('#meRepeat')?.addEventListener('change',ev=>{if($('#meRepeatEnd'))$('#meRepeatEnd').disabled=!ev.target.checked});$('#massEventForm')?.addEventListener('submit',async ev=>{ev.preventDefault();const btn=$('#meSave');if(btn)btn.disabled=true;try{const base=massEventPayloadFromForm_(e);if(eventId){await rpc('cc_manager_mass_event_save_v1',{p_event_id:eventId,p_payload:base});await rpc('cc_manager_mass_event_set_active_v1',{p_event_id:eventId,p_active:base.active})}else{const repeat=$('#meRepeat')?.checked===true,endDate=text($('#meRepeatEnd')?.value),dates=[base.eventDate],series=repeat&&window.crypto?.randomUUID?window.crypto.randomUUID():'';if(repeat){if(!endDate||endDate<base.eventDate)throw new Error('Adj meg érvényes ismétlési végdátumot.');let cur=new Date(`${base.eventDate}T12:00:00`),last=new Date(`${endDate}T12:00:00`);while(dates.length<26){cur=new Date(cur);cur.setDate(cur.getDate()+7);if(cur>last)break;dates.push(localDateKey(cur))}}const payloads=dates.map(day=>({...base,eventDate:day,seriesId:series,recurrenceRule:repeat?'WEEKLY':'',seriesEnd:repeat?endDate:null}));if(repeat)await rpc('cc_manager_mass_event_series_create_v1',{p_payloads:payloads});else await rpc('cc_manager_mass_event_save_v1',{p_event_id:null,p_payload:payloads[0]})}state.massDetailCache.clear();await Promise.all([loadMassTrainings(),loadMassCalendar(),loadMassArchive()]);ccCloseEntityDialog_();renderMassTrainings();status('Tömegsport edzés mentve.','success')}catch(err){console.error(err);status(err.message||'Az edzés mentése sikertelen.','error');if(btn)btn.disabled=false}});$('#meDelete')?.addEventListener('click',async()=>{if(!eventId||!window.confirm('Biztosan törlöd ezt az edzést? Csak olyan jövőbeli edzés törölhető, amelynek nincs jelentkezési/várólista előzménye.'))return;try{await rpc('cc_manager_mass_event_delete_v1',{p_event_id:eventId});state.massDetailCache.clear();await Promise.all([loadMassTrainings(),loadMassCalendar()]);ccCloseEntityDialog_();renderMassTrainings();status('Edzés törölve.','success')}catch(err){status(err.message||'Az edzés nem törölhető.','error')}})}
+  function massEventPayloadFromForm_(existing={}){const date=$('#meDate')?.value,start=ccNormalizeTime24_($('#meStart')?.value),end=ccNormalizeTime24_($('#meEnd')?.value),session=text($('#meSession')?.value||existing.sessionType||'TÖMEGSPORT').toUpperCase();if(!date||!start||!end)throw new Error('A dátum, kezdés és befejezés kötelező.');if(end<=start)throw new Error('A befejezésnek később kell lennie a kezdésnél.');return {eventDate:date,startTime:start,endTime:end,level:text($('#meLevel')?.value),court:text($('#meCourt')?.value),capacity:Number($('#meCapacity')?.value||0),cancellationHours:Number($('#meCancelHours')?.value||0),active:$('#meActive')?.checked!==false,oldLimit:0,newLimit:Number($('#meCapacity')?.value||0),publicRegistrationActive:session!=='VERSENYSPORT',sessionType:session,teamId:'',visibility:'PUBLIC',seriesId:text(existing.seriesId||''),recurrenceRule:'',seriesEnd:null,exceptionType:'',eventType:'EDZÉS',color:text($('#meColor')?.value||existing.color||'#f7b700')}}
+  async function openMassEventEditor_(eventId=null){if(!canAction('mass.trainings','edit')){status('Nincs Tömegsport szerkesztési jogosultságod.','error');return}let data=null,e={};if(eventId){data=await loadMassEventDetail(eventId,{force:true});e=data?.event||{}}const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='TÖMEGSPORT · EDZÉS · SZERKESZTÉS';title.textContent=eventId?'Edzés szerkesztése':'Új Tömegsport edzés';const st=safeDate(e.startsAt)||new Date(),en=safeDate(e.endsAt)||new Date(st.getTime()+90*60000);body.innerHTML=`<form id="massEventForm" class="action-form"><div class="action-form-grid"><label class="field"><span>Dátum</span><input id="meDate" type="date" value="${esc(ccDateInputValue_(st))}" required></label><label class="field cc-native-time-field"><span>Kezdés</span><input id="meStart" type="time" step="60" autocomplete="off" value="${esc(ccTimeInputValue_(st))}" required></label><label class="field cc-native-time-field"><span>Befejezés</span><input id="meEnd" type="time" step="60" autocomplete="off" value="${esc(ccTimeInputValue_(en))}" required></label><label class="field"><span>Szint</span><select id="meLevel"><option value="KEZDŐ" ${text(e.level).toUpperCase()==='KEZDŐ'?'selected':''}>Kezdő</option><option value="KÖZÉPHALADÓ" ${text(e.level).toUpperCase()==='KÖZÉPHALADÓ'?'selected':''}>Középhaladó</option><option value="HALADÓ" ${text(e.level).toUpperCase()==='HALADÓ'?'selected':''}>Haladó</option></select></label><label class="field"><span>Pálya</span><input id="meCourt" value="${esc(e.court||'')}"></label><label class="field"><span>Férőhely</span><input id="meCapacity" type="number" min="1" max="40" value="${esc(e.capacity||e.totalLimit||18)}"></label><label class="field"><span>Lemondási határ (óra)</span><input id="meCancelHours" type="number" min="0" max="72" step="0.5" value="${esc(e.cancellationHours??6)}"></label><label class="field"><span>Típus</span><select id="meSession"><option value="TÖMEGSPORT" ${text(e.sessionType).toUpperCase()!=='SPORT7'?'selected':''}>Tömegsport</option><option value="SPORT7" ${text(e.sessionType).toUpperCase()==='SPORT7'?'selected':''}>SPORT7</option></select></label><label class="field"><span>Szín</span><input id="meColor" type="color" value="${esc(e.color||massLevelColor(e)||'#f7b700')}"></label></div><label class="action-checkbox"><input id="meActive" type="checkbox" ${e.active===false?'':'checked'}> <span>Aktív edzés</span></label>${!eventId?`<div class="action-form-repeat"><label><input id="meRepeat" type="checkbox"> Hetente ismétlődjön</label><label class="field compact"><span>Ismétlés vége</span><input id="meRepeatEnd" type="date" disabled></label></div>`:''}<div class="dialog-action-row"><button type="button" class="button quiet" id="meCancel">Mégse</button>${eventId?'<button type="button" class="button danger" id="meDelete">Törlés</button>':''}<button type="submit" class="button primary" id="meSave">Mentés</button></div></form>`;ccOpenDialogStable_(d);$('#meCancel')?.addEventListener('click',ccCloseEntityDialog_);$('#meRepeat')?.addEventListener('change',ev=>{if($('#meRepeatEnd'))$('#meRepeatEnd').disabled=!ev.target.checked});$('#massEventForm')?.addEventListener('submit',async ev=>{ev.preventDefault();const btn=$('#meSave');if(btn)btn.disabled=true;try{const base=massEventPayloadFromForm_(e);if(eventId){await rpc('cc_manager_mass_event_save_v1',{p_event_id:eventId,p_payload:base});await rpc('cc_manager_mass_event_set_active_v1',{p_event_id:eventId,p_active:base.active})}else{const repeat=$('#meRepeat')?.checked===true,endDate=text($('#meRepeatEnd')?.value),dates=[base.eventDate],series=repeat&&window.crypto?.randomUUID?window.crypto.randomUUID():'';if(repeat){if(!endDate||endDate<base.eventDate)throw new Error('Adj meg érvényes ismétlési végdátumot.');let cur=new Date(`${base.eventDate}T12:00:00`),last=new Date(`${endDate}T12:00:00`);while(dates.length<26){cur=new Date(cur);cur.setDate(cur.getDate()+7);if(cur>last)break;dates.push(localDateKey(cur))}}const payloads=dates.map(day=>({...base,eventDate:day,seriesId:series,recurrenceRule:repeat?'WEEKLY':'',seriesEnd:repeat?endDate:null}));if(repeat)await rpc('cc_manager_mass_event_series_create_v1',{p_payloads:payloads});else await rpc('cc_manager_mass_event_save_v1',{p_event_id:null,p_payload:payloads[0]})}state.massDetailCache.clear();await Promise.all([loadMassTrainings(),loadMassCalendar(),loadMassArchive()]);ccCloseEntityDialog_();renderMassTrainings();status('Tömegsport edzés mentve.','success')}catch(err){console.error(err);status(err.message||'Az edzés mentése sikertelen.','error');if(btn)btn.disabled=false}});$('#meDelete')?.addEventListener('click',async()=>{if(!eventId||!window.confirm('Biztosan törlöd ezt az edzést? Csak olyan jövőbeli edzés törölhető, amelynek nincs jelentkezési/várólista előzménye.'))return;try{await rpc('cc_manager_mass_event_delete_v1',{p_event_id:eventId});state.massDetailCache.clear();await Promise.all([loadMassTrainings(),loadMassCalendar()]);ccCloseEntityDialog_();renderMassTrainings();status('Edzés törölve.','success')}catch(err){status(err.message||'Az edzés nem törölhető.','error')}})}
   function openMassAddAthlete_(eventId){const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='TÖMEGSPORT · SPORTOLÓ HOZZÁADÁSA';title.textContent='Sportoló hozzáadása';body.innerHTML=`<form id="massAddAthleteForm" class="action-form"><div class="action-form-grid"><label class="field"><span>Név</span><input id="maName" required maxlength="100"></label><label class="field"><span>Email</span><input id="maEmail" type="email"></label><label class="field"><span>Típus</span><select id="maType"><option value="NORMAL">Normál</option><option value="FIRST">Első edzés</option><option value="GUEST">Vendég</option></select></label><label class="field"><span>Bérletszám</span><input id="maPass"></label><label class="field span-2"><span>Admin megjegyzés</span><input id="maNote" maxlength="1000"></label></div><label class="action-checkbox"><input id="maPresent" type="checkbox"> <span>Megjelentként rögzítés</span></label><div class="dialog-action-row"><button type="button" class="button quiet" id="maCancel">Mégse</button><button type="submit" class="button primary" id="maSave">Hozzáadás</button></div></form>`;ccOpenDialogStable_(d);$('#maCancel')?.addEventListener('click',ccCloseEntityDialog_);$('#massAddAthleteForm')?.addEventListener('submit',async ev=>{ev.preventDefault();const btn=$('#maSave');if(btn)btn.disabled=true;try{await rpc('cc_manager_mass_booking_add_v1',{p_event_id:eventId,p_payload:{name:text($('#maName').value),email:text($('#maEmail').value),personType:$('#maType').value,passNumber:text($('#maPass').value),note:text($('#maNote').value),present:$('#maPresent').checked,capacityBucket:'ADMIN'}});state.massDetailCache.delete(eventId);ccCloseEntityDialog_();await openMassEventDetail(eventId);status('Sportoló hozzáadva.','success')}catch(err){status(err.message||'A sportoló hozzáadása sikertelen.','error');if(btn)btn.disabled=false}})}
   async function massBookingPatch_(eventId,bookingId,patch){captureMassDetailUi_(eventId);try{await rpc('cc_manager_mass_booking_patch_v1',{p_booking_id:bookingId,p_patch:patch});state.massDetailCache.delete(eventId);await openMassEventDetail(eventId);status('Jelentkezés frissítve.','success')}catch(err){status(err.message||'A módosítás sikertelen.','error')}}
   async function massBookingRemove_(eventId,bookingId){if(!window.confirm('Biztosan kiveszed a sportolót erről az edzésről?'))return;captureMassDetailUi_(eventId);try{await rpc('cc_manager_mass_booking_remove_v1',{p_booking_id:bookingId});state.massDetailCache.delete(eventId);await openMassEventDetail(eventId);status('Sportoló kivéve az edzésről.','success')}catch(err){status(err.message||'A sportoló kivétele sikertelen.','error')}}
@@ -1595,9 +1710,62 @@
   function teamSeasonAttendanceState_(row){const x=text(row?.attendanceStatus||row?.attendance_status||'').toLowerCase();return x==='present'?'present':x==='absent'?'absent':''}
   function teamSeasonRsvpState_(row){const x=text(row?.status||row?.rsvpStatus||row?.rsvp_status||'').toLowerCase();return x==='going'?'going':x==='not_going'?'not-going':'none'}
   function teamSeasonAttendanceButton_(event,player,row){const actual=teamSeasonAttendanceState_(row),rsvp=teamSeasonRsvpState_(row),started=!!eventStart(event)&&eventStart(event)<=new Date(),editable=started&&ccEventCanEdit_(event),glyph=actual==='present'?'✓':actual==='absent'?'✕':rsvp==='going'?'✓':rsvp==='not-going'?'✕':'·',label=actual==='present'?'Megjelent':actual==='absent'?'Nem jelent meg':rsvp==='going'?'Jövök (még nincs jelenlét)':rsvp==='not-going'?'Nem jövök (még nincs jelenlét)':'Nincs jelzés / jelenlét';return `<button type="button" class="team-season-att ${actual||'unset'} rsvp-${rsvp}" data-team-season-att data-event-id="${esc(event.eventId||event.id)}" data-player-id="${esc(player.playerId||player.id)}" data-att-state="${esc(actual)}" ${editable?'':'disabled'} title="${esc(label)}">${glyph}</button>`}
-  function teamSeasonGridHtml_(team){const tid=text(team?.id),src=state.cardRsvpMatrix||{events:[],players:[],responses:[]},events=effectiveCompetitionEvents(src.events||[]).filter(e=>eventTeamId(e)===tid).sort((a,b)=>eventStart(a)-eventStart(b)),players=(src.players||[]).filter(p=>text(p.teamId)===tid).slice().sort((a,b)=>(num(a.jerseyNo)||9999)-(num(b.jerseyNo)||9999)||text(a.displayName||a.name).localeCompare(text(b.displayName||b.name),'hu')),coaches=coachNames_(team),coachMap=coachAvailabilityMap_(),map=teamSeasonGridResponseMap_();if(!events.length)return emptyInline('Nincs szezon-esemény ehhez a csapathoz.');const coachHead=coaches.map(name=>`<th class="matrix-player-head coach-head" title="Edző · ${esc(name)}"><span class="grid-player-head-inner"><span class="cc-avatar matrix monogram coach-avatar">${esc(coachMonogram_(name))}</span><span class="grid-player-label">${esc(text(name).split(/\s+/).filter(Boolean).slice(-1)[0]||'Edző')}</span></span></th>`).join(''),head=`<th class="matrix-event-col matrix-event-side sticky-matrix-col">Alkalom</th><th class="matrix-count-col matrix-count-head">Fő</th>${coachHead}${players.map(p=>`<th class="matrix-player-head" title="${esc(p.displayName||p.name)}"><span class="grid-player-head-inner">${avatarHtml(p,'matrix')}<span class="grid-player-label">${esc(gridGivenName(p))}</span></span></th>`).join('')}`;let lastMonth='';const body=events.map((e,idx)=>{const month=matrixMonthLabel(e),divider=idx>0&&month!==lastMonth?`<tr class="matrix-month-divider"><td colspan="${2+coaches.length+players.length}"><span>${esc(month)}</span></td></tr>`:'';lastMonth=month;const actualCount=players.filter(p=>teamSeasonAttendanceState_(map.get(`${text(e.eventId||e.id)}:${text(p.playerId||p.id)}`))==='present').length,goingCount=players.filter(p=>teamSeasonRsvpState_(map.get(`${text(e.eventId||e.id)}:${text(p.playerId||p.id)}`))==='going').length,count=eventStart(e)&&eventStart(e)<=new Date()?actualCount:goingCount,iconPath=eventType(e)==='training'?'assets/event-training-mask.png':text(e.homeAway||e.home_away)==='away'?'assets/event-away-mask.png':'assets/event-home-mask.png',eventLabel=eventType(e)==='training'?'Edzés':ccEventOpponent_(e)||'Meccs',coachCells=coaches.map(name=>`<td class="matrix-cell coach-cell">${coachMatrixControl_(text(e.eventId||e.id),tid,name,coachMap.get(`${text(e.eventId||e.id)}:${name}`)||{status:'unknown',canEdit:coachCanEditFallback_(tid,name)},true)}</td>`).join('');return divider+`<tr class="matrix-data-row"><th class="matrix-event-col matrix-event-side sticky-matrix-col"><button class="matrix-event-side-btn" type="button" data-event-id="${esc(e.eventId||e.id)}"><span class="matrix-side-icon"><img src="${iconPath}" alt=""></span><span class="matrix-event-copy"><b>${esc(eventLabel)}</b><small>${esc(fmtDate(eventStart(e)))} · ${esc(fmtTime(eventStart(e)))}</small></span></button></th><td class="matrix-count-col matrix-count-cell"><strong class="${matrixCountClass(count)}">${count}</strong></td>${coachCells}${players.map(p=>{const row=map.get(`${text(e.eventId||e.id)}:${text(p.playerId||p.id)}`)||{};return `<td class="matrix-cell team-season-cell ${teamSeasonAttendanceState_(row)||'unset'}">${teamSeasonAttendanceButton_(e,p,row)}</td>`}).join('')}</tr>`}).join('');return `<div class="team-season-grid-head"><div><h4>Szezonrács</h4><p>Edzői jelzés és játékos RSVP/jelenlét.</p></div></div><div class="matrix-scroll manager-player-grid team-season-grid"><table class="rsvp-matrix season-matrix transposed-matrix manager-player-matrix"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`}
+  function teamSeasonGridHtml_(team){
+    const tid=text(team?.id),src=state.cardRsvpMatrix||{events:[],players:[],responses:[]};
+    const eventMap=new Map();
+    [
+      ...(Array.isArray(src.events)?src.events:[]),
+      ...(Array.isArray(state.activityEvents)?state.activityEvents:[]),
+      ...(Array.isArray(state.calendarEvents)?state.calendarEvents:[])
+    ].forEach(e=>{
+      const id=text(e?.eventId||e?.id);
+      if(!id||eventTeamId(e)!==tid)return;
+      if(!eventMap.has(id))eventMap.set(id,e);else eventMap.set(id,{...eventMap.get(id),...e});
+    });
+    const allEvents=effectiveCompetitionEvents(Array.from(eventMap.values())).filter(e=>eventTeamId(e)===tid).sort((a,b)=>(eventStart(a)?.getTime()||0)-(eventStart(b)?.getTime()||0));
+    const showPast=state.teamGridPeriod==='all';
+    const todayStart=new Date();todayStart.setHours(0,0,0,0);
+    const events=showPast?allEvents:allEvents.filter(e=>{const end=eventEnd(e)||eventStart(e);return !end||end.getTime()>=todayStart.getTime()});
+
+    const playerMap=new Map();
+    (Array.isArray(src.players)?src.players:[]).filter(p=>text(p?.teamId||p?.team_id)===tid).forEach(p=>playerMap.set(text(p?.playerId||p?.id),p));
+    (Array.isArray(state.players)?state.players:[]).filter(p=>{
+      if(text(p?.teamId||p?.team_id)===tid)return true;
+      return (Array.isArray(p?.memberships)?p.memberships:[]).some(m=>text(m?.teamId||m?.team_id)===tid);
+    }).forEach(p=>{
+      const id=text(p?.playerId||p?.id);
+      if(id)playerMap.set(id,{...(playerMap.get(id)||{}),...p,teamId:tid});
+    });
+    const players=Array.from(playerMap.values()).slice().sort((a,b)=>(num(a.jerseyNo)||9999)-(num(b.jerseyNo)||9999)||text(a.displayName||a.name).localeCompare(text(b.displayName||b.name),'hu'));
+
+    const coaches=teamGridCoachNames_(team),coachMap=coachAvailabilityMap_(),map=teamSeasonGridResponseMap_();
+    if(!events.length)return `<div class="team-season-grid-head"><div><h4>Edzői jelentkezés és szezonrács</h4><p>${allEvents.length} szezon-esemény érhető el.</p></div></div><div class="team-grid-empty"><b>Nincs következő alkalom.</b><span>Válaszd fent a „Teljes szezon” nézetet az elmúlt edzésekhez és meccsekhez.</span></div>`;
+
+    const coachHead=coaches.map(name=>`<th class="matrix-player-head coach-head" title="Edző · ${esc(name)}"><span class="grid-player-head-inner"><span class="cc-avatar matrix monogram coach-avatar">${esc(coachMonogram_(name))}</span><span class="grid-player-label">${esc(text(name).split(/\s+/).filter(Boolean).slice(-1)[0]||'Edző')}</span></span></th>`).join('');
+    const head=`<th class="matrix-event-col matrix-event-side sticky-matrix-col">Alkalom</th><th class="matrix-count-col matrix-count-head">Fő</th>${coachHead}${players.map(p=>`<th class="matrix-player-head" title="${esc(p.displayName||p.name)}"><span class="grid-player-head-inner">${avatarHtml(p,'matrix')}<span class="grid-player-label">${esc(gridGivenName(p))}</span></span></th>`).join('')}`;
+
+    let lastMonth='';
+    const body=events.map((e,idx)=>{
+      const month=matrixMonthLabel(e),divider=idx>0&&month!==lastMonth?`<tr class="matrix-month-divider"><td colspan="${2+coaches.length+players.length}"><span>${esc(month)}</span></td></tr>`:'';
+      lastMonth=month;
+      const actualCount=players.filter(p=>teamSeasonAttendanceState_(map.get(`${text(e.eventId||e.id)}:${text(p.playerId||p.id)}`))==='present').length;
+      const goingCount=players.filter(p=>teamSeasonRsvpState_(map.get(`${text(e.eventId||e.id)}:${text(p.playerId||p.id)}`))==='going').length;
+      const count=eventStart(e)&&eventStart(e)<=new Date()?actualCount:goingCount;
+      const iconPath=eventType(e)==='training'?'assets/event-training-mask.png':text(e.homeAway||e.home_away)==='away'?'assets/event-away-mask.png':'assets/event-home-mask.png';
+      const eventLabel=eventType(e)==='training'?'Edzés':ccEventOpponent_(e)||'Meccs';
+      const coachCells=coaches.map(name=>`<td class="matrix-cell coach-cell">${coachMatrixControl_(text(e.eventId||e.id),tid,name,coachMap.get(`${text(e.eventId||e.id)}:${name}`)||{status:'unknown',canEdit:coachCanEditFallback_(tid,name)},true)}</td>`).join('');
+      return divider+`<tr class="matrix-data-row"><th class="matrix-event-col matrix-event-side sticky-matrix-col"><button class="matrix-event-side-btn" type="button" data-event-id="${esc(e.eventId||e.id)}"><span class="matrix-side-icon"><img src="${iconPath}" alt=""></span><span class="matrix-event-copy"><b>${esc(eventLabel)}</b><small>${esc(fmtDate(eventStart(e)))} · ${esc(fmtTime(eventStart(e)))}</small></span></button></th><td class="matrix-count-col matrix-count-cell"><strong class="${matrixCountClass(count)}">${count}</strong></td>${coachCells}${players.map(p=>{const row=map.get(`${text(e.eventId||e.id)}:${text(p.playerId||p.id)}`)||{};return `<td class="matrix-cell team-season-cell ${teamSeasonAttendanceState_(row)||'unset'}">${teamSeasonAttendanceButton_(e,p,row)}</td>`}).join('')}</tr>`
+    }).join('');
+
+    const coachNote=coaches.length?`${coaches.length} edző · `:'';
+    return `<div class="team-season-grid-head"><div><h4>Edzői jelentkezés és szezonrács</h4><p>${coachNote}${events.length} / ${allEvents.length} alkalom · jövő: jelentkezés · múlt: jelenlét.</p></div></div><div class="matrix-scroll manager-player-grid team-season-grid"><table class="rsvp-matrix season-matrix transposed-matrix manager-player-matrix"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`
+  }
   async function teamSeasonAttendanceWrite_(button){if(!button||button.disabled)return;const eventId=text(button.dataset.eventId),playerId=text(button.dataset.playerId),current=text(button.dataset.attState),next=current==='present'?'absent':current==='absent'?'':'present',db=next||'clear';button.disabled=true;try{const result=await ccCompetitionAttendanceRpc_(eventId,playerId,db),saved=text(result?.status||'');if(saved!==next)throw new Error('A jelenlét mentése nem igazolható vissza.');ccPatchAttendanceCaches_(eventId,playerId,saved);renderTeams();status('Jelenlét mentve.','success')}catch(err){button.disabled=false;status(err.message||'A jelenlét mentése sikertelen.','error')}}
-  function bindTeamSeasonGrid_(){$$('[data-team-season-att]').forEach(b=>b.addEventListener('click',()=>teamSeasonAttendanceWrite_(b)));bindCoachAvailabilityControls_($('#viewContent')||document);bindEventDetailActions()}
+  function bindTeamSeasonGrid_(){
+    $('#teamGridPeriodSelect')?.addEventListener('change',e=>{state.teamGridPeriod=e.target.value==='all'?'all':'upcoming';try{localStorage.setItem('cc-manager-team-grid-period',state.teamGridPeriod)}catch(_){}renderTeams()});
+    $$('[data-team-season-att]').forEach(b=>b.addEventListener('click',()=>teamSeasonAttendanceWrite_(b)));
+    bindCoachAvailabilityControls_($('#viewContent')||document);bindEventDetailActions()
+  }
 
   function renderTeams(){if(!ccRouteIs_('competition','teams'))return;
     state.teamFiltersOpen=filterOpen_('competition.teams',state.teamFiltersOpen);
@@ -1608,7 +1776,7 @@
     const equipmentTab=`<div class="panel-subhead"><div><h4>Felszerelés</h4><p>Mez, méret, gyártás, kiadás és fizetés.</p></div></div><div class="equipment-list">${state.equipmentLoading.has(text(selected?.id))?'<div class="loading-inline">Felszerelés betöltése…</div>':equipment.map(r=>equipmentRowHtml_(r,canEdit)).join('')||emptyInline('Nincs felszerelésadat.')}</div>`;
     $('#viewContent').innerHTML=`<div class="page-intro cc-page-header-panel cc-team-page-header"><div><h2>Csapatok</h2><p>Csapatkeret, teljes szezonrács, felszerelés és alapadatok.</p></div><div class="page-actions team-page-actions compact cc-icon-toolbar">${filterActive?'<button class="filter-reset cc-toolbar-reset" id="teamFilterReset" type="button" aria-label="Szűrő törlése" title="Szűrő törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.teamFiltersOpen?'open':''} ${filterActive?'has-filter':''}" id="teamFiltersToggle" aria-expanded="${state.teamFiltersOpen?'true':'false'}" type="button" aria-label="Csapatszűrő" title="Csapatszűrő"><span class="triangle-icon"></span></button>${canEdit?'':'<span class="read-only-badge">MEGTEKINTÉS</span>'}</div></div>
       <div class="filter-panel team-filter-panel" id="teamFiltersPanel" ${state.teamFiltersOpen?'':'hidden'}>${teamMultiFilterHtml_('teams')}</div>
-      <div class="team-master-detail single-team-detail"><article class="panel team-detail-panel">${selected?`<div class="team-detail-head team-gradient-head" style="--team-color:${esc(selected.color||'#f7b700')}"><div><span class="eyebrow">${esc(selected.season||cfg.DEFAULT_SEASON)}</span><h3>${esc(selected.name)}</h3></div><div class="team-head-actions"><div class="team-detail-tabs team-icon-tabs"><button type="button" class="team-tab-grid ${tab==='grid'?'active':''}" data-team-tab="grid" aria-label="Rács" title="Rács"><span class="cc-grid-menu-icon" aria-hidden="true"></span></button>${canEdit?'<button class="team-edit-circle team-tab-yellow" id="teamEditBtn" type="button" aria-label="Csapat szerkesztése" title="Csapat szerkesztése">✎</button>':''}<button type="button" class="team-tab-yellow ${tab==='players'?'active':''}" data-team-tab="players" aria-label="Játékosok" title="Játékosok">P</button><button type="button" class="team-tab-yellow ${tab==='equipment'?'active':''}" data-team-tab="equipment" aria-label="Felszerelés" title="Felszerelés">F</button><button type="button" class="team-tab-yellow ${tab==='info'?'active':''}" data-team-tab="info" aria-label="Infó" title="Infó">i</button></div></div></div>${tab==='players'?playerTab:tab==='grid'?gridTab:tab==='equipment'?equipmentTab:infoTab}`:emptyInline('Válassz egy csapatot a Szűrőkben.')}</article></div>`;
+      <div class="team-master-detail single-team-detail"><article class="panel team-detail-panel">${selected?`<div class="team-detail-head team-gradient-head" style="--team-color:${esc(selected.color||'#f7b700')}"><div class="team-head-main"><span class="eyebrow">${esc(selected.season||cfg.DEFAULT_SEASON)}</span><h3>${esc(selected.name)}</h3></div>${tab==="grid"?`<label class="team-grid-period-filter team-grid-period-filter-head"><span>Időszak</span><select id="teamGridPeriodSelect"><option value="upcoming" ${state.teamGridPeriod==="all"?"":"selected"}>Következő</option><option value="all" ${state.teamGridPeriod==="all"?"selected":""}>Teljes szezon</option></select></label>`:""}<div class="team-head-attendance" aria-label="Csapat jelenlét"><span><small>Edzésjelenlét</small><b>${esc(pctText(att.trainingPresent,att.trainingMarked))}</b></span><span><small>Meccsjelenlét</small><b>${esc(pctText(att.matchPresent,att.matchMarked))}</b></span></div><div class="team-head-actions"><div class="team-detail-tabs team-icon-tabs"><button type="button" class="team-tab-grid ${tab==='grid'?'active':''}" data-team-tab="grid" aria-label="Rács" title="Rács"><svg class="cc-team-grid-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="4" y="4" width="24" height="24" rx="1"></rect><rect x="10" y="10" width="12" height="12" rx=".5"></rect></svg></button>${canEdit?'<button class="team-edit-circle team-tab-yellow" id="teamEditBtn" type="button" aria-label="Csapat szerkesztése" title="Csapat szerkesztése">✎</button>':''}<button type="button" class="team-tab-yellow ${tab==='players'?'active':''}" data-team-tab="players" aria-label="Játékosok" title="Játékosok">P</button><button type="button" class="team-tab-yellow ${tab==='equipment'?'active':''}" data-team-tab="equipment" aria-label="Felszerelés" title="Felszerelés">F</button><button type="button" class="team-tab-yellow ${tab==='info'?'active':''}" data-team-tab="info" aria-label="Infó" title="Infó">i</button></div></div></div>${tab==='players'?playerTab:tab==='grid'?gridTab:tab==='equipment'?equipmentTab:infoTab}`:emptyInline('Válassz egy csapatot a Szűrőkben.')}</article></div>`;
     const filterToggle=$('#teamFiltersToggle'),filterPanel=$('#teamFiltersPanel');filterToggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.teams',!state.teamFiltersOpen);state.teamFiltersOpen=open;filterToggle.setAttribute('aria-expanded',String(open));filterToggle.classList.toggle('open',open);if(filterPanel)filterPanel.hidden=!open;ccBlurPointerControl_(filterToggle)});
     $('#teamFilterReset')?.addEventListener('click',()=>{state.teamFilters.teams=[];state.selectedTeam='';renderTeams()});
     bindTeamMultiFilter_('teams',renderTeams);$$('[data-team-tab]').forEach(b=>b.addEventListener('click',()=>{state.teamDetailTab=b.dataset.teamTab;renderTeams();if(state.teamDetailTab==='equipment'&&selected&&!state.equipmentByTeam.has(text(selected.id)))void ensureEquipment_(selected.id).then(renderTeams).catch(err=>status(err.message||'A felszerelés nem tölthető be.','error'))}));bindUnifiedPlayerCards_($('#viewContent')||document);bindTeamSeasonGrid_();$('#teamEditBtn')?.addEventListener('click',()=>openTeamEditor_(state.selectedTeam));$$('[data-equipment-player]').forEach(b=>b.addEventListener('click',()=>openEquipmentEditor_(state.selectedTeam,b.dataset.equipmentPlayer)));if(tab==='equipment'&&selected&&!state.equipmentByTeam.has(text(selected.id))&&!state.equipmentLoading.has(text(selected.id)))void ensureEquipment_(selected.id).then(()=>{if(state.module==='teams'&&state.teamDetailTab==='equipment')renderTeams()}).catch(err=>status(err.message||'A felszerelés nem tölthető be.','error'));
@@ -2129,16 +2297,17 @@
     $('#viewContent').innerHTML=`<div class="page-intro finance-page-intro"><div><h2>Pénzügyek</h2><p>Versenyengedély, bérlet/tagdíj, edzői díj, értékesítés és teljes módosítási napló.</p></div></div><div class="finance-top-tabs">${financeTabsHtml_()}</div>${content}`;bindFinance_()
   }
 
-  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.8</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
+  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9K</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
 
-  function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`;requestAnimationFrame(ccForceRootHorizontalZero_)}
+  function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`;ccScheduleTeamSelectorDecorate_();requestAnimationFrame(ccForceRootHorizontalZero_)}
 
   async function refresh(){if(!configured()){status('Manager PWA konfigurációs hiba.','error');return}try{await loadLiveData()}catch(_){}}
   function bindStaticUi(){
+    ccInstallTeamSelectorDecorator_();
     $('#refreshBtn')?.addEventListener('click',refresh);$('#managerMenuBtn')?.addEventListener('click',()=>ccOpenDialogStable_($('#accountDialog')));$('#accountDialogClose')?.addEventListener('click',()=>$('#accountDialog')?.close());$('#accountDialog')?.addEventListener('click',e=>{if(e.target===$('#accountDialog'))$('#accountDialog').close()});
     $('#logoutBtn')?.addEventListener('click',async()=>{if(state.supabase)await state.supabase.auth.signOut({scope:'local'});location.reload()});
     $('#entityDialogClose')?.addEventListener('click',()=>$('#entityDialog')?.close());$('#entityDialog')?.addEventListener('click',e=>{if(e.target===$('#entityDialog'))$('#entityDialog').close()});$('#entityDialog')?.addEventListener('close',()=>{ensureTopStatus_();if(ccDialogContext_==='player'&&ccPlayerReturnEventId_){const back=ccPlayerReturnEventId_;ccPlayerReturnEventId_='';ccDialogContext_='';setTimeout(()=>openEventDetail(back),0)}else{ccDialogContext_=''}});
-    $('#requestCodeBtn')?.addEventListener('click',requestCode);$('#verifyCodeBtn')?.addEventListener('click',verifyCode);$('#changeEmailBtn')?.addEventListener('click',()=>showLogin('loginEmailStep'));$('#loginEmail')?.addEventListener('keydown',e=>{if(e.key==='Enter')requestCode()});$('#loginCode')?.addEventListener('keydown',e=>{if(e.key==='Enter')verifyCode()});$('#loginCode')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,10)});
+    $('#requestCodeBtn')?.addEventListener('click',requestCode);$('#verifyCodeBtn')?.addEventListener('click',verifyCode);$('#resendCodeBtn')?.addEventListener('click',resendCode);$('#changeEmailBtn')?.addEventListener('click',()=>{state.pendingEmail='';loginMessage('#loginMsg','');showLogin('loginEmailStep')});$('#loginEmail')?.addEventListener('keydown',e=>{if(e.key==='Enter')requestCode()});$('#loginCode')?.addEventListener('keydown',e=>{if(e.key==='Enter')verifyCode()});$('#loginCode')?.addEventListener('input',e=>{e.target.value=managerOtp_(e.target.value)});
     window.addEventListener('popstate',()=>{ccAdvanceRouteGeneration_();resolveInitialRoute();renderChrome();renderView()});
     window.addEventListener('pageshow',()=>requestAnimationFrame(ccForceRootHorizontalZero_));
     window.addEventListener('resize',()=>requestAnimationFrame(ccForceRootHorizontalZero_),{passive:true});
@@ -2154,9 +2323,41 @@
   }
 
   async function boot(){
-    if(localStorage.getItem('cc-manager-theme')==='dark')document.body.classList.add('dark');resolveInitialRoute();bindStaticUi();installManagerPullToRefresh_();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW:',err));
+    if(localStorage.getItem('cc-manager-theme')==='dark')document.body.classList.add('dark');
+    resolveInitialRoute();bindStaticUi();installManagerPullToRefresh_();
+
+    const localTest=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+    if('serviceWorker'in navigator){
+      if(localTest){
+        try{
+          const regs=await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r=>r.unregister()));
+          if('caches'in window){
+            const keys=await caches.keys();
+            await Promise.all(keys.filter(k=>/^cc-manager-/i.test(k)).map(k=>caches.delete(k)));
+          }
+        }catch(err){console.warn('Local Manager cache cleanup:',err)}
+      }else{
+        navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW:',err))
+      }
+    }
+
     if(!configured()){hideLogin();status('Manager PWA konfigurációs hiba: a Supabase kapcsolat nincs beállítva.','error');renderChrome();renderView();return}
-    try{state.supabase=await createSupabase();showLogin('loginLoadingStep');const {data:{session},error}=await state.supabase.auth.getSession();if(error)throw error;state.session=session||null;if(!session){showLogin('loginEmailStep');return}await loadLiveData();hideLogin();if(!location.hash)setRoute(state.area,legacyDefaultModule_(state.area),{replace:true})}catch(err){console.error(err);status(err.message||'Manager indítási hiba.','error');showLogin('loginEmailStep')}
+    try{
+      state.supabase=await createSupabase();
+      showLogin('loginLoadingStep');
+      const {data:{session},error}=await state.supabase.auth.getSession();
+      if(error)throw error;
+      state.session=session||null;
+      if(!session){showLogin('loginEmailStep');return}
+      await loadLiveData();
+      hideLogin();
+      if(!location.hash)setRoute(state.area,legacyDefaultModule_(state.area),{replace:true})
+    }catch(err){
+      console.error(err);
+      status(err.message||'Manager indítási hiba.','error');
+      showLogin('loginEmailStep')
+    }
   }
 
   boot();
