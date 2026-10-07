@@ -1,10 +1,10 @@
 (()=>{
   'use strict';
 
-  const FRONTEND_BUILD='manager-r1-ui1-9h-2026-10-07';
+  const FRONTEND_BUILD='manager-r1-ui1-9i-2026-10-07';
 
   const cfg=Object.freeze({...{
-    BUILD:'manager-r1-ui1-9h-2026-10-07',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
+    BUILD:'manager-r1-ui1-9i-2026-10-07',DATA_MODE:'supabase',SUPABASE_URL:'',SUPABASE_PUBLISHABLE_KEY:'',DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'
   },...(window.CC_MANAGER_CONFIG||{})});
 
   const AREAS={
@@ -274,7 +274,7 @@
     }finally{if(b)b.disabled=false}
   }
 
-  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='R1 UI1.9H';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · R1 UI1.9H';}
+  function applyManager(){const m=state.manager||{};$('#managerName').textContent=m.displayName||m.name||'Manager';$('#managerEmail').textContent=m.email||'–';$('#managerInitials').textContent=initials(m.displayName||m.name||m.email);$('#accountDialogName').textContent=m.displayName||m.name||'Manager';$('#accountDialogEmail').textContent=m.email||'–';if($('#runtimeLabel'))$('#runtimeLabel').textContent='R1 UI1.9I';$('#dataModePill').textContent='MANAGER';$('#dataModeDetail').textContent='Club Control Manager · R1 UI1.9I';}
 
   async function loadLiveData(){
     state.loading=true;status('Manager adatok frissítése…');
@@ -430,6 +430,40 @@
   function pct(a,b){const aa=num(a),bb=num(b);return bb>0?Math.round(aa*100/bb):null}
   function pctText(a,b){const p=pct(a,b);return p==null?'–':`${p}%`}
   function teamById(id){return state.teams.find(t=>text(t.id)===text(id))||null}
+  let ccTeamSelectorObserver_=null,ccTeamSelectorRaf_=0;
+  function ccTeamSelectorColor_(value,label=''){
+    const v=text(value),name=text(label);
+    let team=teamById(v);
+    if(!team&&name)team=(state.teams||[]).find(t=>text(t.name)===name||text(t.name).replace(/^BEAC\s+/i,'')===name.replace(/^BEAC\s+/i,''));
+    return /^#[0-9a-f]{6}$/i.test(text(team?.color))?text(team.color):'#b7b7b7'
+  }
+  function ccDecorateTeamSelectors_(){
+    document.querySelectorAll('label').forEach(label=>{
+      const select=label.querySelector('select');if(!select)return;
+      const caption=text(label.querySelector(':scope > span')?.textContent||label.querySelector('span')?.textContent);
+      if(!/csapat/i.test(caption))return;
+      const option=select.selectedOptions?.[0],color=ccTeamSelectorColor_(select.value,option?.textContent||'');
+      label.classList.add('cc-team-select-wrap');
+      label.style.setProperty('--cc-team-color',color);
+      label.classList.toggle('cc-team-select-neutral',color==='#b7b7b7');
+    });
+    $$('[data-team-filter-details]').forEach(details=>{
+      const scope=text(details.dataset.teamFilterDetails),ids=teamFilterIds_(scope),color=ids.length===1?ccTeamSelectorColor_(ids[0],teamById(ids[0])?.name||''):'#b7b7b7';
+      details.classList.add('cc-team-select-details');
+      details.style.setProperty('--cc-team-color',color);
+      details.classList.toggle('cc-team-select-neutral',color==='#b7b7b7');
+    })
+  }
+  function ccScheduleTeamSelectorDecorate_(){
+    if(ccTeamSelectorRaf_)cancelAnimationFrame(ccTeamSelectorRaf_);
+    ccTeamSelectorRaf_=requestAnimationFrame(()=>{ccTeamSelectorRaf_=0;ccDecorateTeamSelectors_()})
+  }
+  function ccInstallTeamSelectorDecorator_(){
+    if(ccTeamSelectorObserver_)return;
+    ccTeamSelectorObserver_=new MutationObserver(()=>ccScheduleTeamSelectorDecorate_());
+    ccTeamSelectorObserver_.observe(document.body,{childList:true,subtree:true});
+    ccScheduleTeamSelectorDecorate_()
+  }
   function playerById(id){return state.players.find(p=>text(p.playerId||p.id)===text(id))||null}
   function eventStart(e){return safeDate(e.startsAt||e.starts_at)}
   function eventEnd(e){return safeDate(e.endsAt||e.ends_at)||eventStart(e)}
@@ -2263,12 +2297,13 @@
     $('#viewContent').innerHTML=`<div class="page-intro finance-page-intro"><div><h2>Pénzügyek</h2><p>Versenyengedély, bérlet/tagdíj, edzői díj, értékesítés és teljes módosítási napló.</p></div></div><div class="finance-top-tabs">${financeTabsHtml_()}</div>${content}`;bindFinance_()
   }
 
-  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9H</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
+  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9I</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
 
-  function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`;requestAnimationFrame(ccForceRootHorizontalZero_)}
+  function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`;ccScheduleTeamSelectorDecorate_();requestAnimationFrame(ccForceRootHorizontalZero_)}
 
   async function refresh(){if(!configured()){status('Manager PWA konfigurációs hiba.','error');return}try{await loadLiveData()}catch(_){}}
   function bindStaticUi(){
+    ccInstallTeamSelectorDecorator_();
     $('#refreshBtn')?.addEventListener('click',refresh);$('#managerMenuBtn')?.addEventListener('click',()=>ccOpenDialogStable_($('#accountDialog')));$('#accountDialogClose')?.addEventListener('click',()=>$('#accountDialog')?.close());$('#accountDialog')?.addEventListener('click',e=>{if(e.target===$('#accountDialog'))$('#accountDialog').close()});
     $('#logoutBtn')?.addEventListener('click',async()=>{if(state.supabase)await state.supabase.auth.signOut({scope:'local'});location.reload()});
     $('#entityDialogClose')?.addEventListener('click',()=>$('#entityDialog')?.close());$('#entityDialog')?.addEventListener('click',e=>{if(e.target===$('#entityDialog'))$('#entityDialog').close()});$('#entityDialog')?.addEventListener('close',()=>{ensureTopStatus_();if(ccDialogContext_==='player'&&ccPlayerReturnEventId_){const back=ccPlayerReturnEventId_;ccPlayerReturnEventId_='';ccDialogContext_='';setTimeout(()=>openEventDetail(back),0)}else{ccDialogContext_=''}});
