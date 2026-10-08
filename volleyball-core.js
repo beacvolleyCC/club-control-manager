@@ -7,7 +7,7 @@ const clone=value=>JSON.parse(JSON.stringify(value));
 const num=(v,min=0,max=999)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.trunc(n))):min;};
 function newSet(number=1,previous=null){
  const start=previous?.startLineups||[Array(6).fill(''),Array(6).fill('')];
- return {number,status:'setup',startLineups:clone(start),lineups:clone(start),service:null,points:[0,0],rotations:[0,0],rallies:[],events:[],substitutions:[],finishedAt:null,winner:null};
+ return {number,status:'setup',startLineups:clone(start),lineups:clone(start),service:null,points:[0,0],rotations:[0,0],rallies:[],events:[],substitutions:[],finishedAt:null,winner:null,setterStarts:clone(previous?.setterStarts||[null,null]),setterPlayers:['','']};
 }
 function newCourt(id=1){
  return {id:String(id),name:String(id)+'. pálya',names:['A csapat','B csapat'],bestOf:3,target:25,sets:[],active:newSet(),history:[],eventSeq:0,timer:{type:'countdown',durationMs:600000,elapsedMs:0,since:0,running:false}};
@@ -33,13 +33,30 @@ function validateLineups(value){
  if(!teamsWithSix)return 'Legalább az egyik csapat kezdő hatosát töltsd ki.';
  return '';
 }
-function start(c,lineups,service){
+function setterAt(s,team){
+ const start=Number(s.setterStarts?.[team]),steps=Number(s.rotations?.[team]||0);
+ if(!Number.isInteger(start)||start<1||start>6)return null;
+ const position=(start-1-((steps%6)+6)%6+6)%6+1;
+ const jersey=String(s.setterPlayers?.[team]||'');
+ return {position,label:'P'+position,jersey,front:position>=2&&position<=4};
+}
+function start(c,lineups,service,setterStarts=null){
  if(c.active.status!=='setup')throw Error('Ez a szett már elkezdődött.');
  const clean=lineups.map(team=>team.map(v=>String(v??'').trim()));
  const error=validateLineups(clean);if(error)throw Error(error);
  if(service!==0&&service!==1)throw Error('Válaszd ki, melyik csapat nyit.');
+ const chosen=setterStarts==null?(c.active.setterStarts||[null,null]):setterStarts;
+ if(!Array.isArray(chosen)||chosen.length!==2)throw Error('A feladó kezdőhelye nem megfelelő.');
+ const normalized=chosen.map((v,side)=>{
+  if(v==null||v==='')return null;
+  const pos=Number(v);
+  if(!Number.isInteger(pos)||pos<1||pos>6||!clean[side][pos-1])throw Error('A feladóhoz válassz kitöltött forgáshelyet.');
+  return pos;
+ });
  checkpoint(c);
- c.active.startLineups=clone(clean);c.active.lineups=clone(clean);c.active.service=service;c.active.status='live';
+ c.active.startLineups=clone(clean);c.active.lineups=clone(clean);c.active.setterStarts=normalized;
+ c.active.setterPlayers=normalized.map((pos,side)=>pos?clean[side][pos-1]:'');
+ c.active.service=service;c.active.status='live';
  return c.active;
 }
 function rotated(lineup){
@@ -69,6 +86,23 @@ function award(c,side){
  s.rallies.push(rally);
  return rally;
 }
+function lastPointCorrection(c,side){
+ const s=c.active,last=s.rallies[s.rallies.length-1];
+ if(s.status!=='live'||!last||last.winner!==side)return null;
+ const targetCount=s.rallies.length-1;
+ const index=(c.history||[]).findLastIndex(entry=>entry.active?.number===s.number&&entry.active?.rallies?.length===targetCount);
+ if(index<0)return null;
+ const previous=c.history[index].active;
+ return {index,discardedStats:s.events.length-(previous.events?.length||0),discardedSubs:s.substitutions.length-(previous.substitutions?.length||0)};
+}
+function retractLastPoint(c,side){
+ const info=lastPointCorrection(c,side);
+ if(!info)throw Error('A −1 csak a legutóbbi labdamenet pontját vonhatja vissza. Régebbi pont javításához külön meccsnapló-korrekció szükséges.');
+ const entry=c.history[info.index];
+ c.active=clone(entry.active);c.sets=clone(entry.sets);c.eventSeq=entry.eventSeq;
+ c.history.splice(info.index);
+ return info;
+}
 function close(c,force=false){
  if(c.active.status!=='live')throw Error('Nincs folyamatban lévő szett.');
  const p=c.active.points;if(p[0]===p[1])throw Error('Döntetlen szettet nem lehet lezárni.');
@@ -96,7 +130,8 @@ function substitute(c,side,position,replacement){
  if(lineup.includes(jersey))throw Error('A játékos már pályán van.');
  checkpoint(c);
  lineup[pos-1]=jersey;
- c.active.substitutions.push({team:side,position:pos,out:old,in:jersey,rallyIndex:c.active.rallies.length,at:new Date().toISOString()});
+ if(c.active.setterPlayers?.[side]===old)c.active.setterPlayers[side]=jersey;
+ c.active.substitutions.push({team:side,position:pos,out:old,in:jersey,rallyIndex:c.active.rallies.length,setterChange:Number(c.active.setterStarts?.[side])>0&&c.active.setterPlayers?.[side]===jersey,at:new Date().toISOString()});
  return {out:old,in:jersey};
 }
 const SKILLS={
@@ -153,5 +188,5 @@ function summary(c,filter='all'){
  }
  return sides;
 }
-window.CCVolleyballCore=Object.freeze({newCourt,newSet,checkpoint,undo,validateLineups,start,rotated,requiredPoints,canClose,award,close,next,substitute,SKILLS,stat,summary});
+window.CCVolleyballCore=Object.freeze({newCourt,newSet,checkpoint,undo,validateLineups,start,setterAt,lastPointCorrection,retractLastPoint,rotated,requiredPoints,canClose,award,close,next,substitute,SKILLS,stat,summary});
 })();
