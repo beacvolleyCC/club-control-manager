@@ -70,8 +70,8 @@ function clockHtml(c){
 function pointsHtml(c){
  const s=c.active;
  const wins=[0,1].map(side=>c.sets.filter(x=>x.winner===side).length+(s.status==='closed'&&s.winner===side?1:0));
- const live=s.status==='live',finished=live&&core.canClose(c),activeTeam=s.service;
- return '<section class="cc-vb-scorecard"><div class="cc-vb-gameinfo"><strong>'+escape(s.number)+'. szett</strong><span>'+escape(s.status==='setup'?'Kezdés előtt':s.status==='closed'?'Lezárt szett':finished?'Lezárható':'Folyamatban')+'</span></div>'+
+ const live=s.status==='live',finished=live&&core.canClose(c),activeTeam=s.service,matchFinished=s.status==='closed'&&wins.some(n=>n>=Math.ceil(c.bestOf/2));
+ return '<section class="cc-vb-scorecard"><div class="cc-vb-gameinfo"><strong>'+escape(s.number)+'. szett</strong><span>'+escape(s.status==='setup'?'Kezdés előtt':s.status==='closed'?(matchFinished?'Mérkőzés vége':'Lezárt szett'):finished?'Lezárható':'Folyamatban')+'</span></div>'+
  '<div class="cc-vb-scoregrid">'+[0,1].map(side=>'<div class="cc-vb-side '+(live&&activeTeam===side?'serving':'')+'">'+
   '<input type="text" data-vb-name="'+side+'" maxlength="60" aria-label="'+(side===0?'A':'B')+' csapat neve" value="'+escape(c.names[side])+'">'+
   '<strong class="cc-vb-pts">'+s.points[side]+'</strong>'+
@@ -79,7 +79,7 @@ function pointsHtml(c){
   '<span class="cc-vb-ball">'+(live&&activeTeam===side?'● Nyitás':' ')+'</span>'+
   button('+1 pont','point-'+side,'cc-vb-ptbtn',!live||finished)+'</div>').join('<span class="cc-vb-colon">:</span>')+'</div>'+
   '<div class="cc-vb-actions">'+button('↶ Visszavonás','undo','cc-counter-quiet',!c.history.length)+
-  (s.status==='live'?button(finished?'Szett lezárása ✓':'Szett lezárása','close-set','cc-counter-quiet'):s.status==='closed'?button('Következő szett →','next-set','cc-counter-primary'): '')+
+  (s.status==='live'?button(finished?'Szett lezárása ✓':'Szett lezárása','close-set','cc-counter-quiet'):s.status==='closed'?(matchFinished?button('Meccs elemzése','show-analysis','cc-counter-primary')+button('További edzőszett','next-set','cc-counter-quiet'):button('Következő szett →','next-set','cc-counter-primary')): '')+
   button('Kivetítő','project','cc-counter-quiet')+'</div></section>';
 }
 function setupHtml(c){
@@ -174,7 +174,8 @@ function handleClick(event){
    else say(e.message,true);
   }return;
  }
- if(act==='next-set'){update(()=>{core.next(c);view.tab='score';view.setupService=1-Number(s.service??0)});return}
+ if(act==='show-analysis'){view.tab='analysis';view.analysis='all';render();return}
+ if(act==='next-set'){if(c.sets.filter(x=>x.winner===0).length+(s.winner===0?1:0)>=Math.ceil(c.bestOf/2)||c.sets.filter(x=>x.winner===1).length+(s.winner===1?1:0)>=Math.ceil(c.bestOf/2)){if(!window.confirm('A mérkőzés már eldőlt. Újabb edzőszettet nyitsz?'))return}update(()=>{core.next(c);view.tab='score';view.setupService=1-Number(s.service??0)});return}
  if(act==='substitute'){
   update(()=>{core.substitute(c,view.subTeam,view.subPos,root.querySelector('[data-vb-subjersey]')?.value);view.subJersey=''});return;
  }
