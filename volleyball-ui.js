@@ -195,10 +195,18 @@ function handleClick(event){
   c.timer.durationMs=n*60000;c.timer.elapsedMs=0;c.timer.since=0;c.timer.running=false;save();render();return;
  }
  if(act==='export-json'){download(JSON.stringify({exportedAt:new Date().toISOString(),sport:'indoor_volleyball',court:c},null,2),'club-control-'+c.id+'-meccs.json','application/json');return}
- if(act==='export-csv'){const rows=[['szett','labdamenet','csapat','mez','technikai_elem','ertekeles','idopont']];
- for(const s of [...c.sets,c.active])for(const e of s.events)rows.push([e.set,e.rallyIndex,c.names[e.team],e.jersey,e.skill,e.grade,e.at]);
+ if(act==='export-csv'){const rows=[['szett','labdamenet','rekord','csapat','mez','technikai_elem','ertekeles','pont_A','pont_B','nyito_csapat','nyito_mez','idopont']];
+ for(const item of [...c.sets,c.active]){
+  const byRally=new Map();
+  for(const e of item.events){if(!byRally.has(e.rallyIndex))byRally.set(e.rallyIndex,[]);byRally.get(e.rallyIndex).push(e)}
+  for(const rally of item.rallies){
+   const teamName=rally.serviceBefore==null?'':c.names[rally.serviceBefore];
+   rows.push([item.number,rally.index,'pont',c.names[rally.winner],'','','',rally.scoreAfter[0],rally.scoreAfter[1],teamName,rally.serverNumber||'',rally.at]);
+   for(const e of byRally.get(rally.index)||[])rows.push([e.set,e.rallyIndex,'statisztika',c.names[e.team],e.jersey,e.skill,e.grade,rally.scoreAfter[0],rally.scoreAfter[1],teamName,rally.serverNumber||'',e.at]);
+  }
+ }
  const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
- download('\uFEFF'+rows.map(r=>r.map(quote).join(';')).join('\r\n'),'club-control-'+c.id+'-statisztika.csv','text/csv;charset=utf-8');return}
+ download('\uFEFF'+rows.map(r=>r.map(quote).join(';')).join('\r\n'),'club-control-'+c.id+'-esemenynaplo.csv','text/csv;charset=utf-8');return}
 }
 function download(content,filename,type){
  const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
