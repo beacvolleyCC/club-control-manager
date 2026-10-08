@@ -46,6 +46,7 @@ assert.equal(c.active.points[0],3);
 assert.equal(v.setterAt(c.active,0).label,'P5');
 v.undo(c);
 assert.equal(v.setterAt(c.active,0).label,'P6'); // undo previous side-out restores the preceding rotation
+v.award(c,0); // break the tie before training-set close
 v.close(c,true);
 v.next(c);
 assert.equal(c.active.setterStarts[0],1,'next set carries setter start position');
