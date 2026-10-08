@@ -49,10 +49,10 @@ function zoneGrid(s,team,editable=false){
  const cells=[4,3,2,5,6,1];
  return '<div class="cc-vb-zones" aria-label="Pályahelyek 1–6">'+cells.map(pos=>{
   const jersey=(editable?s.startLineups:s.lineups)[team][pos-1]||'';
-  return '<div class="cc-vb-zone '+(pos===1&&s.service===team?'server':'')+'"><small>'+pos+'. hely</small>'+
+  return '<div class="cc-vb-zone '+(pos===1&&s.service===team?'server':'')+' '+(core.setterAt(s,team)?.position===pos?'cc-vb-setter-zone':'')+'"><small>'+pos+'. hely</small>'+
     (editable?'<input type="text" maxlength="12" inputmode="numeric" aria-label="'+team+' csapat, '+pos+'. hely, mezszám" data-vb-lineup="'+team+'-'+pos+'" value="'+escape(jersey)+'" placeholder="–">':
       '<strong>'+escape(jersey||'–')+'</strong>')+
-    (pos===1&&s.service===team?'<em>NYIT</em>':'')+
+    (pos===1&&s.service===team?'<em>NYIT</em>':'')+(core.setterAt(s,team)?.position===pos?'<em>FELADÓ</em>':'')+
    '</div>';
  }).join('')+'</div>';
 }
@@ -91,27 +91,46 @@ function pointsHtml(c){
   '<strong class="cc-vb-pts">'+s.points[side]+'</strong>'+
   '<span class="cc-vb-sets">'+wins[side]+' nyert szett</span>'+
   '<span class="cc-vb-ball">'+(live&&activeTeam===side?'● Nyitás':' ')+'</span>'+
-  button('+1 pont','point-'+side,'cc-vb-ptbtn',!live||finished)+'</div>').join('<span class="cc-vb-colon">:</span>')+'</div>'+
+  '<div class="cc-vb-pointcontrols">'+button('−1','minus-'+side,'cc-vb-minus',!core.lastPointCorrection(c,side))+button('+1','point-'+side,'cc-vb-ptbtn',!live||finished)+'</div></div>').join('<span class="cc-vb-colon">:</span>')+'</div>'+
   '<div class="cc-vb-actions">'+button('↶ Visszavonás','undo','cc-counter-quiet',!c.history.length)+
   (s.status==='live'?button(finished?'Szett lezárása ✓':'Szett lezárása','close-set','cc-counter-quiet'):s.status==='closed'?(matchFinished?button('Meccs elemzése','show-analysis','cc-counter-primary')+button('További edzőszett','next-set','cc-counter-quiet'):button('Következő szett →','next-set','cc-counter-primary')): '')+
   button('Kivetítő','project','cc-counter-quiet')+'</div></section>';
 }
+function setterStripHtml(c){
+ const s=c.active;
+ if(s.status==='setup')return '';
+ return '<section class="cc-vb-setterstrip" aria-label="Feladóállás az aktuális szettben">'+[0,1].map(team=>{
+  const setter=core.setterAt(s,team);
+  return '<div class="cc-vb-setterpill"><span>'+escape(c.names[team])+'</span>'+
+    (setter?'<strong>'+escape(setter.label)+'</strong><small>Feladó: #'+escape(setter.jersey||'–')+' · '+setter.position+'. hely · '+(setter.front?'első sor':'hátsó sor')+'</small>':
+     '<strong>–</strong><small>Feladó nincs megadva</small>')+'</div>';
+ }).join('')+'</section>';
+}
 function setupHtml(c){
  const s=c.active;
- return '<section class="cc-vb-panel"><div class="cc-vb-blockhead"><div><h3>'+s.number+'. szett · kezdőfelállás</h3><p>Minden új szett előtt módosítható. A 6 hely a forgásrendet jelenti, nem a labdamenet közbeni tényleges mozgást.</p></div></div>'+
+ return '<section class="cc-vb-panel"><div class="cc-vb-blockhead"><div><h3>'+s.number+'. szett · kezdőfelállás</h3><p>Állítsd be a mezszámokat az 1–6-os helyre, majd válaszd ki, melyik helyen kezd a feladó.</p></div></div>'+
   '<div class="cc-vb-rulecols"><label>Szettek száma<select data-vb-bestof><option value="3"'+(c.bestOf===3?' selected':'')+'>2 nyert szett</option><option value="5"'+(c.bestOf===5?' selected':'')+'>3 nyert szett</option></select></label>'+
   '<label>Alapszett pontszáma<select data-vb-target>'+[15,21,25].map(v=>'<option value="'+v+'"'+(c.target===v?' selected':'')+'>'+v+' pont</option>').join('')+'</select></label></div>'+
   '<div class="cc-vb-label">Kezdő hatos (mezszámok az 1–6-os helyre)</div>'+selectorRoster(s)+
+  '<div class="cc-vb-setterpicks">'+[0,1].map(side=>'<label><span>'+escape(c.names[side])+' · feladó kezdőhelye</span><select data-vb-setter="'+side+'" aria-label="'+escape(c.names[side])+' feladó kezdőhelye"><option value="">Nincs megadva</option>'+
+   [1,2,3,4,5,6].map(pos=>'<option value="'+pos+'"'+(Number(s.setterStarts?.[side])===pos?' selected':'')+'>'+pos+'. hely (P'+pos+')</option>').join('')+'</select></label>').join('')+'</div>'+
   '<div class="cc-vb-startrow"><label>Kezdő nyitás<select data-vb-first-serve><option value="0"'+(view.setupService===0?' selected':'')+'>'+escape(c.names[0])+'</option><option value="1"'+(view.setupService===1?' selected':'')+'>'+escape(c.names[1])+'</option></select></label>'+
-  button('Szett indítása','start-set','cc-counter-primary')+'</div><p class="cc-vb-note">Az egyik csapat kezdő hatosa elég a kezdéshez; az ismeretlen ellenfél felállása üresen hagyható.</p></section>';
+  button('Szett indítása','start-set','cc-counter-primary')+'</div><p class="cc-vb-note">Az ismeretlen ellenfél felállása és feladója üresen maradhat. A P1–P6 felirat a feladó tényleges forgáshelyét jelenti, nem az éppen nyitó csapatét.</p></section>';
 }
 function lineupsHtml(c){
  const s=c.active;if(s.status==='setup')return setupHtml(c);
  const server=s.lineups[s.service]?.[0],next=1-s.service,nextNo=s.lineups[next]?.[1]||'';
- return '<section class="cc-vb-panel"><div class="cc-vb-blockhead"><div><h3>Aktuális forgás</h3><p>A nyitásjog megnyerésekor a fogadó csapat forog egyet.</p></div></div>'+
+ const subs=(s.substitutions||[]).slice(-10).reverse();
+ return '<section class="cc-vb-panel"><div class="cc-vb-blockhead"><div><h3>Aktuális forgás</h3><p>A nyitásjogot megszerző fogadó csapat elforog. A feladó helyét külön követjük.</p></div></div>'+
  '<div class="cc-vb-servebar"><span><b>Most nyit:</b> '+escape(c.names[s.service])+' · '+(server?'#'+escape(server):'ismeretlen')+'</span><small>Másik csapat következő nyitója: '+(nextNo?'#'+escape(nextNo):'–')+'</small></div>'+
  selectorRoster(s)+
- (s.status==='live'?'<div class="cc-vb-sub"><div class="cc-vb-label">Játékoscsere · kézi</div><div class="cc-vb-subcontrols"><select data-vb-subteam aria-label="Csere csapata"><option value="0"'+(view.subTeam===0?' selected':'')+'>'+escape(c.names[0])+'</option><option value="1"'+(view.subTeam===1?' selected':'')+'>'+escape(c.names[1])+'</option></select><select data-vb-subpos aria-label="Cserélendő forgáshely">'+[1,2,3,4,5,6].map(p=>'<option value="'+p+'"'+(String(p)===view.subPos?' selected':'')+'>'+p+'. hely</option>').join('')+'</select><input type="text" data-vb-subjersey maxlength="12" inputmode="numeric" aria-label="Beálló játékos mezszáma" placeholder="Új mezszám" value="'+escape(view.subJersey)+'">'+button('Csere','substitute','cc-counter-quiet')+'</div><small>A liberohelyettesítés és a hivatalos cserekeret-ellenőrzés még nincs automatizálva.</small></div>':'')+'</section>';
+ (s.status==='live'?'<div class="cc-vb-sub"><div class="cc-vb-label">Játékoscsere · kézi rögzítés</div><div class="cc-vb-subcontrols"><label>Csapat<select data-vb-subteam aria-label="Csere csapata"><option value="0"'+(view.subTeam===0?' selected':'')+'>'+escape(c.names[0])+'</option><option value="1"'+(view.subTeam===1?' selected':'')+'>'+escape(c.names[1])+'</option></select></label>'+
+ '<label>Forgáshely<select data-vb-subpos aria-label="Cserélendő forgáshely">'+[1,2,3,4,5,6].map(p=>'<option value="'+p+'"'+(String(p)===view.subPos?' selected':'')+'>'+p+'. hely</option>').join('')+'</select></label>'+
+ '<div class="cc-vb-subout">Lejövő: <output data-vb-subout>#'+escape(s.lineups[view.subTeam]?.[Number(view.subPos)-1]||'–')+'</output></div>'+
+ '<label>Beálló mezszáma<input type="text" data-vb-subjersey maxlength="12" inputmode="numeric" aria-label="Beálló játékos mezszáma" placeholder="Mezszám" value="'+escape(view.subJersey)+'"></label>'+button('Csere rögzítése','substitute','cc-counter-primary')+'</div>'+
+ '<small>Feladó cseréjénél a beálló automatikusan átveszi a feladó megjelölését az adott forgáshelyen. A hivatalos csere- és liberószabályok ellenőrzése még nincs beépítve.</small></div>':'')+
+ '<div class="cc-vb-subhistory"><h4>Cserekövetés · '+s.substitutions.length+' rögzítés</h4>'+
+ (subs.length?subs.map(x=>'<div><strong>'+escape(c.names[x.team])+'</strong><span>#'+escape(x.out)+' → #'+escape(x.in)+'</span><small>'+x.position+'. hely · '+(x.setterChange?'Feladócsere · ':'')+x.rallyIndex+'. labdamenet után</small></div>').join(''):'<p class="cc-vb-note">Ebben a szettben még nem rögzítettél cserét.</p>')+'</div></section>';
 }
 function statHtml(c){
  const s=c.active;
@@ -153,7 +172,7 @@ function render(){
   '<div class="cc-vb-topbar"><div class="cc-vb-courttabs">'+model.courts.map(x=>'<button type="button" data-vb-court="'+escape(x.id)+'" class="cc-vb-courttab '+(x.id===c.id?'active':'')+'">'+escape(x.name)+'</button>').join('')+
   button('+ Pálya','add-court','cc-counter-quiet',model.courts.length>=6)+'</div><div class="cc-vb-sportactions">'+button('Szabad pontozás','free-mode','cc-counter-quiet')+button('Új mérkőzés','reset-match','cc-counter-quiet')+'</div></div>'+
   '<div class="cc-vb-currentcourt"><label class="cc-counter-small" for="cc-vb-courtname">Pálya neve</label><input id="cc-vb-courtname" data-vb-courtname maxlength="60" value="'+escape(c.name)+'">'+(model.courts.length>1?button('Pálya törlése','remove-court','cc-counter-quiet'):'')+'</div>'+
-  pointsHtml(c)+
+  pointsHtml(c)+setterStripHtml(c)+
   '<nav class="cc-vb-tabnav" aria-label="Röplabda modul nézete">'+[['score','Forgás'],['stats','Statisztika'],['analysis','Elemzés']].map(([value,label])=>'<button type="button" data-vb-tab="'+value+'" class="'+(view.tab===value?'active':'')+'">'+label+'</button>').join('')+'</nav>'+
   (view.tab==='score'?lineupsHtml(c):view.tab==='stats'?statHtml(c):analyticsHtml(c))+
   clockHtml(c)+
@@ -174,11 +193,18 @@ function handleClick(event){
  const b=event.target.closest('[data-vb-action]');if(!b)return;
  const act=b.dataset.vbAction,c=court(),s=c.active;
  if(act.startsWith('point-')){update(()=>core.award(c,Number(act.slice(-1))));return}
+ if(act.startsWith('minus-')){
+  const side=Number(act.slice(-1)),info=core.lastPointCorrection(c,side);
+  if(!info){say('A −1 csak a legutóbb kiosztott pontot vonja vissza, a megfelelő csapatnál.',true);return}
+  if((info.discardedStats||info.discardedSubs)&&!window.confirm('A legutóbbi pont visszavonása '+info.discardedStats+' statisztikát és '+info.discardedSubs+' cserét is töröl. Folytatod?'))return;
+  update(()=>core.retractLastPoint(c,side));return;
+ }
  if(act==='undo'){update(()=>{if(!core.undo(c))throw Error('Nincs visszavonható művelet.')});return}
  if(act==='start-set'){
   update(()=>{
    const lineups=[0,1].map(side=>[1,2,3,4,5,6].map(pos=>root.querySelector('[data-vb-lineup="'+side+'-'+pos+'"]')?.value||''));
-   core.start(c,lineups,Number(root.querySelector('[data-vb-first-serve]')?.value));
+   const setterStarts=[0,1].map(side=>root.querySelector('[data-vb-setter="'+side+'"]')?.value||null);
+   core.start(c,lineups,Number(root.querySelector('[data-vb-first-serve]')?.value),setterStarts);
   });return;
  }
  if(act==='close-set'){
@@ -191,7 +217,13 @@ function handleClick(event){
  if(act==='show-analysis'){view.tab='analysis';view.analysis='all';render();return}
  if(act==='next-set'){if(c.sets.filter(x=>x.winner===0).length+(s.winner===0?1:0)>=Math.ceil(c.bestOf/2)||c.sets.filter(x=>x.winner===1).length+(s.winner===1?1:0)>=Math.ceil(c.bestOf/2)){if(!window.confirm('A mérkőzés már eldőlt. Újabb edzőszettet nyitsz?'))return}update(()=>{core.next(c);view.tab='score';view.setupService=1-Number(s.service??0)});return}
  if(act==='substitute'){
-  update(()=>{core.substitute(c,view.subTeam,view.subPos,root.querySelector('[data-vb-subjersey]')?.value);view.subJersey=''});return;
+  const old=s.lineups[view.subTeam]?.[Number(view.subPos)-1]||'';
+  const fresh=String(root.querySelector('[data-vb-subjersey]')?.value||'').trim();
+  if(!fresh){say('A beálló játékos mezszáma kötelező.',true);return}
+  const setter=core.setterAt(s,view.subTeam);
+  const setterNote=setter?.position===Number(view.subPos)?' A feladó megjelölése az új játékosra kerül.':'';
+  if(!window.confirm(escape(c.names[view.subTeam])+': #'+old+' → #'+fresh+' a '+view.subPos+'. helyen.'+setterNote+' Rögzíted?'))return;
+  update(()=>{core.substitute(c,view.subTeam,view.subPos,fresh);view.subJersey=''});return;
  }
  if(act==='add-stat'){
   update(()=>{core.stat(c,view.statsTeam,root.querySelector('[data-vb-statjersey]')?.value,view.statsSkill,root.querySelector('[data-vb-statgrade]')?.value);view.statsJersey=String(root.querySelector('[data-vb-statjersey]')?.value||'')});return;
@@ -227,6 +259,7 @@ function download(content,filename,type){
  const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
+function refreshSubOut(){const el=root?.querySelector('[data-vb-subout]');if(el)el.textContent='#'+(court().active.lineups[view.subTeam]?.[Number(view.subPos)-1]||'–')}
 function handleChange(e){
  const target=e.target,c=court();
  if(target.matches('[data-vb-name]')){c.names[Number(target.dataset.vbName)]=String(target.value||'').trim().slice(0,60)||'Csapat';save();render();return}
@@ -238,8 +271,8 @@ function handleChange(e){
  if(target.matches('[data-vb-statskill]')){view.statsSkill=target.value;view.statsGrade=Object.keys(core.SKILLS[view.statsSkill]||{})[0]||'ace';render();return}
  if(target.matches('[data-vb-statgrade]')){view.statsGrade=target.value;return}
  if(target.matches('[data-vb-statjersey]')){view.statsJersey=target.value;return}
- if(target.matches('[data-vb-subteam]')){view.subTeam=Number(target.value);return}
- if(target.matches('[data-vb-subpos]')){view.subPos=target.value;return}
+ if(target.matches('[data-vb-subteam]')){view.subTeam=Number(target.value);refreshSubOut();return}
+ if(target.matches('[data-vb-subpos]')){view.subPos=target.value;refreshSubOut();return}
  if(target.matches('[data-vb-subjersey]')){view.subJersey=target.value;return}
  if(target.matches('[data-vb-analysis]')){view.analysis=target.value;render();return}
  if(target.matches('[data-vb-clock-type]')){c.timer.type=target.value==='stopwatch'?'stopwatch':'countdown';c.timer.running=false;c.timer.elapsedMs=0;c.timer.since=0;save();render()}

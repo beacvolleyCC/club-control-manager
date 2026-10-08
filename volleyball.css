@@ -100,3 +100,39 @@
 @media(max-width:860px){.cc-vb-reports{grid-template-columns:1fr}}
 @media(max-width:620px){.cc-vb-scorecard,.cc-vb-panel,.cc-vb-clockcard{padding:12px}.cc-vb-lineups{grid-template-columns:1fr}.cc-vb-zone{min-height:72px}.cc-vb-scoregrid{gap:5px}.cc-vb-side{padding:9px 5px}.cc-vb-ptbtn{min-height:60px}.cc-vb-stat-form{gap:8px}.cc-vb-servebar{flex-direction:column}.cc-vb-topbar{align-items:stretch}.cc-vb-courttabs,.cc-vb-sportactions{width:100%}.cc-vb-courttabs>*{flex:1}.cc-vb-sportactions>*{flex:1}.cc-vb-stat-form{grid-template-columns:1fr 1fr}.cc-vb-scoregrid .cc-vb-pts{font-size:clamp(50px,14vw,78px)}.cc-vb-projector{padding:12px}.cc-vb-projectscores h2{font-size:clamp(14px,4vw,26px)}.cc-vb-projectscores strong{font-size:clamp(55px,20vw,110px)}}
 @media(max-width:350px){.cc-vb-stat-form{grid-template-columns:1fr}.cc-vb-actions>button{min-width:88px}.cc-vb-tabnav button{font-size:12px}}
+
+
+/* Setter-position and manual score correction V3 */
+.cc-vb-pointcontrols{display:grid;grid-template-columns:minmax(45px,.54fr) minmax(0,1fr);gap:7px;width:100%;margin-top:3px}
+.cc-vb-pointcontrols .cc-counter-btn{min-height:58px;font-size:19px;padding:9px 5px}
+.cc-vb-minus{background:var(--card);border:1px solid var(--line);font-size:18px!important}
+.cc-vb-setterstrip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.cc-vb-setterpill{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:center;background:color-mix(in srgb,var(--yellow) 11%,var(--card));border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+.cc-vb-setterpill>span{font-size:12px;font-weight:750;overflow-wrap:anywhere}
+.cc-vb-setterpill>strong{font-size:29px;justify-self:end;color:var(--black);font-variant-numeric:tabular-nums}
+.cc-vb-setterpill>small{grid-column:1 / -1;color:var(--muted);font-size:11px}
+.cc-vb-setterpicks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+.cc-vb-setterpicks label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:12px;font-weight:750}
+.cc-vb-setterpicks select{background:var(--card);color:var(--black);border:1px solid var(--line);border-radius:11px;padding:10px;min-width:0;min-height:44px}
+.cc-vb-zone.cc-vb-setter-zone{border-color:var(--yellow-dark);background:color-mix(in srgb,var(--yellow) 13%,var(--card))}
+.cc-vb-zone.cc-vb-setter-zone em{color:var(--amber)}
+.cc-vb-subcontrols label{display:grid;gap:6px;min-width:100px;font-size:11px;font-weight:700;color:var(--muted)}
+.cc-vb-subcontrols label>select,.cc-vb-subcontrols label>input{width:100%}
+.cc-vb-subcontrols .cc-counter-primary{background:var(--yellow);border-color:var(--yellow-dark);color:#171717}
+.cc-vb-subout{background:var(--card);padding:9px 12px;border-radius:10px;border:1px solid var(--line);font-size:12px}
+.cc-vb-subout output{font-weight:850;font-size:15px}
+.cc-vb-subhistory{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.cc-vb-subhistory h4{margin:0 0 8px;font-size:13px}
+.cc-vb-subhistory>div{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:5px 10px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:6px;font-size:12px}
+.cc-vb-subhistory>div span{font-variant-numeric:tabular-nums;font-weight:800}
+.cc-vb-subhistory>div small{width:100%;color:var(--muted);font-size:10px}
+@media(max-width:620px){
+ .cc-vb-setterstrip{gap:7px}
+ .cc-vb-setterpill{padding:10px;gap:4px}
+ .cc-vb-setterpill>strong{font-size:25px}
+ .cc-vb-setterpill>span{font-size:11px}
+ .cc-vb-setterpicks{grid-template-columns:1fr}
+ .cc-vb-subcontrols>label{flex-basis:44%}
+ .cc-vb-subcontrols .cc-counter-btn{width:100%}
+ .cc-vb-pointcontrols .cc-counter-btn{min-height:62px}
+}
