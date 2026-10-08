@@ -422,8 +422,8 @@
   }
   function bindDynamicNavigation(){
     Array.from(document.querySelectorAll('[data-main-section]')).forEach(b=>b.onclick=()=>{const section=b.dataset.mainSection;if(section==='competition'||section==='mass')switchArea(section);else if(section==='calendar'){const area=canRoute(state.area,'calendar')?state.area:(canRoute('competition','calendar')?'competition':'mass');setRoute(area,'calendar')}else setRoute(state.area,section)});
-    $('[data-route-module]').forEach(b=>b.onclick=()=>setRoute(b.dataset.routeArea||state.area,b.dataset.routeModule));
-    $('[data-planning-tab]').forEach(b=>b.onclick=()=>setPlannerTab_(b.dataset.planningTab));
+    $$('[data-route-module]').forEach(b=>b.onclick=()=>setRoute(b.dataset.routeArea||state.area,b.dataset.routeModule));
+    $$('[data-planning-tab]').forEach(b=>b.onclick=()=>setPlannerTab_(b.dataset.planningTab));
   }
 
   function metric(label,value,note){return `<article class="metric-card"><small>${esc(label)}</small><strong>${value==null?'–':esc(value)}</strong><span>${esc(note)}</span></article>`}
