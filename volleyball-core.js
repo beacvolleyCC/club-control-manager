@@ -15,7 +15,7 @@ function newCourt(id=1){
 function checkpoint(c){
  if(!Array.isArray(c.history))c.history=[];
  c.history.push(clone({active:c.active,sets:c.sets,eventSeq:c.eventSeq}));
- if(c.history.length>80)c.history.shift();
+ if(c.history.length>20)c.history.shift();
 }
 function undo(c){
  const entry=c.history?.pop();if(!entry)return false;
