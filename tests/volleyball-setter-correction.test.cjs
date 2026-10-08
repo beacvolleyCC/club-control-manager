@@ -45,7 +45,7 @@ assert.equal(c.active.substitutions.length,1,'earlier substitution preserved');
 assert.equal(c.active.points[0],3);
 assert.equal(v.setterAt(c.active,0).label,'P5');
 v.undo(c);
-assert.equal(v.setterAt(c.active,0).label,'P5'); // undo previous rally also keeps setter based on rotation
+assert.equal(v.setterAt(c.active,0).label,'P6'); // undo previous side-out restores the preceding rotation
 v.close(c,true);
 v.next(c);
 assert.equal(c.active.setterStarts[0],1,'next set carries setter start position');
