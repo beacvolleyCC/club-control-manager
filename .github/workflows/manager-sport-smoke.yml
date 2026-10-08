@@ -34,3 +34,4 @@ jobs:
           node tests/volleyball-core.test.cjs
           node tests/volleyball-ui.test.cjs
           node tests/volleyball-setter-correction.test.cjs
+          node tests/volleyball-setter-ui.test.cjs
