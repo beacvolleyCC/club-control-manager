@@ -62,9 +62,10 @@ function award(c,side){
  if(canClose(c))throw Error('A szett már befejezhető. Zárd le vagy vond vissza az utolsó pontot.');
  checkpoint(c);
  const before=s.service, prior=s.points.slice(),rotBefore=s.rotations.slice();
+ const servedBy=s.lineups[before]?.[0]||'';
  s.points[side]+=1;
  if(before!==side){s.service=side;s.rotations[side]=(s.rotations[side]+1)%6;s.lineups[side]=rotated(s.lineups[side]);}
- const rally={index:s.rallies.length+1,winner:side,serviceBefore:before,serviceAfter:s.service,scoreBefore:prior,scoreAfter:s.points.slice(),rotationBefore:rotBefore,rotationAfter:s.rotations.slice(),serverNumber:s.lineups[s.service][0]||'',at:new Date().toISOString()};
+ const rally={index:s.rallies.length+1,winner:side,serviceBefore:before,serviceAfter:s.service,scoreBefore:prior,scoreAfter:s.points.slice(),rotationBefore:rotBefore,rotationAfter:s.rotations.slice(),serverNumber:servedBy,nextServer:s.lineups[s.service]?.[0]||'',at:new Date().toISOString()};
  s.rallies.push(rally);
  return rally;
 }
