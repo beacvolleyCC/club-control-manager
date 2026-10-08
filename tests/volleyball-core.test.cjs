@@ -17,7 +17,7 @@ v.start(c,lineup,0);
 assert.equal(c.active.service,0);
 assert.equal(c.active.lineups[0][0],'1');
 v.award(c,0);assert.equal(c.active.lineups[0][0],'1');
-v.award(c,1);assert.equal(c.active.service,1);assert.equal(c.active.lineups[1][0],'8');
+v.award(c,1);assert.equal(c.active.service,1);assert.equal(c.active.lineups[1][0],'8');assert.equal(c.active.rallies[1].serverNumber,'1');assert.equal(c.active.rallies[1].nextServer,'8');
 v.award(c,0);assert.equal(c.active.lineups[0][0],'2');
 assert.equal(v.undo(c),true);
 assert.equal(c.active.service,1);assert.equal(c.active.lineups[0][0],'1');
