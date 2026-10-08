@@ -1,0 +1,35 @@
+name: Manager Sport Scoring QA
+
+on:
+  pull_request:
+    paths:
+      - 'scoreboard.js'
+      - 'volleyball-*.js'
+      - 'volleyball.css'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/**'
+      - '.github/workflows/manager-sport-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  sport-scoring-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax checks
+        run: |
+          node --check app.js
+          node --check scoreboard.js
+          node --check volleyball-core.js
+          node --check volleyball-ui.js
+          node --check sw.js
+      - name: Scoring and navigation regression tests
+        run: |
+          node tests/scoreboard.test.cjs
+          node tests/nav-regression.test.cjs
+          node tests/volleyball-core.test.cjs
+          node tests/volleyball-ui.test.cjs
