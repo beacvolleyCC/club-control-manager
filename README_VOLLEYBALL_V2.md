@@ -48,3 +48,13 @@ node tests/volleyball-ui.test.cjs
 node tests/nav-regression.test.cjs
 ```
 Élesítés előtt és után: Manager belépés, főmenü, Edzéstervezés/ Tervező és Számláló, új pálya, alapértelmezett 1 pálya, szettkezdés, forgás nyitásváltáskor, nyitó mezszáma, kézi szettlezárás, korábbi szett elemzés, statisztikai események, adatvisszaolvasás/refresh, letöltés iOS Safariban.
+
+
+## V3 – feladóállás, pontjavítás és cserék (2026-10-08)
+- A röplabda meccsvezető két pontvezérlője csapatonként **−1 / +1** (ujjbarát nagy gombok).
+- **−1 biztonsági szabály:** kizárólag a legutolsó labdamenetet nyerő csapat pontja vonható vissza. A pont visszavonásával az utána rögzített kapcsolódó statisztikák és cserék is visszaállnak; ezek meglétekor megerősítés jelenik meg. Régebbi vagy nem az utolsó labdamenethez tartozó pontot ez a v3 még nem javít. Ha a visszavonási előzmény már kifutott a 20 műveletes mentési korlátból, a −1 nem érhető el.
+- **Szettenként feladó kezdőhelye:** 1–6-os hely megadása mindkét csapatnak a szett indulása előtt. Az ellenfél kijelölése opcionális. A feladó mezszámát a kezdő felállásból veszi.
+- **Folyamatos P1–P6 kijelzés:** a pontozó alatt és a pályarajzon is látható a feladó aktuális forgáshelye, első/hátsó sora, mezszáma. A csapat csak nyitásjog megszerzésekor forog.
+- **Csere:** csapat + pozíció + beálló mezszám, lejövő mezszám előnézete, megerősítő párbeszéd és visszanézhető szetten belüli cserejegyzék. A feladó mezszáma a feladót helyettesítő játékosra frissül, a P-állás pedig a forgáshelyéhez kötve marad.
+- **Fontos:** a cserekezelés még edzői nyilvántartás, nem hivatalos e-jegyzőkönyv. FIVB 2025–2028 szerint a hivatalos csere és a liberóváltás eltérő szabályú; a 2026-os FIVB szabálykísérleteknél a megengedett cserekorlát is eltérhet. A program nem mondja azt, hogy egy kézi csere jogszerű volt.
+- QA: `node tests/volleyball-setter-correction.test.cjs` és `node tests/volleyball-setter-ui.test.cjs`; CI workflow mindkettőt futtatja.
