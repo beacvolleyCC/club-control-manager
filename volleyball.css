@@ -1,0 +1,102 @@
+
+/* Club Control – volleyball-specific live screen */
+.cc-vb-topbar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:12px 0 14px;align-items:center}
+.cc-vb-courttabs,.cc-vb-sportactions{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.cc-vb-courttab{border:1px solid var(--line);background:var(--soft);color:var(--black);min-height:44px;border-radius:11px;padding:10px 13px;font-weight:750}
+.cc-vb-courttab.active{background:var(--yellow);color:#161616;border-color:var(--yellow-dark)}
+.cc-vb-currentcourt{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.cc-vb-currentcourt input{max-width:180px;min-width:0;flex:1;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--black);font-weight:750;padding:8px}
+.cc-vb-currentcourt button{margin-left:auto;font-size:12px}
+.cc-vb-scorecard,.cc-vb-panel,.cc-vb-clockcard{margin-bottom:13px;background:var(--card);border:1px solid var(--line);border-radius:17px;padding:15px}
+.cc-vb-gameinfo{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;font-size:13px}
+.cc-vb-gameinfo strong{font-weight:800}
+.cc-vb-gameinfo span{color:var(--muted)}
+.cc-vb-scoregrid{display:grid;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr);align-items:center;gap:7px;margin:13px 0}
+.cc-vb-side{min-width:0;background:var(--soft);border:1px solid transparent;border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center}
+.cc-vb-side.serving{border-color:var(--yellow-dark);background:color-mix(in srgb,var(--yellow) 9%,var(--card))}
+.cc-vb-side input{width:100%;min-width:0;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--black);text-align:center;font-size:15px;font-weight:750;padding:8px 0}
+.cc-vb-side .cc-vb-pts{font-size:clamp(48px,9vw,90px);font-weight:850;line-height:1.2;letter-spacing:-.06em;font-variant-numeric:tabular-nums}
+.cc-vb-sets{font-size:12px;color:var(--muted)}
+.cc-vb-ball{height:22px;font-size:11px;color:var(--green);font-weight:750;margin-top:5px}
+.cc-vb-colon{text-align:center;color:var(--muted);font-size:22px;font-weight:800}
+.cc-vb-ptbtn{width:100%;min-height:54px;font-size:19px;font-weight:800;background:var(--yellow);border-color:var(--yellow-dark);color:#191919}
+.cc-vb-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cc-vb-actions button{flex:1;min-width:105px;font-size:12px}
+.cc-vb-tabnav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:5px;background:var(--soft);border-radius:13px;margin:12px 0}
+.cc-vb-tabnav button{border:0;border-radius:9px;min-height:45px;background:transparent;font-weight:750;color:var(--muted)}
+.cc-vb-tabnav button.active{background:var(--card);color:var(--black);box-shadow:0 1px 6px #0001}
+.cc-vb-panel h3,.cc-vb-panel h4,.cc-vb-panel h5{margin:0;font-weight:800}
+.cc-vb-panel h3{font-size:16px}
+.cc-vb-panel h4{font-size:14px}
+.cc-vb-panel h5{font-size:12px;margin:18px 0 9px}
+.cc-vb-panel p{margin:5px 0;font-size:12px;line-height:1.5;color:var(--muted)}
+.cc-vb-blockhead{display:flex;gap:10px;justify-content:space-between;align-items:center;margin:0 0 13px}
+.cc-vb-blockhead select,.cc-vb-rulecols select,.cc-vb-startrow select,.cc-vb-stat-form select,.cc-vb-stat-form input,.cc-vb-subcontrols select,.cc-vb-subcontrols input,.cc-vb-clockhead select,.cc-vb-timepresets input{background:var(--card);border:1px solid var(--line);color:var(--black);border-radius:10px;padding:9px 10px;min-height:43px;min-width:0}
+.cc-vb-label{font-size:12px;letter-spacing:.02em;text-transform:uppercase;font-weight:750;margin:10px 0 7px;color:var(--muted)}
+.cc-vb-rulecols{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.cc-vb-rulecols label,.cc-vb-startrow label,.cc-vb-stat-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:var(--muted);min-width:0}
+.cc-vb-rulecols select{min-width:128px}
+.cc-vb-lineups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cc-vb-lineup-box{min-width:0;border:1px solid var(--line);border-radius:13px;padding:10px;background:var(--soft)}
+.cc-vb-lineup-box .cc-vb-blockhead{align-items:start;margin-bottom:10px;flex-wrap:wrap}
+.cc-vb-lineup-box .cc-vb-blockhead strong{font-size:13px;overflow-wrap:anywhere}
+.cc-vb-lineup-box .cc-vb-blockhead small{font-size:10px;color:var(--muted)}
+.cc-vb-zones{border-top:3px solid var(--yellow);padding-top:9px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.cc-vb-zone{display:flex;align-items:center;flex-direction:column;justify-content:center;gap:2px;border:1px solid var(--line);background:var(--card);border-radius:10px;min-height:73px;min-width:0;padding:7px 3px}
+.cc-vb-zone small{color:var(--muted);font-size:10px}
+.cc-vb-zone strong{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums}
+.cc-vb-zone em{font-style:normal;color:var(--green);font-size:9px;font-weight:850}
+.cc-vb-zone.server{border-color:var(--green)}
+.cc-vb-zone input{width:calc(100% - 4px);min-width:0;text-align:center;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--black);padding:8px 2px;font-size:16px;font-weight:750}
+.cc-vb-startrow{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:13px}
+.cc-vb-startrow>button{flex:1;min-width:150px}
+.cc-vb-note{line-height:1.55!important;margin:10px 0!important}
+.cc-vb-servebar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;background:color-mix(in srgb,var(--yellow) 14%,var(--card));padding:12px;border-radius:11px;margin-bottom:12px}
+.cc-vb-servebar span{font-size:13px}.cc-vb-servebar small{font-size:11px;color:var(--muted)}
+.cc-vb-sub{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.cc-vb-subcontrols{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.cc-vb-subcontrols>*{flex:1;min-width:95px}
+.cc-vb-sub small{display:block;color:var(--muted);font-size:10px;margin-top:9px;line-height:1.5}
+.cc-vb-stat-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cc-vb-stat-form label input,.cc-vb-stat-form label select{width:100%}
+.cc-vb-statadd,.cc-vb-export{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}
+.cc-vb-statadd>button{flex:1;min-width:130px}
+.cc-vb-eventlist,.cc-vb-setlist{display:grid;gap:7px;margin:10px 0}
+.cc-vb-eventlist>div,.cc-vb-setlist>div{display:flex;gap:7px;flex-wrap:wrap;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--soft);font-size:12px}
+.cc-vb-eventlist span{color:var(--muted)}
+.cc-vb-eventlist small,.cc-vb-setlist small{color:var(--muted);font-size:10px}
+.cc-vb-tag{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;margin-bottom:12px}
+.cc-vb-warning{color:var(--red)!important}
+.cc-vb-reports{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cc-vb-report{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--soft);padding:12px}
+.cc-vb-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:10px 0}
+.cc-vb-metrics div{display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--card);border-radius:9px;padding:9px 4px}
+.cc-vb-metrics b{font-size:17px;font-variant-numeric:tabular-nums}.cc-vb-metrics small{font-size:10px;color:var(--muted);text-align:center}
+.cc-vb-rotationstats{display:flex;flex-wrap:wrap;gap:6px}
+.cc-vb-rotationstats span{font-size:11px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:7px}
+.cc-vb-tablewrap{overflow-x:auto;max-width:100%;padding-bottom:4px}
+.cc-vb-tablewrap table{width:100%;border-collapse:collapse;min-width:580px;font-size:11px}
+.cc-vb-tablewrap th,.cc-vb-tablewrap td{padding:9px 6px;text-align:center;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.cc-vb-tablewrap th:first-child,.cc-vb-tablewrap td:first-child{text-align:left}
+.cc-vb-clockcard{background:var(--soft)}
+.cc-vb-clockhead{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.cc-vb-clockhead output{margin-top:5px}
+.cc-vb-timebtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cc-vb-timepresets{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}
+.cc-vb-timepresets button{min-height:38px;font-size:11px;padding:8px}
+.cc-vb-timepresets label{display:flex;gap:5px;margin-left:auto}
+.cc-vb-timepresets input{width:68px;min-height:38px;padding:7px}
+.cc-vb-message{font-size:12px;min-height:17px;color:var(--green);margin:8px}
+.cc-vb-message.cc-vb-error{color:var(--red)}
+.cc-vb-projector{position:fixed;inset:0;z-index:50000;min-height:100vh;background:#090b10;color:#fff;padding:24px;display:flex;flex-direction:column}
+.cc-vb-projecthead,.cc-vb-projectfoot{display:flex;justify-content:space-between;gap:12px;align-items:center;font-weight:750}
+.cc-vb-projectscores{flex:1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:clamp(8px,3vw,50px);align-items:center}
+.cc-vb-projectscores>div{text-align:center;min-width:0}
+.cc-vb-projectscores h2{font-size:clamp(17px,3.2vw,52px);overflow-wrap:anywhere}
+.cc-vb-projectscores strong{display:block;font-size:clamp(70px,20vw,240px);font-weight:850;line-height:1.1;letter-spacing:-.07em;font-variant-numeric:tabular-nums}
+.cc-vb-projectscores i{font-size:clamp(30px,8vw,110px);font-style:normal;color:#f7b700}
+.cc-vb-projectscores small{color:#f7b700}
+.cc-vb-projectfoot{font-size:clamp(13px,2vw,34px);border-top:1px solid #555;padding-top:14px}
+@media(max-width:860px){.cc-vb-reports{grid-template-columns:1fr}}
+@media(max-width:620px){.cc-vb-scorecard,.cc-vb-panel,.cc-vb-clockcard{padding:12px}.cc-vb-lineups{grid-template-columns:1fr}.cc-vb-zone{min-height:72px}.cc-vb-scoregrid{gap:5px}.cc-vb-side{padding:9px 5px}.cc-vb-ptbtn{min-height:60px}.cc-vb-stat-form{gap:8px}.cc-vb-servebar{flex-direction:column}.cc-vb-topbar{align-items:stretch}.cc-vb-courttabs,.cc-vb-sportactions{width:100%}.cc-vb-courttabs>*{flex:1}.cc-vb-sportactions>*{flex:1}.cc-vb-stat-form{grid-template-columns:1fr 1fr}.cc-vb-scoregrid .cc-vb-pts{font-size:clamp(50px,14vw,78px)}.cc-vb-projector{padding:12px}.cc-vb-projectscores h2{font-size:clamp(14px,4vw,26px)}.cc-vb-projectscores strong{font-size:clamp(55px,20vw,110px)}}
+@media(max-width:350px){.cc-vb-stat-form{grid-template-columns:1fr}.cc-vb-actions>button{min-width:88px}.cc-vb-tabnav button{font-size:12px}}

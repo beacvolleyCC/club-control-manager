@@ -28,7 +28,7 @@
     return fresh;
   }
   function load(){
-    const initial={mode:'volleyball',target:25,bestOf:3,courts:[makeCourt(1),makeCourt(2)]};
+    const initial={mode:'volleyball',target:25,bestOf:3,courts:[makeCourt(1)]};
     try{
       const parsed=JSON.parse(localStorage.getItem(KEY)||'null');
       if(!parsed||!Array.isArray(parsed.courts)||!parsed.courts.length)return initial;
@@ -151,6 +151,14 @@
   }
   function render(){
     if(!root||!root.isConnected)return;
+    if(model.mode==='volleyball'&&window.CCManagerVolleyball){
+      projectorId=null;
+      root.innerHTML='<div id="ccVolleyballHost"></div>';
+      window.CCManagerVolleyball.mount(root.querySelector('#ccVolleyballHost'),()=>{
+        model.mode='free';save();render();
+      });
+      return;
+    }
     root.innerHTML='<div class="page-intro cc-page-header-panel"><div><h2>Számláló</h2><p>Többpályás pontszámlálás és időmérés edzésekhez, minitornákhoz.</p></div><span class="read-only-badge">HELYI ESZKÖZ</span></div>'+
       '<div class="cc-counter-intro"><div class="cc-counter-settings"><label>Játékmód <select id="cc-counter-mode"><option value="volleyball"'+(model.mode==='volleyball'?' selected':'')+'>Röplabda</option><option value="free"'+(model.mode==='free'?' selected':'')+'>Szabad pontozás</option></select></label>'+
       (model.mode==='volleyball'?'<label>Pontszám <select id="cc-counter-target">'+[15,21,25].map(n=>'<option value="'+n+'"'+(model.target===n?' selected':'')+'>'+n+' pont</option>').join('')+'</select></label><label>Nyert szettek <select id="cc-counter-bestof"><option value="3"'+(model.bestOf===3?' selected':'')+'>2 (3 szettből)</option><option value="5"'+(model.bestOf===5?' selected':'')+'>3 (5 szettből)</option></select></label>':'')+
