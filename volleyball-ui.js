@@ -10,7 +10,21 @@ const unique=(prefix)=>prefix+Math.floor(Date.now()%100000000)+Math.floor(Math.r
 let model=null,root=null,projector=false,clockInterval=null,onFree=null;
 const view={tab:'score',statsTeam:0,statsSkill:'serve',statsGrade:'ace',statsJersey:'',analysis:'all',subTeam:0,subPos:'1',subJersey:'',setupService:0};
 const court=()=>model.courts.find(c=>c.id===model.selected)||model.courts[0];
-function save(){try{localStorage.setItem(KEY,JSON.stringify(model))}catch(e){console.warn('Volleyball local save:',e)}}
+function save(){
+ try{localStorage.setItem(KEY,JSON.stringify(model));return true}
+ catch(e){
+  // Old undo snapshots may be dropped before any live match data is lost.
+  for(let i=0;i<30;i++){
+   const candidate=model.courts.filter(c=>c.history?.length).sort((x,y)=>y.history.length-x.history.length)[0];
+   if(!candidate)break;
+   candidate.history.shift();
+   try{localStorage.setItem(KEY,JSON.stringify(model));say('A helyi tárhely megtelt: régi visszavonási lépések törölve. Érdemes JSON mentést készíteni.',true);return true}catch(_){}
+  }
+  say('Nem sikerült menteni a mérkőzést. Exportáld az adatokat JSON-fájlba, és ellenőrizd a böngészőtárhelyet.',true);
+  console.warn('Volleyball local save:',e);
+  return false;
+ }
+}
 function fresh(){
  const c=core.newCourt(1);
  try{
