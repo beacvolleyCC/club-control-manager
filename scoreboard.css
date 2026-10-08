@@ -1,0 +1,61 @@
+/* Club Control – Edzéstervezés / Számláló v1 */
+.cc-counter-intro{display:flex;gap:14px;justify-content:space-between;align-items:end;flex-wrap:wrap;margin:16px 0 10px}
+.cc-counter-settings{display:flex;align-items:end;gap:10px;flex-wrap:wrap}
+.cc-counter-settings label{display:grid;gap:5px;font-size:12px;font-weight:700;color:var(--muted)}
+.cc-counter-settings select,.cc-counter-timer select,.cc-counter-custom input{appearance:auto;min-height:42px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--black);max-width:100%}
+.cc-counter-btn{border:1px solid var(--line);border-radius:11px;background:var(--card);font-weight:700;min-height:44px;padding:9px 14px;display:inline-flex;align-items:center;justify-content:center;text-align:center;touch-action:manipulation;transition:transform .12s ease,background .12s ease}
+.cc-counter-btn:active:not(:disabled){transform:scale(.96)}
+.cc-counter-add,.cc-counter-primary{background:var(--yellow);border-color:var(--yellow-dark);color:#171717}
+.cc-counter-quiet{background:var(--soft)}
+.cc-counter-notice{border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--muted);padding:12px 14px;font-size:12px;line-height:1.5;margin-bottom:14px}
+.cc-counter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.cc-counter-court{min-width:0;margin:0;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
+.cc-counter-card-head{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:15px}
+.cc-counter-court-title{display:flex;align-items:center;gap:9px;min-width:0}
+.cc-counter-court-title label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.cc-counter-court-title input{font-size:16px;font-weight:800;min-width:65px;width:min(100%,150px);border:0;border-bottom:1px solid transparent;padding:7px 0;background:transparent;color:var(--black)}
+.cc-counter-court-title input:focus{border-bottom-color:var(--yellow)}
+.cc-counter-head-actions{display:flex;gap:7px}
+.cc-counter-head-actions .cc-counter-btn{min-height:38px;padding:6px 10px;font-size:12px}
+.cc-counter-remove{font-size:20px!important;min-width:38px}
+.cc-counter-score-row{display:grid;grid-template-columns:minmax(0,1fr) 12px minmax(0,1fr);gap:8px;align-items:center}
+.cc-counter-team{min-width:0;display:flex;align-items:center;flex-direction:column;padding:14px 8px 12px;background:var(--soft);border-radius:14px}
+.cc-counter-small{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:750}
+.cc-counter-team-name{width:100%;min-width:0;text-align:center;background:transparent;border:0;border-bottom:1px solid transparent;margin:7px 0 3px;padding:7px 4px;font-size:14px;font-weight:750;color:var(--black);text-overflow:ellipsis}
+.cc-counter-team-name:focus{border-bottom-color:var(--yellow)}
+.cc-counter-score{font-variant-numeric:tabular-nums;font-size:clamp(45px,5.2vw,82px);letter-spacing:-.07em;line-height:1.2;font-weight:850}
+.cc-counter-middle{font-size:24px;font-weight:800;color:var(--muted);text-align:center}
+.cc-counter-point-buttons{display:flex;gap:7px;width:100%;margin-top:12px}
+.cc-counter-point-buttons button{flex:1;min-width:0;min-height:54px;font-size:20px}
+.cc-counter-minus{background:var(--card)}
+.cc-counter-plus{background:var(--yellow);border-color:var(--yellow-dark);color:#171717}
+.cc-counter-setbar{min-height:44px;margin:12px 0 0;padding:9px 12px;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:9px;font-size:12px;color:var(--muted)}
+.cc-counter-setbar strong{color:var(--black);font-variant-numeric:tabular-nums;font-size:18px}
+.cc-counter-last{font-size:12px;color:var(--muted);min-height:22px;margin:9px 0 4px}
+.cc-counter-bottom-actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.cc-counter-bottom-actions .cc-counter-btn{flex:1;min-width:110px;font-size:12px}
+.cc-counter-timer{margin-top:15px;padding:14px;background:var(--soft);border:1px solid var(--line);border-radius:14px}
+.cc-counter-timer-top{display:flex;justify-content:space-between;align-items:start;gap:8px}
+.cc-counter-timer-top select{max-width:155px;font-size:12px}
+.cc-counter-clock{display:block;font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(30px,3.2vw,43px);line-height:1.2;margin:5px 0 10px}
+.cc-counter-finished{color:var(--red)!important}
+.cc-counter-timer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cc-counter-timer-presets{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.cc-counter-timer-presets>.cc-counter-btn{font-size:12px;padding:6px 10px;min-height:38px}
+.cc-counter-custom{display:flex;gap:5px;align-items:center;margin-left:auto}
+.cc-counter-custom input{width:59px;min-height:38px;padding:6px;font-size:12px}
+.cc-counter-custom .cc-counter-btn{min-height:38px;padding:6px 8px;font-size:11px}
+.cc-counter-footnote{color:var(--muted);font-size:12px;line-height:1.55;margin:14px 0 30px}
+.cc-counter-projector{position:fixed;inset:0;z-index:50000;background:#080a0f;color:#fff;display:flex;flex-direction:column;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));min-height:100vh}
+.cc-counter-projector-top{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:clamp(14px,2vw,23px);letter-spacing:.08em;font-weight:700}
+.cc-counter-project-close{background:#262a32;color:#fff;border-color:#525965;min-height:47px}
+.cc-counter-projector-body{flex:1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:min(4vw,48px);align-items:center;text-align:center}
+.cc-counter-project-team{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:min(5vh,45px)}
+.cc-counter-project-team>div{font-size:clamp(20px,3.8vw,65px);font-weight:750;overflow-wrap:anywhere}
+.cc-counter-project-team strong{font-size:clamp(80px,17vw,260px);font-variant-numeric:tabular-nums;line-height:1;font-weight:850;letter-spacing:-.07em}
+.cc-counter-project-colon{font-size:clamp(48px,8vw,150px);font-weight:700;color:#f7b700}
+.cc-counter-projector-foot{display:flex;align-items:center;justify-content:space-around;gap:14px;border-top:1px solid #41444a;padding-top:16px;font-size:clamp(17px,2.4vw,38px);font-weight:700}
+.cc-counter-projector-foot output{font-variant-numeric:tabular-nums}
+@media(max-width:1080px){.cc-counter-grid{grid-template-columns:1fr 1fr;gap:10px}.cc-counter-court{padding:12px}.cc-counter-score{font-size:55px}.cc-counter-setbar{flex-wrap:wrap}}
+@media(max-width:760px){.cc-counter-grid{grid-template-columns:1fr}.cc-counter-court{padding:14px}.cc-counter-score{font-size:clamp(54px,14vw,82px)}.cc-counter-card-head{margin-bottom:10px}.cc-counter-settings{width:100%}.cc-counter-settings label{flex:1;min-width:95px}.cc-counter-intro>.cc-counter-btn{width:100%}.cc-counter-custom{margin-left:0}.cc-counter-projector-top{font-size:11px}.cc-counter-projector-body{gap:8px}.cc-counter-project-team>div{font-size:clamp(13px,4vw,27px)}.cc-counter-project-team strong{font-size:clamp(55px,19vw,110px)}.cc-counter-projector-foot{font-size:14px}}
+@media(max-width:370px){.cc-counter-point-buttons{gap:4px}.cc-counter-point-buttons button{padding:7px 2px}.cc-counter-team{padding:10px 4px}.cc-counter-timer-presets{gap:5px}.cc-counter-timer-presets>.cc-counter-btn{padding:5px 8px}.cc-counter-custom .cc-counter-btn{padding:5px}}
