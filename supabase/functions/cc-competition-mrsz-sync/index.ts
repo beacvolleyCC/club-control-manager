@@ -33,7 +33,7 @@ function json(data:unknown,status=200){
 }
 function cleanText(v:unknown){return String(v??'').replace(/\s+/g,' ').trim()}
 function decodeEntities(input:string){
-  const named:Record<string,string>={amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' ',aacute:'á',Aacute:'Á',eacute:'é',Eacute:'É',iacute:'í',Iacute:'Í',oacute:'ó',Oacute:'Ö',ouml:'ö',Ouml:'Ö',odblac:'ő',Odblac:'Ő',uacute:'ú',Uacute:'Ú',uuml:'ü',Uuml:'Ü',udblac:'ű',Udblac:'Ű'};
+  const named:Record<string,string>={amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' ',aacute:'á',Aacute:'Á',eacute:'é',Eacute:'É',iacute:'í',Iacute:'Í',oacute:'ó',Oacute:'Ó',ouml:'ö',Ouml:'Ö',odblac:'ő',Odblac:'Ő',uacute:'ú',Uacute:'Ú',uuml:'ü',Uuml:'Ü',udblac:'ű',Udblac:'Ű'};
   return input.replace(/&(#x?[0-9a-f]+|[a-zA-Z]+);/g,(_,key)=>{
     if(key[0]==='#'){
       const hex=key[1]?.toLowerCase()==='x';
@@ -101,7 +101,7 @@ async function fetchMrszHtml(url:string){
       'cache-control':'no-cache','pragma':'no-cache','referer':'https://www.hunvolley.info/',
     }
   });
-  if(!res.ok)throw new Error(\`MRSZ_HTTP_\${res.status}\`);
+  if(!res.ok)throw new Error(`MRSZ_HTTP_${res.status}`);
   const html=decodeHtml(await res.arrayBuffer(),res.headers.get('content-type'));
   if(!html||html.length<500)throw new Error('MRSZ_EMPTY_HTML');
   return html;
@@ -131,37 +131,32 @@ function discoverContexts(clubHtml:string,season:string){
     });
   }
 
-  // Fallback for layouts where the competition label and team link sit in the same
-  // visual row but nested markup prevents document-order tracking from seeing it.
+  // Fallback for Hunvolley layouts where team navigation is emitted through
+  // onclick/JS or encoded query strings instead of a normal anchor.
   if(found.size<3){
     for(const row of rowList(clubHtml)){
-      const text=stripHtml(row);if(!isBeacTeamName(text))continue;
-      const links=htmlAnchors(row),team=links.find(a=>sourceTeamIdFromHref(a.href)&&isBeacTeamName(a.text));
-      const competition=links.find(a=>/(?:Férfi|Női)\s+Budapest\s+Bajnokság/i.test(a.text));
-      if(!team||!competition)continue;
-      const key=classifyContext(team.text,competition.text);if(!key)continue;
-      const spec=CONTEXTS[key];
+      const rowText=stripHtml(row);if(!isBeacTeamName(rowText))continue;
+      const ids=[...row.matchAll(/p_csapat_fo_kod(?:=|%3D)(\d+)/gi)].map(m=>m[1]);
+      const sourceTeamId=[...new Set(ids)][0]||'';if(!sourceTeamId)continue;
+      const competitionName=(rowText.match(/(?:Férfi|Női)\s+Budapest\s+Bajnokság/i)||[])[0]||'';
+      const teamName=(rowText.match(/Budapesti\s+Egyetemi\s+Atlétikai\s+Club(?:\s+II\.?)?/i)||[])[0]||'Budapesti Egyetemi Atlétikai Club';
+      const key=classifyContext(teamName,competitionName);if(!key)continue;
+      const spec=CONTEXTS[key],year=seasonCode(season);
+      const teamUrl=`https://www.hunvolley.info/pr_a/920/003/p_003.asp?p_csapat_fo_kod=${encodeURIComponent(sourceTeamId)}&p_evad_kod=${encodeURIComponent(year)}&p_sportszervezet_kod=${MRSZ_CLUB_CODE}`;
+      const links=htmlAnchors(row),competition=links.find(a=>/(?:Férfi|Női)\s+Budapest\s+Bajnokság/i.test(a.text));
       found.set(key,{
         key,internalTeamId:spec.internalTeamId,competitionLabel:spec.competitionLabel,
-        sourceTeamId:sourceTeamIdFromHref(team.href),teamName:team.text,
-        teamUrl:withSeason(absoluteHunvolleyUrl(team.href),season),
-        competitionUrl:absoluteHunvolleyUrl(competition.href)
+        sourceTeamId,teamName,teamUrl,competitionUrl:absoluteHunvolleyUrl(competition?.href||'')
       });
     }
   }
   return [...found.values()];
 }
 
-async function resolveCompetitionUrl(ctx:MrszContext,season:string){
-  // Team profile is used as a second source of truth for the competition link.
-  // If the profile does not expose it, keep the club-profile link.
-  try{
-    const teamHtml=await fetchMrszHtml(withSeason(ctx.teamUrl,season));
-    const target=ctx.key==='men'?/Férfi\s+Budapest\s+Bajnokság/i:/Női\s+Budapest\s+Bajnokság/i;
-    const link=htmlAnchors(teamHtml).find(a=>target.test(a.text)&&!sourceTeamIdFromHref(a.href));
-    const resolved=absoluteHunvolleyUrl(link?.href||'');if(resolved)return resolved;
-  }catch(_){}
-  return ctx.competitionUrl;
+function resolveCompetitionUrl(ctx:MrszContext,teamHtml:string){
+  const target=ctx.key==='men'?/Férfi\s+Budapest\s+Bajnokság/i:/Női\s+Budapest\s+Bajnokság/i;
+  const link=htmlAnchors(teamHtml).find(a=>target.test(a.text)&&!sourceTeamIdFromHref(a.href));
+  return absoluteHunvolleyUrl(link?.href||ctx.competitionUrl||'');
 }
 
 function parseStandings(html:string,ctx:MrszContext){
@@ -201,8 +196,8 @@ function parseStandings(html:string,ctx:MrszContext){
   }
 
   let rows=[...byId.values()];
-  if(!rows.some(r=>r.sourceTeamId===ctx.sourceTeamId))throw new Error(\`MRSZ_STANDINGS_FOCUS_MISSING_\${ctx.sourceTeamId}\`);
-  if(rows.length<2||rows.length>30)throw new Error(\`MRSZ_STANDINGS_SIZE_INVALID_\${rows.length}\`);
+  if(!rows.some(r=>r.sourceTeamId===ctx.sourceTeamId))throw new Error(`MRSZ_STANDINGS_FOCUS_MISSING_${ctx.sourceTeamId}`);
+  if(rows.length<2||rows.length>30)throw new Error(`MRSZ_STANDINGS_SIZE_INVALID_${rows.length}`);
 
   const allPositioned=rows.every(r=>Number(r.position)>0);
   if(allPositioned)rows.sort((a,b)=>a.position-b.position);
@@ -215,26 +210,18 @@ function parseStandings(html:string,ctx:MrszContext){
 
 async function ensureMap(service:any,ctx:MrszContext,season:string,competitionUrl:string){
   const now=new Date().toISOString();
-  const {error:disableError}=await service.from('competition_source_team_maps')
-    .update({enabled:false,updated_at:now})
+  const {error:deleteError}=await service.from('competition_source_team_maps')
+    .delete()
     .eq('source',SOURCE).eq('season',season).eq('internal_team_id',ctx.internalTeamId)
     .neq('source_team_id',ctx.sourceTeamId);
-  if(disableError)throw new Error(\`MRSZ_MAP_DISABLE_FAILED: \${disableError.message}\`);
+  if(deleteError)throw new Error(`MRSZ_MAP_REPLACE_FAILED: ${deleteError.message}`);
 
   const {error:upsertError}=await service.from('competition_source_team_maps').upsert({
     source:SOURCE,season,source_team_id:ctx.sourceTeamId,internal_team_id:ctx.internalTeamId,
     competition_label:ctx.competitionLabel,source_url:competitionUrl||ctx.teamUrl,
     enabled:true,updated_at:now
   },{onConflict:'source,season,source_team_id'});
-  if(upsertError)throw new Error(\`MRSZ_MAP_UPSERT_FAILED: \${upsertError.message}\`);
-}
-
-async function makeMrszCurrentSource(service:any,season:string,internalTeamId:string){
-  // Keep federation history in sync_runs/source_matches, but only one standings
-  // snapshot source is active at a time so Player and Manager cannot show duplicates.
-  const {error}=await service.from('competition_source_standings')
-    .delete().eq('season',season).eq('internal_team_id',internalTeamId).neq('source',SOURCE);
-  if(error)throw new Error(\`MRSZ_SOURCE_SWITCH_FAILED: \${error.message}\`);
+  if(upsertError)throw new Error(`MRSZ_MAP_UPSERT_FAILED: ${upsertError.message}`);
 }
 
 Deno.serve(async(req)=>{
@@ -272,7 +259,7 @@ Deno.serve(async(req)=>{
 
   const missing=(['women1','women2','men'] as ContextKey[]).filter(key=>!contexts.some(ctx=>ctx.key===key));
   if(missing.length){
-    return json({ok:false,status:'validation_failed',source:SOURCE,season,errors:[\`MRSZ_BEAC_CONTEXT_MISSING: \${missing.join(', ')}\`]},200);
+    return json({ok:false,status:'validation_failed',source:SOURCE,season,errors:[`MRSZ_BEAC_CONTEXT_MISSING: ${missing.join(', ')}`]},200);
   }
 
   const {data:run,error:runError}=await service.from('competition_sync_runs')
@@ -284,18 +271,22 @@ Deno.serve(async(req)=>{
 
   for(const ctx of contexts){
     try{
-      const competitionUrl=await resolveCompetitionUrl(ctx,season);
-      if(!competitionUrl)throw new Error(\`MRSZ_COMPETITION_URL_MISSING: \${ctx.key}\`);
-      await ensureMap(service,ctx,season,competitionUrl);
+      const teamHtml=await fetchMrszHtml(withSeason(ctx.teamUrl,season));
+      const competitionUrl=resolveCompetitionUrl(ctx,teamHtml);
+      let standings:any[]=[];
+      try{
+        standings=parseStandings(teamHtml,ctx);
+      }catch(teamParseError){
+        if(!competitionUrl)throw teamParseError;
+        standings=parseStandings(await fetchMrszHtml(competitionUrl),ctx);
+      }
+      await ensureMap(service,ctx,season,competitionUrl||ctx.teamUrl);
 
-      const standings=parseStandings(await fetchMrszHtml(competitionUrl),ctx);
       const {data:extra,error:extraError}=await service.rpc('cc_competition_sync_apply_results_standings_v1',{
         p_run_id:run.id,p_source:SOURCE,p_season:season,p_source_team_id:ctx.sourceTeamId,
         p_results:[],p_standings:standings
       });
       if(extraError)throw new Error(extraError.message);
-
-      await makeMrszCurrentSource(service,season,ctx.internalTeamId);
       const changed=extra?.standingsChanged===true?1:0;
       totals.fetchedTeamCount++;
       totals.standingsChanges+=changed;
@@ -308,7 +299,7 @@ Deno.serve(async(req)=>{
       });
     }catch(err){
       const message=err instanceof Error?err.message:String(err);
-      errors.push(\`\${ctx.key}: \${message}\`);
+      errors.push(`${ctx.key}: ${message}`);
       teamResults.push({
         teamId:ctx.internalTeamId,sourceTeamId:ctx.sourceTeamId,
         competitionLabel:ctx.competitionLabel,ok:false,error:message
@@ -318,7 +309,7 @@ Deno.serve(async(req)=>{
 
   const status=errors.length===0?'success':(totals.fetchedTeamCount>0?'partial':'failed');
   const details={
-    version:'MRSZ-STANDINGS-V1',
+    version:'MRSZ-STANDINGS-V1.1-SAFE',
     mode:'standings_only',
     clubCode:MRSZ_CLUB_CODE,
     clubUrl:MRSZ_CLUB_URL,
@@ -334,7 +325,7 @@ Deno.serve(async(req)=>{
     review_count:0,change_count:totals.changeCount,
     error:errors.length?errors.join(' | '):null,details
   }).eq('id',run.id);
-  if(updateError)errors.push(\`RUN_UPDATE: \${updateError.message}\`);
+  if(updateError)errors.push(`RUN_UPDATE: ${updateError.message}`);
 
   return json({
     ok:status!=='failed',status,runId:run.id,source:SOURCE,season,actor,
