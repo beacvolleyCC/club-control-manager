@@ -1724,20 +1724,21 @@
   async function runMrszCompetitionSync_(){
     if(state.competitionSyncBusy)return;
     if(!state.supabase?.functions)throw new Error('A Supabase Edge Functions kliens nem érhető el.');
-    state.competitionSyncBusy=true;renderCompetitionMatchCards_();competitionStatus_('MRSZ / Hunvolley tabella frissítése…');
+    state.competitionSyncBusy=true;renderManagerStandings_();status('MRSZ / Hunvolley tabella frissítése…');
     try{
       const {data,error}=await state.supabase.functions.invoke('cc-competition-mrsz-sync',{body:{season:'2026/27'}});
-      if(error)throw error;
+      if(error){let detail='';try{const payload=await error.context?.json?.();detail=(payload?.errors||[]).join(' · ')||payload?.message||payload?.error||''}catch(_){}throw new Error(detail||error.message||'Az MRSZ frissítés sikertelen.');}
       if(!data?.ok)throw new Error((data?.errors||[]).join(' · ')||data?.message||'Az MRSZ tabellafrissítés sikertelen.');
       await Promise.all([loadCompetitionSyncStatus(),loadCompetitionResultsStandings()]);
-      renderCompetitionMatchCards_();
+      state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};
+      renderManagerStandings_();
       const t=data?.totals||{};
-      competitionStatus_(`MRSZ kész · ${num(t.fetchedTeamCount)} csapat · ${num(t.standingsRows)} tabellasor`,data?.status==='partial'?'':'success');
+      status(`MRSZ kész · ${num(t.fetchedTeamCount)} csapat · ${num(t.standingsRows)} tabellasor`,data?.status==='partial'?'':'success');
     }catch(err){
-      console.error(err);await loadCompetitionSyncStatus().catch(()=>{});renderCompetitionMatchCards_();competitionStatus_(err.message||'Az MRSZ frissítés sikertelen.','error');
+      console.error(err);await loadCompetitionSyncStatus().catch(()=>{});renderManagerStandings_();status(err.message||'Az MRSZ frissítés sikertelen.','error');
     }finally{
       state.competitionSyncBusy=false;
-      ['#competitionSourceSync','#competitionBrszSync'].forEach(sel=>{const b=$(sel);if(b)b.disabled=false});
+      const button=$('#standingsMrszSync');if(button)button.disabled=false;
     }
   }
 
