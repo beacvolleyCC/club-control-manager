@@ -92,19 +92,37 @@ function huNumber(value:string){
 }
 
 async function fetchMrszHtml(url:string){
-  const res=await fetch(url,{
-    redirect:'follow',
-    headers:{
-      'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36',
-      'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'accept-language':'hu-HU,hu;q=0.9,en-US;q=0.7,en;q=0.6',
-      'cache-control':'no-cache','pragma':'no-cache','referer':'https://www.hunvolley.info/',
+  const maxAttempts=3;
+  let lastError='';
+  for(let attempt=1;attempt<=maxAttempts;attempt++){
+    try{
+      const res=await fetch(url,{
+        redirect:'follow',
+        signal:AbortSignal.timeout(14000),
+        headers:{
+          'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36',
+          'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'accept-language':'hu-HU,hu;q=0.9,en-US;q=0.7,en;q=0.6',
+          'cache-control':'no-cache','pragma':'no-cache','referer':'https://www.hunvolley.info/',
+        }
+      });
+      if(!res.ok){
+        if(res.status>=400&&res.status<500&&res.status!==429)throw new Error(`MRSZ_HTTP_${res.status}`);
+        throw new Error(`MRSZ_TRANSIENT_HTTP_${res.status}`);
+      }
+      const bytes=await res.arrayBuffer();
+      const html=decodeHtml(bytes,res.headers.get('content-type'));
+      if(!html||html.length<500)throw new Error('MRSZ_EMPTY_HTML');
+      return html;
+    }catch(err){
+      const message=err instanceof Error?err.message:String(err);
+      if(/^MRSZ_HTTP_4\d\d$/.test(message))throw new Error(message);
+      lastError=message;
+      console.warn('MRSZ_FETCH_RETRY',{attempt,maxAttempts,error:message});
+      if(attempt<maxAttempts)await new Promise(resolve=>setTimeout(resolve,attempt*550));
     }
-  });
-  if(!res.ok)throw new Error(`MRSZ_HTTP_${res.status}`);
-  const html=decodeHtml(await res.arrayBuffer(),res.headers.get('content-type'));
-  if(!html||html.length<500)throw new Error('MRSZ_EMPTY_HTML');
-  return html;
+  }
+  throw new Error(`MRSZ_FETCH_FAILED_AFTER_${maxAttempts}_ATTEMPTS: ${lastError}`);
 }
 
 function classifyContext(teamName:string,competitionName:string):ContextKey|null{
