@@ -150,6 +150,29 @@ function discoverContexts(clubHtml:string,season:string){
       });
     }
   }
+
+  if(found.size<3){
+    const raw=String(clubHtml||'');
+    const idRe=/p_csapat_fo_kod(?:=|%3D)(\d+)/gi;let m:RegExpExecArray|null;
+    while((m=idRe.exec(raw))){
+      const sourceTeamId=m[1],from=Math.max(0,m.index-3500),to=Math.min(raw.length,m.index+3500);
+      const windowHtml=raw.slice(from,to),windowText=stripHtml(windowHtml);
+      if(!isBeacTeamName(windowText))continue;
+
+      const competitionName=(windowText.match(/(?:Férfi|Női)\s+Budapest\s+Bajnokság/i)||[])[0]||'';
+      const teamName=(windowText.match(/Budapesti\s+Egyetemi\s+Atlétikai\s+Club(?:\s+II\.?)?/i)||[])[0]||'';
+      const key=classifyContext(teamName,competitionName);if(!key||found.has(key))continue;
+
+      const spec=CONTEXTS[key],year=seasonCode(season);
+      const teamUrl='https://www.hunvolley.info/pr_a/920/003/p_003.asp?p_csapat_fo_kod='+encodeURIComponent(sourceTeamId)+'&p_evad_kod='+encodeURIComponent(year)+'&p_sportszervezet_kod='+MRSZ_CLUB_CODE;
+      found.set(key,{
+        key,internalTeamId:spec.internalTeamId,competitionLabel:spec.competitionLabel,
+        sourceTeamId,teamName:teamName||'Budapesti Egyetemi Atlétikai Club',
+        teamUrl,competitionUrl:''
+      });
+    }
+  }
+
   return [...found.values()];
 }
 
@@ -159,50 +182,97 @@ function resolveCompetitionUrl(ctx:MrszContext,teamHtml:string){
   return absoluteHunvolleyUrl(link?.href||ctx.competitionUrl||'');
 }
 
+
+function standingTeamSlug(value:string){
+  const key=nameKey(value).replace(/\s+/g,'-');
+  return key?'name:'+key:'';
+}
+function isContextFocusName(teamName:string,ctx:MrszContext){
+  const key=nameKey(teamName);
+  if(!key)return false;
+  if(key==='beac'||key.startsWith('beac '))return ctx.key==='women2'?/\bii\b/.test(key):!(/\bii\b/.test(key));
+  if(isBeacTeamName(teamName))return ctx.key==='women2'?/\bii\b/.test(key):!(/\bii\b/.test(key));
+  return false;
+}
+function numericRunFrom(cells:string[],start:number){
+  const out:number[]=[];
+  for(let i=start;i<cells.length;i++){
+    const n=huNumber(cells[i]);if(n===null)break;out.push(n);
+  }
+  return out;
+}
 function parseStandings(html:string,ctx:MrszContext){
   const byId=new Map<string,any>();
   for(const row of rowList(html)){
-    const links=htmlAnchors(row),team=links.find(a=>sourceTeamIdFromHref(a.href));
-    if(!team)continue;
-    const sourceTeamId=sourceTeamIdFromHref(team.href),cells=rowCells(row);
-    if(!sourceTeamId||!cells.length)continue;
+    const cells=rowCells(row).map(cleanText).filter(Boolean);
+    if(cells.length<10)continue;
 
-    const tKey=nameKey(team.text);
-    let teamIdx=cells.findIndex(v=>nameKey(v)===tKey);
-    if(teamIdx<0)teamIdx=cells.findIndex(v=>{const k=nameKey(v);return !!k&&(k.includes(tKey)||tKey.includes(k))});
-    if(teamIdx<0)continue;
+    let teamIdx=-1,nums:number[]=[];
+    for(let i=1;i<cells.length;i++){
+      const run=numericRunFrom(cells,i);
+      if(run.length>=8 && i>0 && huNumber(cells[i-1])===null){
+        if(run.length>nums.length){teamIdx=i-1;nums=run}
+      }
+    }
+    if(teamIdx<0||nums.length<8)continue;
 
-    const nums=cells.slice(teamIdx+1).map(huNumber).filter((v):v is number=>v!==null);
-    if(nums.length<8)continue;
+    const teamName=cells[teamIdx];
+    if(!teamName||teamName.length>120)continue;
 
     const played=Math.trunc(nums[0]),wins=Math.trunc(nums[1]),losses=Math.trunc(nums[2]),tablePoints=Math.trunc(nums[3]);
     const setsFor=Math.trunc(nums[4]),setsAgainst=Math.trunc(nums[5]);
     let setRatio:number,pointsFor:number,pointsAgainst:number,pointRatio:number;
-    if(nums.length>=10){
-      setRatio=Number(nums[6]);pointsFor=Math.trunc(nums[7]);pointsAgainst=Math.trunc(nums[8]);pointRatio=Number(nums[9]);
-    }else{
-      pointsFor=Math.trunc(nums[6]);pointsAgainst=Math.trunc(nums[7]);
-      setRatio=ratio(setsFor,setsAgainst);pointRatio=ratio(pointsFor,pointsAgainst);
-    }
-    if(played<0||wins<0||losses<0||wins+losses>played+2||setsFor<0||setsAgainst<0||pointsFor<0||pointsAgainst<0)continue;
 
-    const positionCell=cells.slice(0,teamIdx).map(cleanText).reverse().find(v=>/^\d{1,2}\.?$/.test(v))||'';
+    if(nums.length>=10){
+      setRatio=Number(nums[6]);
+      pointsFor=Math.trunc(nums[7]);
+      pointsAgainst=Math.trunc(nums[8]);
+      pointRatio=Number(nums[9]);
+    }else{
+      pointsFor=Math.trunc(nums[6]);
+      pointsAgainst=Math.trunc(nums[7]);
+      setRatio=ratio(setsFor,setsAgainst);
+      pointRatio=ratio(pointsFor,pointsAgainst);
+    }
+
+    if(
+      played<0||wins<0||losses<0||wins+losses>played+2||
+      tablePoints<0||setsFor<0||setsAgainst<0||pointsFor<0||pointsAgainst<0
+    )continue;
+
+    const positionCell=cells.slice(0,teamIdx).reverse().find(v=>/^\d{1,2}\.?$/.test(v))||'';
     const position=positionCell?Number(positionCell.replace('.','')):null;
+
+    const rowTeamId=htmlAnchors(row).map(a=>sourceTeamIdFromHref(a.href)).find(Boolean)||'';
+    const focus=isContextFocusName(teamName,ctx);
+    const sourceTeamId=focus?ctx.sourceTeamId:(rowTeamId||standingTeamSlug(teamName));
+    if(!sourceTeamId)continue;
+
     byId.set(sourceTeamId,{
-      sourceTeamId,teamName:team.text,competitionLabel:ctx.competitionLabel,position,
+      sourceTeamId,teamName,competitionLabel:ctx.competitionLabel,position,
       played,wins,losses,tablePoints,setsFor,setsAgainst,setRatio,
       pointsFor,pointsAgainst,pointRatio,sourcePosition:!!position,logoUrl:null
     });
   }
 
   let rows=[...byId.values()];
-  if(!rows.some(r=>r.sourceTeamId===ctx.sourceTeamId))throw new Error(`MRSZ_STANDINGS_FOCUS_MISSING_${ctx.sourceTeamId}`);
-  if(rows.length<2||rows.length>30)throw new Error(`MRSZ_STANDINGS_SIZE_INVALID_${rows.length}`);
+  if(!rows.some(r=>r.sourceTeamId===ctx.sourceTeamId)){
+    throw new Error('MRSZ_STANDINGS_FOCUS_MISSING_'+ctx.sourceTeamId);
+  }
+  if(rows.length<2||rows.length>30){
+    throw new Error('MRSZ_STANDINGS_SIZE_INVALID_'+rows.length);
+  }
 
   const allPositioned=rows.every(r=>Number(r.position)>0);
-  if(allPositioned)rows.sort((a,b)=>a.position-b.position);
-  else{
-    rows.sort((a,b)=>b.tablePoints-a.tablePoints||b.setRatio-a.setRatio||b.pointRatio-a.pointRatio||a.teamName.localeCompare(b.teamName,'hu'));
+  if(allPositioned){
+    rows.sort((a,b)=>a.position-b.position);
+  }else{
+    rows.sort((a,b)=>
+      b.tablePoints-a.tablePoints||
+      b.setRatio-a.setRatio||
+      b.pointRatio-a.pointRatio||
+      a.teamName.localeCompare(b.teamName,'hu')
+    );
     rows=rows.map((r,i)=>({...r,position:i+1,sourcePosition:false}));
   }
   return rows;
@@ -309,7 +379,7 @@ Deno.serve(async(req)=>{
 
   const status=errors.length===0?'success':(totals.fetchedTeamCount>0?'partial':'failed');
   const details={
-    version:'MRSZ-STANDINGS-V1.1-SAFE',
+    version:'MRSZ-STANDINGS-V1.2-NAME-ROWS',
     mode:'standings_only',
     clubCode:MRSZ_CLUB_CODE,
     clubUrl:MRSZ_CLUB_URL,
