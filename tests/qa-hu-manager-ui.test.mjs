@@ -131,5 +131,5 @@ test("original manager calendar already has Monday week beginning",()=>{
  assert.ok(app.includes("['H','K','Sze','Cs','P','Szo','V']"));
 });
 test("picker has no database, login or external-provider dependency",()=>{
- assert.doesNotMatch(picker,/supabase|resend|service_role|https?:\/\//i);
+ assert.doesNotMatch(picker,/createClient\(|service_role|RESEND_API_KEY|https?:\/\/|fetch\(/i);
 });
