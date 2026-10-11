@@ -89,3 +89,18 @@ input.cc-hu-native-input[type="time"]{
   .cc-hu-day{min-height:37px}
 }
 @media(prefers-reduced-motion:reduce){.cc-hu-picker,.cc-hu-wheel{scroll-behavior:auto!important}}
+
+/* Mass training swatches — preserve level colors and custom manual selection. */
+.cc-mass-color-presets{display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+  margin-top:9px;min-height:30px}
+.cc-mass-swatch{width:27px;height:27px;min-width:27px;border-radius:50%;
+  border:2px solid var(--card,#fff);background:var(--cc-preset);
+  outline:1px solid color-mix(in srgb,var(--cc-preset) 50%,var(--line,#ccc));
+  cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+.cc-mass-swatch:hover{transform:scale(1.12)}
+.cc-mass-swatch.active{box-shadow:0 0 0 3px var(--yellow,#f7b700)}
+.cc-mass-swatch:focus-visible{outline:2px solid var(--yellow,#f7b700);
+  outline-offset:3px}
+#meColor{width:100%;min-height:40px;border-radius:9px;cursor:pointer;
+  border:1px solid var(--line,#ddd);background:var(--card,#fff);
+  padding:4px 5px}
