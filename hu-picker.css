@@ -104,3 +104,23 @@ input.cc-hu-native-input[type="time"]{
 #meColor{width:100%;min-height:40px;border-radius:9px;cursor:pointer;
   border:1px solid var(--line,#ddd);background:var(--card,#fff);
   padding:4px 5px}
+
+/* Time preset wheel mirrors the earlier Manager 30-minute quick picker.
+ * Precise HH:mm wheels remain available under one compact toggle. */
+.cc-hu-quick-times{display:block;max-height:248px;min-height:176px;overflow-y:auto;
+  overscroll-behavior:contain;scroll-snap-type:y proximity;
+  padding:7px 6px;border:1px solid var(--line,#ddd);
+  border-radius:12px;background:var(--card,#fff)}
+.cc-hu-quick-time{display:block;width:100%;min-height:40px;height:40px;
+  margin:0 0 4px;border:1px solid var(--line,#e7e7e7);border-radius:10px;
+  background:var(--soft,#f7f7f7);color:var(--text,#181818);
+  font:inherit;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;
+  text-align:center;cursor:pointer;scroll-snap-align:center}
+.cc-hu-quick-time.chosen{background:var(--yellow,#f7b700);border-color:#d99d00;
+  color:#151515;font-size:15px;font-weight:950}
+.cc-hu-quick-time:hover:not(.chosen){border-color:var(--yellow,#f7b700)}
+.cc-hu-custom-toggle{display:block;width:100%;min-height:38px;margin-top:12px;
+  padding:8px;border:1px solid var(--line,#ddd);border-radius:10px;
+  background:var(--soft,#f5f5f5);color:var(--text,#181818);
+  font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.cc-hu-wheels[hidden],.cc-hu-actions[hidden],.cc-hu-quick-times[hidden]{display:none!important}
