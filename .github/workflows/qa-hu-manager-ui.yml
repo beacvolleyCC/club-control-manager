@@ -38,3 +38,27 @@ jobs:
           node --check app.js
           node --check hu-picker.js
           node --check sw.js
+
+      - name: Package installable Manager frontend preview (no deployment)
+        uses: actions/upload-artifact@v4
+        with:
+          name: CC_MANAGER_HU_24H_SZINEK_PREVIEW
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            index.html
+            app.js
+            styles.css
+            config.js
+            hu-picker.js
+            hu-picker.css
+            sw.js
+            manifest.webmanifest
+            scoreboard.js
+            scoreboard.css
+            volleyball-core.js
+            volleyball-ui.js
+            volleyball.css
+            assets/
+            icons/
+            data/
