@@ -71,6 +71,27 @@
     const start=/^([01]\d|2[0-3]):[0-5]\d$/.test(input.value)?input.value:"18:00";
     let [h,m]=start.split(":").map(Number);
     const content=layerFor(input,"Időpont kiválasztása · 24 órás");
+    const quick=document.createElement("div");
+    quick.className="cc-hu-quick-times";
+    quick.setAttribute("role","listbox");
+    quick.setAttribute("aria-label","Félórás időpontok");
+    let nearIndex=0,nearDistance=Infinity;
+    for(let i=0;i<48;i++){
+      const value=TWO(Math.floor(i/2))+":"+(i%2?"30":"00");
+      const item=document.createElement("button");
+      item.type="button";item.className="cc-hu-quick-time";
+      item.textContent=value;item.setAttribute("role","option");
+      const minutes=Math.floor(i/2)*60+(i%2)*30;
+      const distance=Math.abs(minutes-(h*60+m));
+      if(distance<nearDistance){nearIndex=i;nearDistance=distance;}
+      if(value===start){item.classList.add("chosen");item.setAttribute("aria-selected","true");}
+      else item.setAttribute("aria-selected","false");
+      item.addEventListener("click",()=>commit(value));
+      quick.append(item);
+    }
+    const custom=document.createElement("button");
+    custom.type="button";custom.className="cc-hu-custom-toggle";
+    custom.textContent="Percenkénti beállítás (00–59)";
     const wheels=document.createElement("div");
     wheels.className="cc-hu-wheels";
     const makeWheel=(label,count,selected,choose)=>{
@@ -91,6 +112,7 @@
         item.textContent=TWO(i);
         item.dataset.index=String(i);
         item.tabIndex=-1;
+        item.setAttribute("role","option");
         item.addEventListener("click",()=>chooseValue(i,true));
         list.append(item);
       }
@@ -131,7 +153,14 @@
     apply.className="cc-hu-apply";apply.textContent="Beállítás";
     apply.addEventListener("click",()=>commit(TWO(h)+":"+TWO(m)));
     actions.append(cancel,apply);
-    content.append(wheels,actions);
+    wheels.hidden=true;actions.hidden=true;
+    custom.addEventListener("click",()=>{
+      const precise=wheels.hidden;
+      wheels.hidden=!precise;actions.hidden=!precise;quick.hidden=precise;
+      custom.textContent=precise?"Félórás gyorsválasztó":"Percenkénti beállítás (00–59)";
+    });
+    content.append(quick,custom,wheels,actions);
+    requestAnimationFrame(()=>{quick.scrollTop=Math.max(0,nearIndex*44-96);});
   }
   function openDate(input) {
     const original=asDate(input.value),today=asDate(localToday());
