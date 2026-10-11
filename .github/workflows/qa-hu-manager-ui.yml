@@ -1,0 +1,40 @@
+name: Manager HU Date Time Color Hotfix QA
+on:
+  push:
+    branches:
+      - qa/hu-manager-hotfix-2026-10-12
+    paths:
+      - app.js
+      - hu-picker.js
+      - hu-picker.css
+      - index.html
+      - sw.js
+      - tests/qa-hu-manager-ui.test.mjs
+      - .github/workflows/qa-hu-manager-ui.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manager-ui-qa:
+    name: Main-based Manager HU picker and colors
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript parser and visual-source regression assertions
+        run: node --test tests/qa-hu-manager-ui.test.mjs
+      - name: Check scoped hotfix assets only
+        shell: bash
+        run: |
+          test -f hu-picker.js
+          test -f hu-picker.css
+          test -f scoreboard.js
+          test -f volleyball-core.js
+          node --check app.js
+          node --check hu-picker.js
+          node --check sw.js
