@@ -926,7 +926,7 @@
   async function ccRosterAttendanceWrite_(eventId,playerId,statusValue,slider=null){
     if(slider){slider.dataset.sliderDisabled='1';slider.setAttribute('aria-busy','true')}
     try{
-      const result=await ccCompetitionAttendanceRpc_(eventId,playerId,statusValue),expected=statusValue==='clear'||statusValue==='none'||statusValue==='unknown'||statusValue===''?'':statusValue,saved=text(result?.status||'');
+      const result=await ccCompetitionAttendanceRpc_(eventId,playerId,statusValue),expected=statusValue==='clear'||statusValue==='none'||statusValue==='unknown'||statusValue===''?'':statusValue,saved=text(result?.attendanceStatus??result?.status??'');
       if(saved!==expected)throw new Error('A jelenlét mentése nem igazolható vissza.');
       ccPatchAttendanceCaches_(eventId,playerId,saved);status('Jelenlét mentve.','success');return result
     }catch(err){status(err.message||'A jelenlét mentése sikertelen.','error');throw err}
@@ -941,7 +941,7 @@
   }
   function ccEventRosterCardHtml_(raw,eventId,editable,attendanceEditable){
     const p=enrichPlayer_(raw),rsvpLabel=x=>x==='going'?'Jövök':x==='not_going'?'Nem jövök':'Nincs válasz',note=text(raw?.note||raw?.availabilityNote||raw?.availability_note||'');
-    const rsvp=`<span class="roster-rsvp ${esc(text(p.status)||'none')}">${esc(rsvpLabel(text(p.status)))}</span>`;
+    const rsvpStatus=text(raw?.status||p.status||'none');const rsvp=`<span class="roster-rsvp ${esc(rsvpStatus)}" aria-label="Részvételi jelzés: ${esc(rsvpLabel(rsvpStatus))}">${esc(rsvpLabel(rsvpStatus))}</span>`;
     const attendance=ccCompetitionAttendanceSlider_(p,attendanceEditable);
     const noteHtml=note?`<span class="cc-player-rsvp-note" title="${esc(note)}">💬 ${esc(note)}</span>`:'';
     return playerUnifiedCardHtml_(p,{openAttr:'data-roster-player-card',extraClass:'competition-roster-card',actionHtml:`<span class="cc-roster-rsvp-stack">${rsvp}${noteHtml}</span>${attendance}`});
@@ -1766,7 +1766,7 @@
     const coachNote=coaches.length?`${coaches.length} edző · `:'';
     return `<div class="team-season-grid-head"><div><h4>Edzői jelentkezés és szezonrács</h4><p>${coachNote}${events.length} / ${allEvents.length} alkalom · jövő: jelentkezés · múlt: jelenlét.</p></div></div><div class="matrix-scroll manager-player-grid team-season-grid"><table class="rsvp-matrix season-matrix transposed-matrix manager-player-matrix"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`
   }
-  async function teamSeasonAttendanceWrite_(button){if(!button||button.disabled)return;const eventId=text(button.dataset.eventId),playerId=text(button.dataset.playerId),current=text(button.dataset.attState),next=current==='present'?'absent':current==='absent'?'':'present',db=next||'clear';button.disabled=true;try{const result=await ccCompetitionAttendanceRpc_(eventId,playerId,db),saved=text(result?.status||'');if(saved!==next)throw new Error('A jelenlét mentése nem igazolható vissza.');ccPatchAttendanceCaches_(eventId,playerId,saved);renderTeams();status('Jelenlét mentve.','success')}catch(err){button.disabled=false;status(err.message||'A jelenlét mentése sikertelen.','error')}}
+  async function teamSeasonAttendanceWrite_(button){if(!button||button.disabled)return;const eventId=text(button.dataset.eventId),playerId=text(button.dataset.playerId),current=text(button.dataset.attState),next=current==='present'?'absent':current==='absent'?'':'present',db=next||'clear';button.disabled=true;try{const result=await ccCompetitionAttendanceRpc_(eventId,playerId,db),saved=text(result?.attendanceStatus??result?.status??'');if(saved!==next)throw new Error('A jelenlét mentése nem igazolható vissza.');ccPatchAttendanceCaches_(eventId,playerId,saved);renderTeams();status('Jelenlét mentve.','success')}catch(err){button.disabled=false;status(err.message||'A jelenlét mentése sikertelen.','error')}}
   function bindTeamSeasonGrid_(){
     $('#teamGridPeriodSelect')?.addEventListener('change',e=>{state.teamGridPeriod=e.target.value==='all'?'all':'upcoming';try{localStorage.setItem('cc-manager-team-grid-period',state.teamGridPeriod)}catch(_){}renderTeams()});
     $$('[data-team-season-att]').forEach(b=>b.addEventListener('click',()=>teamSeasonAttendanceWrite_(b)));
