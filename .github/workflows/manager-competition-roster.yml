@@ -1,0 +1,31 @@
+name: Manager competition training roster QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - app.js
+      - styles.css
+      - tests/competition-training-roster.test.cjs
+      - .github/workflows/manager-competition-roster.yml
+  pull_request:
+    paths:
+      - app.js
+      - styles.css
+      - tests/competition-training-roster.test.cjs
+      - .github/workflows/manager-competition-roster.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  competition-roster:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse Manager JavaScript
+        run: node --check app.js
+      - name: Validate status colors and position-grouped foldout
+        run: node --test tests/competition-training-roster.test.cjs
