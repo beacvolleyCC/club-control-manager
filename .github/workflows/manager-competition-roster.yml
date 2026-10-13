@@ -6,12 +6,14 @@ on:
       - app.js
       - styles.css
       - tests/competition-training-roster.test.cjs
+      - tests/competition-league-fixture-reference.test.cjs
       - .github/workflows/manager-competition-roster.yml
   pull_request:
     paths:
       - app.js
       - styles.css
       - tests/competition-training-roster.test.cjs
+      - tests/competition-league-fixture-reference.test.cjs
       - .github/workflows/manager-competition-roster.yml
   workflow_dispatch:
 permissions:
@@ -28,4 +30,6 @@ jobs:
       - name: Parse Manager JavaScript
         run: node --check app.js
       - name: Validate status colors and position-grouped foldout
-        run: node --test tests/competition-training-roster.test.cjs
+        run: |
+          node --test tests/competition-training-roster.test.cjs
+          node --test tests/competition-league-fixture-reference.test.cjs
