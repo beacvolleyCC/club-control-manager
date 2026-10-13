@@ -6135,3 +6135,64 @@ body{overflow-x:clip!important}
     font-size:16px!important;
   }
 }
+
+
+/* Competition Manager training roster: mass-style inline foldout, position-first RSVP. */
+.cc-training-card-panel .cc-training-roster-item{
+  min-width:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;
+  background:var(--card);
+}
+.cc-training-card-panel .cc-training-roster-item>.cc-event-card{
+  border:0!important;border-radius:0!important;margin:0!important;
+}
+.cc-training-roster-toggle.legacy-mass-chevron{
+  box-sizing:border-box;display:flex!important;align-items:center!important;
+  justify-content:space-between!important;width:100%!important;min-height:34px!important;
+  gap:12px!important;padding:6px 12px!important;border:0!important;
+  border-top:1px solid var(--line)!important;border-radius:0!important;
+  background:var(--soft)!important;color:var(--text)!important;text-align:left!important;
+  font-size:11px!important;font-weight:750!important;cursor:pointer!important;
+}
+.cc-training-roster-toggle.open{background:var(--card)!important}
+.cc-training-roster-toggle .triangle-icon{flex:none}
+.cc-training-roster-toggle:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:-3px}
+.cc-training-inline-roster{padding:12px;background:var(--card);border-top:1px solid var(--line)}
+.cc-training-inline-roster[hidden]{display:none!important}
+.cc-training-roster-summary{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
+.cc-training-roster-count{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
+  font-size:11px;font-weight:800;border:1px solid transparent}
+.cc-training-roster-count b{font-size:15px}
+.cc-training-roster-count.going{color:#165f37;background:#dff2e6;border-color:#a8d9b9}
+.cc-training-roster-count.not-going{color:#922b2d;background:#fbe5e5;border-color:#ebbbbb}
+.cc-training-roster-count.none{color:#53606b;background:#e9ecef;border-color:#cbd1d5}
+.cc-training-pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:10px;min-width:0}
+.cc-training-pos-group{min-width:0;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
+.cc-training-pos-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:2px 4px 8px;border-bottom:1px solid var(--line);font-size:12px}
+.cc-training-pos-heading b{font-size:12px}
+.cc-training-pos-heading small{color:var(--muted);font-size:10px;font-weight:700;white-space:nowrap}
+.cc-training-pos-players{display:grid;gap:5px;padding-top:8px}
+.cc-training-rsvp-player{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  min-width:0;min-height:38px;padding:6px 9px;border-radius:8px;border:1px solid transparent}
+.cc-training-rsvp-player.going{background:#e1f3e7;border-color:#b8ddc4}
+.cc-training-rsvp-player.not-going{background:#fbe7e7;border-color:#eec1c1}
+.cc-training-rsvp-player.none{background:#e8ebee;border-color:#d2d6da}
+.cc-training-player-name{display:flex;align-items:center;gap:7px;min-width:0;color:#25303a;font-size:11px}
+.cc-training-player-name b{font-weight:750;overflow-wrap:anywhere}
+.cc-training-player-name i{font-style:normal;font-weight:850;flex:none;color:#5d6872;font-size:10px}
+.cc-training-rsvp-badge{flex:none;padding:4px 7px;border-radius:999px;font-size:9px;font-weight:850;white-space:nowrap}
+.cc-training-rsvp-badge.going{background:#b8e3c8;color:#165f37}
+.cc-training-rsvp-badge.not-going{background:#f3c3c3;color:#922b2d}
+.cc-training-rsvp-badge.none{background:#cfd4d8;color:#3f4b54}
+/* The full event dialog uses the same RSVP color language. */
+#entityDialog .competition-roster-card.cc-training-rsvp-going{background:linear-gradient(90deg,#e1f3e7,rgba(225,243,231,.22))!important;border-color:#acd8ba!important}
+#entityDialog .competition-roster-card.cc-training-rsvp-not-going{background:linear-gradient(90deg,#fbe7e7,rgba(251,231,231,.22))!important;border-color:#eec1c1!important}
+#entityDialog .competition-roster-card.cc-training-rsvp-none{background:linear-gradient(90deg,#e8ebee,rgba(232,235,238,.22))!important;border-color:#cbd0d5!important}
+@media(max-width:620px){
+  .cc-training-inline-roster{padding:8px}
+  .cc-training-pos-grid{grid-template-columns:minmax(0,1fr)}
+  .cc-training-roster-summary{gap:5px}
+  .cc-training-roster-count{font-size:9px;padding:5px 8px}
+  .cc-training-roster-count b{font-size:13px}
+  .cc-training-roster-toggle.legacy-mass-chevron{font-size:10px!important}
+}
