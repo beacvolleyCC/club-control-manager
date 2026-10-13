@@ -6196,3 +6196,29 @@ body{overflow-x:clip!important}
   .cc-training-roster-count b{font-size:13px}
   .cc-training-roster-toggle.legacy-mass-chevron{font-size:10px!important}
 }
+
+
+/* Read-only competition fixture reference, 2026/27. */
+.cc-league-fixture-panel{margin-top:10px;overflow:hidden}
+.cc-league-fixture-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.cc-league-group-filter{min-width:190px;margin:0}
+.cc-league-fixture-warning{margin:8px 12px;padding:9px 12px;border-radius:9px;background:var(--soft);color:var(--muted);font-size:11px;line-height:1.5}
+.cc-league-fixture-list{display:grid;gap:4px;padding:6px 12px 12px;max-height:540px;overflow:auto;overscroll-behavior:contain}
+.cc-league-fixture-row{display:grid;grid-template-columns:110px minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--card)}
+.cc-league-fixture-row.needs-review{border-style:dashed;background:color-mix(in srgb,#f59e0b 7%,var(--card))}
+.cc-league-fixture-datetime{display:grid;gap:3px;font-size:11px;font-weight:800;white-space:nowrap}
+.cc-league-fixture-datetime small{font-weight:600;color:var(--muted)}
+.cc-league-fixture-teams{display:grid;gap:4px;min-width:0}
+.cc-league-fixture-teams b{font-size:12px;overflow-wrap:anywhere}
+.cc-league-fixture-teams small{color:var(--muted);font-size:10px;overflow-wrap:anywhere}
+.cc-league-fixture-state{font-size:9px;font-weight:800;color:var(--muted);white-space:nowrap}
+.cc-league-fixture-row.needs-review .cc-league-fixture-state{color:#a16a0d}
+.cc-league-fixture-links{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.cc-league-fixture-links a{color:var(--text);font-size:10px;font-weight:750;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:640px){
+.cc-league-fixture-head{align-items:stretch}
+.cc-league-group-filter{width:100%}
+.cc-league-fixture-row{grid-template-columns:85px minmax(0,1fr);gap:7px}
+.cc-league-fixture-state{grid-column:2;white-space:normal}
+.cc-league-fixture-list{max-height:470px}
+}
