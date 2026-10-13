@@ -916,7 +916,7 @@
   async function ccCompetitionAttendanceRpc_(eventId,playerId,statusValue){
     const dbStatus=statusValue==='clear'||statusValue==='none'||statusValue==='unknown'||statusValue===''?null:statusValue;
     try{return await rpc('cc_manager_competition_attendance_v2',{p_event_id:text(eventId),p_player_id:text(playerId),p_status:dbStatus})}
-    catch(err){if(!/cc_manager_competition_attendance_v2|does not exist|schema cache/i.test(text(err?.message||err)))throw err;return await rpc('cc_manager_competition_attendance_v1',{p_event_id:text(eventId),p_player_id:text(playerId),p_status:dbStatus})}
+    catch(err){if(!/cc_manager_competition_attendance_v2|does not exist|schema cache/i.test(text(err?.message||err)))throw err;return await rpc('cc_manager_competition_attendance_v1',{p_event_id:text(eventId),p_player_id:text(playerId),p_status:dbStatus??'clear'})}
   }
   function ccPatchAttendanceCaches_(eventId,playerId,statusValue){
     const event=text(eventId),player=text(playerId),saved=text(statusValue);
@@ -935,16 +935,33 @@
   function ccCompetitionRsvpModel_(status){const s=text(status);if(s==='going')return {key:'going',value:0,label:'Jövök',db:'going'};if(s==='not_going')return {key:'not-going',value:2,label:'Nem jövök',db:'not_going'};return {key:'none',value:1,label:'Nincs jelzés',db:'unknown'}}
   function ccCompetitionRsvpByValue_(value){const n=Number(value);if(n<=0)return {key:'going',value:0,label:'Jövök',db:'going'};if(n>=2)return {key:'not-going',value:2,label:'Nem jövök',db:'not_going'};return {key:'none',value:1,label:'Nincs jelzés',db:'unknown'}}
   function ccCompetitionRsvpSlider_(p,editable){const model=ccCompetitionRsvpModel_(p?.status),stateClass=model.db==='going'?'yes':model.db==='not_going'?'no':'none';return `<div class="attendance-slider planner-slider cc-player-grid-slider ${stateClass}" data-manager-slider data-manager-slider-kind="competition" data-roster-rsvp="${esc(p?.playerId)}" data-slider-state="${stateClass}" aria-label="${esc(p?.displayName||p?.name||'Játékos')} részvételi jelzése: ${esc(model.label)}" ${editable?'':'data-slider-disabled="1"'}><button class="slider-zone left" type="button" data-slider-action="yes" ${editable?'':'disabled'}>✓</button><button class="slider-zone center" type="button" data-slider-action="none" ${editable?'':'disabled'}>–</button><button class="slider-zone right" type="button" data-slider-action="no" ${editable?'':'disabled'}>✕</button><span class="slider-thumb"></span></div>`}
+
+  // RSVP is a visual default, never a persisted presence marking.
+  function ccRosterPreviewState_(p){
+    const actual=text(p?.attendanceStatus??p?.attendance_status);
+    if(actual==='present')return {state:'yes',confirmed:true};
+    if(actual==='absent')return {state:'no',confirmed:true};
+    const rsvp=text(p?.status);
+    return {state:rsvp==='going'?'yes':rsvp==='not_going'?'no':'none',confirmed:false};
+  }
   function ccCompetitionAttendanceSlider_(p,editable){
-    const raw=text(p?.attendanceStatus),stateClass=raw==='present'?'yes':raw==='absent'?'no':'none';
-    return `<div class="attendance-slider planner-slider cc-player-grid-slider cc-competition-attendance-slider ${stateClass}" data-manager-slider data-manager-slider-kind="attendance" data-roster-att-slider="${esc(p?.playerId)}" data-slider-state="${stateClass}" aria-label="${esc(p?.displayName||p?.name||'Játékos')} tényleges jelenléte" ${editable?'':'data-slider-disabled="1"'}><button class="slider-zone left" type="button" data-slider-action="yes" ${editable?'':'disabled'}>✓</button><button class="slider-zone center" type="button" data-slider-action="none" ${editable?'':'disabled'}>–</button><button class="slider-zone right" type="button" data-slider-action="no" ${editable?'':'disabled'}>✕</button><span class="slider-thumb"></span></div>`
+    const preview=ccRosterPreviewState_(p),name=text(p?.displayName||p?.name||'Játékos');
+    return `<div class="attendance-slider planner-slider cc-player-grid-slider cc-competition-attendance-slider ${preview.state}" data-manager-slider data-manager-slider-kind="attendance" data-roster-att-slider="${esc(p?.playerId)}" data-slider-state="${preview.state}" data-slider-rsvp="${text(p?.status)==='going'?'yes':text(p?.status)==='not_going'?'no':'none'}" data-slider-unconfirmed="${preview.confirmed?'0':'1'}" aria-label="${esc(name)}: ${preview.confirmed?'rögzített jelenlét':'RSVP-alapú előnézet, jelenlét még nincs rögzítve'}" ${editable?'':'data-slider-disabled="1"'}><button class="slider-zone left" type="button" data-slider-action="yes" ${editable?'':'disabled'}>✓</button><button class="slider-zone center" type="button" data-slider-action="none" ${editable?'':'disabled'}>–</button><button class="slider-zone right" type="button" data-slider-action="no" ${editable?'':'disabled'}>✕</button><span class="slider-thumb"></span></div>`;
+  }
+  function ccCompactRosterRowHtml_(raw,eventId,editable,attendanceEditable){
+    const p=enrichPlayer_(raw),tone=ccTrainingRsvpTone_(p.status),m=medicalState_(p.medicalValidUntil);
+    const jersey=p.jerseyNo??p.jersey_no,name=text(p.displayName||p.name||'Játékos'),preview=ccRosterPreviewState_(p);
+    return `<div class="cc-compact-roster-row ${tone} ${preview.confirmed?'is-confirmed':'is-rsvp-only'}">
+      <span class="cc-compact-roster-avatar">${avatarHtml(p,'table')}</span>
+      <span class="cc-compact-roster-jersey">${jersey===null||jersey===undefined||text(jersey)===''?'–':esc(jersey)}</span>
+      <span class="cc-compact-roster-identity"><strong>${esc(name)}</strong><small>${esc(p.position||'Poszt nélkül')}</small></span>
+      <span class="cc-compact-roster-medical ${esc(m.cls)}" title="Sportorvosi: ${esc(p.medicalValidUntil?fmtDate(p.medicalValidUntil):'nincs adat')}">${esc(m.label)}</span>
+      <span class="cc-compact-roster-presence"><small class="cc-compact-roster-source">${preview.confirmed?'Rögzítve':'RSVP alapján'}</small>${ccCompetitionAttendanceSlider_(p,attendanceEditable)}</span>
+      <button type="button" class="cc-compact-roster-open" data-roster-profile-open="${esc(p.playerId)}" aria-label="${esc(name)} játékosprofilja" title="Játékosprofil megnyitása"><span class="triangle-icon" aria-hidden="true"></span></button>
+    </div>`;
   }
   function ccEventRosterCardHtml_(raw,eventId,editable,attendanceEditable){
-    const p=enrichPlayer_(raw),rsvpLabel=x=>x==='going'?'Jövök':x==='not_going'?'Nem jövök':'Nincs válasz',note=text(raw?.note||raw?.availabilityNote||raw?.availability_note||'');
-    const rsvpStatus=text(raw?.status||p.status||'none');const rsvp=`<span class="roster-rsvp ${esc(rsvpStatus)}" aria-label="Részvételi jelzés: ${esc(rsvpLabel(rsvpStatus))}">${esc(rsvpLabel(rsvpStatus))}</span>`;
-    const attendance=ccCompetitionAttendanceSlider_(p,attendanceEditable);
-    const noteHtml=note?`<span class="cc-player-rsvp-note" title="${esc(note)}">💬 ${esc(note)}</span>`:'';
-    return playerUnifiedCardHtml_(p,{openAttr:'data-roster-player-card',extraClass:`competition-roster-card cc-training-rsvp-${ccTrainingRsvpTone_(rsvpStatus)}`,actionHtml:`<span class="cc-roster-rsvp-stack">${rsvp}${noteHtml}</span>${attendance}`});
+    return ccCompactRosterRowHtml_(raw,eventId,editable,attendanceEditable);
   }
   function ccSyncCompetitionRsvpPreview_(input){if(!input)return;const model=ccCompetitionRsvpByValue_(input.value),control=input.closest('.cc-rsvp-control');if(!control)return;control.classList.remove('is-going','is-none','is-not-going');control.classList.add(`is-${model.key}`);const stateEl=control.querySelector('[data-cc-rsvp-state]');if(stateEl)stateEl.textContent=model.label}
   function ccSetPlayerStyleSliderState_(slider,state){if(!slider)return;const next=['yes','none','no'].includes(state)?state:'none';slider.classList.remove('yes','none','no','cc-slider-dragging','cc-slider-snapping','cc-slider-tap-snapping');slider.classList.add(next);slider.dataset.sliderState=next;slider.style.removeProperty('--cc-slider-left')}
@@ -961,22 +978,33 @@
     const setLeft=left=>{currentLeft=left;slider.style.setProperty('--cc-slider-left',`${left.toFixed(1)}px`)};
     const disabled=()=>slider.dataset.sliderDisabled==='1';
     const snap=(state,commit=true,tap=false)=>{const g=geometry(),target=stateLeft(state,g);slider.classList.remove('cc-slider-dragging','cc-slider-snapping','cc-slider-tap-snapping');slider.classList.add(tap?'cc-slider-tap-snapping':'cc-slider-snapping');setLeft(target);setTimeout(()=>{slider.classList.remove('cc-slider-snapping','cc-slider-tap-snapping');slider.style.removeProperty('--cc-slider-left');if(commit){slider.dataset.sliderPrevious=currentState();ccSetPlayerStyleSliderState_(slider,state);onCommit?.(state)}},tap?140:200)};
-    slider.addEventListener('click',e=>{if(disabled())return;if(suppressClick){suppressClick=false;e.preventDefault();e.stopPropagation();return}const b=e.target.closest('[data-slider-action]');if(!b)return;e.preventDefault();e.stopPropagation();const cur=currentState(),req=b.dataset.sliderAction;const ci=idx(cur),ri=idx(req),next=ci===ri?cur:states[ci+Math.sign(ri-ci)];if(next!==cur)snap(next,true,true)});
+    slider.addEventListener('click',e=>{if(disabled())return;if(suppressClick){suppressClick=false;e.preventDefault();e.stopPropagation();return}const b=e.target.closest('[data-slider-action]');if(!b)return;e.preventDefault();e.stopPropagation();const cur=currentState(),req=b.dataset.sliderAction;const ci=idx(cur),ri=idx(req),next=ci===ri?cur:states[ci+Math.sign(ri-ci)];if(next!==cur||slider.dataset.sliderUnconfirmed==='1')snap(next,true,true)});
     slider.addEventListener('pointerdown',e=>{if(disabled()||e.button!==0)return;const g=geometry();active=true;locked=false;pointerId=e.pointerId;startX=e.clientX;startY=e.clientY;startLeft=stateLeft(currentState(),g);currentLeft=startLeft;lastX=e.clientX;lastT=performance.now();velocityX=0;setLeft(startLeft);slider.setPointerCapture?.(e.pointerId)});
     slider.addEventListener('pointermove',e=>{if(!active||e.pointerId!==pointerId)return;const dx=e.clientX-startX,dy=e.clientY-startY;if(!locked){if(Math.hypot(dx,dy)<7)return;if(Math.abs(dy)>Math.abs(dx)){active=false;slider.style.removeProperty('--cc-slider-left');try{slider.releasePointerCapture?.(e.pointerId)}catch(_){ }return}locked=true;slider.classList.add('cc-slider-dragging')}const g=geometry(),next=Math.min(g.max,Math.max(g.min,startLeft+dx)),now=performance.now(),dt=Math.max(1,now-lastT);velocityX=(e.clientX-lastX)/dt;lastX=e.clientX;lastT=now;setLeft(next);e.preventDefault()},{passive:false});
     slider.addEventListener('pointerup',e=>{if(!active||e.pointerId!==pointerId)return;try{slider.releasePointerCapture?.(e.pointerId)}catch(_){ }const wasLocked=locked,g=geometry(),start=currentState(),direct=stateFromLeft(currentLeft,g),projected=stateFromLeft(Math.min(g.max,Math.max(g.min,currentLeft+velocityX*120)),g);let next=start;if(wasLocked){const dd=idx(direct)-idx(start);if(Math.abs(dd)>=2)next=direct;else{const pd=idx(projected)-idx(start);next=Math.abs(pd)>1?states[idx(start)+Math.sign(pd)]:projected}}active=false;locked=false;pointerId=null;slider.classList.remove('cc-slider-dragging');if(wasLocked){suppressClick=true;setTimeout(()=>suppressClick=false,320);snap(next,true,false)}else slider.style.removeProperty('--cc-slider-left')});
     slider.addEventListener('pointercancel',e=>{if(!active||e.pointerId!==pointerId)return;active=false;locked=false;pointerId=null;snap(currentState(),false,false)});
   }
-  function ccBindCompetitionRoster_(host,eventId,editable,attendanceEditable){
+
+  function ccBindCompetitionRoster_(host,eventId,editable,attendanceEditable,{returnToEvent=false}={}){
     if(!host)return;
-    Array.from(host.querySelectorAll('[data-roster-player-card]')).forEach(card=>{
-      const open=ev=>{if(ev?.target?.closest?.('input,select,button,label,.cc-rsvp-control,.roster-action-field'))return;ccPlayerReturnEventId_=text(eventId);openPlayerDetail(card.dataset.rosterPlayerCard)};
-      card.addEventListener('click',open);
-      card.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&!ev.target.closest('input,select,button,label,.cc-rsvp-control,.roster-action-field')){ev.preventDefault();openPlayerDetail(card.dataset.rosterPlayerCard)}});
+    Array.from(host.querySelectorAll('[data-roster-profile-open]')).forEach(button=>{
+      button.addEventListener('click',()=>{
+        ccPlayerReturnEventId_=returnToEvent?text(eventId):'';
+        openPlayerDetail(text(button.dataset.rosterProfileOpen));
+      });
     });
     Array.from(host.querySelectorAll('[data-roster-att-slider]')).forEach(slider=>ccBindPlayerStyleSlider_(slider,{onCommit:async nextState=>{
       const previous=text(slider.dataset.sliderPrevious)||'none',db=nextState==='yes'?'present':nextState==='no'?'absent':'clear';
-      try{await ccRosterAttendanceWrite_(eventId,slider.dataset.rosterAttSlider,db,slider)}catch(_){ccSetPlayerStyleSliderState_(slider,previous)}
+      try{
+        await ccRosterAttendanceWrite_(eventId,slider.dataset.rosterAttSlider,db,slider);
+        const confirmed=db!=='clear';
+        slider.dataset.sliderUnconfirmed=confirmed?'0':'1';
+        slider.closest('.cc-compact-roster-row')?.classList.toggle('is-confirmed',confirmed);
+        slider.closest('.cc-compact-roster-row')?.classList.toggle('is-rsvp-only',!confirmed);
+        const source=slider.closest('.cc-compact-roster-presence')?.querySelector('.cc-compact-roster-source');
+        if(source)source.textContent=confirmed?'Rögzítve':'RSVP alapján';
+        if(!confirmed)ccSetPlayerStyleSliderState_(slider,text(slider.dataset.sliderRsvp)||'none');
+      }catch(_){ccSetPlayerStyleSliderState_(slider,previous)}
     }}));
   }
   function openEventDetail(id){
@@ -987,7 +1015,7 @@
     body.innerHTML=`<div class="entity-hero event-entity-hero"><span class="event-detail-mark" style="background:${esc(e.color||teamById(eventTeamId(e))?.color||'#f7b700')}"></span><div><b>${esc(e.teamName||teamById(eventTeamId(e))?.name||'–')}</b><span>${esc(eventType(e)==='match'?'Meccs':'Edzés')} · ${esc(s?fmtDate(s):'–')} ${esc(s?fmtTime(s):'–')}</span></div>${editable?`<button class="button quiet small entity-hero-action" id="eventEditBtn" type="button">Szerkesztés</button>`:''}</div><div class="detail-grid event-detail-primary-grid ${eventType(e)==='training'?'is-training':''}">${detailPair('Kezdés',s?`${fmtDate(s)} ${fmtTime(s)}`:'–')}${eventType(e)==='training'||ccMatchKindFromEvent_(e)==='friendly'?detailPair('Befejezés',en?fmtTime(en):'–'):''}${eventType(e)==='training'?detailPair('Pálya',e.court):`${detailPair('Helyszín',e.venue)}${detailPair('Cím',e.address)}${detailPair('Pálya',e.court)}${detailPair('Találkozó',e.meetingAt?`${fmtTime(e.meetingAt)} · ${e.meetingPlace||''}`:(e.meetingPlace||'–'))}`}</div><div class="panel-subhead rsvp-subhead"><div><h4>Részvételi jelzések</h4><p>A játékos RSVP-je és üzenete itt látható; a tényleges jelenlétet az esemény után lehet rögzíteni.</p></div></div><div class="attendance-detail rsvp-detail compact-three"><div><small>Jövök</small><span><b>${num(e.yesCount)}</b> fő</span></div><div><small>Nem jövök</small><span><b>${num(e.noCount)}</b> fő</span></div><div><small>Nincs válasz</small><span><b>${num(e.unknownCount)}</b> fő</span></div></div><div class="panel-subhead"><div><h4>Névsor</h4><p>RSVP, játékosüzenet és tényleges jelenlét.</p></div></div><div id="eventRosterBody" class="event-roster-detail"><span class="roster-loading">Névsor betöltése…</span></div>`;
     ccOpenDialogStable_(d);$('#eventEditBtn')?.addEventListener('click',()=>openCompetitionEventEditor(eventId,eventType(e)));
     if(!eventId||!configured())return;
-    loadEventRoster(eventId,{force:true}).then(rows=>{const host=$('#eventRosterBody');if(!host)return;host.innerHTML=rows.length?`<div class="event-roster-list action-roster-list competition-roster-list cc-unified-player-list">${rows.map(p=>ccEventRosterCardHtml_(p,eventId,editable,attendanceEditable)).join('')}</div>`:emptyInline('Nincs játékos a névsorban.');ccBindCompetitionRoster_(host,eventId,editable,attendanceEditable)}).catch(err=>{const host=$('#eventRosterBody');if(host)host.innerHTML=`<span class="roster-loading error">${esc(err?.message||'A névsor nem tölthető be.')}</span>`})
+    loadEventRoster(eventId,{force:true}).then(rows=>{const host=$('#eventRosterBody');if(!host)return;host.innerHTML=rows.length?ccTrainingInlineRosterHtml_(rows,eventId,editable,attendanceEditable):emptyInline('Nincs játékos a névsorban.');ccBindCompetitionRoster_(host,eventId,editable,attendanceEditable,{returnToEvent:true})}).catch(err=>{const host=$('#eventRosterBody');if(host)host.innerHTML=`<span class="roster-loading error">${esc(err?.message||'A névsor nem tölthető be.')}</span>`})
   }
 
   function bindEventDetailActions(){$$('[data-event-id]').forEach(el=>el.addEventListener('click',()=>openEventDetail(el.dataset.eventId)))}
