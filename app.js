@@ -1586,7 +1586,7 @@
     }
   }
   function ccBindTrainingRosterToggles_(){
-    $('[data-training-roster-toggle]').forEach(button=>button.addEventListener('click',()=>ccToggleTrainingInlineRoster_(text(button.dataset.trainingRosterToggle),button)));
+    document.querySelectorAll('[data-training-roster-toggle]').forEach(button=>button.addEventListener('click',()=>ccToggleTrainingInlineRoster_(text(button.dataset.trainingRosterToggle),button)));
   }
 
   function renderCompetitionTrainingCards_(){if(!ccRouteIs_('competition','trainings'))return;
