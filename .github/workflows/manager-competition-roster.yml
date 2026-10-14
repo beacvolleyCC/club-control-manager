@@ -8,6 +8,7 @@ on:
       - tests/competition-training-roster.test.cjs
       - tests/competition-league-fixture-reference.test.cjs
       - tests/mrsz-screenshot-finance.test.cjs
+      - tests/mrsz-fixture-merge.test.cjs
       - .github/workflows/manager-competition-roster.yml
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - tests/competition-training-roster.test.cjs
       - tests/competition-league-fixture-reference.test.cjs
       - tests/mrsz-screenshot-finance.test.cjs
+      - tests/mrsz-fixture-merge.test.cjs
       - .github/workflows/manager-competition-roster.yml
   workflow_dispatch:
 permissions:
@@ -36,3 +38,4 @@ jobs:
           node --test tests/competition-training-roster.test.cjs
           node --test tests/competition-league-fixture-reference.test.cjs
           node --test tests/mrsz-screenshot-finance.test.cjs
+          node --test tests/mrsz-fixture-merge.test.cjs
