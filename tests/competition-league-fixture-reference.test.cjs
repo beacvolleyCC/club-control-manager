@@ -12,7 +12,7 @@ const helpers=js.slice(begin,end);
 const context={msLogoHtml_:(_id,name)=>'<span class="ms-monogram">'+String(name||'').slice(0,1)+'</span>',text:x=>String(x??''),esc:x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))};
 vm.createContext(context);
 vm.runInContext(helpers+
- '\nthis.qa={html:ccLeagueFixturePanelHtml_,load:ccLoadLeagueFixtureSnapshot_,inject:(rows)=>{ccLeagueFixtureRows_=rows},setGroup:(name)=>{ccLeagueSelectedGroup_=name}};',context);
+ '\nthis.qa={html:ccLeagueFixturePanelHtml_,load:ccLoadLeagueFixtureSnapshot_,inject:(rows)=>{ccLeagueFixtureRows_=rows},setGroup:(name)=>{ccLeagueSelectedGroup_=name},setScope:(scope)=>{ccLeagueSnapshotScope_=scope},setPhoto:(matches)=>{ccMrszPhotoState_.matches=matches}};',context);
 test('source snapshot declares itself non-live and not a verified complete league schedule',()=>{
  const html=context.qa.html();
  assert.match(html,/nem élő BRSZ/);
@@ -47,6 +47,7 @@ test('ambiguous rows display review warning rather than disappearing',()=>{
  assert.match(html,/Időpont nélkül/);
 });
 test('HTML-escape adversarial source names',()=>{
+ context.qa.setScope('all');
  context.qa.inject([{group:'Női I. osztály',date:'2026-10-14',time:'18:30',home:'<script>x</script>',away:'A & B',venue:'<img>',review:false}]);
  const html=context.qa.html();
  assert.ok(html.includes('&lt;script&gt;'));
@@ -62,4 +63,27 @@ test('match page uses separate full-season period, without mutating training fil
  assert.ok(!code.includes('state.eventPeriod=e.target.value'));
  assert.ok(code.includes('ccLeagueFixturePanelHtml_()'));
  assert.ok(css.includes('.cc-league-fixture-row'));
+});
+test('BEAC-only is the default and all-league toggle restores opponent fixtures',()=>{
+ const rows=dataset.fixtures.filter(f=>f.group==='Női II. osztály B csoport');
+ context.qa.inject(rows);context.qa.setGroup('Női II. osztály B csoport');context.qa.setScope('beac');
+ const beac=context.qa.html();
+ assert.ok(beac.includes('data-league-snapshot-scope="beac" aria-pressed="true"'));
+ assert.ok(beac.includes('BEAC II.'));
+ assert.ok(!beac.includes('>RKSK felnőtt női</strong>'));
+ context.qa.setScope('all');
+ assert.ok(context.qa.html().includes('RKSK felnőtt női'));
+ context.qa.setScope('beac');context.qa.setGroup('all');
+});
+test('only an exact Budapest-date and opponent match overlays archival MRSZ results',()=>{
+ const rows=dataset.fixtures.filter(f=>f.group==='Női II. osztály B csoport');
+ context.qa.inject(rows);context.qa.setGroup('Női II. osztály B csoport');context.qa.setScope('all');
+ context.qa.setPhoto([{competitionLabel:'Női Budapest II. osztály – B csoport',
+  homeName:'MTK kék',awayName:'RKSK felnőtt női',startsAt:'2026-10-13T18:20:00+02:00',
+  homeSets:3,awaySets:0,setScores:[{home:25,away:18}]}]);
+ const html=context.qa.html();
+ assert.ok(html.includes('3–0'));
+ assert.ok(html.includes('Szettek: 25:18'));
+ assert.ok(html.includes('MRSZ · 2026.10.14-i eredmény'));
+ context.qa.setPhoto([]);context.qa.setScope('beac');context.qa.setGroup('all');
 });
