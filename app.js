@@ -1698,6 +1698,60 @@
     const statusText=r.status==='success'?'rendben':r.status==='partial'?'részleges':r.status==='failed'?'hiba':'fut';
     return `BRSZ · ${stamp} · ${statusText} · ${num(r.created_events)} új · ${num(r.updated_events)} módosult${Number(r.review_count||0)?` · ${num(r.review_count)} ellenőrzendő`:''}`;
   }
+  // Audit is read-only; RSVP totals are the current values, not historical snapshots.
+  function ccCompetitionAuditLabel_(kind){
+    return ({created:'Új meccs',opponent:'Ellenfélváltozás',schedule:'Időpontváltozás',time:'Időpontváltozás',venue:'Helyszínváltozás',result:'Eredményváltozás'})[text(kind)]||'Meccsváltozás';
+  }
+  function ccCompetitionAuditRowsHtml_(items,scope='all'){
+    const visible=(Array.isArray(items)?items:[]).filter(c=>scope==='all'||(scope==='created'?text(c.changeType)==='created':text(c.changeType)!=='created'));
+    if(!visible.length)return '<p class="cc-audit-empty">Nincs változás ebben a szűrésben.</p>';
+    const fields=[['title','Mérkőzés'],['startsAt','Kezdés'],['venue','Helyszín'],['status','Állapot']];
+    const display=(key,value)=>key==='startsAt'?(value?fmtDate(value)+' '+fmtTime(value):'–'):(text(value)||'–');
+    return visible.map(c=>{
+      const before=c.before||{},after=c.after||{},created=text(c.changeType)==='created',r=c.responses||{},id=text(c.eventId);
+      const rows=fields.filter(([key])=>created?['title','startsAt'].includes(key):text(before[key])!==text(after[key]))
+        .map(([key,label])=>'<div class="cc-audit-field"><span>'+esc(label)+'</span><div>'
+          +(created?'':'<s>'+esc(display(key,before[key]))+'</s>')
+          +'<strong>'+esc(display(key,after[key]))+'</strong></div></div>').join('');
+      return '<article class="cc-audit-item"><header><b>'+esc(ccCompetitionAuditLabel_(c.changeType))+'</b><time>'+esc(fmtDate(c.detectedAt))+' '+esc(fmtTime(c.detectedAt))+'</time></header>'
+        +'<h4>'+esc(text(after.title)||text(before.title)||'Ismeretlen meccs')+'</h4>'
+        +(rows||'<p class="cc-audit-empty">Nincs részletezett mezőváltozás.</p>')
+        +'<p class="cc-audit-rsvp">Jelenlegi válaszok: <b>'+num(r.total||0)+'</b> · Jövök: '+num(r.going||0)+' · Nem jövök: '+num(r.notGoing||0)+' · Egyéb: '+num(r.unknown||0)+'</p>'
+        +'<div class="cc-audit-foot"><code>'+esc(id||'Nincs eseményazonosító')+'</code>'
+        +(c.eventExists===true&&id?'<button type="button" class="button quiet small" data-cc-audit-event="'+esc(id)+'">Meccs megnyitása</button>':'<small>Nem található kapcsolt meccs</small>')
+        +'</div></article>';
+    }).join('');
+  }
+  async function ccOpenCompetitionChangeAudit_(){
+    const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');
+    if(!d||!body||!title)return;
+    if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='VERSENYSPORT · BRSZ NAPLÓ';
+    title.textContent='Meccsváltozások';
+    body.innerHTML='<div id="ccChangeAuditLoading" class="roster-loading">Napló betöltése…</div>';
+    ccOpenDialogStable_(d);
+    try{
+      const res=await rpc('cc_manager_competition_change_audit_v1',{p_limit:100});
+      if(!d.open||!body.querySelector('#ccChangeAuditLoading'))return;
+      const items=Array.isArray(res)?res:[];
+      body.innerHTML='<div class="cc-audit-root"><p>Az eredeti BRSZ-napló. A jelentkezések számai <b>jelenlegi</b> értékek. Ezen a felületen semmilyen adat nem módosul.</p>'
+        +'<label class="field compact"><span>Szűrés</span><select id="ccChangeAuditFilter"><option value="all">Összes ('+num(items.length)+')</option>'
+        +'<option value="updated">Módosítások ('+num(items.filter(c=>text(c.changeType)!=='created').length)+')</option>'
+        +'<option value="created">Új meccsek ('+num(items.filter(c=>text(c.changeType)==='created').length)+')</option>'
+        +'</select></label><div id="ccChangeAuditItems">'+ccCompetitionAuditRowsHtml_(items)+'</div></div>';
+      const bindOpen=()=>body.querySelectorAll('[data-cc-audit-event]').forEach(button=>button.addEventListener('click',()=>{
+        const id=text(button.dataset.ccAuditEvent);
+        if(!findEventById(id)){status('A meccs nem található a jelenlegi események között.','error');return;}
+        ccCloseEntityDialog_();openEventDetail(id);
+      }));
+      bindOpen();
+      $('#ccChangeAuditFilter')?.addEventListener('change',e=>{
+        const host=$('#ccChangeAuditItems');
+        if(host){host.innerHTML=ccCompetitionAuditRowsHtml_(items,text(e.target.value));bindOpen();}
+      });
+    }catch(err){
+      if(d.open&&body.querySelector('#ccChangeAuditLoading'))body.innerHTML='<p class="cc-audit-empty">A változásnapló nem tölthető be: '+esc(err?.message||'Ismeretlen hiba')+'</p>';
+    }
+  }
   const CC_BRSZ_COMPETITION_HTML_V1=Object.freeze({
     '1121':'Női I. osztály',
     '1146':'Női II. osztály B csoport',
@@ -2088,8 +2142,8 @@
   function renderCompetitionMatchCards_(){if(!ccRouteIs_('competition','matches'))return;
     state.eventFiltersOpen=filterOpen_('competition.matches',false);
     const matchPeriod=state.ccMatchPeriod||'all',rows=effectiveCompetitionEvents(state.activityEvents).filter(e=>eventType(e)==='match'&&teamFilterMatch_('events',eventTeamId(e))&&(matchPeriod==='all'||(matchPeriod==='upcoming'&&!isEventPast(e))||(matchPeriod==='past'&&isEventPast(e)))).sort((a,b)=>(eventStart(a)?.getTime()||0)-(eventStart(b)?.getTime()||0)),active=teamFilterIds_('events').length>0||matchPeriod!=='all',periodTitle=matchPeriod==='past'?'Elmúlt meccsek':matchPeriod==='upcoming'?'Következő meccsek':'BEAC – teljes idény';
-    $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-match-page-header"><div><h2>Meccsek</h2><p>Mérkőzések és aktuális tabella.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.matches','edit')?`<button class="cc-toolbar-icon cc-refresh-icon" id="competitionSourceSync" type="button" aria-label="BRSZ frissítés" title="BRSZ frissítés" ${state.competitionSyncBusy?'disabled':''}>↻</button><button class="cc-toolbar-icon cc-add-square" id="competitionMatchAdd" type="button" aria-label="Új meccs" title="Új meccs">+</button>`:''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${matchPeriod==='upcoming'?'selected':''}>Közelgő</option><option value="past" ${matchPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${matchPeriod==='all'?'selected':''}>Teljes idény</option></select></label></div><div class="competition-live-status hidden" id="competitionLiveStatus" role="status" aria-live="polite"></div>${ccMrszPhotoPanelHtml_()}<article class="panel cc-event-card-panel cc-match-card-panel"><div class="panel-head"><div><h3>${periodTitle}</h3><p>${rows.length} mérkőzés a szűrésben</p></div></div><div class="cc-event-card-list">${rows.map(e=>ccCompetitionEventWithRosterHtml_(e,'match')).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}</div>${standingsSection_('events')}${ccLeagueFixturePanelHtml_()}`;
-    $('#competitionSourceSync')?.addEventListener('click',ccOpenBrszSyncOptions_);$('#competitionMatchAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'match'));
+    $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-match-page-header"><div><h2>Meccsek</h2><p>Mérkőzések és aktuális tabella.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.matches','edit')?`<button class="cc-toolbar-icon cc-refresh-icon" id="competitionSourceSync" type="button" aria-label="BRSZ frissítés" title="BRSZ frissítés" ${state.competitionSyncBusy?'disabled':''}>↻</button><button class="cc-toolbar-icon cc-add-square" id="competitionMatchAdd" type="button" aria-label="Új meccs" title="Új meccs">+</button>`:''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${matchPeriod==='upcoming'?'selected':''}>Közelgő</option><option value="past" ${matchPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${matchPeriod==='all'?'selected':''}>Teljes idény</option></select></label></div><div class="competition-live-status hidden" id="competitionLiveStatus" role="status" aria-live="polite"></div>${ccMrszPhotoPanelHtml_()}<article class="panel cc-event-card-panel cc-match-card-panel"><div class="panel-head"><div><h3>${periodTitle}</h3><p>${rows.length} mérkőzés a szűrésben</p></div></div><div class="cc-event-card-list">${rows.map(e=>ccCompetitionEventWithRosterHtml_(e,'match')).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}<button id="ccCompetitionChangeAudit" class="button quiet small cc-audit-trigger" type="button">Változások megtekintése</button></div>${standingsSection_('events')}${ccLeagueFixturePanelHtml_()}`;
+    $('#ccCompetitionChangeAudit')?.addEventListener('click',ccOpenCompetitionChangeAudit_);$('#competitionSourceSync')?.addEventListener('click',ccOpenBrszSyncOptions_);$('#competitionMatchAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'match'));
     const toggle=$('#eventFiltersToggle'),panel=$('#eventFiltersPanel');if(toggle)toggle.classList.toggle('open',state.eventFiltersOpen);toggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.matches',!state.eventFiltersOpen);state.eventFiltersOpen=open;toggle.setAttribute('aria-expanded',String(open));toggle.classList.toggle('open',open);if(panel)panel.hidden=!open;ccBlurPointerControl_(toggle)});
     bindTeamMultiFilter_('events',renderCompetitionMatchCards_);
     $('#eventPeriodFilter')?.addEventListener('change',e=>{state.ccMatchPeriod=e.target.value;afterNativePicker(e.target,renderCompetitionMatchCards_,'#eventFiltersPanel')});
