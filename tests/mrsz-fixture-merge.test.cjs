@@ -48,13 +48,13 @@ test('initial league list defaults to BEAC fixtures and offers full-league switc
  assert.ok(html.includes('data-league-match-scope="beac"'));
  assert.ok(html.includes('aria-pressed="true"'));
  assert.ok(html.includes('Összes bajnoki meccs'));
- assert.ok(!html.includes('ms-match-row'),'no BEAC player in sample league fixtures');
+ assert.ok(!html.includes('cc-match-scoreboard'),'no BEAC player in sample league fixtures');
 });
 test('full-league selection restores the original match-card layout with results',()=>{
  ctx.qa.setScope('all');
  const html=ctx.qa.html('Női Budapest I. osztály');
  assert.ok(html.includes('ms-panel ms-match-panel'));
- assert.ok(html.includes('ms-match-row'));
+ assert.ok(html.includes('cc-match-scoreboard'));
  assert.ok(html.includes('standing-logo-text'));
  assert.ok(html.includes('3–1'));
  assert.ok(html.includes('Szettek: 25:16'));
@@ -73,16 +73,16 @@ test('main standings render does not create a second table',()=>{
 
 test('mobile layout keeps set scores readable beneath the match row',()=>{
  const css=fs.readFileSync('styles.css','utf8');
- assert.ok(css.includes('@media(max-width:560px){\n  .cc-mrsz-league-matches .ms-match-place{display:block;grid-column:1/-1;'));
- assert.ok(css.includes('.cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;'));
+ assert.ok(css.includes('@media(max-width:700px){'));
+ assert.ok(css.includes('.cc-scoreboard-sets{order:3;flex:1 1 100%'));
 });
 
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261014-standings-filters-v15'));
- assert.ok(html.includes('app.js?v=20261014-standings-filters-v15'));
- assert.ok(sw.includes("cc-manager-20261014-standings-filters-v15"));
+ assert.ok(html.includes('styles.css?v=20261015-scoreboard-match-cards-v16'));
+ assert.ok(html.includes('app.js?v=20261015-scoreboard-match-cards-v16'));
+ assert.ok(sw.includes("cc-manager-20261015-scoreboard-match-cards-v16"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
@@ -146,6 +146,6 @@ test('unconfirmed BEAC vs BEAC record in women I is also omitted',()=>{
   const html=ctx.qa.html(league);
   assert.ok(html.includes('1 ellenőrzendő BRSZ-rekord'));
   assert.ok(html.includes('0 / 1 meccs'),'all ordinary fixtures are non-BEAC');
-  assert.ok(!html.includes('<div class="ms-match-row">'));
+  assert.ok(!html.includes('<article class="cc-match-scoreboard'));
  }finally{fixtures.pop();}
 });
