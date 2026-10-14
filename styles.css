@@ -6369,3 +6369,30 @@ body{overflow-x:clip!important}
 .cc-finance-summary>div span{color:var(--muted);font-size:10px}
 .cc-finance-summary>p{grid-column:1/-1;margin:1px 4px 0;color:var(--muted);font-size:10px;line-height:1.4}
 @media(max-width:640px){.cc-finance-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.cc-finance-summary>div{padding:7px}.cc-finance-summary>div b{font-size:17px}.cc-finance-summary>div small{font-size:9px}.cc-finance-summary>div span{font-size:8px}}
+
+
+/* Main standings switcher at foot of official or imported competition table. */
+.cc-mrsz-main-group-buttons,.cc-mrsz-men-group-head{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;
+  padding:10px 13px;border-top:1px solid var(--line);
+}
+.cc-mrsz-main-group-buttons>small{font-size:11px;font-weight:800;color:var(--muted)}
+.cc-mrsz-main-group-buttons>div,.cc-mrsz-men-group-head>span{
+  display:inline-flex;gap:4px;padding:3px;border-radius:9px;background:var(--soft);
+}
+.cc-mrsz-main-group-buttons button,.cc-mrsz-men-group-head button{
+  min-height:32px;padding:6px 12px;border-radius:7px;border:1px solid transparent;
+  background:transparent;color:var(--text);font-size:11px;font-weight:850;cursor:pointer;
+}
+.cc-mrsz-main-group-buttons button.active,.cc-mrsz-men-group-head button.active{
+  background:var(--card);border-color:var(--line);box-shadow:0 1px 4px rgba(0,0,0,.12);
+}
+.cc-mrsz-main-group-buttons button:focus-visible{outline:2px solid var(--yellow-dark)}
+.cc-mrsz-main-photo .cc-mrsz-photo-team{display:inline-flex;align-items:center;gap:7px;min-width:150px}
+.cc-mrsz-main-photo .ms-table td:nth-child(n+7){color:var(--muted)}
+.cc-mrsz-photo-compact{margin-top:10px}
+@media(max-width:620px){
+ .cc-mrsz-main-group-buttons{padding:9px}
+ .cc-mrsz-main-group-buttons>div{width:100%}
+ .cc-mrsz-main-group-buttons button{flex:1}
+}
