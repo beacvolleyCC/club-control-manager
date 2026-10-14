@@ -6396,3 +6396,13 @@ body{overflow-x:clip!important}
  .cc-mrsz-main-group-buttons>div{width:100%}
  .cc-mrsz-main-group-buttons button{flex:1}
 }
+
+
+/* Existing league match rows, with a compact BEAC/all selection in the match-panel heading. */
+.cc-mrsz-league-matches .ms-match-panel-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.cc-league-match-scope{display:inline-flex;align-items:center;gap:3px;max-width:100%;padding:3px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
+.cc-league-match-scope button{border:0;border-radius:7px;background:transparent;color:var(--text);font-size:11px;font-weight:800;padding:7px 11px;min-height:32px;cursor:pointer}
+.cc-league-match-scope button.active{background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.13)}
+.cc-league-match-scope button:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:1px}
+.cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;color:var(--muted);margin-top:4px}
+@media(max-width:620px){.cc-league-match-scope{display:flex;width:100%}.cc-league-match-scope button{flex:1;font-size:10px;white-space:normal}}
