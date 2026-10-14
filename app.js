@@ -1871,14 +1871,14 @@
 
 
   // Isolated Hunvolley screenshots: not the automatic BRSZ schedule or league source.
-  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],tables:[]};
+  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[]};
   async function ccLoadMrszPhotoSnapshot_(){
     if(ccMrszPhotoState_.loaded||ccMrszPhotoState_.loading)return;
     ccMrszPhotoState_.loading=true;
     try{
       const data=await rpc('cc_manager_competition_mrsz_snapshot_v1');
-      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],tables:Array.isArray(data?.tables)?data.tables:[]};
-    }catch(err){ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],tables:[]}}
+      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[]};
+    }catch(err){ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
     else if(ccRouteIs_('competition','standings'))renderManagerStandings_();
   }
@@ -1912,13 +1912,21 @@
 
   // League fixture cards use the existing ms-match-row design; source data is not changed.
   function ccMrszNormPairName_(name){
-    return text(name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
-      .replace(/\bbudapest\b/g,'').replace(/\bsport klub\b/g,'').replace(/[^a-z0-9]/g,'');
+    const n=text(name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    if(n.includes('kando'))return 'kando';
+    if(n.includes('kozgaz'))return 'kozgaz';
+    if(n.includes('semmelweis'))return 'semmelweis';
+    if(n.includes('emericus'))return 'emericus';
+    if(n.includes('rackeve'))return 'rackeve';
+    if(n.includes('mtk')&&n.includes('kek'))return 'mtk-kek';
+    if(n.includes('mtk'))return 'mtk';
+    return n.replace(/\bbudapest\b/g,'').replace(/\bsport klub\b/g,'').replace(/[^a-z0-9]/g,'');
   }
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const key=m=>text(m.startsAt).slice(0,10)+'|'+ccMrszNormPairName_(m.homeName)+'|'+ccMrszNormPairName_(m.awayName);
     const unique=new Map();
+    for(const m of (ccMrszPhotoState_.fixtures||[]).filter(x=>text(x.competitionLabel)===group))unique.set(key(m),{...m,isFixture:true});
     for(const m of canonicalMatches)unique.set(key(m),{...m,isPhoto:false});
     for(const m of photo)unique.set(key(m),m); // prefer uploaded score when same fixture
     return [...unique.values()].sort((a,b)=>text(a.startsAt).localeCompare(text(b.startsAt))||text(a.homeName).localeCompare(text(b.homeName),'hu'));
@@ -1939,7 +1947,7 @@
        +'<div class="ms-match-place">'+esc(m.venue||'')+(sets?'<small>Szettek: '+esc(sets)+'</small>':'')+'</div></div>';
     }).join('');
     return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
-      +matches.length+' meccs · '+esc(group)+'</span></div></div><div class="ms-match-list">'
+      +matches.length+' meccs · '+esc(group)+' · korábbi BRSZ-kiírás + rögzített eredmények</span></div></div><div class="ms-match-list">'
       +(items||'<div class="ms-empty">Ehhez a bajnoksághoz még nem szerepel mérkőzés a forrásban.</div>')+'</div></section>';
   }
 
