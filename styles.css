@@ -6412,3 +6412,10 @@ body{overflow-x:clip!important}
   .cc-mrsz-league-matches .ms-match-place{display:block;grid-column:1/-1;padding:3px 7px 5px;min-width:0;font-size:10px;line-height:1.35;white-space:normal;}
   .cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;font-weight:650;white-space:normal;margin-top:2px;}
 }
+
+/* Anomalous same-team fixture audit stays in Manager below the ordinary match cards. */
+.cc-mrsz-review-fixtures{border-top:1px solid var(--line);padding:10px 14px;font-size:11px;color:var(--muted)}
+.cc-mrsz-review-fixtures summary{cursor:pointer;font-weight:750;color:var(--text);list-style:revert}
+.cc-mrsz-review-fixtures ul{margin:10px 0 5px;padding-left:20px;line-height:1.7}
+.cc-mrsz-review-fixtures li b{color:var(--text)}
+.cc-mrsz-review-fixtures p{font-size:10px;margin:5px 0}

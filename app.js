@@ -1934,7 +1934,15 @@
     for(const m of (ccMrszPhotoState_.fixtures||[]).filter(x=>text(x.competitionLabel)===group))unique.set(key(m),{...m,isFixture:true});
     for(const m of canonicalMatches)unique.set(key(m),{...m,isPhoto:false});
     for(const m of photo)unique.set(key(m),m); // prefer uploaded score when same fixture
-    return [...unique.values()].sort((a,b)=>text(a.startsAt).localeCompare(text(b.startsAt))||text(a.homeName).localeCompare(text(b.homeName),'hu'));
+    const localSort=m=>{const t=ccMrszLocalKickoff_(m.startsAt);return t.date+'T'+t.time};
+    return [...unique.values()].sort((a,b)=>localSort(a).localeCompare(localSort(b))||text(a.homeName).localeCompare(text(b.homeName),'hu'));
+  }
+
+  // An unscored BEAC–BEAC record is a source anomaly, not a confirmed fixture.
+  function ccMrszUnverifiedSelfFixture_(m){
+    if(m.homeSets!=null||m.awaySets!=null)return false;
+    const home=ccMrszNormPairName_(m.homeName);
+    return !!home&&home===ccMrszNormPairName_(m.awayName)&&ccIsBeacLeagueTeam_(m.homeName);
   }
 
   let ccLeagueMatchScope_='beac';
@@ -1953,7 +1961,9 @@
   }
 
   function ccMrszLeagueFixturePanelHtml_(group,canonicalMatches=[]){
-    const matches=ccMrszMergedLeagueMatches_(group,canonicalMatches);
+    const merged=ccMrszMergedLeagueMatches_(group,canonicalMatches);
+    const review=merged.filter(ccMrszUnverifiedSelfFixture_);
+    const matches=merged.filter(m=>!ccMrszUnverifiedSelfFixture_(m));
     const scope=ccLeagueMatchScope_;
     const visible=scope==='all'?matches:matches.filter(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName));
     const controls='<div class="cc-league-match-scope" role="group" aria-label="Bajnoki mérkőzések szűrése">'
@@ -1974,7 +1984,10 @@
     }).join('');
     return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
       +visible.length+' / '+matches.length+' meccs · '+esc(group)+'</span></div>'+controls+'</div><div class="ms-match-list">'
-      +(items||'<div class="ms-empty">Nincs BEAC-mérkőzés ebben a szűrésben. Az összes bajnoki meccs a fenti kapcsolóval elérhető.</div>')+'</div></section>';
+      +(items||'<div class="ms-empty">Nincs BEAC-mérkőzés ebben a szűrésben. Az összes bajnoki meccs a fenti kapcsolóval elérhető.</div>')+'</div>'
+      +(review.length?'<details class="cc-mrsz-review-fixtures"><summary>'+review.length+' ellenőrzendő BRSZ-rekord · elrejtve a meccslistából</summary><ul>'
+        +review.map(m=>{const kick=ccMrszLocalKickoff_(m.startsAt);return '<li><b>'+esc(kick.date+' '+kick.time)+'</b> · '+esc(m.homeName)+' – '+esc(m.awayName)+'</li>'}).join('')
+        +'</ul><p>Korábbi, nem megerősített menetrendadat. A forrásrekord változatlanul megmarad.</p></details>':'')+'</section>';
   }
 
   function ccMrszPhotoResultsByLeagueHtml_(group){

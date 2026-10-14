@@ -80,9 +80,9 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261014-standings-scope-v6'));
- assert.ok(html.includes('app.js?v=20261014-standings-scope-v6'));
- assert.ok(sw.includes("cc-manager-20261014-standings-scope-v6"));
+ assert.ok(html.includes('styles.css?v=20261014-fixture-review-v7'));
+ assert.ok(html.includes('app.js?v=20261014-fixture-review-v7'));
+ assert.ok(sw.includes("cc-manager-20261014-fixture-review-v7"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
@@ -116,4 +116,36 @@ test('changing Manager context resets BEAC-only scope except for men A',()=>{
  handlers.context({target:{value:'10000000-0000-4000-8000-000000000003'}});
  assert.equal(ctx.qa.getScope(),'all');
  assert.equal(localState.managerStandingsMatchScope,'all');
+});
+
+test('unconfirmed BEAC vs BEAC records are omitted from match cards but listed for Manager review',()=>{
+ const group='Férfi Budapest I. osztály – B csoport';
+ const unverified=[
+  {competitionLabel:group,startsAt:'2027-01-13T20:30:00',homeName:'BEAC',awayName:'BEAC',homeSets:null,awaySets:null},
+  {competitionLabel:group,startsAt:'2027-03-04T19:30:00',homeName:'BEAC',awayName:'BEAC',homeSets:null,awaySets:null}
+ ];
+ fixtures.push(...unverified);
+ try{
+  const duplicateCanonical={...unverified[0],startsAt:'2027-01-13T19:30:00+00:00'};
+  const html=ctx.qa.html(group,[duplicateCanonical]);
+  assert.ok(html.includes('2 ellenőrzendő BRSZ-rekord'));
+  assert.ok(html.includes('2027-03-04 19:30'));
+  assert.ok(html.includes('1 / 1 meccs'));
+  const ordinary=html.split('<div class="ms-match-list">')[1].split('</div><details class="cc-mrsz-review-fixtures">')[0];
+  assert.ok(!ordinary.includes('2027-01-13'));
+  assert.ok(!ordinary.includes('2027-03-04'));
+  assert.ok(ordinary.includes('PDSE'));
+  const valid={...unverified[1],startsAt:'2027-04-01T19:30:00',homeSets:3,awaySets:1};
+  assert.equal(vm.runInContext('ccMrszUnverifiedSelfFixture_',ctx)(valid),false,'scored matches must not be silently suppressed');
+ }finally{fixtures.splice(fixtures.length-unverified.length);}
+});
+test('unconfirmed BEAC vs BEAC record in women I is also omitted',()=>{
+ const league='Női Budapest I. osztály',suspect={competitionLabel:league,startsAt:'2026-11-10T19:30:00',homeName:'BEAC',awayName:'BEAC',homeSets:null,awaySets:null};
+ fixtures.push(suspect);
+ try{
+  const html=ctx.qa.html(league);
+  assert.ok(html.includes('1 ellenőrzendő BRSZ-rekord'));
+  assert.ok(html.includes('0 / 1 meccs')===false);
+  assert.ok(!html.includes('<div class="ms-match-row">'));
+ }finally{fixtures.pop();}
 });
