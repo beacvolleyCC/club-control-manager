@@ -10,6 +10,7 @@ on:
       - tests/brsz-mobile-html-import.test.cjs
       - tests/competition-change-audit.test.cjs
       - tests/manager-standings-filters.test.cjs
+      - tests/scoreboard-match-cards.test.cjs
       - supabase/migrations/20261014153502_cc_manager_competition_change_audit_readonly_v1.sql
       - tests/competition-source-identity.test.cjs
       - supabase/migrations/20261014135156_cc_sync_identity_ambiguous_pair_preserve_v2.sql
@@ -27,6 +28,7 @@ on:
       - tests/brsz-mobile-html-import.test.cjs
       - tests/competition-change-audit.test.cjs
       - tests/manager-standings-filters.test.cjs
+      - tests/scoreboard-match-cards.test.cjs
       - supabase/migrations/20261014153502_cc_manager_competition_change_audit_readonly_v1.sql
       - tests/competition-source-identity.test.cjs
       - supabase/migrations/20261014135156_cc_sync_identity_ambiguous_pair_preserve_v2.sql
@@ -60,3 +62,4 @@ jobs:
           node --test tests/competition-league-fixture-reference.test.cjs
           node --test tests/mrsz-screenshot-finance.test.cjs
           node --test tests/mrsz-fixture-merge.test.cjs
+          node --test tests/scoreboard-match-cards.test.cjs
