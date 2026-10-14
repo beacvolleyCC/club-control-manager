@@ -80,9 +80,9 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261014-single-standings-beac-mobile-v5'));
- assert.ok(html.includes('app.js?v=20261014-single-standings-beac-mobile-v5'));
- assert.ok(sw.includes("cc-manager-20261014-single-standings-beac-mobile-v5"));
+ assert.ok(html.includes('styles.css?v=20261014-standings-scope-v6'));
+ assert.ok(html.includes('app.js?v=20261014-standings-scope-v6'));
+ assert.ok(sw.includes("cc-manager-20261014-standings-scope-v6"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
@@ -98,4 +98,22 @@ test('official UTC kickoff is shown in Budapest time and merged into local-day f
   assert.ok(!html.includes('17:30'));
   assert.equal(vm.runInContext("ccMrszLocalKickoff_('2026-11-01T23:30:00+00:00').date",ctx),'2026-11-02');
  }finally{fixtures.pop();}
+});
+
+test('changing Manager context resets BEAC-only scope except for men A',()=>{
+ const begin=js.indexOf('  function msBind_(){');
+ const end=js.indexOf('  function renderManagerStandings_()',begin);
+ assert.ok(begin>0&&end>begin);
+ const handlers={};
+ const localState={managerStandingsContext:'',managerStandingsTeam:'',managerStandingsMatchScope:'all',managerLeagueInsights:{}};
+ const ctx={state:localState,text:x=>String(x??''),localStorage:{setItem(){}},$:(selector)=>selector==='#msContextSelect'?{addEventListener:(type,fn)=>handlers.context=fn}:{addEventListener(){}},$$:()=>[],renderManagerStandings_:()=>{},msSetTeam_:()=>{}};
+ vm.createContext(ctx);
+ vm.runInContext("let ccMrszMenGroup_='A';let ccLeagueMatchScope_='all';"+js.slice(begin,end)+"\\nthis.qa={bind:msBind_,getScope:()=>ccLeagueMatchScope_};",ctx);
+ ctx.qa.bind();
+ handlers.context({target:{value:'10000000-0000-4000-8000-000000000001'}});
+ assert.equal(ctx.qa.getScope(),'beac');
+ assert.equal(localState.managerStandingsMatchScope,'beac');
+ handlers.context({target:{value:'10000000-0000-4000-8000-000000000003'}});
+ assert.equal(ctx.qa.getScope(),'all');
+ assert.equal(localState.managerStandingsMatchScope,'all');
 });
