@@ -70,3 +70,9 @@ test('main standings render does not create a second table',()=>{
  assert.ok(!render.includes('.outerHTML=html'));
  assert.ok(render.includes('ccMrszLeagueFixturePanelHtml_'));
 });
+
+test('mobile layout keeps set scores readable beneath the match row',()=>{
+ const css=fs.readFileSync('styles.css','utf8');
+ assert.ok(css.includes('@media(max-width:560px){\n  .cc-mrsz-league-matches .ms-match-place{display:block;grid-column:1/-1;'));
+ assert.ok(css.includes('.cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;'));
+});

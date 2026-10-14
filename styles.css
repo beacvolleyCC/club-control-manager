@@ -6406,3 +6406,9 @@ body{overflow-x:clip!important}
 .cc-league-match-scope button:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:1px}
 .cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;color:var(--muted);margin-top:4px}
 @media(max-width:620px){.cc-league-match-scope{display:flex;width:100%}.cc-league-match-scope button{flex:1;font-size:10px;white-space:normal}}
+
+/* Small-screen competition cards: keep set scores visible below the four-column match row. */
+@media(max-width:560px){
+  .cc-mrsz-league-matches .ms-match-place{display:block;grid-column:1/-1;padding:3px 7px 5px;min-width:0;font-size:10px;line-height:1.35;white-space:normal;}
+  .cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;font-weight:650;white-space:normal;margin-top:2px;}
+}
