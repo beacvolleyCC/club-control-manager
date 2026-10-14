@@ -26,6 +26,10 @@ const ctx={
   initials:x=>String(x??'').split(/\s+/).filter(Boolean).slice(0,2).map(v=>v[0]).join('')||'?',
   medicalState_:()=>({cls:'valid',label:'Érvényes'}),fmtDate:()=> '2027.01.01',
   ccEventCardHtml_:()=>'<button data-event-id="test">Esemény</button>',
+  eventTeamId:()=> 'team',teamById:()=>({name:'BEAC'}),
+  ccEventOpponent_:()=> 'UTE',competitionResultByEvent_:()=>null,
+  ccTeamRosterSize_:()=>14,isEventPast:()=>false,
+  ccMatchScoreboardHtml_:(_m,o)=>'<button class="cc-match-scoreboard" data-event-id="'+o.eventId+'">Meccs</button>',
   ccEventCanEdit_:()=>true,eventStart:()=>new Date('2026-01-01T00:00:00Z'),
   findEventById:id=>({id,status:'active'}),configured:()=>true,
   ccBindCompetitionRoster_:()=>{},loadEventRoster:async()=>players,
@@ -90,7 +94,8 @@ test('pre-event attendance sliders never persist from RSVP; actual attendance ta
 test('both training and match cards show only Névsor in folded header',()=>{
   for(const kind of ['training','match']){
     const html=ctx.qa.item({id:'event-1'},kind);
-    assert.ok(html.includes('data-event-id="test"'));
+    assert.ok(html.includes(kind==='match'?'data-event-id="event-1"':'data-event-id="test"'));
+    if(kind==='match')assert.ok(html.includes('cc-match-scoreboard'),'match card uses scoreboard');
     assert.ok(html.includes('data-training-roster-toggle="event-1"'));
     assert.ok(html.includes('>Névsor</span>'));
     assert.ok(!html.includes('Névsor ·'));
