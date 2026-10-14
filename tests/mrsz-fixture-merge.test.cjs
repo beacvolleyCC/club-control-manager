@@ -80,9 +80,9 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261014-brsz-mobile-review-v9'));
- assert.ok(html.includes('app.js?v=20261014-brsz-mobile-review-v9'));
- assert.ok(sw.includes("cc-manager-20261014-brsz-mobile-review-v9"));
+ assert.ok(html.includes('styles.css?v=20261014-competition-audit-v10'));
+ assert.ok(html.includes('app.js?v=20261014-competition-audit-v10'));
+ assert.ok(sw.includes("cc-manager-20261014-competition-audit-v10"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
