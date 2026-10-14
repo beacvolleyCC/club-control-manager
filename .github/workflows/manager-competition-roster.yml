@@ -6,6 +6,8 @@ on:
       - app.js
       - styles.css
       - tests/competition-training-roster.test.cjs
+      - tests/competition-match-integrity.test.cjs
+      - supabase/migrations/20261014125538_cc_preserve_competition_match_identity_v1.sql
       - tests/competition-league-fixture-reference.test.cjs
       - tests/mrsz-screenshot-finance.test.cjs
       - tests/mrsz-fixture-merge.test.cjs
@@ -15,6 +17,8 @@ on:
       - app.js
       - styles.css
       - tests/competition-training-roster.test.cjs
+      - tests/competition-match-integrity.test.cjs
+      - supabase/migrations/20261014125538_cc_preserve_competition_match_identity_v1.sql
       - tests/competition-league-fixture-reference.test.cjs
       - tests/mrsz-screenshot-finance.test.cjs
       - tests/mrsz-fixture-merge.test.cjs
@@ -36,6 +40,7 @@ jobs:
       - name: Validate status colors and position-grouped foldout
         run: |
           node --test tests/competition-training-roster.test.cjs
+          node --test tests/competition-match-integrity.test.cjs
           node --test tests/competition-league-fixture-reference.test.cjs
           node --test tests/mrsz-screenshot-finance.test.cjs
           node --test tests/mrsz-fixture-merge.test.cjs
