@@ -6538,3 +6538,60 @@ body{overflow-x:clip!important}
   .cc-overview-men-groups>button{min-height:44px;min-width:44px}
   .cc-overview-standings-more{min-height:44px!important}
 }
+
+/* Unified Manager/league match scoreboard; avoids duplicating the existing standings table. */
+.cc-match-scoreboard{display:block;appearance:none;box-sizing:border-box;width:100%;min-width:0;
+  border:1px solid rgba(122,106,89,.19);border-radius:14px;padding:12px 17px;text-align:left;
+  font-family:inherit;color:#2b2928;background:linear-gradient(110deg,#fff3e5 0%,#ffdfc5 55%,#fff3e6 100%);
+  box-shadow:0 1px 3px rgba(80,62,42,.04)}
+button.cc-match-scoreboard{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+button.cc-match-scoreboard:hover{border-color:rgba(117,87,53,.43);box-shadow:0 4px 14px rgba(80,62,42,.12)}
+button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b58217);outline-offset:3px}
+.cc-match-scoreboard.is-upcoming{background:linear-gradient(105deg,#fbf8f2,#f0ebe4 53%,#fbf8f2)}
+.cc-scoreboard-top,.cc-scoreboard-bottom{display:flex;align-items:center;justify-content:space-between;gap:7px 12px;flex-wrap:wrap}
+.cc-scoreboard-top{padding-bottom:9px;font-size:10px;font-weight:750;letter-spacing:.035em}
+.cc-scoreboard-label{text-transform:uppercase;color:#74533d}
+.cc-scoreboard-kickoff{font-size:12px;color:#4b3e34;font-weight:800;letter-spacing:0}
+.cc-scoreboard-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,135px) minmax(0,1fr);gap:12px;align-items:center;min-width:0}
+.cc-scoreboard-team{display:flex;align-items:center;gap:10px;min-width:0}
+.cc-scoreboard-team.away{flex-direction:row-reverse;text-align:right}
+.cc-scoreboard-crest{display:flex;align-items:center;justify-content:center;flex:0 0 45px}
+.cc-scoreboard-crest img,.cc-scoreboard-crest .ms-team-logo{width:44px!important;height:44px!important;max-width:44px!important;max-height:44px!important;object-fit:contain}
+.cc-scoreboard-crest .ms-monogram{border-radius:50%;background:rgba(255,255,255,.86);font-size:17px;font-weight:900}
+.cc-scoreboard-teamcopy{display:grid;gap:4px;min-width:0}
+.cc-scoreboard-teamcopy>strong{font-size:clamp(15px,2vw,23px);font-weight:900;line-height:1.16;overflow-wrap:anywhere}
+.cc-scoreboard-teamcopy>small{font-size:10px;color:#77675a;font-weight:600}
+.cc-scoreboard-score{display:grid;text-align:center;gap:2px;min-width:0}
+.cc-scoreboard-score>strong{font-size:clamp(30px,3.4vw,46px);font-weight:950;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.05;letter-spacing:-.035em}
+.cc-scoreboard-score>small{font-size:9px;letter-spacing:.075em;text-transform:uppercase;font-weight:800;color:#6c5d51}
+.cc-scoreboard-bottom{border-top:1px solid rgba(126,95,58,.12);padding-top:9px;margin-top:11px;font-size:10px;color:#685a4b}
+.cc-scoreboard-location{font-weight:700;overflow-wrap:anywhere}
+.cc-scoreboard-sets{font-variant-numeric:tabular-nums;font-weight:750;letter-spacing:.01em}
+.cc-scoreboard-source{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.cc-scoreboard-meta{margin-left:auto;white-space:normal}
+.cc-event-card-list .cc-match-scoreboard{margin:0}
+.cc-training-roster-item>.cc-match-scoreboard{border-radius:13px}
+.cc-mrsz-league-matches .ms-match-list,.cc-league-fixture-list{display:grid;gap:9px}
+.cc-league-fixture-list{padding-top:10px}
+.cc-league-fixture-list>.cc-match-scoreboard{min-width:0}
+@media(max-width:700px){
+  .cc-match-scoreboard{padding:11px 12px;border-radius:11px}
+  .cc-scoreboard-main{grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:5px}
+  .cc-scoreboard-crest{flex-basis:29px}
+  .cc-scoreboard-crest img,.cc-scoreboard-crest .ms-team-logo{width:28px!important;height:28px!important;max-width:28px!important;max-height:28px!important}
+  .cc-scoreboard-team{gap:5px}
+  .cc-scoreboard-teamcopy>strong{font-size:clamp(12px,3vw,17px)}
+  .cc-scoreboard-score>strong{font-size:29px}
+  .cc-scoreboard-score>small{font-size:8px}
+  .cc-scoreboard-bottom{align-items:flex-start;gap:5px 10px}
+  .cc-scoreboard-sets{order:3;flex:1 1 100%;line-height:1.45}
+  .cc-scoreboard-meta{margin-left:0}
+}
+@media(max-width:430px){
+  .cc-scoreboard-main{grid-template-columns:minmax(0,1fr) 67px minmax(0,1fr);gap:4px}
+  .cc-scoreboard-crest{flex-basis:24px}
+  .cc-scoreboard-crest img,.cc-scoreboard-crest .ms-team-logo{width:24px!important;height:24px!important;max-width:24px!important;max-height:24px!important}
+  .cc-scoreboard-teamcopy>strong{font-size:12px}
+  .cc-scoreboard-score>strong{font-size:25px}
+  .cc-scoreboard-kickoff{font-size:11px}
+}
