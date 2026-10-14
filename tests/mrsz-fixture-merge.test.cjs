@@ -145,7 +145,7 @@ test('unconfirmed BEAC vs BEAC record in women I is also omitted',()=>{
  try{
   const html=ctx.qa.html(league);
   assert.ok(html.includes('1 ellenőrzendő BRSZ-rekord'));
-  assert.ok(html.includes('0 / 1 meccs')===false);
+  assert.ok(html.includes('0 / 1 meccs'),'all ordinary fixtures are non-BEAC');
   assert.ok(!html.includes('<div class="ms-match-row">'));
  }finally{fixtures.pop();}
 });
