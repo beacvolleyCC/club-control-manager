@@ -9,7 +9,7 @@ const begin=js.indexOf('// Competition schedule snapshot.');
 const end=js.indexOf('  function renderCompetitionMatchCards_()',begin);
 assert.ok(begin>=0&&end>begin,'snapshot-only UI helpers present');
 const helpers=js.slice(begin,end);
-const context={text:x=>String(x??''),esc:x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))};
+const context={msLogoHtml_:(_id,name)=>'<span class="ms-monogram">'+String(name||'').slice(0,1)+'</span>',text:x=>String(x??''),esc:x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))};
 vm.createContext(context);
 vm.runInContext(helpers+
  '\nthis.qa={html:ccLeagueFixturePanelHtml_,load:ccLoadLeagueFixtureSnapshot_,inject:(rows)=>{ccLeagueFixtureRows_=rows},setGroup:(name)=>{ccLeagueSelectedGroup_=name}};',context);
