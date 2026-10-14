@@ -129,7 +129,10 @@ test('match edits retain event ID and never replace an event with its RSVPs',()=
   const end=source.indexOf('  async function ccRosterRsvpWrite_(',start);
   assert.ok(start>0&&end>start);
   const editor=source.slice(start,end);
-  const existingBranch=editor.slice(editor.indexOf('         if(e){'),editor.indexOf('         }else{',editor.indexOf('         if(e){')));
+  const editStart=editor.indexOf('if(e){',editor.indexOf("const notify=$('#ceNotify')"));
+  const editEnd=editor.indexOf('}else{',editStart);
+  assert.ok(editStart>=0&&editEnd>editStart,'existing-event save branch must exist');
+  const existingBranch=editor.slice(editStart,editEnd);
   assert.match(existingBranch,/cc_manager_competition_event_save_v1/);
   assert.ok(existingBranch.includes('p_event_id:text(e.eventId||e.id)'),'preserve the original event UUID');
   assert.ok(existingBranch.includes('p_payload:base'),'update the event instead of recreating it');
