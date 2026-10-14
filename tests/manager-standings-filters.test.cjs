@@ -74,3 +74,11 @@ test('snapshot choice shows actual known rows and discloses missing male B group
  ctx.ccMrszMenGroup_='B';
  assert.equal(ctx.get('10000000-0000-4000-8000-000000000003').rows.length,0);
 });
+test('match screen binds shared standings row, details and A/B controls',()=>{
+ const match=slice('  function renderCompetitionMatchCards_(){','  function renderEventList(');
+ assert.ok(match.includes("standingsSection_('events')"));
+ assert.ok(match.includes('bindOverviewStandings_();'));
+ const bind=slice('  function bindOverviewStandings_(){','  function standingsSection_(');
+ for(const key of ['data-overview-standings-team','data-overview-open-standings','data-overview-men-group'])
+   assert.ok(bind.includes(key));
+});

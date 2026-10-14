@@ -6523,3 +6523,18 @@ body{overflow-x:clip!important}
 .cc-inline-player:has(.cc-inline-decline-note){min-height:55px}
 .cc-detail-decline-note{display:block;font-size:11px;line-height:1.4;color:var(--muted);white-space:normal;overflow-wrap:anywhere;margin-top:3px}
 .cc-compact-roster-list .cc-compact-roster-row:has(.cc-detail-decline-note){min-height:54px}
+/* Shared official standings, clearly labelled snapshots and mobile A/B selector. */
+.cc-overview-standings-head{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.cc-overview-standings-head>div:first-child{flex:1 1 150px;min-width:0}
+.cc-overview-standings-head>div:first-child p{line-height:1.4;overflow-wrap:anywhere}
+.cc-overview-men-groups{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto}
+.cc-overview-men-groups>button{min-height:35px;min-width:39px;border:1px solid var(--line);border-radius:8px;background:var(--soft);color:var(--text);font-size:12px;font-weight:800;cursor:pointer}
+.cc-overview-men-groups>button.active{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.cc-overview-men-groups>button:focus-visible,.cc-overview-standings-more:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:2px}
+.cc-overview-standings-more{flex:0 0 auto;min-height:35px!important}
+.cc-standings-notice{margin:0;padding:13px;color:var(--muted);font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+@media(max-width:560px){
+  .cc-overview-standings-head{gap:9px}
+  .cc-overview-men-groups>button{min-height:44px;min-width:44px}
+  .cc-overview-standings-more{min-height:44px!important}
+}
