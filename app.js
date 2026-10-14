@@ -729,9 +729,10 @@
     if(!ccMrszPhotoState_.loaded&&!ccMrszPhotoState_.loading)void ccLoadMrszPhotoSnapshot_();
     const isMens=text(team.id)==='10000000-0000-4000-8000-000000000003';
     const isWomenII=text(team.id)==='10000000-0000-4000-8000-000000000002';
+    const isWomenI=text(team.id)==='10000000-0000-4000-8000-000000000001';
     const isA=isMens&&ccMrszMenGroup_==='A';
-    const usePhoto=isA||isWomenII;
-    const label=isA?'Férfi Budapest I. osztály – A csoport':'Női Budapest II. osztály – B csoport';
+    const usePhoto=isA||isWomenII||isWomenI;
+    const label=isA?'Férfi Budapest I. osztály – A csoport':isWomenII?'Női Budapest II. osztály – B csoport':'Női Budapest I. osztály';
     const snapshot=ccMrszPhotoState_.tables.find(t=>text(t.competitionLabel)===label);
     let mainPanel=$('#viewContent .ms-standings-card');
     if(usePhoto&&ccMrszPhotoState_.loaded){
@@ -739,7 +740,7 @@
       if(mainPanel)mainPanel.outerHTML=html;
       else $('#viewContent').insertAdjacentHTML('beforeend',html);
       mainPanel=$('#viewContent .ms-standings-card');
-      $('#viewContent').querySelectorAll('.ms-panel').forEach(p=>{p.hidden=true});
+      $('#viewContent').querySelectorAll('.ms-panel').forEach(p=>p.remove());
     }
     if(mainPanel&&isMens){
       mainPanel.insertAdjacentHTML('beforeend',ccMrszMainGroupButtonsHtml_());
@@ -747,9 +748,15 @@
       $('#viewContent').insertAdjacentHTML('beforeend',ccMrszMainGroupButtonsHtml_());
     }
     if(ccMrszPhotoState_.loaded){
-      const league=usePhoto?label:(isMens?'Férfi Budapest I. osztály – B csoport':text(team.id)==='10000000-0000-4000-8000-000000000001'?'Női Budapest I. osztály':null);
-      const matchHtml=ccMrszPhotoResultsByLeagueHtml_(league);
-      if(matchHtml)$('#viewContent').insertAdjacentHTML('beforeend',matchHtml);
+      const group=isMens?(isA?'Férfi Budapest I. osztály – A csoport':'Férfi Budapest I. osztály – B csoport')
+        :isWomenII?'Női Budapest II. osztály – B csoport':'Női Budapest I. osztály';
+      const leagueMatches=!isA&&Array.isArray(msData_()?.matches)?msData_().matches:[];
+      const panel=ccMrszLeagueFixturePanelHtml_(group,leagueMatches);
+      const table=$('#viewContent .ms-standings-card');
+      const old=$('#viewContent .ms-match-panel');
+      if(old)old.outerHTML=panel;
+      else if(table)table.insertAdjacentHTML('afterend',panel);
+      else $('#viewContent').insertAdjacentHTML('beforeend',panel);
     }
     msBind_();
     ccBindMrszMenGroup_();
@@ -1896,12 +1903,46 @@
     const rows=Array.isArray(table?.rows)?table.rows:[];
     const label=text(table?.competitionLabel||'Bajnoki tabella');
     const body=rows.map(r=>'<tr><td><b>'+num(r.position)+'</b></td><td class="team"><span class="cc-mrsz-photo-team">'+msLogoHtml_('',r.teamName)+'<strong>'+esc(r.teamName)+'</strong></span></td>'
-     +'<td>'+num(r.played)+'</td><td>'+num(r.wins)+'</td><td>'+num(r.losses)+'</td><td class="group-end"><b>'+num(r.tablePoints)+'</b></td><td>–</td><td>–</td><td>–</td><td>–</td></tr>').join('');
+     +'<td>'+num(r.played)+'</td><td>'+num(r.wins)+'</td><td>'+num(r.losses)+'</td><td class="group-end"><b>'+num(r.tablePoints)+'</b></td><td>'+((r.setsFor==null||r.setsAgainst==null)?'–':num(r.setsFor)+'–'+num(r.setsAgainst))+'</td><td>'+(r.setsAgainst>0?(r.setsFor/r.setsAgainst).toFixed(3):'–')+'</td><td>'+((r.pointsFor==null||r.pointsAgainst==null)?'–':num(r.pointsFor)+'–'+num(r.pointsAgainst))+'</td><td>'+(r.pointsAgainst>0?(r.pointsFor/r.pointsAgainst).toFixed(3):'–')+'</td></tr>').join('');
     return '<article class="panel ms-standings-card cc-mrsz-main-photo"><div class="ms-title"><div><h3>'+esc(label)+'</h3>'
      +'<p>MRSZ · 2026.10.14-i képernyőképek · nem élő frissítés</p></div></div><div class="ms-table-scroll"><table class="ms-table">'
      +'<thead><tr><th>#</th><th class="team">Csapat</th><th>M</th><th>GY</th><th>V</th><th class="group-end">P</th><th>SZ</th><th>SZA</th><th>P</th><th>PA</th></tr></thead><tbody>'
      +(body||'<tr><td colspan="10">Ehhez a bajnoksághoz nincs rögzített tabella.</td></tr>')+'</tbody></table></div></article>';
   }
+
+  // League fixture cards use the existing ms-match-row design; source data is not changed.
+  function ccMrszNormPairName_(name){
+    return text(name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+      .replace(/\bbudapest\b/g,'').replace(/\bsport klub\b/g,'').replace(/[^a-z0-9]/g,'');
+  }
+  function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
+    const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
+    const key=m=>text(m.startsAt).slice(0,10)+'|'+ccMrszNormPairName_(m.homeName)+'|'+ccMrszNormPairName_(m.awayName);
+    const unique=new Map();
+    for(const m of canonicalMatches)unique.set(key(m),{...m,isPhoto:false});
+    for(const m of photo)unique.set(key(m),m); // prefer uploaded score when same fixture
+    return [...unique.values()].sort((a,b)=>text(a.startsAt).localeCompare(text(b.startsAt))||text(a.homeName).localeCompare(text(b.homeName),'hu'));
+  }
+  function ccMrszLeagueFixturePanelHtml_(group,canonicalMatches=[]){
+    const matches=ccMrszMergedLeagueMatches_(group,canonicalMatches);
+    const items=matches.map(m=>{
+      const date=text(m.startsAt).slice(0,10),time=text(m.startsAt).slice(11,16);
+      const valid=m.homeSets!==null&&m.homeSets!==undefined&&m.awaySets!==null&&m.awaySets!==undefined;
+      const score=valid?num(m.homeSets)+'–'+num(m.awaySets):'–';
+      const url=text(m.sourceUrl||m.matchUrl||m.reportUrl||'');
+      const scoreHtml=url&&valid?'<a class="ms-score ms-score-link" target="_blank" rel="noopener noreferrer" href="'+esc(url)+'">'+esc(score)+'</a>':'<strong class="ms-score">'+esc(score)+'</strong>';
+      const sets=Array.isArray(m.setScores)?m.setScores.map(z=>num(z.home)+':'+num(z.away)).join(' · '):'';
+      return '<div class="ms-match-row"><div class="ms-match-date"><b>'+esc(date)+'</b><span>'+esc(time)+'</span></div>'
+       +'<div class="ms-match-team">'+msLogoHtml_('',m.homeName,'match')+'<span><b>'+esc(m.homeName||'–')+'</b></span></div>'
+       +scoreHtml
+       +'<div class="ms-match-team away"><span><b>'+esc(m.awayName||'–')+'</b></span>'+msLogoHtml_('',m.awayName,'match')+'</div>'
+       +'<div class="ms-match-place">'+esc(m.venue||'')+(sets?'<small>Szettek: '+esc(sets)+'</small>':'')+'</div></div>';
+    }).join('');
+    return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
+      +matches.length+' meccs · '+esc(group)+'</span></div></div><div class="ms-match-list">'
+      +(items||'<div class="ms-empty">Ehhez a bajnoksághoz még nem szerepel mérkőzés a forrásban.</div>')+'</div></section>';
+  }
+
   function ccMrszPhotoResultsByLeagueHtml_(group){
     const list=(ccMrszPhotoState_.matches||[]).filter(x=>!group||text(x.competitionLabel)===group);
     if(!list.length)return '';
