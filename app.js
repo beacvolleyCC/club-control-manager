@@ -1919,7 +1919,7 @@
   function ccMrszLocalKickoff_(value){
   const raw=String(value||'');
   const fallback={date:raw.slice(0,10),time:raw.slice(11,16)};
-  if(raw.length<17||!/(?:[zZ]|[+-]\\d{2}(?::?\\d{2})?)$/.test(raw))return fallback;
+  if(raw.length<17||!/(?:[zZ]|[+-]\d{2}(?::?\d{2})?)$/.test(raw))return fallback;
   const instant=new Date(raw);
   if(Number.isNaN(instant.getTime()))return fallback;
   const pieces=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(instant);
