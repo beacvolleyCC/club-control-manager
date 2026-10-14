@@ -374,7 +374,16 @@
       state.rsvpMatrixLoadError=text(err?.message||err||'A jelenléti rács adatforrása nem érhető el.');
     }
   }
-  async function loadCardRsvpMatrix(){const now=new Date(),seasonYear=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1,from=new Date(seasonYear,7,1),to=new Date(seasonYear+1,7,1);const d=await rpc('cc_manager_rsvp_matrix_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_team_id:null});state.cardRsvpMatrix=d&&typeof d==='object'?d:{events:[],players:[],responses:[]}}
+  // The RSVP matrix RPC permits 62 days only. Position badges use a compact
+  // year-wide count RPC instead; leave the existing grid's short-range data alone.
+  let ccSeasonPositionByEvent_=new Map();
+  async function loadCardRsvpMatrix(){
+    const now=new Date(),year=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1;
+    const from=new Date(year,7,1),to=new Date(year+1,7,1);
+    const data=await rpc('cc_manager_competition_position_counts_v1',{p_from:from.toISOString(),p_to:to.toISOString()});
+    ccSeasonPositionByEvent_=new Map((Array.isArray(data)?data:[]).map(x=>[text(x.eventId),x]));
+    state.cardRsvpMatrix={events:[],players:[],responses:[]};
+  }
   async function loadCoachAvailability(){const now=new Date(),seasonYear=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1,from=new Date(seasonYear,7,1),to=new Date(seasonYear+1,7,1);try{const d=await rpc('cc_manager_coach_availability_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_team_id:null});state.coachAvailability=Array.isArray(d)?d:[]}catch(err){console.warn('MGR019 coach availability unavailable',err);state.coachAvailability=[]}}
   // v2 is not deployed on production; one real RPC per event, shared by concurrent callers.
   const ccRosterInFlight_=new Map();
@@ -1581,29 +1590,20 @@
   function ccCardMatrix_(){const m=state.cardRsvpMatrix&&Array.isArray(state.cardRsvpMatrix.responses)?state.cardRsvpMatrix:state.rsvpMatrix;return m||{events:[],players:[],responses:[]}}
   function ccGoingStatus_(value){const k=ccNameKey_(value);return k==='going'||k==='yes'||k==='jovok'||k==='igen'}
   function ccEventPositionSummary_(e){
-    const m=ccCardMatrix_(),eventId=text(e.eventId||e.id),players=new Map([...(m.players||[]),...(state.players||[])].map(p=>[text(p.playerId||p.id),p])),counts={f:0,sz:0,c:0,a:0,l:0,'?':0};
-    const matrixRows=(m.responses||[]).filter(r=>text(r.eventId||r.event_id)===eventId),cachedRows=state.eventRosterCache.get(eventId)||[],sourceRows=cachedRows.length?cachedRows:matrixRows;
-    sourceRows.filter(r=>ccGoingStatus_(r.status)).forEach(r=>{const p=players.get(text(r.playerId||r.player_id))||r,k=ccPositionKey_(p?.position);counts[k]=(counts[k]||0)+1});
-    const eventKnown=(m.events||[]).some(x=>text(x.eventId||x.id||x.event_id)===eventId),known=eventKnown||matrixRows.length>0||cachedRows.length>0||num(e.yesCount)===0;
-    return {known,counts,source:cachedRows.length?'roster':matrixRows.length?'matrix':eventKnown?'matrix-event':'none'}
+    const id=text(e.eventId||e.id),record=ccSeasonPositionByEvent_.get(id);
+    if(record){
+      return {known:true,counts:{f:num(record.f),sz:num(record.sz),c:num(record.c),a:num(record.a),l:num(record.l),'?':num(record.unknown)},source:'season-summary'};
+    }
+    const cached=state.eventRosterCache.get(id);
+    if(Array.isArray(cached)){
+      const counts={f:0,sz:0,c:0,a:0,l:0,'?':0};
+      for(const r of cached)if(ccGoingStatus_(r.status)){const key=ccPositionKey_(r.position);counts[key]=(counts[key]||0)+1}
+      return {known:true,counts,source:'roster'};
+    }
+    return {known:num(e.yesCount)===0,counts:{f:0,sz:0,c:0,a:0,l:0,'?':0},source:'none'};
   }
-  const ccCardRosterPrefetch_=new Set(),ccCardRosterPrefetchAttempted_=new Set();
-  function ccPositionCountTotal_(summary){return Object.values(summary?.counts||{}).reduce((a,b)=>a+num(b),0)}
-  async function ccHydrateCardPositions_(rows,rerender){
-    // A season has hundreds of events; never start a request storm from card rendering.
-    if(!configured()||(rows||[]).length>30)return;
-    const pending=(rows||[]).filter(e=>{
-      const id=text(e.eventId||e.id),summary=ccEventPositionSummary_(e),expected=num(e.yesCount);
-      return id&&expected>0&&(!summary.known||ccPositionCountTotal_(summary)!==expected)
-        &&!state.eventRosterCache.has(id)&&!ccCardRosterPrefetch_.has(id)&&!ccCardRosterPrefetchAttempted_.has(id);
-    }).slice(0,4);
-    if(!pending.length)return;
-    pending.forEach(e=>{const id=text(e.eventId||e.id);ccCardRosterPrefetch_.add(id);ccCardRosterPrefetchAttempted_.add(id)});
-    const results=await Promise.allSettled(pending.map(e=>loadEventRoster(text(e.eventId||e.id))));
-    pending.forEach(e=>ccCardRosterPrefetch_.delete(text(e.eventId||e.id)));
-    // Failed calls must NOT recursively cause another render/fetch loop.
-    if(results.some(r=>r.status==='fulfilled')&&typeof rerender==='function')rerender();
-  }
+  // No full-roster background prefetch; roster and decline notes load on demand.
+  async function ccHydrateCardPositions_(){return}
   function ccTotalTone_(n){const x=num(n);return x<6?'danger':x<10?'warn':'ok'}
   function ccPositionTone_(key,n,known){if(!known)return'unknown';const x=num(n);if(key==='f'||key==='l'||key==='a')return x===0?'danger':x===1?'warn':'ok';if(key==='sz'||key==='c')return x<=1?'danger':x===2?'warn':'ok';return'ok'}
   function ccTeamRosterSize_(teamId){return (state.players||[]).filter(p=>text(p.teamId||p.team_id)===text(teamId)&&p.active!==false).length}

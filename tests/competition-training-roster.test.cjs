@@ -154,11 +154,11 @@ test('roster RPC calls deployed v1 directly and reuses inflight/cache',()=>{
   assert.ok(part.includes('state.eventRosterCache.has(id)'));
   assert.ok(part.includes('12000'),'pending request has a timeout');
 });
-test('failed automatic hydration cannot cause an infinite prefetch/re-render storm',()=>{
-  assert.ok(source.includes('ccCardRosterPrefetchAttempted_'));
-  assert.ok(source.includes('if(!configured()||(rows||[]).length>30)return'));
-  assert.ok(source.includes('.slice(0,4)'));
-  assert.ok(source.includes("results.some(r=>r.status==='fulfilled')"));
+test('season-wide position badges never trigger full roster background fetches',()=>{
+ assert.ok(source.includes("rpc('cc_manager_competition_position_counts_v1'"));
+ assert.ok(!source.includes("rpc('cc_manager_rsvp_matrix_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_team_id:null});state.cardRsvpMatrix"));
+ assert.ok(source.includes('ccSeasonPositionByEvent_'));
+ assert.ok(source.includes('async function ccHydrateCardPositions_(){return}'));
 });
 test('training cards are paged and opened event roster guards against stale async responses',()=>{
   assert.ok(source.includes('let ccTrainingVisibleLimit_=30'));
