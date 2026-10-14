@@ -73,4 +73,4 @@ test('snapshot choice shows actual known rows and discloses missing male B group
  assert.equal(ctx.get('10000000-0000-4000-8000-000000000003').rows.length,1);
  ctx.ccMrszMenGroup_='B';
  assert.equal(ctx.get('10000000-0000-4000-8000-000000000003').rows.length,0);
-};
+});
