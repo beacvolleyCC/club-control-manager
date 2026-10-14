@@ -10,7 +10,7 @@ test('source sync requires unique source match pair within one incoming batch',(
 test('changed technical keys recover linked event UUID without using kickoff as identity',()=>{
  assert.ok(migration.includes('MGR015_SYNC_PAIR_IDENTITY_RECOVERY_V1'));
  assert.match(migration,/s\.linked_event_id is not null[\s\S]*?v_pair_candidate_count=1/);
- assert.match(migration,/s\.source_match_key=v_key,updated_at=now\(\),last_run_id=p_run_id/);
+ assert.match(migration,/set source_match_key=v_key,updated_at=now\(\),last_run_id=p_run_id/);
  assert.match(migration,/update public\.events e set[\s\S]*?where e\.id=v_event\.id/);
 });
 test('ambiguous source key collision is held for manual review, not linked',()=>{
