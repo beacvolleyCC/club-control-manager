@@ -6595,3 +6595,11 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
   .cc-scoreboard-score>strong{font-size:25px}
   .cc-scoreboard-kickoff{font-size:11px}
 }
+
+.cc-league-fixture-scope{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}
+.cc-league-fixture-scope button{border:1px solid var(--line);border-radius:9px;background:var(--soft);
+  padding:9px 12px;min-height:38px;color:var(--text);font-size:12px;font-weight:750;cursor:pointer}
+.cc-league-fixture-scope button.active{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.cc-league-fixture-scope button:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:2px}
+@media(max-width:560px){.cc-league-fixture-scope{display:grid;grid-template-columns:1fr 1fr}
+  .cc-league-fixture-scope button{min-height:44px;min-width:0;padding:7px}}
