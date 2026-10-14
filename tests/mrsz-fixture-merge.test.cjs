@@ -21,7 +21,7 @@ const text=x=>String(x??''),esc=x=>text(x).replace(/&/g,'&amp;').replace(/</g,'&
 const ctx={text,esc,num:x=>Number(x)||0,msLogoHtml_:()=>'<span class="standing-logo-text">TEAM</span>',
   ccMrszPhotoState_:{matches,fixtures}};
 vm.createContext(ctx);
-vm.runInContext(js.slice(start,end)+'\nthis.qa={merge:ccMrszMergedLeagueMatches_,html:ccMrszLeagueFixturePanelHtml_}',ctx);
+vm.runInContext(js.slice(start,end)+'\nthis.qa={merge:ccMrszMergedLeagueMatches_,html:ccMrszLeagueFixturePanelHtml_,setScope:(x)=>{ccLeagueMatchScope_=x}}',ctx);
 test('merge BRSZ fixture and MRSZ outcome without double counting 2026-10-13 matches',()=>{
  for(const [league,score] of [['Női Budapest I. osztály',3],['Női Budapest II. osztály – B csoport',3],['Férfi Budapest I. osztály – A csoport',3]]){
   const rows=ctx.qa.merge(league);
@@ -43,12 +43,30 @@ test('canonical feed results overlay archived fixture, and submitted photo score
  assert.equal(rows.length,1);
  assert.equal(rows[0].homeSets,3);
 });
-test('league UI uses original match-card style under each table',()=>{
+test('initial league list defaults to BEAC fixtures and offers full-league switch',()=>{
+ const html=ctx.qa.html('Női Budapest I. osztály');
+ assert.ok(html.includes('data-league-match-scope="beac"'));
+ assert.ok(html.includes('aria-pressed="true"'));
+ assert.ok(html.includes('Összes bajnoki meccs'));
+ assert.ok(!html.includes('ms-match-row'),'no BEAC player in sample league fixtures');
+});
+test('full-league selection restores the original match-card layout with results',()=>{
+ ctx.qa.setScope('all');
  const html=ctx.qa.html('Női Budapest I. osztály');
  assert.ok(html.includes('ms-panel ms-match-panel'));
  assert.ok(html.includes('ms-match-row'));
  assert.ok(html.includes('standing-logo-text'));
  assert.ok(html.includes('3–1'));
  assert.ok(html.includes('Szettek: 25:16'));
- assert.ok(!html.includes('BEAC</b>'),'other league not present');
+ assert.ok(!html.includes('BEAC</b>'),'unrelated league not in match list');
+ ctx.qa.setScope('beac');
+});
+test('main standings render does not create a second table',()=>{
+ const st=js.indexOf('  function renderManagerStandings_()');
+ const end=js.indexOf('\n  function ',st+10);
+ const render=js.slice(st,end);
+ assert.ok(render.includes('const rows=showPhoto?ccStandingsPhotoTeamRows_'));
+ assert.ok(!render.includes('ccMrszMainPhotoTableHtml_('));
+ assert.ok(!render.includes('.outerHTML=html'));
+ assert.ok(render.includes('ccMrszLeagueFixturePanelHtml_'));
 });
