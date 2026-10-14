@@ -108,7 +108,7 @@ test('changing Manager context resets BEAC-only scope except for men A',()=>{
  const localState={managerStandingsContext:'',managerStandingsTeam:'',managerStandingsMatchScope:'all',managerLeagueInsights:{}};
  const ctx={state:localState,text:x=>String(x??''),localStorage:{setItem(){}},$:(selector)=>selector==='#msContextSelect'?{addEventListener:(type,fn)=>handlers.context=fn}:{addEventListener(){}},$$:()=>[],renderManagerStandings_:()=>{},msSetTeam_:()=>{}};
  vm.createContext(ctx);
- vm.runInContext("let ccMrszMenGroup_='A';let ccLeagueMatchScope_='all';"+js.slice(begin,end)+"\\nthis.qa={bind:msBind_,getScope:()=>ccLeagueMatchScope_};",ctx);
+ vm.runInContext("let ccMrszMenGroup_='A';let ccLeagueMatchScope_='all';"+js.slice(begin,end)+"\nthis.qa={bind:msBind_,getScope:()=>ccLeagueMatchScope_};",ctx);
  ctx.qa.bind();
  handlers.context({target:{value:'10000000-0000-4000-8000-000000000001'}});
  assert.equal(ctx.qa.getScope(),'beac');
