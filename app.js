@@ -1943,7 +1943,7 @@
 
   function ccMrszLeagueFixturePanelHtml_(group,canonicalMatches=[]){
     const matches=ccMrszMergedLeagueMatches_(group,canonicalMatches);
-    const scope=group==='Férfi Budapest I. osztály – A csoport'?'all':ccLeagueMatchScope_;
+    const scope=ccLeagueMatchScope_;
     const visible=scope==='all'?matches:matches.filter(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName));
     const controls='<div class="cc-league-match-scope" role="group" aria-label="Bajnoki mérkőzések szűrése">'
       +'<button type="button" data-league-match-scope="beac" aria-pressed="'+(scope==='beac')+'" class="'+(scope==='beac'?'active':'')+'">BEAC meccsek</button>'
@@ -1976,6 +1976,7 @@
   function ccBindMrszMenGroup_(){
     document.querySelectorAll('[data-mrsz-men-group]').forEach(btn=>btn.addEventListener('click',()=>{
       ccMrszMenGroup_=btn.dataset.mrszMenGroup==='A'?'A':'B';
+      ccLeagueMatchScope_=ccMrszMenGroup_==='A'?'all':'beac';
       document.querySelectorAll('[data-mrsz-men-group]').forEach(x=>{
         const active=x.dataset.mrszMenGroup===ccMrszMenGroup_;
         x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active));
