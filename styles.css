@@ -6435,3 +6435,29 @@ body{overflow-x:clip!important}
 .cc-brsz-import-review li>small{font-size:11px;color:var(--muted)}
 .cc-brsz-import-review .cc-brsz-import-caution{font-size:11px;color:var(--muted)}
 @media(max-width:560px){.cc-brsz-import-review .dialog-action-row{display:grid;grid-template-columns:1fr;gap:8px}.cc-brsz-import-review .dialog-action-row>.button{min-height:48px;width:100%}}
+
+/* BRSZ match history: read-only responsive activity audit. */
+.competition-sync-strip .cc-audit-trigger{margin-left:auto;flex:0 0 auto;min-height:34px;white-space:normal}
+.cc-audit-root{display:grid;gap:13px}
+.cc-audit-root>p{font-size:12px;color:var(--muted);line-height:1.5;margin:0}
+.cc-audit-root>.field{max-width:280px}
+#ccChangeAuditItems{display:grid;gap:10px;max-height:60vh;overflow:auto;padding-right:3px;overscroll-behavior:contain}
+.cc-audit-item{border:1px solid var(--line);border-radius:11px;padding:13px;display:grid;gap:9px;min-width:0}
+.cc-audit-item header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;color:var(--muted);font-size:11px}
+.cc-audit-item header b{color:var(--ink)}
+.cc-audit-item h4{font-size:14px;margin:0;overflow-wrap:anywhere}
+.cc-audit-field{display:grid;grid-template-columns:85px minmax(0,1fr);gap:9px;font-size:12px}
+.cc-audit-field>span{color:var(--muted)}
+.cc-audit-field>div{display:grid;gap:4px;overflow-wrap:anywhere}
+.cc-audit-field s{color:var(--muted)}
+.cc-audit-rsvp{padding-top:9px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.4}
+.cc-audit-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0}
+.cc-audit-foot code{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+.cc-audit-foot>.button{flex:0 0 auto;min-height:34px}
+.cc-audit-foot small,.cc-audit-empty{font-size:11px;color:var(--muted)}
+@media(max-width:560px){
+  .competition-sync-strip .cc-audit-trigger{width:100%;margin-left:0;min-height:44px}
+  #ccChangeAuditItems{max-height:60vh}
+  .cc-audit-item{padding:10px}
+  .cc-audit-foot>.button{width:100%;min-height:44px}
+}
