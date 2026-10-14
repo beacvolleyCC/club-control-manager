@@ -76,3 +76,11 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
  assert.ok(css.includes('@media(max-width:560px){\n  .cc-mrsz-league-matches .ms-match-place{display:block;grid-column:1/-1;'));
  assert.ok(css.includes('.cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;'));
 });
+
+test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const sw=fs.readFileSync('sw.js','utf8');
+ assert.ok(html.includes('styles.css?v=20261014-single-standings-beac-mobile-v5'));
+ assert.ok(html.includes('app.js?v=20261014-single-standings-beac-mobile-v5'));
+ assert.ok(sw.includes("cc-manager-20261014-single-standings-beac-mobile-v5"));
+});
