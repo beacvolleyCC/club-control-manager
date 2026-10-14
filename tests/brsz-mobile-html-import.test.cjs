@@ -17,7 +17,7 @@ const input=id=>{
 test('all three saved BRSZ pages can be selected and encoded on iPhone',async()=>{
  const files=['1121','1137','1146'].map(input);
  const docs=await ctx.qa.prepare(files);
- assert.deepEqual(Array.from(docs,x=>x.competitionId),['1121','1146','1137']);
+ assert.deepEqual(Array.from(docs,x=>x.competitionId),['1121','1137','1146']);
  for(const doc of docs){
    const html=Buffer.from(doc.contentBase64,'base64').toString('utf8');
    assert.ok(html.includes('bajnoksag_id='+doc.competitionId));
