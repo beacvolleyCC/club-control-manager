@@ -166,3 +166,18 @@ test('training cards are paged and opened event roster guards against stale asyn
   assert.ok(source.includes("$('#ccTrainingShowMore')?.addEventListener('click'"));
   assert.ok(source.includes('host?.dataset.eventRosterId!==eventId'));
 });
+test('decline notes are shown under player names in quick and detailed rosters',()=>{
+  const decline={...players[2],note:'Munka miatt nem érek oda'};
+  const quick=ctx.qa.small([decline],'ev',true,true);
+  const full=ctx.qa.detail([decline],'ev',true,true);
+  assert.ok(quick.includes('cc-inline-decline-note'));
+  assert.ok(quick.includes('Munka miatt nem érek oda'));
+  assert.ok(full.includes('cc-detail-decline-note'));
+  assert.ok(full.includes('Munka miatt nem érek oda'));
+  assert.ok(!ctx.qa.small([{...players[0],note:'Nem jelenhet meg'}],'ev',true,true).includes('Nem jelenhet meg'));
+});
+test('decline messages are escaped',()=>{
+  const html=ctx.qa.small([{...players[2],note:'<img src=x onerror=alert(1)>'}],'ev',true,true);
+  assert.ok(html.includes('&lt;img'));
+  assert.ok(!html.includes('<img'));
+});

@@ -996,7 +996,7 @@
       <span class="cc-compact-roster-person">
         <span class="cc-compact-roster-avatar">${avatarHtml(p,'table')}</span>
         <span class="cc-compact-roster-jersey">${jersey===null||jersey===undefined||text(jersey)===''?'–':esc(jersey)}</span>
-        <span class="cc-compact-roster-identity"><strong>${esc(name)}</strong><small>${esc(p.position||'Poszt nélkül')}</small></span>
+        <span class="cc-compact-roster-identity"><strong>${esc(name)}</strong><small>${esc(p.position||'Poszt nélkül')}</small>${tone==='not-going'&&text(p.note)?`<span class="cc-detail-decline-note">${esc(p.note)}</span>`:''}</span>
       </span>
       <span class="cc-compact-roster-presence"><small class="cc-compact-roster-source">${preview.confirmed?'Rögzítve':'RSVP alapján'}</small>${ccCompetitionAttendanceSlider_(p,attendanceEditable)}</span>
       <span class="cc-compact-roster-actions">
@@ -1651,7 +1651,7 @@
       return `<div class="cc-inline-player ${tone} ${preview.confirmed?'is-confirmed':'is-rsvp-only'}" aria-label="${esc(name)} · ${tone==='going'?'Jövök':tone==='not-going'?'Nem jövök':'Nincs válasz'}">
         <span class="cc-inline-person">
           <span class="cc-inline-avatar">${avatarHtml(p,'table')}</span>
-          <strong class="cc-inline-name" title="${esc(name)}">${esc(name)}</strong>
+          <span class="cc-inline-name-stack"><strong class="cc-inline-name" title="${esc(name)}">${esc(name)}</strong>${tone==='not-going'&&text(p.note)?`<small class="cc-inline-decline-note" title="${esc(p.note)}">${esc(p.note)}</small>`:''}</span>
           <span class="cc-inline-player-number" title="Mezszám">${jersey?'#'+esc(jersey):'–'}</span>
         </span>
         <span class="cc-compact-roster-presence">${ccCompetitionAttendanceSlider_(p,attendanceEditable)}</span>

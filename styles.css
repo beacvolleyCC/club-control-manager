@@ -6515,3 +6515,11 @@ body{overflow-x:clip!important}
 }
 .cc-compact-roster-list .cc-compact-roster-row.none .slider-zone{color:var(--text)!important}
 .cc-compact-roster-list .cc-compact-roster-row.none .slider-thumb{background:var(--card)!important}
+
+/* Decline notes shown only for not-going players; safely wrap longer explanations. */
+.cc-inline-name-stack{display:grid;min-width:0;gap:2px;align-content:center}
+.cc-inline-name-stack .cc-inline-name{display:block;min-width:0}
+.cc-inline-decline-note{display:block;min-width:0;max-width:100%;font-size:10px;font-weight:500;line-height:1.3;color:var(--muted);white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cc-inline-player:has(.cc-inline-decline-note){min-height:55px}
+.cc-detail-decline-note{display:block;font-size:11px;line-height:1.4;color:var(--muted);white-space:normal;overflow-wrap:anywhere;margin-top:3px}
+.cc-compact-roster-list .cc-compact-roster-row:has(.cc-detail-decline-note){min-height:54px}
