@@ -6341,3 +6341,22 @@ body{overflow-x:clip!important}
   .cc-compact-roster-list .cc-compact-roster-avatar .cc-avatar.table{width:24px!important;height:24px!important}
   .cc-compact-roster-list .cc-compact-roster-medical{font-size:7px;padding:3px 4px}
 }
+
+
+/* Read-only Hunvolley screenshot records; never mixed with canonical BEAC BRSZ table. */
+.cc-mrsz-photo-panel{margin-top:14px}
+.cc-mrsz-photo-panel .panel-head{margin-bottom:10px}
+.cc-mrsz-photo-note{margin:10px;color:var(--muted);font-size:12px}
+.cc-mrsz-photo-matches{display:grid;gap:6px;padding:0 12px}
+.cc-mrsz-photo-match{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:5px 12px;padding:10px;border:1px solid var(--line);border-radius:9px}
+.cc-mrsz-photo-match>span:first-child{display:grid;gap:3px;font-size:12px}
+.cc-mrsz-photo-match small{color:var(--muted);font-size:10px}
+.cc-mrsz-photo-score{font-size:20px;font-weight:900;white-space:nowrap}
+.cc-mrsz-photo-sets{grid-column:1/-1;font-variant-numeric:tabular-nums}
+.cc-mrsz-photo-tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:10px;padding:14px 12px}
+.cc-mrsz-photo-group{min-width:0}
+.cc-mrsz-photo-group h4{font-size:12px;margin:0 0 7px}
+.cc-mrsz-photo-table-scroll{max-width:100%;overflow:auto}
+.cc-mrsz-photo-group table{width:100%;border-collapse:collapse;font-size:11px}
+.cc-mrsz-photo-group th,.cc-mrsz-photo-group td{padding:7px 5px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.cc-mrsz-photo-group th:nth-child(2),.cc-mrsz-photo-group td:nth-child(2){text-align:left;min-width:125px}
