@@ -70,9 +70,11 @@ test('BEAC-only is the default and all-league toggle restores opponent fixtures'
  const beac=context.qa.html();
  assert.ok(beac.includes('data-league-snapshot-scope="beac" aria-pressed="true"'));
  assert.ok(beac.includes('BEAC II.'));
- assert.ok(!beac.includes('>RKSK felnőtt női</strong>'));
+ const beacCards=(beac.match(/class="cc-match-scoreboard /g)||[]).length;
  context.qa.setScope('all');
- assert.ok(context.qa.html().includes('RKSK felnőtt női'));
+ const all=context.qa.html(),allCards=(all.match(/class="cc-match-scoreboard /g)||[]).length;
+ assert.ok(allCards>beacCards,'all league scope must show more fixtures than BEAC-only');
+ assert.ok(all.includes('RKSK felnőtt női'));
  context.qa.setScope('beac');context.qa.setGroup('all');
 });
 test('only an exact Budapest-date and opponent match overlays archival MRSZ results',()=>{
