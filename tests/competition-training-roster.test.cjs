@@ -123,3 +123,21 @@ test('slider centered via true center column, on small screens as well',()=>{
   assert.ok(css.includes('grid-template-rows:auto auto'));
   assert.ok(css.includes('.cc-compact-roster-list .cc-compact-roster-presence{grid-column:2'));
 });
+
+test('match edits retain event ID and never replace an event with its RSVPs',()=>{
+  const start=source.indexOf('  function openCompetitionEventEditor(');
+  const end=source.indexOf('  async function ccRosterRsvpWrite_(',start);
+  assert.ok(start>0&&end>start);
+  const editor=source.slice(start,end);
+  const existingBranch=editor.slice(editor.indexOf('         if(e){'),editor.indexOf('         }else{',editor.indexOf('         if(e){')));
+  assert.match(existingBranch,/cc_manager_competition_event_save_v1/);
+  assert.ok(existingBranch.includes('p_event_id:text(e.eventId||e.id)'),'preserve the original event UUID');
+  assert.ok(existingBranch.includes('p_payload:base'),'update the event instead of recreating it');
+  assert.ok(!existingBranch.includes('p_event_id:null'),'never create a replacement match on edit');
+  assert.ok(!existingBranch.includes('cc_manager_competition_event_series_create_v1'));
+  assert.ok(!existingBranch.includes('delete'),'never delete existing event/RSVP rows during edit');
+  assert.ok(editor.includes("rpc('cc_manager_competition_event_cancel_v1'"),'cancellation must retain the event');
+  const reload=source.slice(source.indexOf('  async function ccReloadCompetitionAfterWrite_('),start);
+  assert.ok(reload.includes('loadRsvpMatrix()'),'refresh actual responses after saving');
+  assert.ok(reload.includes('loadCardRsvpMatrix()'),'refresh match counts after saving');
+});
