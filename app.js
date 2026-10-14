@@ -2040,7 +2040,7 @@
     ['Női II. osztály B csoport','1146'],
     ['Férfi I. osztály B csoport','1137']
   ]);
-  let ccLeagueFixtureRows_=null,ccLeagueFixtureLoading_=false,ccLeagueFixtureError_='',ccLeagueSelectedGroup_='all';
+  let ccLeagueFixtureRows_=null,ccLeagueFixtureLoading_=false,ccLeagueFixtureError_='',ccLeagueSelectedGroup_='all',ccLeagueSnapshotScope_='beac';
   async function ccLoadLeagueFixtureSnapshot_(){
     if(ccLeagueFixtureRows_||ccLeagueFixtureLoading_)return;
     ccLeagueFixtureLoading_=true;
@@ -2059,18 +2059,34 @@
     const groups=CC_LEAGUE_GROUPS_;
     const sourceText='Korábbi, 2026.10.01-i mentett forrásadatok · tájékoztató, nem élő BRSZ-frissítés';
     const selector=`<label class="field compact cc-league-group-filter"><span>Bajnokság</span><select id="ccLeagueGroupSelect"><option value="all" ${group==='all'?'selected':''}>Mindhárom bajnokság</option>${groups.map(([name])=>`<option value="${esc(name)}" ${group===name?'selected':''}>${esc(name)}</option>`).join('')}</select></label>`;
-    const filtered=(ccLeagueFixtureRows_||[]).filter(f=>group==='all'||f.group===group)
+    const all=(ccLeagueFixtureRows_||[]).filter(f=>group==='all'||f.group===group);
+    const beac=f=>ccIsBeacLeagueTeam_(f.home)||ccIsBeacLeagueTeam_(f.away);
+    const filtered=all.filter(f=>ccLeagueSnapshotScope_==='all'||beac(f)||f.review===true)
       .sort((a,b)=>text(a.date||'9999').localeCompare(text(b.date||'9999'))||text(a.time).localeCompare(text(b.time)));
+    const leagueMap={'Női I. osztály':'Női Budapest I. osztály',
+      'Női II. osztály B csoport':'Női Budapest II. osztály – B csoport',
+      'Férfi I. osztály B csoport':'Férfi Budapest I. osztály – B csoport'};
     const rows=filtered.map(f=>{
-      const review=f.review===true||!f.date||!f.home||!f.away;
+      const review=f.review===true||!f.date||!f.home||!f.away,
+        league=leagueMap[f.group]||f.group;
+      // Match on saved Budapest-local date + normalized home/away clubs, never on row number.
+      const match=review?null:(ccMrszPhotoState_.matches||[]).find(m=>
+        text(m.competitionLabel)===league&&ccMrszLocalKickoff_(m.startsAt).date===text(f.date)
+        &&ccMrszNormPairName_(m.homeName)===ccMrszNormPairName_(f.home)
+        &&ccMrszNormPairName_(m.awayName)===ccMrszNormPairName_(f.away));
       return ccMatchScoreboardHtml_({
         homeName:f.home||'Ismeretlen hazai',awayName:f.away||'Ismeretlen vendég',
         startsAt:f.date?(f.date+'T'+(f.time||'00:00')+':00'):'',
-        homeSets:null,awaySets:null,venue:f.venue||f.group,competitionLabel:f.group
-      },{league:f.group,badge:review?'Ellenőrzendő':'Bajnoki menetrend',meta:review?'Kézi ellenőrzés szükséges':'2026.10.01-i mentett kiírás'});
+        homeSets:match?.homeSets??null,awaySets:match?.awaySets??null,
+        setScores:match?.setScores||[],venue:f.venue||f.group,competitionLabel:league
+      },{league,badge:review?'Ellenőrzendő':match?'Mentett eredmény':'Bajnoki menetrend',
+        meta:review?'Kézi ellenőrzés szükséges':match?'MRSZ · 2026.10.14-i eredmény':'2026.10.01-i mentett kiírás'});
     }).join('');
+    const scopeButtons='<div class="cc-league-match-scope cc-league-fixture-scope" role="group" aria-label="Bajnoki mérkőzések">'
+      +'<button type="button" data-league-snapshot-scope="beac" aria-pressed="'+(ccLeagueSnapshotScope_==='beac')+'" class="'+(ccLeagueSnapshotScope_==='beac'?'active':'')+'">BEAC meccsek</button>'
+      +'<button type="button" data-league-snapshot-scope="all" aria-pressed="'+(ccLeagueSnapshotScope_==='all')+'" class="'+(ccLeagueSnapshotScope_==='all'?'active':'')+'">Összes bajnoki meccs</button></div>';
     return `<article class="panel cc-league-fixture-panel">
-      <div class="panel-head cc-league-fixture-head"><div><h3>Bajnoki menetrend · ismert mérkőzések</h3><p>${sourceText}</p></div>${selector}</div>
+      <div class="panel-head cc-league-fixture-head"><div><h3>Bajnoki menetrend · ismert mérkőzések</h3><p>${sourceText} · ${filtered.length} / ${all.length} meccs</p></div>${selector}</div>${scopeButtons}
       <p class="cc-league-fixture-warning">Ez a korábbi adatcsomag nem teljes és nem aktuális hivatalos menetrend. Az új eredményekhez BRSZ-frissítés szükséges; semmit nem ír át a meccsnaptárban.</p>
       ${ccLeagueFixtureError_?`<p class="roster-loading error">${esc(ccLeagueFixtureError_)}</p>`:
       ccLeagueFixtureRows_?`<div class="cc-league-fixture-list">${rows||'<p>Nincs ismert mérkőzés ebben a csoportban.</p>'}</div>`:
@@ -2280,6 +2296,10 @@
     $('#eventPeriodFilter')?.addEventListener('change',e=>{state.ccMatchPeriod=e.target.value;afterNativePicker(e.target,renderCompetitionMatchCards_,'#eventFiltersPanel')});
     $('#eventFilterReset')?.addEventListener('click',()=>{state.eventTeam='';state.teamFilters.events=[];state.ccMatchPeriod='all';renderCompetitionMatchCards_()});
     $('#ccLeagueGroupSelect')?.addEventListener('change',e=>{ccLeagueSelectedGroup_=e.target.value;renderCompetitionMatchCards_()});
+    $('[data-league-snapshot-scope]').forEach(b=>b.addEventListener('click',()=>{
+      ccLeagueSnapshotScope_=b.dataset.leagueSnapshotScope==='all'?'all':'beac';
+      renderCompetitionMatchCards_();
+    }));
     if(!ccLeagueFixtureRows_&&!ccLeagueFixtureLoading_&&!ccLeagueFixtureError_)void ccLoadLeagueFixtureSnapshot_();
     if(!ccMrszPhotoState_.loaded&&!ccMrszPhotoState_.loading)void ccLoadMrszPhotoSnapshot_();
     bindEventDetailActions();
