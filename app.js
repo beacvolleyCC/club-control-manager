@@ -747,7 +747,7 @@
       $('#viewContent').insertAdjacentHTML('beforeend',ccMrszMainGroupButtonsHtml_());
     }
     if(ccMrszPhotoState_.loaded){
-      const league=usePhoto?label:(!isMens&&text(team.id)==='10000000-0000-4000-8000-000000000001'?'Női Budapest I. osztály':null);
+      const league=usePhoto?label:(isMens?'Férfi Budapest I. osztály – B csoport':text(team.id)==='10000000-0000-4000-8000-000000000001'?'Női Budapest I. osztály':null);
       const matchHtml=ccMrszPhotoResultsByLeagueHtml_(league);
       if(matchHtml)$('#viewContent').insertAdjacentHTML('beforeend',matchHtml);
     }
