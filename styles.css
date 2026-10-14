@@ -6494,3 +6494,24 @@ body{overflow-x:clip!important}
   .cc-inline-player .cc-compact-roster-presence{grid-column:2}
   .cc-inline-player .cc-compact-roster-open{grid-column:3}
 }
+
+/* Matching subtle presence colors in detailed event roster; status stays readable. */
+.cc-compact-roster-list .cc-compact-roster-row.going{
+  background:rgba(54,155,94,.07)!important;border-color:rgba(54,155,94,.17)!important;color:var(--text)!important
+}
+.cc-compact-roster-list .cc-compact-roster-row.not-going{
+  background:rgba(200,70,82,.06)!important;border-color:rgba(200,70,82,.16)!important;color:var(--text)!important
+}
+.cc-compact-roster-list .cc-compact-roster-row.none{
+  background:rgba(130,140,150,.07)!important;border-color:var(--line)!important;color:var(--text)!important
+}
+.cc-compact-roster-list .cc-compact-roster-row.none .cc-compact-roster-identity strong,
+.cc-compact-roster-list .cc-compact-roster-row.none .cc-compact-roster-identity small,
+.cc-compact-roster-list .cc-compact-roster-row.none .cc-compact-roster-jersey,
+.cc-compact-roster-list .cc-compact-roster-row.none .cc-compact-roster-source,
+.cc-compact-roster-list .cc-compact-roster-row.none .cc-compact-roster-open{color:var(--text)!important}
+.cc-compact-roster-list .cc-compact-roster-row.none .cc-player-grid-slider{
+  border-color:var(--line)!important;background:var(--soft)!important;color:var(--text)!important
+}
+.cc-compact-roster-list .cc-compact-roster-row.none .slider-zone{color:var(--text)!important}
+.cc-compact-roster-list .cc-compact-roster-row.none .slider-thumb{background:var(--card)!important}
