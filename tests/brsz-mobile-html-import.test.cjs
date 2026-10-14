@@ -6,9 +6,9 @@ const js=fs.readFileSync('app.js','utf8');
 const start=js.indexOf('  const CC_BRSZ_COMPETITION_HTML_V1=');
 const end=js.indexOf('  const CC_BRSZ_HELPER_PAGE_SOURCE=',start);
 assert.ok(start>0&&end>start);
-const ctx={TextDecoder,Uint8Array,btoa:s=>Buffer.from(s,'binary').toString('base64'),text:x=>String(x||'')};
+const ctx={TextDecoder,Uint8Array,btoa:s=>Buffer.from(s,'binary').toString('base64'),text:x=>String(x||''),esc:x=>String(x||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))};
 vm.createContext(ctx);
-vm.runInContext(js.slice(start,end)+'\nthis.qa={prepare:ccPrepareBrszHtmlDocuments_,detect:ccBRSZCompetitionIdFromHtml_};',ctx);
+vm.runInContext(js.slice(start,end)+'\nthis.qa={prepare:ccPrepareBrszHtmlDocuments_,detect:ccBRSZCompetitionIdFromHtml_,preview:ccBrszImportPreviewHtml_};',ctx);
 const input=id=>{
  const html='<!-- saved from url=(0080)https://www.brsz.hu/bajnoksagok.php?bajnoksag_id='+id+' -->'+'<html><body>bajnoksag_id='+id+'</body></html>';
  const bytes=Buffer.from(html,'utf8');
@@ -52,7 +52,32 @@ test('the two paths use the same existing Edge Function and preserve event links
 });
 test('HTML/JS/PWA cache is updated for touch device rollout',()=>{
  const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8'),css=fs.readFileSync('styles.css','utf8');
- assert.ok(html.includes('app.js?v=20261014-brsz-mobile-import-v8'));
- assert.ok(sw.includes('cc-manager-20261014-brsz-mobile-import-v8'));
+ assert.ok(html.includes('app.js?v=20261014-brsz-mobile-review-v9'));
+ assert.ok(sw.includes('cc-manager-20261014-brsz-mobile-review-v9'));
  assert.ok(css.includes('.cc-brsz-sync-chooser>.button{min-height:44px'));
+});
+test('mobile BRSZ import asks for approval after recognizing all three leagues',async()=>{
+ const docs=await ctx.qa.prepare(['1121','1146','1137'].map(input));
+ const markup=ctx.qa.preview(docs);
+ for(const id of ['1121','1146','1137'])assert.ok(markup.includes('brsz-'+id+'.html'));
+ assert.ok(markup.includes('ccBrszImportConfirm'));
+ assert.ok(markup.includes('ccBrszImportAbort'));
+ assert.ok(markup.includes('még'), 'preview includes pre-write warning');
+ const run=js.slice(js.indexOf('  async function runCompetitionSourceSync_('),js.indexOf('  // Competition schedule snapshot.'));
+ const before=run.indexOf('ccConfirmBrszHtmlImport_(documents)');
+ const after=run.indexOf("functions.invoke('cc-competition-sync'");
+ assert.ok(before>0&&after>before,'require approval before any server mutation');
+ assert.ok(run.includes('if(!await ccConfirmBrszHtmlImport_(documents))'));
+});
+test('mobile preview escapes potentially malicious HTML file names',()=>{
+ const markup=ctx.qa.preview([{competitionId:'1121',name:'<img src=x onerror=alert(1)>'}]);
+ assert.ok(!markup.includes('<img'));
+ assert.ok(markup.includes('&lt;img'));
+});
+test('cancel, Escape and close button all resolve without syncing',()=>{
+ const body=js.slice(js.indexOf('  function ccConfirmBrszHtmlImport_('),js.indexOf('  async function runCompetitionSourceSync_('));
+ assert.ok(body.includes("d.addEventListener('close',onClose)"));
+ assert.ok(body.includes('const onClose=()=>finish(false)'));
+ assert.ok(body.includes("$('#ccBrszImportAbort')?.addEventListener('click',()=>finish(false)"));
+ assert.ok(body.includes("$('#ccBrszImportConfirm')?.addEventListener('click',()=>finish(true)"));
 });

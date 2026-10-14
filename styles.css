@@ -6425,3 +6425,13 @@ body{overflow-x:clip!important}
 .cc-brsz-sync-chooser>small{font-size:11px;line-height:1.5;color:var(--muted)}
 .cc-brsz-sync-chooser>.button{min-height:44px;max-width:100%;white-space:normal;text-align:center}
 @media(max-width:560px){.cc-brsz-sync-chooser{gap:12px}.cc-brsz-sync-chooser>.button{width:100%;min-height:48px}}
+
+/* Review the three mobile BRSZ source documents before sending any data. */
+.cc-brsz-import-review{display:grid;gap:13px;max-width:500px}
+.cc-brsz-import-review>p{margin:0;font-size:13px;line-height:1.5}
+.cc-brsz-import-review>ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.cc-brsz-import-review li{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:3px;overflow-wrap:anywhere}
+.cc-brsz-import-review li>span{font-size:13px;font-weight:760}
+.cc-brsz-import-review li>small{font-size:11px;color:var(--muted)}
+.cc-brsz-import-review .cc-brsz-import-caution{font-size:11px;color:var(--muted)}
+@media(max-width:560px){.cc-brsz-import-review .dialog-action-row{display:grid;grid-template-columns:1fr;gap:8px}.cc-brsz-import-review .dialog-action-row>.button{min-height:48px;width:100%}}

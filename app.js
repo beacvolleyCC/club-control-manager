@@ -1746,6 +1746,18 @@
     if(missing.length)throw new Error(`Hiányzó BRSZ oldal: ${missing.map(id=>CC_BRSZ_COMPETITION_HTML_V1[id]).join(', ')}.`);
     return Object.keys(CC_BRSZ_COMPETITION_HTML_V1).map(id=>byId.get(id));
   }
+  function ccBrszImportPreviewHtml_(documents){
+    const rows=(documents||[]).map(doc=>{
+      const name=CC_BRSZ_COMPETITION_HTML_V1[text(doc.competitionId)]||'Ismeretlen bajnokság';
+      return '<li><span>'+esc(name)+'</span><small>'+esc(doc.name||'BRSZ.html')+'</small></li>';
+    }).join('');
+    return '<div class="cc-brsz-import-review">'
+      +'<p>Három 2026/27-es BRSZ bajnokságoldal felismerve. Az adatok még <strong>nem kerültek be az adatbázisba</strong>.</p>'
+      +'<ul>'+rows+'</ul>'
+      +'<p class="cc-brsz-import-caution">Az import a meglévő meccseket azonosítójuk alapján frissíti. Az ütköző vagy bizonytalan párosítások ellenőrzésre kerülnek. A játékosok jelentkezései és a létszámok megmaradnak.</p>'
+      +'<div class="dialog-action-row"><button type="button" class="button quiet" id="ccBrszImportAbort">Mégse</button>'
+      +'<button type="button" class="button primary" id="ccBrszImportConfirm">Importálás indítása</button></div></div>';
+  }
   const CC_BRSZ_HELPER_PAGE_SOURCE='CC_MANAGER';
   const CC_BRSZ_HELPER_SOURCE='CC_BRSZ_HELPER';
   const ccBrszHelperPending_=new Map();
@@ -1814,6 +1826,28 @@
     $('#ccBrszSyncHelper')?.addEventListener('click',()=>{ccCloseEntityDialog_();void runCompetitionSourceSync_('browser_helper')});
     $('#ccBrszSyncCancel')?.addEventListener('click',ccCloseEntityDialog_);
   }
+  function ccConfirmBrszHtmlImport_(documents){
+    return new Promise(resolve=>{
+      const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');
+      if(!d||!body||!title){resolve(false);return;}
+      if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='VERSENYSPORT · IMPORT ELLENŐRZÉSE';
+      title.textContent='Kiválasztott BRSZ-adatok';
+      body.innerHTML=ccBrszImportPreviewHtml_(documents);
+      let settled=false;
+      const onClose=()=>finish(false);
+      function finish(approved){
+        if(settled)return;
+        settled=true;
+        d.removeEventListener('close',onClose);
+        if(d.open)d.close();
+        resolve(approved);
+      }
+      d.addEventListener('close',onClose);
+      ccOpenDialogStable_(d);
+      $('#ccBrszImportConfirm')?.addEventListener('click',()=>finish(true),{once:true});
+      $('#ccBrszImportAbort')?.addEventListener('click',()=>finish(false),{once:true});
+    });
+  }
   async function runCompetitionSourceSync_(mode='browser_helper'){
     if(state.competitionSyncBusy)return;
     if(!state.supabase?.functions){status('A Supabase Edge Functions kliens nem érhető el.','error');return;}
@@ -1825,6 +1859,10 @@
         const selected=await ccPickBrszHtmlFiles_();
         if(!selected.length){competitionStatus_('BRSZ-fájlok kiválasztása megszakítva.');return;}
         documents=await ccPrepareBrszHtmlDocuments_(selected);
+        if(!await ccConfirmBrszHtmlImport_(documents)){
+          competitionStatus_('BRSZ-import megszakítva. Semmilyen meccs vagy jelentkezés nem változott.');
+          return;
+        }
       }else{
         documents=ccValidateHelperDocuments_(await ccRequestBrszHelperDocuments_());
       }
