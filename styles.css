@@ -6419,3 +6419,9 @@ body{overflow-x:clip!important}
 .cc-mrsz-review-fixtures ul{margin:10px 0 5px;padding-left:20px;line-height:1.7}
 .cc-mrsz-review-fixtures li b{color:var(--text)}
 .cc-mrsz-review-fixtures p{font-size:10px;margin:5px 0}
+/* Phone/desktop BRSZ sync: same menu, separate safe data input methods. */
+.cc-brsz-sync-chooser{display:grid;gap:10px;max-width:480px}
+.cc-brsz-sync-chooser>p{font-size:13px;line-height:1.5;margin:0 0 5px}
+.cc-brsz-sync-chooser>small{font-size:11px;line-height:1.5;color:var(--muted)}
+.cc-brsz-sync-chooser>.button{min-height:44px;max-width:100%;white-space:normal;text-align:center}
+@media(max-width:560px){.cc-brsz-sync-chooser{gap:12px}.cc-brsz-sync-chooser>.button{width:100%;min-height:48px}}

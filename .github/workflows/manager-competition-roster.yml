@@ -7,6 +7,7 @@ on:
       - styles.css
       - tests/competition-training-roster.test.cjs
       - tests/competition-match-integrity.test.cjs
+      - tests/brsz-mobile-html-import.test.cjs
       - supabase/migrations/20261014125538_cc_preserve_competition_match_identity_v1.sql
       - tests/competition-league-fixture-reference.test.cjs
       - tests/mrsz-screenshot-finance.test.cjs
@@ -18,6 +19,7 @@ on:
       - styles.css
       - tests/competition-training-roster.test.cjs
       - tests/competition-match-integrity.test.cjs
+      - tests/brsz-mobile-html-import.test.cjs
       - supabase/migrations/20261014125538_cc_preserve_competition_match_identity_v1.sql
       - tests/competition-league-fixture-reference.test.cjs
       - tests/mrsz-screenshot-finance.test.cjs
@@ -41,6 +43,7 @@ jobs:
         run: |
           node --test tests/competition-training-roster.test.cjs
           node --test tests/competition-match-integrity.test.cjs
+          node --test tests/brsz-mobile-html-import.test.cjs
           node --test tests/competition-league-fixture-reference.test.cjs
           node --test tests/mrsz-screenshot-finance.test.cjs
           node --test tests/mrsz-fixture-merge.test.cjs

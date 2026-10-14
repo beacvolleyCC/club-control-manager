@@ -1795,14 +1795,41 @@
     const missing=[...expected].filter(id=>!seen.has(id));if(missing.length)throw new Error(`Hiányzó BRSZ oldal: ${missing.map(id=>CC_BRSZ_COMPETITION_HTML_V1[id]).join(', ')}.`);
     return documents.map(doc=>({competitionId:text(doc.competitionId),name:text(doc.name)||`brsz-${text(doc.competitionId)}.html`,html:String(doc.html||''),encoding:'utf-8'}));
   }
-  async function runCompetitionSourceSync_(){
+  // Desktop helper and phone HTML file imports share the exact same verified server pipeline.
+  function ccOpenBrszSyncOptions_(){
     if(state.competitionSyncBusy)return;
-    if(!state.supabase?.functions)throw new Error('A Supabase Edge Functions kliens nem érhető el.');
-    state.competitionSyncBusy=true;renderCompetitionMatchCards_();competitionStatus_('BRSZ Helper indítása…');
+    const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');
+    if(!d||!body||!title)return;
+    if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='VERSENYSPORT · BRSZ FRISSÍTÉS';
+    title.textContent='Bajnoki meccsek frissítése';
+    body.innerHTML='<div class="cc-brsz-sync-chooser">'
+      +'<p>A korábbi jelentkezések és létszámok a meglévő meccsazonosítóhoz kapcsolódnak. Bizonytalan mérkőzést kézzel kell egyeztetni.</p>'
+      +'<button type="button" class="button primary" id="ccBrszSyncMobile">HTML-fájlok kiválasztása</button>'
+      +'<small>Telefonon is működik: a három 2026/27-es BRSZ bajnokságoldal mentett .html fájlját válaszd ki a Fájlokból. A böngészőben megnyitott link önmagában nem elég.</small>'
+      +'<button type="button" class="button quiet" id="ccBrszSyncHelper">Frissítés Chrome-kiegészítővel</button>'
+      +'<small>Számítógépen, telepített Club Control BRSZ Helperrel. Nem szükséges kézzel fájlokat menteni.</small>'
+      +'<button type="button" class="button quiet" id="ccBrszSyncCancel">Mégse</button></div>';
+    ccOpenDialogStable_(d);
+    $('#ccBrszSyncMobile')?.addEventListener('click',()=>{ccCloseEntityDialog_();void runCompetitionSourceSync_('html_import')});
+    $('#ccBrszSyncHelper')?.addEventListener('click',()=>{ccCloseEntityDialog_();void runCompetitionSourceSync_('browser_helper')});
+    $('#ccBrszSyncCancel')?.addEventListener('click',ccCloseEntityDialog_);
+  }
+  async function runCompetitionSourceSync_(mode='browser_helper'){
+    if(state.competitionSyncBusy)return;
+    if(!state.supabase?.functions){status('A Supabase Edge Functions kliens nem érhető el.','error');return;}
+    state.competitionSyncBusy=true;renderCompetitionMatchCards_();
+    competitionStatus_(mode==='html_import'?'BRSZ HTML-fájlok kiválasztása…':'BRSZ Helper indítása…');
     try{
-      const documents=ccValidateHelperDocuments_(await ccRequestBrszHelperDocuments_());
+      let documents;
+      if(mode==='html_import'){
+        const selected=await ccPickBrszHtmlFiles_();
+        if(!selected.length){competitionStatus_('BRSZ-fájlok kiválasztása megszakítva.');return;}
+        documents=await ccPrepareBrszHtmlDocuments_(selected);
+      }else{
+        documents=ccValidateHelperDocuments_(await ccRequestBrszHelperDocuments_());
+      }
       competitionStatus_('BRSZ adatok feldolgozása…');
-      const {data,error}=await state.supabase.functions.invoke('cc-competition-sync',{body:{source:'brsz',season:'2026/27',mode:'browser_helper',documents}});
+      const {data,error}=await state.supabase.functions.invoke('cc-competition-sync',{body:{source:'brsz',season:'2026/27',mode,documents}});
       if(error)throw error;
       if(!data?.ok)throw new Error((data?.errors||[]).join(' · ')||data?.message||'A BRSZ Browser Helper import sikertelen.');
       await Promise.all([loadCompetitionSyncStatus(),loadCompetitionResultsStandings().catch(()=>{}),loadActivityEvents(),loadCalendar()]);
@@ -2024,7 +2051,7 @@
     state.eventFiltersOpen=filterOpen_('competition.matches',false);
     const matchPeriod=state.ccMatchPeriod||'all',rows=effectiveCompetitionEvents(state.activityEvents).filter(e=>eventType(e)==='match'&&teamFilterMatch_('events',eventTeamId(e))&&(matchPeriod==='all'||(matchPeriod==='upcoming'&&!isEventPast(e))||(matchPeriod==='past'&&isEventPast(e)))).sort((a,b)=>(eventStart(a)?.getTime()||0)-(eventStart(b)?.getTime()||0)),active=teamFilterIds_('events').length>0||matchPeriod!=='all',periodTitle=matchPeriod==='past'?'Elmúlt meccsek':matchPeriod==='upcoming'?'Következő meccsek':'BEAC – teljes idény';
     $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-match-page-header"><div><h2>Meccsek</h2><p>Mérkőzések és aktuális tabella.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.matches','edit')?`<button class="cc-toolbar-icon cc-refresh-icon" id="competitionSourceSync" type="button" aria-label="BRSZ frissítés" title="BRSZ frissítés" ${state.competitionSyncBusy?'disabled':''}>↻</button><button class="cc-toolbar-icon cc-add-square" id="competitionMatchAdd" type="button" aria-label="Új meccs" title="Új meccs">+</button>`:''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${matchPeriod==='upcoming'?'selected':''}>Közelgő</option><option value="past" ${matchPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${matchPeriod==='all'?'selected':''}>Teljes idény</option></select></label></div><div class="competition-live-status hidden" id="competitionLiveStatus" role="status" aria-live="polite"></div>${ccMrszPhotoPanelHtml_()}<article class="panel cc-event-card-panel cc-match-card-panel"><div class="panel-head"><div><h3>${periodTitle}</h3><p>${rows.length} mérkőzés a szűrésben</p></div></div><div class="cc-event-card-list">${rows.map(e=>ccCompetitionEventWithRosterHtml_(e,'match')).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}</div>${standingsSection_('events')}${ccLeagueFixturePanelHtml_()}`;
-    $('#competitionSourceSync')?.addEventListener('click',runCompetitionSourceSync_);$('#competitionMatchAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'match'));
+    $('#competitionSourceSync')?.addEventListener('click',ccOpenBrszSyncOptions_);$('#competitionMatchAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'match'));
     const toggle=$('#eventFiltersToggle'),panel=$('#eventFiltersPanel');if(toggle)toggle.classList.toggle('open',state.eventFiltersOpen);toggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.matches',!state.eventFiltersOpen);state.eventFiltersOpen=open;toggle.setAttribute('aria-expanded',String(open));toggle.classList.toggle('open',open);if(panel)panel.hidden=!open;ccBlurPointerControl_(toggle)});
     bindTeamMultiFilter_('events',renderCompetitionMatchCards_);
     $('#eventPeriodFilter')?.addEventListener('change',e=>{state.ccMatchPeriod=e.target.value;afterNativePicker(e.target,renderCompetitionMatchCards_,'#eventFiltersPanel')});
