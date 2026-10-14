@@ -21,7 +21,7 @@ const players=[
 ];
 const ctx={
   Set,Map,state:{eventRosterCache:new Map()},
-  text:x=>String(x??'').trim(),esc,
+  text:x=>String(x??'').trim(),esc,num:x=>Number(x)||0,
   enrichPlayer_:p=>p,avatarHtml:()=>'<span class="cc-avatar">A</span>',
   initials:x=>String(x??'').split(/\s+/).filter(Boolean).slice(0,2).map(v=>v[0]).join('')||'?',
   medicalState_:()=>({cls:'valid',label:'Érvényes'}),fmtDate:()=> '2027.01.01',
