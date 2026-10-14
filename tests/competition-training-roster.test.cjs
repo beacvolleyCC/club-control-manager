@@ -41,29 +41,27 @@ test('RSVP ordering: going first, then not going, then unanswered, jersey numeri
   assert.ok(pos.every(n=>n>=0));
   assert.deepEqual(pos,[...pos].sort((a,b)=>a-b));
 });
-test('small foldout has jersey numbers + slider + profile triangle but no avatar, player name or position',()=>{
+test('small foldout has avatar, visible name, jersey, slider and profile triangle only',()=>{
   const html=ctx.qa.small(players,'ev',true,true);
-  for(const cls of ['cc-inline-player-number','cc-compact-roster-presence','cc-compact-roster-open'])assert.ok(html.includes(cls));
+  for(const cls of ['cc-inline-avatar','cc-inline-name','cc-inline-player-number','cc-compact-roster-presence','cc-compact-roster-open'])assert.ok(html.includes(cls));
   assert.ok(html.includes('#3')&&html.includes('#11'));
-  assert.ok(!html.includes('cc-compact-roster-avatar'));
-  assert.ok(!html.includes('cc-compact-roster-identity'));
-  assert.ok(!html.includes('cc-compact-roster-heading'));
+  assert.ok(html.includes('Jövő Három</strong>'),'name should be visible beside jersey number');
+  assert.ok(!html.includes('cc-compact-roster-medical'));
+  assert.ok(!html.includes('cc-compact-roster-source'));
   assert.ok(!html.includes('Feladók'));
-  assert.ok(!html.includes('Jövő Három</strong>'),'full player name should not be visibly rendered');
-  assert.ok(html.includes('title="Jövő Három"'),'names remain accessible on hover');
   assert.ok(html.includes('data-roster-profile-open="g3"'));
 });
-test('RSVP tint is green, red, dark grey and unknown comes last',()=>{
+test('RSVP tint stays subtle with green, red, neutral and unknown last',()=>{
   const html=ctx.qa.small(players,'ev',true,true);
   for(const v of ['going','not-going','none'])assert.ok(html.includes('cc-inline-player '+v));
-  assert.ok(css.includes('.cc-inline-player.going{background:#dff1e5'));
-  assert.ok(css.includes('.cc-inline-player.not-going{background:#f9dfe0'));
-  assert.ok(css.includes('.cc-inline-player.none{background:#424950'));
-  assert.ok(css.includes('.cc-compact-roster-row.none{background:#424950'));
+  assert.ok(css.includes('.cc-inline-player.going{background:rgba(54,155,94,.07)'));
+  assert.ok(css.includes('.cc-inline-player.not-going{background:rgba(200,70,82,.06)'));
+  assert.ok(css.includes('.cc-inline-player.none{background:rgba(130,140,150,.07)'));
 });
-test('missing jersey falls back to initials; no unsafe HTML from player name',()=>{
+test('missing jersey shows a dash and name remains safely escaped',()=>{
   const html=ctx.qa.small(players,'ev',true,true);
-  assert.ok(html.includes('title="Nincs mezszám &lt;script&gt;X&lt;/script&gt;"'));
+  assert.ok(html.includes('Nincs mezszám &lt;script&gt;X&lt;/script&gt;</strong>'));
+  assert.ok(html.includes('title="Mezszám">–</span>'));
   assert.ok(!html.includes('<script>'));
 });
 test('detailed event still has identifying information, doctor status and editable attendance, no position grouping',()=>{
@@ -103,13 +101,14 @@ test('foldout loads current roster from service, on close does not write anythin
   const button={attrs:{},setAttribute(k,v){this.attrs[k]=v},classList:{toggle(){}}};
   let reads=0,bound=0;
   ctx.document.querySelector=()=>holder;
-  ctx.loadEventRoster=async(_id,opts)=>{reads++;assert.equal(opts.force,true);return players};
+  ctx.loadEventRoster=async(_id,opts)=>{reads++;assert.equal(opts,undefined);return players};
   ctx.ccBindCompetitionRoster_=()=>bound++;
   await ctx.qa.toggle(id,button);
   assert.equal(holder.hidden,false);
   assert.equal(button.attrs['aria-expanded'],'true');
   assert.equal(reads,1);assert.equal(bound,1);
   assert.ok(holder.innerHTML.includes('#3'));
+  assert.ok(holder.innerHTML.includes('Jövő Három</strong>'));
   assert.ok(!holder.innerHTML.includes('Feladók'));
   await ctx.qa.toggle(id,button);
   assert.equal(holder.hidden,true);assert.equal(button.attrs['aria-expanded'],'false');
@@ -117,7 +116,7 @@ test('foldout loads current roster from service, on close does not write anythin
 });
 test('slider centered via true center column, on small screens as well',()=>{
   assert.ok(css.includes('.cc-inline-player{'));
-  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) 136px minmax(0,1fr)'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) minmax(122px,136px) 28px'));
   assert.ok(css.includes('.cc-compact-roster-list .cc-compact-roster-row{'));
   assert.ok(css.includes('minmax(135px,170px) minmax(0,1fr)'));
   assert.ok(css.includes('grid-template-rows:auto auto'));
@@ -143,4 +142,27 @@ test('match edits retain event ID and never replace an event with its RSVPs',()=
   const reload=source.slice(source.indexOf('  async function ccReloadCompetitionAfterWrite_('),start);
   assert.ok(reload.includes('loadRsvpMatrix()'),'refresh actual responses after saving');
   assert.ok(reload.includes('loadCardRsvpMatrix()'),'refresh match counts after saving');
+});
+test('roster RPC calls deployed v1 directly and reuses inflight/cache',()=>{
+  const begin=source.indexOf('  const ccRosterInFlight_=new Map();');
+  const end=source.indexOf('  function useDemo()',begin);
+  assert.ok(begin>0&&end>begin);
+  const part=source.slice(begin,end);
+  assert.ok(part.includes("rpc('cc_manager_event_roster_v1'"));
+  assert.ok(!part.includes("rpc('cc_manager_event_roster_v2'"));
+  assert.ok(part.includes('ccRosterInFlight_.has(id)'));
+  assert.ok(part.includes('state.eventRosterCache.has(id)'));
+  assert.ok(part.includes('12000'),'pending request has a timeout');
+});
+test('failed automatic hydration cannot cause an infinite prefetch/re-render storm',()=>{
+  assert.ok(source.includes('ccCardRosterPrefetchAttempted_'));
+  assert.ok(source.includes('if(!configured()||(rows||[]).length>30)return'));
+  assert.ok(source.includes('.slice(0,4)'));
+  assert.ok(source.includes("results.some(r=>r.status==='fulfilled')"));
+});
+test('training cards are paged and opened event roster guards against stale async responses',()=>{
+  assert.ok(source.includes('let ccTrainingVisibleLimit_=30'));
+  assert.ok(source.includes('visibleRows=rows.slice(0,ccTrainingVisibleLimit_)'));
+  assert.ok(source.includes("$('#ccTrainingShowMore')?.addEventListener('click'"));
+  assert.ok(source.includes('host?.dataset.eventRosterId!==eventId'));
 });

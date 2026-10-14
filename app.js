@@ -376,12 +376,23 @@
   }
   async function loadCardRsvpMatrix(){const now=new Date(),seasonYear=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1,from=new Date(seasonYear,7,1),to=new Date(seasonYear+1,7,1);const d=await rpc('cc_manager_rsvp_matrix_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_team_id:null});state.cardRsvpMatrix=d&&typeof d==='object'?d:{events:[],players:[],responses:[]}}
   async function loadCoachAvailability(){const now=new Date(),seasonYear=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1,from=new Date(seasonYear,7,1),to=new Date(seasonYear+1,7,1);try{const d=await rpc('cc_manager_coach_availability_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_team_id:null});state.coachAvailability=Array.isArray(d)?d:[]}catch(err){console.warn('MGR019 coach availability unavailable',err);state.coachAvailability=[]}}
+  // v2 is not deployed on production; one real RPC per event, shared by concurrent callers.
+  const ccRosterInFlight_=new Map();
   async function loadEventRoster(eventId,{force=false}={}){
-    const id=text(eventId);if(!force&&state.eventRosterCache.has(id))return state.eventRosterCache.get(id);
-    let d;
-    try{d=await rpc('cc_manager_event_roster_v2',{p_event_id:id})}
-    catch(err){if(!/cc_manager_event_roster_v2|does not exist|schema cache/i.test(text(err?.message||err)))throw err;d=await rpc('cc_manager_event_roster_v1',{p_event_id:id})}
-    const rows=Array.isArray(d)?d:[];state.eventRosterCache.set(id,rows);return rows
+    const id=text(eventId);
+    if(!id)return[];
+    if(!force&&state.eventRosterCache.has(id))return state.eventRosterCache.get(id);
+    if(ccRosterInFlight_.has(id))return ccRosterInFlight_.get(id);
+    let release;
+    const timeout=new Promise((_,reject)=>{release=setTimeout(()=>reject(new Error('A névsor betöltése túl sokáig tart. Próbáld újra.')),12000)});
+    const task=Promise.race([rpc('cc_manager_event_roster_v1',{p_event_id:id}),timeout])
+      .then(result=>{
+        const rows=Array.isArray(result)?result:[];
+        state.eventRosterCache.set(id,rows);
+        return rows;
+      }).finally(()=>{clearTimeout(release);ccRosterInFlight_.delete(id)});
+    ccRosterInFlight_.set(id,task);
+    return task;
   }
   function useDemo(){const d=demoData();Object.assign(state,d);state.calendarEvents=d.calendarEvents;state.activityEvents=d.activityEvents;applyManager();renderChrome();renderView();status('Preview mód: nincs production adatkapcsolat. A csomag nem ír semmit.')}
 
@@ -1046,10 +1057,21 @@
     const e=findEventById(id);if(!e)return;const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle'),s=eventStart(e),en=eventEnd(e),eventId=text(e.eventId||e.id),editable=ccEventCanEdit_(e),attendanceEditable=editable&&!!s&&s<=new Date();
     if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='VERSENYSPORT · ESEMÉNY';
     title.textContent=ccDisplayEventTitle_(e);
-    body.innerHTML=`<div class="entity-hero event-entity-hero"><span class="event-detail-mark" style="background:${esc(e.color||teamById(eventTeamId(e))?.color||'#f7b700')}"></span><div><b>${esc(e.teamName||teamById(eventTeamId(e))?.name||'–')}</b><span>${esc(eventType(e)==='match'?'Meccs':'Edzés')} · ${esc(s?fmtDate(s):'–')} ${esc(s?fmtTime(s):'–')}</span></div>${editable?`<button class="button quiet small entity-hero-action" id="eventEditBtn" type="button">Szerkesztés</button>`:''}</div><div class="detail-grid event-detail-primary-grid ${eventType(e)==='training'?'is-training':''}">${detailPair('Kezdés',s?`${fmtDate(s)} ${fmtTime(s)}`:'–')}${eventType(e)==='training'||ccMatchKindFromEvent_(e)==='friendly'?detailPair('Befejezés',en?fmtTime(en):'–'):''}${eventType(e)==='training'?detailPair('Pálya',e.court):`${detailPair('Helyszín',e.venue)}${detailPair('Cím',e.address)}${detailPair('Pálya',e.court)}${detailPair('Találkozó',e.meetingAt?`${fmtTime(e.meetingAt)} · ${e.meetingPlace||''}`:(e.meetingPlace||'–'))}`}</div><div class="panel-subhead rsvp-subhead"><div><h4>Részvételi jelzések</h4><p>A játékos RSVP-je és üzenete itt látható; a tényleges jelenlétet az esemény után lehet rögzíteni.</p></div></div><div class="attendance-detail rsvp-detail compact-three"><div><small>Jövök</small><span><b>${num(e.yesCount)}</b> fő</span></div><div><small>Nem jövök</small><span><b>${num(e.noCount)}</b> fő</span></div><div><small>Nincs válasz</small><span><b>${num(e.unknownCount)}</b> fő</span></div></div><div class="panel-subhead"><div><h4>Névsor</h4><p>RSVP, játékosüzenet és tényleges jelenlét.</p></div></div><div id="eventRosterBody" class="event-roster-detail"><span class="roster-loading">Névsor betöltése…</span></div>`;
+    body.innerHTML=`<div class="entity-hero event-entity-hero"><span class="event-detail-mark" style="background:${esc(e.color||teamById(eventTeamId(e))?.color||'#f7b700')}"></span><div><b>${esc(e.teamName||teamById(eventTeamId(e))?.name||'–')}</b><span>${esc(eventType(e)==='match'?'Meccs':'Edzés')} · ${esc(s?fmtDate(s):'–')} ${esc(s?fmtTime(s):'–')}</span></div>${editable?`<button class="button quiet small entity-hero-action" id="eventEditBtn" type="button">Szerkesztés</button>`:''}</div><div class="detail-grid event-detail-primary-grid ${eventType(e)==='training'?'is-training':''}">${detailPair('Kezdés',s?`${fmtDate(s)} ${fmtTime(s)}`:'–')}${eventType(e)==='training'||ccMatchKindFromEvent_(e)==='friendly'?detailPair('Befejezés',en?fmtTime(en):'–'):''}${eventType(e)==='training'?detailPair('Pálya',e.court):`${detailPair('Helyszín',e.venue)}${detailPair('Cím',e.address)}${detailPair('Pálya',e.court)}${detailPair('Találkozó',e.meetingAt?`${fmtTime(e.meetingAt)} · ${e.meetingPlace||''}`:(e.meetingPlace||'–'))}`}</div><div class="panel-subhead rsvp-subhead"><div><h4>Részvételi jelzések</h4><p>A játékos RSVP-je és üzenete itt látható; a tényleges jelenlétet az esemény után lehet rögzíteni.</p></div></div><div class="attendance-detail rsvp-detail compact-three"><div><small>Jövök</small><span><b>${num(e.yesCount)}</b> fő</span></div><div><small>Nem jövök</small><span><b>${num(e.noCount)}</b> fő</span></div><div><small>Nincs válasz</small><span><b>${num(e.unknownCount)}</b> fő</span></div></div><div class="panel-subhead"><div><h4>Névsor</h4><p>RSVP, játékosüzenet és tényleges jelenlét.</p></div></div><div id="eventRosterBody" data-event-roster-id="${esc(eventId)}" class="event-roster-detail"><span class="roster-loading">Névsor betöltése…</span></div>`;
     ccOpenDialogStable_(d);$('#eventEditBtn')?.addEventListener('click',()=>openCompetitionEventEditor(eventId,eventType(e)));
     if(!eventId||!configured())return;
-    loadEventRoster(eventId,{force:true}).then(rows=>{const host=$('#eventRosterBody');if(!host)return;host.innerHTML=rows.length?ccTrainingInlineRosterHtml_(rows,eventId,editable,attendanceEditable):emptyInline('Nincs játékos a névsorban.');ccBindCompetitionRoster_(host,eventId,editable,attendanceEditable,{returnToEvent:true})}).catch(err=>{const host=$('#eventRosterBody');if(host)host.innerHTML=`<span class="roster-loading error">${esc(err?.message||'A névsor nem tölthető be.')}</span>`})
+    const showRoster=rows=>{
+      const host=$('#eventRosterBody');
+      if(!d.open||host?.dataset.eventRosterId!==eventId)return;
+      host.innerHTML=rows.length?ccTrainingInlineRosterHtml_(rows,eventId,editable,attendanceEditable):emptyInline('Nincs játékos a névsorban.');
+      ccBindCompetitionRoster_(host,eventId,editable,attendanceEditable,{returnToEvent:true});
+    };
+    if(state.eventRosterCache.has(eventId))showRoster(state.eventRosterCache.get(eventId));
+    else loadEventRoster(eventId).then(showRoster).catch(err=>{
+      const host=$('#eventRosterBody');
+      if(d.open&&host?.dataset.eventRosterId===eventId)host.innerHTML=`<span class="roster-loading error">${esc(err?.message||'A névsor nem tölthető be.')}</span><button class="button quiet small" id="ccEventRosterRetry" type="button">Újrapróbálás</button>`;
+      $('#ccEventRosterRetry')?.addEventListener('click',()=>{const current=$('#eventRosterBody');if(!current||current.dataset.eventRosterId!==eventId)return;current.innerHTML='<span class="roster-loading">Újrapróbálás…</span>';loadEventRoster(eventId).then(showRoster).catch(nextErr=>{if(current.dataset.eventRosterId===eventId)current.textContent=nextErr?.message||'Betöltési hiba'})},{once:true});
+    })
   }
 
   function bindEventDetailActions(){$$('[data-event-id]').forEach(el=>el.addEventListener('click',()=>openEventDetail(el.dataset.eventId)))}
@@ -1565,16 +1587,22 @@
     const eventKnown=(m.events||[]).some(x=>text(x.eventId||x.id||x.event_id)===eventId),known=eventKnown||matrixRows.length>0||cachedRows.length>0||num(e.yesCount)===0;
     return {known,counts,source:cachedRows.length?'roster':matrixRows.length?'matrix':eventKnown?'matrix-event':'none'}
   }
-  const ccCardRosterPrefetch_=new Set();
+  const ccCardRosterPrefetch_=new Set(),ccCardRosterPrefetchAttempted_=new Set();
   function ccPositionCountTotal_(summary){return Object.values(summary?.counts||{}).reduce((a,b)=>a+num(b),0)}
   async function ccHydrateCardPositions_(rows,rerender){
-    if(!configured())return;
-    const pending=(rows||[]).filter(e=>{const id=text(e.eventId||e.id),summary=ccEventPositionSummary_(e),expected=num(e.yesCount);return id&&expected>0&&(!summary.known||ccPositionCountTotal_(summary)!==expected)&&!state.eventRosterCache.has(id)&&!ccCardRosterPrefetch_.has(id)});
+    // A season has hundreds of events; never start a request storm from card rendering.
+    if(!configured()||(rows||[]).length>30)return;
+    const pending=(rows||[]).filter(e=>{
+      const id=text(e.eventId||e.id),summary=ccEventPositionSummary_(e),expected=num(e.yesCount);
+      return id&&expected>0&&(!summary.known||ccPositionCountTotal_(summary)!==expected)
+        &&!state.eventRosterCache.has(id)&&!ccCardRosterPrefetch_.has(id)&&!ccCardRosterPrefetchAttempted_.has(id);
+    }).slice(0,4);
     if(!pending.length)return;
-    pending.forEach(e=>ccCardRosterPrefetch_.add(text(e.eventId||e.id)));
-    await Promise.allSettled(pending.map(e=>loadEventRoster(text(e.eventId||e.id))));
+    pending.forEach(e=>{const id=text(e.eventId||e.id);ccCardRosterPrefetch_.add(id);ccCardRosterPrefetchAttempted_.add(id)});
+    const results=await Promise.allSettled(pending.map(e=>loadEventRoster(text(e.eventId||e.id))));
     pending.forEach(e=>ccCardRosterPrefetch_.delete(text(e.eventId||e.id)));
-    if(typeof rerender==='function')rerender();
+    // Failed calls must NOT recursively cause another render/fetch loop.
+    if(results.some(r=>r.status==='fulfilled')&&typeof rerender==='function')rerender();
   }
   function ccTotalTone_(n){const x=num(n);return x<6?'danger':x<10?'warn':'ok'}
   function ccPositionTone_(key,n,known){if(!known)return'unknown';const x=num(n);if(key==='f'||key==='l'||key==='a')return x===0?'danger':x===1?'warn':'ok';if(key==='sz'||key==='c')return x<=1?'danger':x===2?'warn':'ok';return'ok'}
@@ -1615,20 +1643,22 @@
       return av-bv||text(a.displayName||a.name).localeCompare(text(b.displayName||b.name),'hu');
     });
   }
-  // Expanded event-card foldout: jersey, centered attendance control, profile arrow.
-  // The detailed event view is the place for names, avatars and medical information.
+  // Quick roster: avatar, name, jersey number, attendance slider, profile triangle.
   function ccTrainingInlinePreviewHtml_(rows,eventId,editable,attendanceEditable){
     const players=ccRosterSortedByResponse_(rows);
     const html=players.map(p=>{
       const name=text(p.displayName||p.name||'Játékos'),jersey=text(p.jerseyNo??p.jersey_no),tone=ccTrainingRsvpTone_(p.status),preview=ccRosterPreviewState_(p);
-      const shown=jersey?'#'+jersey:initials(name);
       return `<div class="cc-inline-player ${tone} ${preview.confirmed?'is-confirmed':'is-rsvp-only'}" aria-label="${esc(name)} · ${tone==='going'?'Jövök':tone==='not-going'?'Nem jövök':'Nincs válasz'}">
-        <span class="cc-inline-player-number" title="${esc(name)}">${esc(shown)}</span>
-        <span class="cc-compact-roster-presence"><span class="cc-compact-roster-source">${preview.confirmed?'Rögzítve':'RSVP alapján'}</span>${ccCompetitionAttendanceSlider_(p,attendanceEditable)}</span>
-        <button type="button" class="cc-compact-roster-open" data-roster-profile-open="${esc(p.playerId||p.id)}" aria-label="${esc(name)} játékosprofilja" title="${esc(name)} – profil"><span class="triangle-icon" aria-hidden="true"></span></button>
+        <span class="cc-inline-person">
+          <span class="cc-inline-avatar">${avatarHtml(p,'table')}</span>
+          <strong class="cc-inline-name" title="${esc(name)}">${esc(name)}</strong>
+          <span class="cc-inline-player-number" title="Mezszám">${jersey?'#'+esc(jersey):'–'}</span>
+        </span>
+        <span class="cc-compact-roster-presence">${ccCompetitionAttendanceSlider_(p,attendanceEditable)}</span>
+        <button type="button" class="cc-compact-roster-open" data-roster-profile-open="${esc(p.playerId||p.id)}" aria-label="${esc(name)} részletes játékoskártyája" title="Részletes játékoskártya"><span class="triangle-icon" aria-hidden="true"></span></button>
       </div>`;
     }).join('');
-    return `<div class="cc-inline-player-grid" aria-label="Játékosok mezszám szerint, részvételi jelzés alapján sorrendben">${html||'<span class="roster-empty">Nincs játékos a névsorban.</span>'}</div>`;
+    return `<div class="cc-inline-player-grid" aria-label="Játékosok részvételi állapot és mezszám szerint">${html||'<span class="roster-empty">Nincs játékos a névsorban.</span>'}</div>`;
   }
   // The event detail keeps all player data, but is no longer divided by positions.
   function ccTrainingInlineRosterHtml_(rows,eventId,editable,attendanceEditable){
@@ -1652,7 +1682,7 @@
     ccTrainingRosterOpenIds_.add(id);
     holder.innerHTML='<span class="roster-loading">Névsor betöltése…</span>';
     try{
-      const rows=configured()?await loadEventRoster(id,{force:true}):[];
+      const rows=configured()?await loadEventRoster(id):[];
       const current=document.querySelector(selector),e=findEventById(id);
       if(ccTrainingRosterOpenIds_.has(id)&&current&&!current.hidden&&e){
         const editable=ccEventCanEdit_(e),attendanceEditable=editable&&!!eventStart(e)&&eventStart(e)<=new Date()&&text(e.status||'active')!=='cancelled';
@@ -1675,19 +1705,21 @@
     });
   }
 
+  let ccTrainingVisibleLimit_=30;
   function renderCompetitionTrainingCards_(){if(!ccRouteIs_('competition','trainings'))return;
     state.eventFiltersOpen=filterOpen_('competition.trainings',false);
-    const rows=filteredActivityEvents(e=>eventType(e)==='training'),active=teamFilterIds_('events').length>0||state.eventPeriod!=='upcoming';
-    $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-training-page-header"><div><h2>Edzések</h2><p>Versenycsapat-edzések.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.trainings','edit')?'<button class="cc-toolbar-icon cc-add-square" id="competitionTrainingAdd" type="button" aria-label="Új edzés" title="Új edzés">+</button>':''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${state.eventPeriod==='upcoming'?'selected':''}>Aktuális / közelgő</option><option value="past" ${state.eventPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${state.eventPeriod==='all'?'selected':''}>Mind</option></select></label></div><article class="panel cc-event-card-panel cc-training-card-panel"><div class="panel-head"><div><h3>${state.eventPeriod==='past'?'Elmúlt edzések':'Következő edzések'}</h3><p>${rows.length} alkalom a szűrésben</p></div></div><div class="cc-event-card-list">${rows.map(ccCompetitionTrainingWithRosterHtml_).join('')||emptyInline('Nincs edzés ebben a szűrésben.')}</div></article>`;
+    const rows=filteredActivityEvents(e=>eventType(e)==='training'),visibleRows=rows.slice(0,ccTrainingVisibleLimit_),active=teamFilterIds_('events').length>0||state.eventPeriod!=='upcoming';
+    $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-training-page-header"><div><h2>Edzések</h2><p>Versenycsapat-edzések.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.trainings','edit')?'<button class="cc-toolbar-icon cc-add-square" id="competitionTrainingAdd" type="button" aria-label="Új edzés" title="Új edzés">+</button>':''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${state.eventPeriod==='upcoming'?'selected':''}>Aktuális / közelgő</option><option value="past" ${state.eventPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${state.eventPeriod==='all'?'selected':''}>Mind</option></select></label></div><article class="panel cc-event-card-panel cc-training-card-panel"><div class="panel-head"><div><h3>${state.eventPeriod==='past'?'Elmúlt edzések':'Következő edzések'}</h3><p>${rows.length} alkalom a szűrésben</p></div></div><div class="cc-event-card-list">${visibleRows.map(ccCompetitionTrainingWithRosterHtml_).join('')||emptyInline('Nincs edzés ebben a szűrésben.')}</div>${rows.length>visibleRows.length?`<div class="cc-training-more-wrap"><button id="ccTrainingShowMore" type="button" class="button quiet">További edzések · ${rows.length-visibleRows.length} hátravan</button></div>`:''}</article>`;
     $('#competitionTrainingAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'training'));
     const toggle=$('#eventFiltersToggle'),panel=$('#eventFiltersPanel');
     toggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.trainings',!state.eventFiltersOpen);state.eventFiltersOpen=open;toggle.setAttribute('aria-expanded',String(open));toggle.classList.toggle('open',open);if(panel)panel.hidden=!open;ccBlurPointerControl_(toggle)});
-    bindTeamMultiFilter_('events',renderCompetitionTrainingCards_);
-    $('#eventPeriodFilter')?.addEventListener('change',e=>{state.eventPeriod=e.target.value;afterNativePicker(e.target,renderCompetitionTrainingCards_,'#eventFiltersPanel')});
-    $('#eventFilterReset')?.addEventListener('click',()=>{state.eventTeam='';state.teamFilters.events=[];state.eventPeriod='upcoming';renderCompetitionTrainingCards_()});
+    bindTeamMultiFilter_('events',()=>{ccTrainingVisibleLimit_=30;renderCompetitionTrainingCards_()});
+    $('#eventPeriodFilter')?.addEventListener('change',e=>{state.eventPeriod=e.target.value;afterNativePicker(e.target,()=>{ccTrainingVisibleLimit_=30;renderCompetitionTrainingCards_()},'#eventFiltersPanel')});
+    $('#eventFilterReset')?.addEventListener('click',()=>{state.eventTeam='';state.teamFilters.events=[];state.eventPeriod='upcoming';ccTrainingVisibleLimit_=30;renderCompetitionTrainingCards_()});
+    $('#ccTrainingShowMore')?.addEventListener('click',()=>{ccTrainingVisibleLimit_+=30;renderCompetitionTrainingCards_()});
     bindEventDetailActions();
     ccBindTrainingRosterToggles_();
-    void ccHydrateCardPositions_(rows,renderCompetitionTrainingCards_);
+    void ccHydrateCardPositions_(visibleRows,renderCompetitionTrainingCards_);
   }
 
   function ccCompetitionSyncLastRun_(){return state.competitionSyncStatus?.lastRun||null}
