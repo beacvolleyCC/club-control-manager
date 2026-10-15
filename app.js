@@ -335,7 +335,21 @@
     state.calendarEvents=effectiveCompetitionEvents(Array.isArray(d)?d:[]);state.events=state.calendarEvents
   }
   async function loadMassCalendar(){const {from,to}=calendarWindow();const end=new Date(to.getTime()-1);const d=await rpc('cc_manager_mass_calendar_v1',{p_from:localDateKey(from),p_to:localDateKey(end)});state.massCalendarEvents=Array.isArray(d)?d:[]}
-  async function loadMassArchive(){const now=new Date(),seasonYear=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1,from=new Date(seasonYear,7,1),to=new Date(now);to.setHours(23,59,59,999);const d=await rpc('cc_manager_mass_training_history_v1',{p_from:localDateKey(from),p_to:localDateKey(to)});state.massArchiveEvents=(Array.isArray(d)?d:[]).sort((a,b)=>(eventStart(b)?.getTime()||0)-(eventStart(a)?.getTime()||0))}
+  async function loadMassArchive(){
+    const now=new Date(),seasonYear=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1,
+      from=new Date(seasonYear,7,1),to=new Date(now);
+    to.setHours(23,59,59,999);
+    const range={p_from:localDateKey(from),p_to:localDateKey(to)};
+    // Training managers use the dedicated history reader; calendar-only viewers
+    // retain their previous, separately authorized read-only history access.
+    const data=can('mass.trainings')
+      ?await rpc('cc_manager_mass_training_history_v1',range)
+      :await rpc('cc_manager_mass_calendar_v1',range);
+    state.massArchiveEvents=(Array.isArray(data)?data:[]).filter(e=>{
+      const end=safeDate(e.endsAt||e.ends_at||e.startsAt||e.starts_at);
+      return end&&end.getTime()<Date.now();
+    }).sort((a,b)=>(eventStart(b)?.getTime()||0)-(eventStart(a)?.getTime()||0));
+  }
   async function loadMassAthletes(){const d=await rpc('cc_manager_mass_athletes_v1',{p_query:'',p_level:'',p_status:''});state.massAthletes=Array.isArray(d)?d:[]}
   async function loadMassPasses(){const d=await rpc('cc_manager_mass_passes_v1',{p_query:'',p_month:''});state.massPasses=Array.isArray(d)?d:[]}
   async function loadActivityEvents(){const now=new Date(),seasonYear=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1,from=new Date(seasonYear,7,1),to=new Date(seasonYear+1,7,1),jobs=[];if(can('competition.trainings'))jobs.push(rpc('cc_manager_events_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_kind:'training',p_team_id:null}));if(can('competition.matches'))jobs.push(rpc('cc_manager_events_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_kind:'match',p_team_id:null}));const parts=await Promise.all(jobs);state.activityEvents=parts.flatMap(x=>Array.isArray(x)?x:[]).sort((a,b)=>eventStart(a)-eventStart(b))}

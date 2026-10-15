@@ -38,8 +38,11 @@ test('Inactive past trainings remain available in the archive',()=>{
 });
 test('Past archive uses train permission rather than the calendar-only RPC',()=>{
  const fn=app.slice(app.indexOf('  async function loadMassArchive(){'),app.indexOf('  async function loadMassAthletes()'));
+ assert.ok(fn.includes("can('mass.trainings')"));
  assert.ok(fn.includes("cc_manager_mass_training_history_v1"));
- assert.ok(!fn.includes("cc_manager_mass_calendar_v1"));
+ assert.ok(fn.includes("cc_manager_mass_calendar_v1"));
+ assert.ok(fn.indexOf("can('mass.trainings')") < fn.indexOf("cc_manager_mass_training_history_v1"));
+ assert.ok(fn.includes("end&&end.getTime()<Date.now()"));
  assert.ok(sql.includes("private.cc_manager_require_any_v1('mass.trainings','view')"));
  assert.ok(!sql.includes("'mass.calendar','view'"));
  assert.ok(sql.includes("upper(coalesce(e.session_type,'')) <> 'VERSENYSPORT'"));
@@ -59,4 +62,19 @@ test('Date filter and visible archive shortcut retain training-detail navigation
  assert.ok(screen.includes('massLegacyTrainingRow(e,{archived:!!e.__archived})'));
  assert.ok(app.includes('data-mass-detail='));
  assert.ok(app.includes("$('#massEventEditBtn')?.addEventListener('click'"));
+});
+
+test('Archive retains calendar-only fallback without granting training rights',()=>{
+ const load=app.slice(app.indexOf('  async function loadMassArchive(){'),app.indexOf('  async function loadMassAthletes()'));
+ const f=new Function('can','rpc','state','localDateKey','safeDate','eventStart',
+   load+';return loadMassArchive;');
+ const allowed=[];
+ const state={massArchiveEvents:[]};
+ const training=f(v=>v==='mass.trainings',
+   async(name)=>{allowed.push(name);return [];},state,d=>'2026-10-15',x=>new Date(x),x=>new Date(x.startsAt));
+ const calendar=f(v=>v==='mass.calendar',
+   async(name)=>{allowed.push(name);return [];},state,d=>'2026-10-15',x=>new Date(x),x=>new Date(x.startsAt));
+ return training().then(()=>calendar()).then(()=>{
+   assert.deepEqual(allowed,['cc_manager_mass_training_history_v1','cc_manager_mass_calendar_v1']);
+ });
 });
