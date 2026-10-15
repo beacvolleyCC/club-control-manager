@@ -11,6 +11,8 @@ on:
       - tests/competition-context-catalog.test.cjs
       - tests/league-context-ui.test.cjs
       - tests/league-matches-page.test.cjs
+      - tests/mass-cancellations-panel.test.cjs
+      - supabase/migrations/20261015173000_cc_manager_mass_cancellations_read_v1.sql
       - tests/competition-match-integrity.test.cjs
       - tests/brsz-mobile-html-import.test.cjs
       - tests/competition-change-audit.test.cjs
@@ -34,6 +36,8 @@ on:
       - tests/competition-context-catalog.test.cjs
       - tests/league-context-ui.test.cjs
       - tests/league-matches-page.test.cjs
+      - tests/mass-cancellations-panel.test.cjs
+      - supabase/migrations/20261015173000_cc_manager_mass_cancellations_read_v1.sql
       - tests/competition-match-integrity.test.cjs
       - tests/brsz-mobile-html-import.test.cjs
       - tests/competition-change-audit.test.cjs
@@ -68,6 +72,7 @@ jobs:
           node --test tests/competition-context-catalog.test.cjs
           node --test tests/league-context-ui.test.cjs
           node --test tests/league-matches-page.test.cjs
+          node --test tests/mass-cancellations-panel.test.cjs
           node --test tests/competition-training-roster.test.cjs
           node --test tests/competition-match-integrity.test.cjs
           node --test tests/brsz-mobile-html-import.test.cjs
