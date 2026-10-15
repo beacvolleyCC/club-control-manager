@@ -2296,7 +2296,7 @@
     $('#eventPeriodFilter')?.addEventListener('change',e=>{state.ccMatchPeriod=e.target.value;afterNativePicker(e.target,renderCompetitionMatchCards_,'#eventFiltersPanel')});
     $('#eventFilterReset')?.addEventListener('click',()=>{state.eventTeam='';state.teamFilters.events=[];state.ccMatchPeriod='all';renderCompetitionMatchCards_()});
     $('#ccLeagueGroupSelect')?.addEventListener('change',e=>{ccLeagueSelectedGroup_=e.target.value;renderCompetitionMatchCards_()});
-    $('[data-league-snapshot-scope]').forEach(b=>b.addEventListener('click',()=>{
+    $$('[data-league-snapshot-scope]').forEach(b=>b.addEventListener('click',()=>{
       ccLeagueSnapshotScope_=b.dataset.leagueSnapshotScope==='all'?'all':'beac';
       renderCompetitionMatchCards_();
     }));
