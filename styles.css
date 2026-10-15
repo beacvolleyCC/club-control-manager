@@ -6614,3 +6614,27 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 .cc-league-context-picker select:disabled{opacity:.65}
 .cc-match-league-no-standings .cc-standings-notice{margin:6px 0 2px}
 @media(max-width:760px){.cc-match-league-header{align-items:stretch}.cc-league-context-picker{width:100%}.cc-league-context-picker select{font-size:16px}}
+
+
+/* Manager mass training: historical cancellations, displayed under the waitlist. */
+.mass-cancellations-panel{margin-top:16px;border:1px solid var(--border,#dedee4);border-radius:12px;overflow:hidden;min-width:0}
+.mass-cancellations-panel summary{display:flex;gap:10px;align-items:center;min-height:48px;padding:12px 14px;cursor:pointer;font-weight:650;list-style:none}
+.mass-cancellations-panel summary::-webkit-details-marker{display:none}
+.mass-cancellations-panel summary>span:first-child{flex:1}
+.mass-cancellations-panel summary>b{font-size:12px;font-variant-numeric:tabular-nums;border-radius:99px;padding:3px 9px;background:var(--surface,#eef0f3)}
+.mass-cancellations-panel summary>.triangle-icon{margin-left:4px;transition:transform .2s ease}
+.mass-cancellations-panel[open] summary>.triangle-icon{transform:rotate(180deg)}
+.mass-cancellations-panel summary:focus-visible{outline:2px solid currentColor;outline-offset:-3px}
+.mass-cancellation-list{display:grid;gap:0;border-top:1px solid var(--border,#dedee4)}
+.mass-cancellation-person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;min-width:0}
+.mass-cancellation-person+.mass-cancellation-person{border-top:1px solid var(--border,#dedee4)}
+.mass-cancellation-identity,.mass-cancellation-meta{display:grid;gap:3px;min-width:0}
+.mass-cancellation-identity>b{overflow-wrap:anywhere}
+.mass-cancellation-person small{font-size:11px;font-weight:400;color:var(--muted,#727783);overflow-wrap:anywhere}
+.mass-cancellation-meta{text-align:right;flex-shrink:0;font-size:12px}
+.mass-cancellation-meta>b{font-size:12px;font-weight:600}
+.mass-cancellation-empty{padding:14px;margin:0;color:var(--muted,#727783);font-size:13px}
+.mass-cancellations-panel.compact{margin:8px 0 0}
+.mass-cancellations-panel.compact summary{min-height:42px;padding:9px 12px}
+.mass-cancellations-panel.compact .mass-cancellation-person{padding:9px 12px}
+@media(max-width:520px){.mass-cancellation-person{align-items:flex-start}.mass-cancellation-meta{max-width:45%}.mass-cancellation-meta>b{line-height:1.25}}
