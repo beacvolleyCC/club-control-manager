@@ -52,8 +52,8 @@ test('the two paths use the same existing Edge Function and preserve event links
 });
 test('HTML/JS/PWA cache is updated for touch device rollout',()=>{
  const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8'),css=fs.readFileSync('styles.css','utf8');
- assert.ok(html.includes('app.js?v=20261015-mass-cancel-refresh-v22'));
- assert.ok(sw.includes('cc-manager-20261015-mass-cancel-refresh-v22'));
+ assert.ok(html.includes('app.js?v=20261015-mass-today-v23'));
+ assert.ok(sw.includes('cc-manager-20261015-mass-today-v23'));
  assert.ok(html.includes('competition-context-catalog.js?v=20261015-lc1'));
  assert.ok(css.includes('.cc-brsz-sync-chooser>.button{min-height:44px'));
 });
