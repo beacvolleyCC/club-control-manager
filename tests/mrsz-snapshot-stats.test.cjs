@@ -56,3 +56,20 @@ test('Snapshot stats are wired to the existing league selector, not a second tab
  assert.ok(snippet.includes("ccMrszLeagueFixturePanelHtml_(group"));
  assert.ok(!snippet.includes('Legnagyobb feljövő'));
 });
+
+test('Saved MRSZ table is explicitly labelled as a dated non-live snapshot',()=>{
+ const html=render([beac],null,{partial:false});
+ assert.ok(html.includes('Pillanatkép: 2026.10.14.'));
+ assert.ok(html.includes('Nem élő adat'));
+ assert.ok(html.includes('külön frissítést igényelnek'));
+});
+test('Standings introduction and empty state never imply live automatic data updates',()=>{
+ const from=app.indexOf('  function renderManagerStandings_()');
+ const end=app.indexOf('  function msPositionDelta_(',from);
+ const snippet=app.slice(from,end>from?end:from+12000);
+ assert.ok(snippet.includes('MRSZ – mentett pillanatkép (2026.10.14.) · nem élő adat'));
+ assert.ok(snippet.includes('MRSZ – részleges pillanatkép (2026.10.14.) · nem élő adat'));
+ assert.ok(snippet.includes('A mentett MRSZ-pillanatképek nem frissülnek automatikusan.'));
+ assert.ok(!snippet.includes('Aktuális bajnoki állás'));
+ assert.ok(!snippet.includes('itt automatikusan megjelenik'));
+});
