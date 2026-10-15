@@ -53,6 +53,7 @@ jobs:
         run: node --check app.js
       - name: Validate status colors and position-grouped foldout
         run: |
+          node tests/nav-regression.test.cjs
           node --test tests/competition-training-roster.test.cjs
           node --test tests/competition-match-integrity.test.cjs
           node --test tests/brsz-mobile-html-import.test.cjs
