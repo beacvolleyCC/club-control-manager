@@ -2359,7 +2359,7 @@
     $('#eventPeriodFilter')?.addEventListener('change',e=>{state.ccMatchPeriod=e.target.value;afterNativePicker(e.target,renderCompetitionMatchCards_,'#eventFiltersPanel')});
     $('#eventFilterReset')?.addEventListener('click',()=>{state.eventTeam='';state.teamFilters.events=[];state.ccMatchPeriod='all';renderCompetitionMatchCards_()});
     $('#ccLeagueContextSelect')?.addEventListener('change',e=>ccSetLeagueContext_(e.target.value));
-    $('[data-league-match-scope]').forEach(button=>button.addEventListener('click',()=>{
+    document.querySelectorAll('[data-league-match-scope]').forEach(button=>button.addEventListener('click',()=>{
       ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac';
       renderCompetitionMatchCards_();
     }));
