@@ -80,3 +80,32 @@ test('Mobile disclosure is styled and uses native details/summary',()=>{
  assert.ok(css.includes('.mass-cancellation-person'));
  assert.ok(css.includes('@media(max-width:520px)'));
 });
+
+test('Reopening an inline roster refreshes cancellations and retains open panel state',async()=>{
+ const begin=app.indexOf('  async function toggleMassInlineRoster_(');
+ const end=app.indexOf('  function bindMassLegacyRows()',begin);
+ assert.ok(begin>=0&&end>begin,'inline roster handler exists');
+ let calls=0,wasOpen=false;
+ const holder={hidden:true,dataset:{loaded:'0'},innerHTML:'',querySelector:()=>wasOpen?{open:true}:null};
+ const button={setAttribute(){},classList:{toggle(){}}};
+ const func=new Function('document','CSS','loadMassEventDetail','massPersonSort_','massPassInfo_','text','esc','emptyInline','massCancellationPanelHtml_',
+   app.slice(begin,end)+';return toggleMassInlineRoster_;')(
+   {querySelector:()=>holder},{escape:x=>String(x)},
+   async()=>{calls++;return{event:{},bookings:[],waitlist:[],cancelled:[{name:calls===1?'Első lemondás':'Új lemondás'}]}},
+   ()=>0,()=>({needsCheck:false}),x=>String(x??''),encode,
+   label=>'<p>'+encode(label)+'</p>',(rows,opts)=>'<details data-open="'+opts.open+'">'+rows.map(r=>encode(r.name)).join(',')+'</details>'
+ );
+ await func('training-1',button);
+ assert.equal(calls,1);
+ assert.ok(holder.innerHTML.includes('Első lemondás'));
+ assert.equal(holder.hidden,false);
+ await func('training-1',button);
+ assert.equal(holder.hidden,true);
+ assert.equal(calls,1,'closing never triggers requests');
+ wasOpen=true;
+ await func('training-1',button);
+ assert.equal(calls,2,'reopening MUST reload fresh cancellation rows');
+ assert.ok(holder.innerHTML.includes('Új lemondás'));
+ assert.ok(!holder.innerHTML.includes('Első lemondás'));
+ assert.ok(holder.innerHTML.includes('data-open="true"'));
+});
