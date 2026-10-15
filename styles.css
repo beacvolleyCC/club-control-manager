@@ -2763,7 +2763,7 @@ body.dark{--legacy-nav-border:rgba(255,255,255,.14);--legacy-nav-bg:#171717}
 .team-multi-menu .team-multi-all{grid-template-columns:20px minmax(0,1fr);padding-bottom:7px;margin-bottom:2px;border-bottom:1px solid var(--line);border-radius:8px 8px 0 0}
 .team-multi-menu .team-multi-all>span{grid-column:2}.team-multi-menu .team-multi-all>i{display:none}
 .overview-team-filter-wrap,.team-page-actions{display:flex;align-items:center;gap:7px}
-.legacy-player-team-tabs.multi{display:block;min-width:200px}
+.legacy-player-team-tabs.multi{display:block;min-width:200px;overflow:visible}
 
 .rsvp-plain{display:flex;align-items:center;justify-content:flex-end;gap:10px;white-space:nowrap}
 .rsvp-plain span{display:inline-flex;align-items:baseline;gap:3px;background:transparent!important;border:0!important;padding:0!important;border-radius:0!important}
