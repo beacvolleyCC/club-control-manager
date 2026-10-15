@@ -37,7 +37,7 @@ test('Past view still exposes archived sessions and preserves sort newest-first'
 });
 test('Rendered Manager UI retains training details and editing action',()=>{
  const view=src.slice(to,src.indexOf('  function massAttendanceModel_',to));
- assert.ok(view.includes('massVisibleTrainingRows_(state.massTrainings,state.massArchiveEvents,mode)'));
+ assert.ok(view.includes('massVisibleTrainingRows_(state.massTrainings,state.massArchiveEvents,mode,localDateKey(new Date()),state.massTrainingDate)'));
  assert.ok(view.includes('massLegacyTrainingRow(e,{archived:!!e.__archived})'));
  assert.ok(src.includes("$('#massEventEditBtn')?.addEventListener('click'"));
  assert.ok(src.includes("openMassEventEditor_(eventId)"));
