@@ -61,7 +61,10 @@ test('match page uses separate full-season period, without mutating training fil
  assert.ok(code.includes("state.ccMatchPeriod||'all'"));
  assert.ok(code.includes("state.ccMatchPeriod=e.target.value"));
  assert.ok(!code.includes('state.eventPeriod=e.target.value'));
- assert.ok(code.includes('ccLeagueFixturePanelHtml_()'));
+ assert.ok(code.includes('ccLeagueMatchesContextHtml_()'));
+ assert.ok(!code.includes('ccLeagueFixturePanelHtml_()'));
+ assert.ok(code.includes('ccLeagueContextSelect'));
+ assert.ok(code.includes('ccMrszPhotoState_'));
  assert.ok(css.includes('.cc-league-fixture-row'));
 });
 test('BEAC-only is the default and all-league toggle restores opponent fixtures',()=>{
