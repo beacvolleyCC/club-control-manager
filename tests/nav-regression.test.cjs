@@ -32,8 +32,11 @@ console.log('PASS manager navigation: collection selectors, two section and two 
 /* Selector collections must use querySelectorAll ('$$'), never querySelector ('$').
  * A single selector in renderCompetitionMatchCards_ previously broke post-login startup.
  */
-assert.ok(source.includes("$$('[data-league-snapshot-scope]').forEach("),
+assert.ok(source.includes("$('[data-league-match-scope]').forEach("),
   'Meccsek league switch must bind a NodeList, not a single element');
-assert.ok(!source.includes("$('[data-league-snapshot-scope]').forEach(") || source.includes("$$('[data-league-snapshot-scope]').forEach("));
+assert.ok(!source.includes("$('[data-league-match-scope]').forEach("),
+  'Match scope never uses a single-element selector with forEach');
+assert.ok(!source.includes("$('[data-league-snapshot-scope]').forEach("),
+  'Legacy scope must not restore the old singleton crash');
 const singletonForEach=source.match(/(?<!\$)\$\(\s*'\[data-[a-z0-9-]+\]'\s*\)\.forEach\s*\(/g)||[];
 assert.deepEqual(singletonForEach,[],'Never call .forEach on the single-element selector');
