@@ -2460,9 +2460,9 @@
   }
   function playerMatchesTeamFilter_(p){
     const selected=teamFilterIds_('players');if(!selected.length)return true;
-    const candidates=new Set([text(p?.teamId||p?.team_id),text(p?.teamName||p?.team_name)]);
-    (Array.isArray(p?.memberships)?p.memberships:[]).forEach(m=>{candidates.add(text(m?.teamId||m?.team_id));candidates.add(text(m?.teamName||m?.team_name))});
-    return selected.some(id=>{const t=teamById(id);return candidates.has(text(id))||candidates.has(text(t?.legacyTeamId))||candidates.has(text(t?.name))})
+    const candidates=new Set([text(p?.teamId||p?.team_id),text(p?.teamName||p?.team_name)].filter(Boolean));
+    (Array.isArray(p?.memberships)?p.memberships:[]).forEach(m=>[text(m?.teamId||m?.team_id),text(m?.teamName||m?.team_name)].filter(Boolean).forEach(v=>candidates.add(v)));
+    return selected.some(id=>{const t=teamById(id);return [text(id),text(t?.legacyTeamId),text(t?.name)].filter(Boolean).some(v=>candidates.has(v))})
   }
   function playerRows(){
     const q=state.playerSearch.toLocaleLowerCase('hu-HU');
@@ -2550,8 +2550,15 @@
   function playerGroupedListHtml_(rows){
     if(state.playerListMode!=='grouped')return `<div class="legacy-player-list cc-unified-player-list">${rows.map(playerLegacyRow_).join('')||emptyInline('Nincs a szűrésnek megfelelő játékos.')}</div>`;
     const selected=teamFilterIds_('players'),teamOrder=(state.teams||[]).filter(t=>t.active!==false&&(!selected.length||selected.includes(text(t.id))));
-    const groups=teamOrder.map(t=>({team:t,rows:rows.filter(p=>text(p.teamId||p.team_id)===text(t.id))}));
-    const unassigned=rows.filter(p=>!text(p.teamId||p.team_id));
+    const groupRows=new Map(teamOrder.map(t=>[text(t.id),[]])),unassigned=[];
+    rows.forEach(p=>{
+      const primary=text(p.teamId||p.team_id);
+      const candidates=new Set([text(p.teamId||p.team_id),text(p.teamName||p.team_name)].filter(Boolean));
+      (Array.isArray(p.memberships)?p.memberships:[]).forEach(m=>[text(m.teamId||m.team_id),text(m.teamName||m.team_name)].filter(Boolean).forEach(v=>candidates.add(v)));
+      const target=teamOrder.find(t=>text(t.id)===primary)||teamOrder.find(t=>[text(t.id),text(t.legacyTeamId),text(t.name)].filter(Boolean).some(v=>candidates.has(v)));
+      if(target)groupRows.get(text(target.id)).push(p);else unassigned.push(p);
+    });
+    const groups=teamOrder.map(t=>({team:t,rows:groupRows.get(text(t.id))||[]}));
     if(unassigned.length)groups.push({team:{id:'',name:'Nincs aktív csapat',color:'#b9b4aa'},rows:unassigned});
     return `<div class="cc-player-team-groups">${groups.map(g=>`<section class="cc-player-team-group" style="--group-team-color:${esc(g.team.color||'#b9b4aa')}"><div class="cc-player-team-group-head"><span></span><div><h3>${esc(g.team.name)}</h3><small>Névsor · vezetéknév szerint</small></div><b>${g.rows.length} fő</b></div><div class="cc-unified-player-list">${g.rows.map(playerLegacyRow_).join('')||emptyInline('Nincs a szűrésnek megfelelő játékos ebben a csapatban.')}</div></section>`).join('')||emptyInline('Nincs a szűrésnek megfelelő játékos.')}</div>`;
   }
