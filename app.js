@@ -344,11 +344,16 @@
   async function loadMassEventDetail(eventId,{force=false}={}){
     const id=text(eventId);
     if(!force&&state.massDetailCache.has(id))return state.massDetailCache.get(id);
-    const [detail,snapshot]=await Promise.all([
+    const [detail,snapshot,cancelledResult]=await Promise.all([
       rpc('cc_manager_mass_event_detail_v1',{p_event_id:id}),
-      rpc('cc_manager_mass_attendance_snapshot_r1_v1',{p_event_id:id})
+      rpc('cc_manager_mass_attendance_snapshot_r1_v1',{p_event_id:id}),
+      // Cancellation history is optional: never block active roster or attendance.
+      rpc('cc_manager_mass_cancellations_v1',{p_event_id:id})
+        .then(rows=>({rows:Array.isArray(rows)?rows:[],unavailable:!Array.isArray(rows)}))
+        .catch(err=>{console.warn('Mass cancellation history unavailable',err);return{rows:[],unavailable:true}})
     ]);
     const data=(detail&&typeof detail==='object')?detail:{};
+    data.cancelled=cancelledResult.rows;data.cancelledUnavailable=cancelledResult.unavailable;
     const rows=Array.isArray(snapshot)?snapshot:[];
     const attendanceByBooking=new Map(rows.map(row=>[text(row.bookingId||row.id),row]));
     if(Array.isArray(data.bookings)){
@@ -1226,7 +1231,7 @@
   }
   async function toggleMassInlineRoster_(eventId,button){
     const holder=document.querySelector(`[data-mass-roster-holder="${CSS.escape(eventId)}"]`);if(!holder)return;const opening=holder.hidden;holder.hidden=!opening;button?.setAttribute('aria-expanded',String(opening));button?.classList.toggle('open',opening);if(!opening)return;if(holder.dataset.loaded==='1')return;holder.innerHTML='<div class="roster-loading">Névsor betöltése…</div>';
-    try{const data=await loadMassEventDetail(eventId,{force:true}),event=data?.event||{},bookings=(Array.isArray(data?.bookings)?data.bookings:[]).slice().sort(massPersonSort_),wait=(Array.isArray(data?.waitlist)?data.waitlist:[]).slice().sort(massPersonSort_);holder.dataset.loaded='1';holder.innerHTML=`<div class="mass-inline-roster-list">${bookings.map(r=>{const pass=massPassInfo_(r,event),type=text(r.personType||r.bookingType||r.type).toLocaleUpperCase('hu-HU'),first=/FIRST|ELSŐ|ELSO/.test(type);return `<div class="mass-inline-person"><span class="mass-inline-identity"><b>${esc(r.name||'Névtelen')}</b>${pass.needsCheck?'<i class="mass-inline-flag pass-check" title="Bérlet ellenőrzendő">!</i>':''}${first?'<i class="mass-inline-flag first-training" title="Első edzés">@</i>':''}</span></div>`}).join('')}${wait.map(r=>`<div class="mass-inline-person wait"><span class="mass-inline-identity"><b>${esc(r.name||'Névtelen')}</b></span><span class="mass-coming wait">Várólista</span></div>`).join('')||(!bookings.length?emptyInline('Nincs jelentkező.'):'')}</div>`}catch(err){holder.innerHTML=`<div class="roster-loading error">${esc(err.message||'A névsor nem tölthető be.')}</div>`}
+    try{const data=await loadMassEventDetail(eventId,{force:true}),event=data?.event||{},bookings=(Array.isArray(data?.bookings)?data.bookings:[]).slice().sort(massPersonSort_),wait=(Array.isArray(data?.waitlist)?data.waitlist:[]).slice().sort(massPersonSort_);holder.dataset.loaded='1';holder.innerHTML=`<div class="mass-inline-roster-list">${bookings.map(r=>{const pass=massPassInfo_(r,event),type=text(r.personType||r.bookingType||r.type).toLocaleUpperCase('hu-HU'),first=/FIRST|ELSŐ|ELSO/.test(type);return `<div class="mass-inline-person"><span class="mass-inline-identity"><b>${esc(r.name||'Névtelen')}</b>${pass.needsCheck?'<i class="mass-inline-flag pass-check" title="Bérlet ellenőrzendő">!</i>':''}${first?'<i class="mass-inline-flag first-training" title="Első edzés">@</i>':''}</span></div>`}).join('')}${wait.map(r=>`<div class="mass-inline-person wait"><span class="mass-inline-identity"><b>${esc(r.name||'Névtelen')}</b></span><span class="mass-coming wait">Várólista</span></div>`).join('')||(!bookings.length?emptyInline('Nincs jelentkező.'):'')}</div>${massCancellationPanelHtml_(data?.cancelled,{compact:true,unavailable:data?.cancelledUnavailable})}`}catch(err){holder.innerHTML=`<div class="roster-loading error">${esc(err.message||'A névsor nem tölthető be.')}</div>`}
   }
   function bindMassLegacyRows(){
     $$('[data-mass-detail]').forEach(b=>{b.addEventListener('click',()=>openMassEventDetail(b.dataset.massDetail));b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMassEventDetail(b.dataset.massDetail)}})});
@@ -1482,7 +1487,7 @@
     });
   }
   function massPersonSort_(a,b){return comparePlayersBySurname_(a,b)}
-  function massDetailUiFor_(eventId){const key=text(eventId);if(!state.massDetailUi.has(key))state.massDetailUi.set(key,{sort:'surname-asc',pass:'all',open:[],scrollTop:0,filtersOpen:false});return state.massDetailUi.get(key)}
+  function massDetailUiFor_(eventId){const key=text(eventId);if(!state.massDetailUi.has(key))state.massDetailUi.set(key,{sort:'surname-asc',pass:'all',open:[],scrollTop:0,filtersOpen:false,cancelledOpen:false});return state.massDetailUi.get(key)}
   function massEventMonth_(e){const d=safeDate(e?.startsAt||e?.eventDate);if(!d)return'';return new Intl.DateTimeFormat('sv-SE',{year:'numeric',month:'2-digit',timeZone:'Europe/Budapest'}).format(d)}
   function massPassRecordForBooking_(r){
     const pn=text(r?.passNumber).toLowerCase(),email=text(r?.email).toLowerCase();if(!pn&&!email)return null;
@@ -1499,7 +1504,7 @@
     return {passNumber,month,eventMonth,label,needsCheck,valid,exempt,matched}
   }
   function captureMassDetailUi_(eventId,root=$('#entityDialogBody')){
-    const ui=massDetailUiFor_(eventId),dialog=$('#entityDialog');if(root){ui.open=Array.from(root.querySelectorAll('.mass-attendance-card:not(.is-collapsed)')).map(x=>text(x.dataset.bookingId)).filter(Boolean);ui.sort=text(root.querySelector('#massRosterSort')?.value||ui.sort);ui.pass=text(root.querySelector('#massRosterPassFilter')?.value||ui.pass);ui.scrollTop=Math.max(root.scrollTop||0,dialog?.scrollTop||0)}return ui
+    const ui=massDetailUiFor_(eventId),dialog=$('#entityDialog');if(root){ui.open=Array.from(root.querySelectorAll('.mass-attendance-card:not(.is-collapsed)')).map(x=>text(x.dataset.bookingId)).filter(Boolean);ui.sort=text(root.querySelector('#massRosterSort')?.value||ui.sort);ui.pass=text(root.querySelector('#massRosterPassFilter')?.value||ui.pass);ui.scrollTop=Math.max(root.scrollTop||0,dialog?.scrollTop||0);const cancelled=root.querySelector('#massCancelledPanel');if(cancelled)ui.cancelledOpen=cancelled.open}return ui
   }
   function restoreMassDetailUi_(eventId,root=$('#entityDialogBody')){
     const ui=massDetailUiFor_(eventId);if(!root)return;const open=new Set(ui.open||[]);root.querySelectorAll('.mass-attendance-card').forEach(card=>{if(!open.has(text(card.dataset.bookingId)))return;const btn=card.querySelector('[data-mass-person-toggle]'),details=card.querySelector('[data-mass-person-details]');if(btn&&details){details.hidden=false;card.classList.remove('is-collapsed');btn.setAttribute('aria-expanded','true');btn.classList.add('open')}});const all=root.querySelector('#massToggleAllPeople');if(all){const toggles=Array.from(root.querySelectorAll('[data-mass-person-toggle]'));all.textContent=toggles.length&&toggles.every(x=>x.getAttribute('aria-expanded')==='true')?'Mind becsuk':'Mind kinyit'}requestAnimationFrame(()=>{const dialog=$('#entityDialog');if(root.scrollTop!==undefined)root.scrollTop=ui.scrollTop||0;if(dialog&&dialog.scrollTop!==undefined)dialog.scrollTop=ui.scrollTop||0})
@@ -1516,6 +1521,25 @@
         ${r.note?`<div class="mass-attendance-note"><b>Megjegyzés:</b> ${esc(r.note)}</div>`:''}
       </div>
     </article>`;
+  }
+  function massCancellationStatus_(r){
+    const type=text(r?.cancellationType).toLocaleUpperCase('hu-HU'),status=text(r?.bookingStatus).toLocaleUpperCase('hu-HU');
+    if(type==='ADMIN TÖRLÉS')return 'Adminisztrátori törlés';
+    if(type==='KÉSŐI'||status==='KÉSŐN LEMONDVA')return 'Késői lemondás';
+    return 'Időben lemondva';
+  }
+  function massCancellationPanelHtml_(records,{compact=false,unavailable=false,open=false}={}){
+    const rows=(Array.isArray(records)?records:[]).slice().sort((a,b)=>(safeDate(b.cancelledAt)?.getTime()||0)-(safeDate(a.cancelledAt)?.getTime()||0));
+    const cards=rows.map(r=>{
+      const stamp=safeDate(r.cancelledAt),when=stamp?fmtDate(stamp)+' '+fmtTime(stamp):'Időpont nincs rögzítve',label=massCancellationStatus_(r);
+      return '<div class="mass-cancellation-person'+(label==='Adminisztrátori törlés'?' admin':label==='Késői lemondás'?' late':'')+'">'
+        +'<span class="mass-cancellation-identity"><b>'+esc(r.name||'Névtelen')+'</b>'+(compact?'':'<small>'+esc(r.email||'–')+'</small>')+'</span>'
+        +'<span class="mass-cancellation-meta"><b>'+esc(label)+'</b><small>'+esc(when)+'</small></span></div>';
+    }).join('');
+    return '<details class="mass-cancellations-panel'+(compact?' compact':'')+'" id="'+(compact?'massInlineCancelledPanel':'massCancelledPanel')+'" '+(open?'open':'')+'>'
+      +'<summary><span>Lemondások és törlések</span><b>'+(unavailable?'–':rows.length)+'</b><span class="triangle-icon" aria-hidden="true"></span></summary>'
+      +'<div class="mass-cancellation-list">'+(unavailable?'<p class="mass-cancellation-empty">A lemondási adatok jelenleg nem érhetők el.</p>'
+        :cards||'<p class="mass-cancellation-empty">Nincs lemondás vagy adminisztrátori törlés.</p>')+'</div></details>';
   }
   function massWaitlistCard_(r){
     const sub=safeDate(r.submittedAt),statusValue=text(r.status||r.waitlistStatus)||'VÁRAKOZIK',matched=massPassRecordForBooking_(r),month=text(r.passMonth||r.validMonth||r.currentPassMonth||matched?.validMonth);
@@ -1545,7 +1569,7 @@
     try{
       const data=await loadMassEventDetail(eventId,{force}),e=data?.event||{},editable=canAction('mass.trainings','edit');
       let bookings=(Array.isArray(data?.bookings)?data.bookings:[]).slice();
-      const wait=(Array.isArray(data?.waitlist)?data.waitlist:[]).slice().sort(massPersonSort_);
+      const wait=(Array.isArray(data?.waitlist)?data.waitlist:[]).slice().sort(massPersonSort_),cancelled=Array.isArray(data?.cancelled)?data.cancelled:[];
       const allBookings=bookings.slice(),present=allBookings.filter(r=>massAttendanceModel_(r.attendance).key==='present').length,noshow=allBookings.filter(r=>massAttendanceModel_(r.attendance).key==='noshow').length,pending=Math.max(0,allBookings.length-present-noshow),gate=text(e.registrationMode)==='WAITLIST_ONLY';
       if(ui.pass==='needs-check')bookings=bookings.filter(r=>massPassInfo_(r,e).needsCheck);else if(ui.pass==='valid')bookings=bookings.filter(r=>massPassInfo_(r,e).valid&&!massPassInfo_(r,e).needsCheck);else if(ui.pass==='missing')bookings=bookings.filter(r=>!massPassInfo_(r,e).passNumber&&!massPassInfo_(r,e).exempt);
       bookings.sort((a,b)=>ui.sort==='surname-desc'?-comparePlayersBySurname_(a,b):comparePlayersBySurname_(a,b));
@@ -1558,7 +1582,8 @@
         <div class="mass-detail-roster-filters" id="massDetailRosterFilters" ${ui.filtersOpen?'':'hidden'}><label><span>Sorrend</span><select id="massRosterSort"><option value="surname-asc" ${ui.sort==='surname-asc'?'selected':''}>Vezetéknév A–Z</option><option value="surname-desc" ${ui.sort==='surname-desc'?'selected':''}>Vezetéknév Z–A</option></select></label><label><span>Bérlet</span><select id="massRosterPassFilter"><option value="all" ${ui.pass==='all'?'selected':''}>Mindenki</option><option value="needs-check" ${ui.pass==='needs-check'?'selected':''}>Ellenőrzendő (${needsCheckCount})</option><option value="valid" ${ui.pass==='valid'?'selected':''}>Érvényes</option><option value="missing" ${ui.pass==='missing'?'selected':''}>Bérlet nélkül</option></select></label><span class="mass-roster-filter-count">${bookings.length} / ${allBookings.length} fő</span></div>
         <div class="panel-subhead mass-attendance-heading"><div><h4>Jelenlét</h4><p>Név és jelenléti csúszka; a részletek játékosonként lenyithatók.</p></div></div>
         <div class="mass-attendance-card-list">${bookings.map(r=>{const base=massBookingCard_(r,e.level,e);if(!editable)return base;return base.replace('</article>',`<div class="mass-booking-admin-actions"><select data-mass-pass-status="${esc(r.bookingId||r.id)}"><option value="">Bérlet állapota…</option><option value="ÉRVÉNYES">Érvényes</option><option value="ÉRVÉNYTELEN">Érvénytelen</option><option value="ELLENŐRIZENDŐ">Ellenőrzendő</option></select><div class="mass-booking-admin-right"><button class="button quiet tiny" data-mass-note="${esc(r.bookingId||r.id)}" data-current-note="${esc(r.note||'')}">Megjegyzés</button><button class="button danger tiny" data-mass-remove="${esc(r.bookingId||r.id)}">Kivétel</button></div></div></article>`) }).join('')||emptyInline('Nincs a szűrésnek megfelelő jelentkező.')}</div>
-        <div class="panel-subhead"><div><h4>Várólista</h4><p>Várakozó és felajánlott helyek, azonos kompakt formában.</p></div></div><div class="mass-wait-card-list">${wait.map(massWaitlistCard_).join('')||emptyInline('A várólista üres.')}</div>`;
+        <div class="panel-subhead"><div><h4>Várólista</h4><p>Várakozó és felajánlott helyek, azonos kompakt formában.</p></div></div><div class="mass-wait-card-list">${wait.map(massWaitlistCard_).join('')||emptyInline('A várólista üres.')}</div>
+        ${massCancellationPanelHtml_(cancelled,{unavailable:data?.cancelledUnavailable,open:ui.cancelledOpen})}`;
       bindMassAttendanceSliders_(eventId);bindMassPersonDisclosure_(body,eventId);restoreMassDetailUi_(eventId,body);
       const rosterFilterToggle=$('#massRosterFiltersToggle'),rosterFilterPanel=$('#massDetailRosterFilters');rosterFilterToggle?.addEventListener('click',()=>{ui.filtersOpen=!ui.filtersOpen;rosterFilterToggle.classList.toggle('open',ui.filtersOpen);rosterFilterToggle.setAttribute('aria-expanded',String(ui.filtersOpen));if(rosterFilterPanel)rosterFilterPanel.hidden=!ui.filtersOpen;ccBlurPointerControl_(rosterFilterToggle)});$('#massRosterSort')?.addEventListener('change',ev=>{ui.sort=ev.target.value;captureMassDetailUi_(eventId,body);openMassEventDetail(eventId,{force:false})});
       $('#massRosterPassFilter')?.addEventListener('change',ev=>{ui.pass=ev.target.value;ui.scrollTop=0;captureMassDetailUi_(eventId,body);openMassEventDetail(eventId,{force:false})});
