@@ -36,7 +36,7 @@ test('Source ID is identity even when team name differs',()=>{
  assert.equal(row.participantCount,3);
  const team=row.participants.find(x=>x.sourceTeamId==='101');
  assert.deepEqual(team.aliases,['Alfa rövid','Klub Alfa']);
- assert.equal(row.unresolvedNamesCount,2);
+ assert.equal(row.unresolvedNamesCount,3);
 });
 test('Standings status is honest and does not fabricate ranks',()=>{
  const rows=catalog.build(fake),byLabel=x=>rows.find(r=>r.competitionLabel===x);
