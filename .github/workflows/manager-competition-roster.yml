@@ -9,6 +9,7 @@ on:
       - tests/player-team-filter.test.cjs
       - competition-context-catalog.js
       - tests/competition-context-catalog.test.cjs
+      - tests/league-context-ui.test.cjs
       - tests/competition-match-integrity.test.cjs
       - tests/brsz-mobile-html-import.test.cjs
       - tests/competition-change-audit.test.cjs
@@ -30,6 +31,7 @@ on:
       - tests/player-team-filter.test.cjs
       - competition-context-catalog.js
       - tests/competition-context-catalog.test.cjs
+      - tests/league-context-ui.test.cjs
       - tests/competition-match-integrity.test.cjs
       - tests/brsz-mobile-html-import.test.cjs
       - tests/competition-change-audit.test.cjs
@@ -62,6 +64,7 @@ jobs:
           node tests/nav-regression.test.cjs
           node tests/player-team-filter.test.cjs
           node --test tests/competition-context-catalog.test.cjs
+          node --test tests/league-context-ui.test.cjs
           node --test tests/competition-training-roster.test.cjs
           node --test tests/competition-match-integrity.test.cjs
           node --test tests/brsz-mobile-html-import.test.cjs
