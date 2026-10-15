@@ -80,9 +80,9 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261015-login-hotfix-v18'));
- assert.ok(html.includes('app.js?v=20261015-login-hotfix-v18'));
- assert.ok(sw.includes("cc-manager-20261015-login-hotfix-v18"));
+ assert.ok(html.includes('styles.css?v=20261015-league-context-v19'));
+ assert.ok(html.includes('app.js?v=20261015-league-context-v19'));
+ assert.ok(sw.includes("cc-manager-20261015-league-context-v19"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
@@ -106,7 +106,7 @@ test('changing Manager context resets BEAC-only scope except for men A',()=>{
  assert.ok(begin>0&&end>begin);
  const handlers={};
  const localState={managerStandingsContext:'',managerStandingsTeam:'',managerStandingsMatchScope:'all',managerLeagueInsights:{}};
- const ctx={state:localState,text:x=>String(x??''),localStorage:{setItem(){}},$:(selector)=>selector==='#msContextSelect'?{addEventListener:(type,fn)=>handlers.context=fn}:{addEventListener(){}},$$:()=>[],renderManagerStandings_:()=>{},msSetTeam_:()=>{}};
+ const ctx={state:localState,text:x=>String(x??''),localStorage:{setItem(){}},$:(selector)=>selector==='#msContextSelect'?{addEventListener:(type,fn)=>handlers.context=fn}:{addEventListener(){}},$$:()=>[],renderManagerStandings_:()=>{},ccClearLeagueContext_:()=>{},ccSetLeagueContext_:()=>{},msSetTeam_:()=>{}};
  vm.createContext(ctx);
  vm.runInContext("let ccMrszMenGroup_='A';let ccLeagueMatchScope_='all';"+js.slice(begin,end)+"\nthis.qa={bind:msBind_,getScope:()=>ccLeagueMatchScope_};",ctx);
  ctx.qa.bind();
