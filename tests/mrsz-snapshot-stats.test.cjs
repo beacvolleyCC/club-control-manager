@@ -2,13 +2,13 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const app=fs.readFileSync(path.join(__dirname,'..','app.js'),'utf8');
-const start=app.indexOf('  function ccVerifiedSnapshotStatsHtml_('),
+const start=app.indexOf('  function ccSavedLeagueResults_('),
   end=app.indexOf('  function renderManagerStandings_()',start);
 assert.ok(start>=0&&end>start,'snapshot renderer present');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ratio=(explicit,a,b)=>{const x=Number(explicit);if(Number.isFinite(x)&&x!==0)return x.toFixed(3);const aa=Number(a),bb=Number(b);if(a==null||b==null||!Number.isFinite(aa)||!Number.isFinite(bb)||aa===0&&bb===0)return'–';if(bb===0)return aa>0?'∞':'–';return(aa/bb).toFixed(3)};
-const render=new Function('text','esc','msRatio_',app.slice(start,end)+';return ccVerifiedSnapshotStatsHtml_;')(
- x=>String(x??'').trim(),esc,ratio);
+const render=new Function('text','esc','msRatio_','ccMrszNormPairName_',app.slice(start,end)+';return ccVerifiedSnapshotStatsHtml_;')(
+ x=>String(x??'').trim(),esc,ratio,x=>String(x??'').trim().toLowerCase());
 const beac={sourceTeamId:'299',focus:true,teamName:'BEAC',played:3,wins:2,losses:1,setsFor:7,setsAgainst:4};
 const other={sourceTeamId:'900',focus:false,teamName:'Ellenfél',played:3,wins:1,losses:2,setsFor:4,setsAgainst:7};
 test('Official saved snapshot shows only recorded match/sets totals for BEAC',()=>{
@@ -52,7 +52,7 @@ test('Snapshot stats are wired to the existing league selector, not a second tab
  const from=app.indexOf('  function renderManagerStandings_()'),to=app.indexOf('  function msPositionDelta_(',from);
  const snippet=app.slice(from,to>from?to:from+8000);
  assert.ok(snippet.includes('ccLeagueContextSelectHtml_(group)'));
- assert.ok(snippet.includes('showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo)'));
+ assert.ok(snippet.includes('showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo,group,ccMrszPhotoState_.matches)'));
  assert.ok(snippet.includes("ccMrszLeagueFixturePanelHtml_(group"));
  assert.ok(!snippet.includes('Legnagyobb feljövő'));
 });
