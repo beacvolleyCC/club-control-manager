@@ -62,7 +62,7 @@ test('Conflicting recordings of same fixture are not treated as verified',()=>{
 test('Duplicate identical score snapshot is counted once, sorted latest first',()=>{
  const team={teamName:'Kandó Sport Klub'};
  const inputs=[fixtures[2],{...fixtures[2]}];
- const out=model.select(team,women,inputs,[team]);
+ const out=model.select(team,women,inputs,[team,{teamName:'Ráckeve'}]);
  assert.equal(out.length,1);
 });
 test('Ambiguous normalized team identity is not attributed to either team',()=>{
