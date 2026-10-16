@@ -18,7 +18,7 @@ const source=cut('  function ccSavedLeagueResults_(','  function ccSavedLeagueRe
  +cut('  function ccMrszCoverageLabel_(','  function ccMrszSavedResultsCrosscheckHtml_(')
  +cut('  function ccMrszSetScoreIssue_(','  function ccMatchScoreboardHtml_(')
  +cut('  function ccMrszNormPairName_(','  function ccMrszPhotoResultsByLeagueHtml_(');
-vm.runInContext(source+'\nthis.auditModel=ccMrszAuditModel_;this.auditHtml=ccMrszAuditHtml_;this.auditFilter=ccMrszAuditFilterModel_;this.auditResults=ccMrszAuditResultsHtml_;this.auditCount=ccMrszAuditCountText_;this.selectAudit=(type,query,league='all')=>{ccMrszAuditType_=type;ccMrszAuditQuery_=query;ccMrszAuditLeague_=league;};',context);
+vm.runInContext(source+'\nthis.auditModel=ccMrszAuditModel_;this.auditHtml=ccMrszAuditHtml_;this.auditFilter=ccMrszAuditFilterModel_;this.auditResults=ccMrszAuditResultsHtml_;this.auditCount=ccMrszAuditCountText_;this.selectAudit=(type,query,league="all")=>{ccMrszAuditType_=type;ccMrszAuditQuery_=query;ccMrszAuditLeague_=league;};',context);
 const leagueA='Női Budapest II. osztály – B csoport',leagueB='Férfi Budapest I. osztály – B csoport';
 const tableA={competitionLabel:leagueA,partial:false,rows:[
  {teamName:'MTK kék',played:1,wins:1,losses:0,setsFor:3,setsAgainst:1},
