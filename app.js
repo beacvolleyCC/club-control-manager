@@ -2485,6 +2485,16 @@
       return 'A játszmánkénti pontszámok nem egyeznek a mentett végeredménnyel';
     return '';
   }
+  // Completeness is about the recorded set-point list, not verification of
+  // the source or proof that the match result is official/current.
+  function ccMrszSetCoverageLabel_(m){
+    const hs=Number(m?.homeSets),as=Number(m?.awaySets);
+    if(m?.homeSets==null||m?.awaySets==null||!Number.isInteger(hs)||!Number.isInteger(as)||hs<0||as<0||hs+as===0)return '';
+    if(ccMrszSetScoreIssue_(m))return 'Szettadat ellenőrzendő';
+    const count=Array.isArray(m?.setScores)?m.setScores.length:0;
+    if(!count)return 'Nincs rögzített szettpontszám';
+    return count+'/'+(hs+as)+' szett'+(count===hs+as?'':' · részleges');
+  }
   function ccMatchScoreboardHtml_(m,options={}){
     const home=text(m.homeName||'Hazai csapat'),away=text(m.awayName||'Vendégcsapat'),
       id=text(options.eventId),linked=!!id,league=text(options.league||m.competitionLabel),
@@ -2493,6 +2503,7 @@
         &&(Number(m.homeSets)+Number(m.awaySets)>0),
       score=hasScore?Number(m.homeSets)+'–'+Number(m.awaySets):'VS.',
       setIssue=hasScore?ccMrszSetScoreIssue_(m):'',
+      setCoverage=hasScore?ccMrszSetCoverageLabel_(m):'',
       sets=hasScore&&!setIssue&&Array.isArray(m.setScores)?m.setScores.filter(x=>x?.home!=null&&x?.away!=null&&text(x.home)!==''&&text(x.away)!=='')
         .map(x=>Number(x.home)+':'+Number(x.away)).join(' · '):'',
       rankHome=ccMatchScoreboardRank_(league,home),rankAway=ccMatchScoreboardRank_(league,away),
@@ -2512,7 +2523,8 @@
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
       +(rankHome?'<small>'+rankHome+'. helyen áll</small>':'')+'</span></span>'
       +'<span class="cc-scoreboard-score">'+(hasScore?'<strong>'+esc(score)+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
-      +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':setIssue&&linked?'<span class="cc-scoreboard-set-results" title="'+esc(setIssue)+'">Szettadat ellenőrzendő</span>':'')+'</span>'
+      +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')
+      +(setCoverage?'<small class="cc-scoreboard-set-coverage"'+(setIssue?' title="'+esc(setIssue)+'"':'')+'>'+esc(setCoverage)+'</small>':'')+'</span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
       +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span></span>'
@@ -2632,8 +2644,10 @@
       +(review.length?'<details class="cc-mrsz-review-fixtures"><summary>'+review.length+(unverifiedOnly?' ellenőrzendő BRSZ-rekord':' ellenőrzendő rekord')+' · külön a meccslistától</summary><ul>'
         +review.map(({match:m,reason})=>{const kick=ccMrszLocalKickoff_(m.startsAt);
           const score=m.homeSets==null||m.awaySets==null?'':text(m.homeSets)+'–'+text(m.awaySets);
+          const coverage=ccMrszSetCoverageLabel_(m);
           return '<li><b>'+esc(kick.date+' '+kick.time)+'</b> · '+esc(m.homeName)+' – '+esc(m.awayName)
-            +(score?' · '+esc(score):'')+'<small> · '+esc(reason)+'</small></li>'}).join('')
+            +(score?' · '+esc(score):'')+'<small> · '+esc(reason)+'</small>'
+            +(coverage?'<small> · '+esc(coverage)+'</small>':'')+'</li>'}).join('')
         +'</ul><p>Ellenőrzendő forrásrekordok; nem kerülnek a megerősített mérkőzések és statisztikák közé. Az eredeti adatok változatlanul megmaradnak.</p></details>':'')+'</section>';
   }
 
