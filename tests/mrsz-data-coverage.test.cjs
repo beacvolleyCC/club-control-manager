@@ -8,6 +8,7 @@ const section=(start,end)=>{
  assert.ok(a>=0&&b>a,'Missing production function: '+start);
  return app.slice(a,b);
 };
+const stats=new Function(section('  function ccMrszStatNumber_(','  // One source/coverage vocabulary')+';return {number:ccMrszStatNumber_,position:ccMrszStatPosition_,pair:ccMrszStatPair_,ratio:ccMrszStatRatio_};')();
 const coverage=new Function(section('  function ccMrszCoverageLabel_(','  function ccVerifiedSnapshotStatsHtml_(')+';return ccMrszCoverageLabel_;')();
 test('complete and partial saved MRSZ table have separate non-live coverage labels',()=>{
  const complete=coverage({partial:false});
@@ -45,8 +46,8 @@ test('Manager overview, main standings and matches route use one snapshot covera
 });
 test('Match-page archived table renders actual shared source label for complete and partial data',()=>{
  const code=section('  function ccMrszMainPhotoTableHtml_(','  // League fixture cards');
- const render=new Function('text','esc','num','msLogoHtml_','ccMrszCoverageLabel_',code+';return ccMrszMainPhotoTableHtml_;')(
-  x=>String(x??''),x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;'),x=>Number(x)||0,()=>'',coverage
+ const render=new Function('text','esc','num','msLogoHtml_','ccMrszCoverageLabel_','ccMrszStatNumber_','ccMrszStatPosition_','ccMrszStatPair_','ccMrszStatRatio_',code+';return ccMrszMainPhotoTableHtml_;')(
+  x=>String(x??''),x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;'),x=>Number(x)||0,()=>'',coverage,stats.number,stats.position,stats.pair,stats.ratio
  );
  for(const partial of [true,false]){
   const html=render({competitionLabel:'Női I. osztály',partial,rows:[{teamName:'MTK',position:1,played:1,wins:1,losses:0,tablePoints:3}]});
