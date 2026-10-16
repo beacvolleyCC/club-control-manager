@@ -242,6 +242,7 @@ test('unknown table completeness never produces unsupported source-to-standings 
  delete unidentified.partial;
  const model=run([unidentified],[game]);
  assert.equal(model.issues,0);
- assert.ok(context.auditHtml().includes('teljesség nincs jelölve'));
+ assert.ok(model.groups[0].coverage.includes('teljesség nincs jelölve'));
+ assert.ok(context.auditHtml().includes('nincs kimutatott ellentmondás'));
  assert.equal(run([{...tableA,partial:false}],[game]).issues,1);
 });
