@@ -6425,6 +6425,9 @@ body{overflow-x:clip!important}
   .cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;font-weight:650;white-space:normal;margin-top:2px;}
 }
 
+/* Saved MRSZ result count and set/record cross-check, using neutral status text. */
+.ms-recorded-audit{font-size:11px;line-height:1.5;margin:9px 0 0;color:var(--muted);overflow-wrap:anywhere}
+.ms-recorded-audit.is-review{font-weight:650;color:var(--text)}
 /* Neutral, non-blocking indication that archived league counters disagree. */
 .ms-stat-warning{display:block;margin-top:3px;font-size:10px;font-weight:600;line-height:1.35;color:var(--muted);white-space:normal}
 .ms-verified-snapshot-stats>.ms-stat-warning{padding:0 14px 8px}
