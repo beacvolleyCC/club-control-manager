@@ -46,7 +46,7 @@ test('Result attribution skips scored youth match for a parent club',()=>{
  const team={teamName:'Kandó Sport Klub'};
  assert.deepEqual(results(team,'Liga A',[base],[team,{teamName:'Kandó Sport Klub II.'}]),[]);
  const youth={teamName:'Kandó Sport Klub II.'};
- const actual=results(youth,'Liga A',[base],[team,youth]);
+ const actual=results(youth,'Liga A',[base],[team,youth,{teamName:'Ráckeve'}]);
  assert.equal(actual.length,1);
  assert.equal(actual[0].score,'3–1');
 });
