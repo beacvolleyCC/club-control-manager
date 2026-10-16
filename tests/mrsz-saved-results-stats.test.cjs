@@ -83,3 +83,14 @@ test('Full table stats and recorded results share the selected league and its sa
  assert.ok(standings.includes('showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo,group,ccMrszPhotoState_.matches)'));
  assert.ok(!standings.includes('ccSavedLeagueResults_(row,group,ccMrszMergedLeagueMatches_'));
 });
+
+
+test('Saved result statistics reject contradictory complete set-point records only',()=>{
+ const team={teamName:'MTK Budapest'};
+ const opponent={teamName:'Közgáz női'};
+ const good={...fixtures[0],setScores:[{home:25,away:22}]};
+ assert.equal(model.select(team,women,[good],[team,opponent]).length,1,'partial set points are allowed');
+ const impossible={...fixtures[0],setScores:[
+  {home:25,away:19},{home:25,away:17},{home:25,away:12},{home:12,away:25},{home:12,away:25}]};
+ assert.equal(model.select(team,women,[impossible],[team,opponent]).length,0);
+});
