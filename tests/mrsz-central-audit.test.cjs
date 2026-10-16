@@ -11,14 +11,14 @@ const cut=(a,b)=>{
 };
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store={tables:[],matches:[],fixtures:[],loaded:true,error:null};
-const context={text:x=>String(x??'').trim(),esc,num:x=>Number(x)||0,ccMrszPhotoState_:store,ccMrszAuditType_:'all',ccMrszAuditQuery_:'',msLogoHtml_:()=>''};
+const context={text:x=>String(x??'').trim(),esc,num:x=>Number(x)||0,ccMrszPhotoState_:store,msLogoHtml_:()=>''};
 vm.createContext(context);
 const source=cut('  function ccSavedLeagueResults_(','  function ccSavedLeagueResultsHtml_(')
  +cut('  function ccMrszStatNumber_(','  // One source/coverage vocabulary')
  +cut('  function ccMrszCoverageLabel_(','  function ccMrszSavedResultsCrosscheckHtml_(')
  +cut('  function ccMrszSetScoreIssue_(','  function ccMatchScoreboardHtml_(')
  +cut('  function ccMrszNormPairName_(','  function ccMrszPhotoResultsByLeagueHtml_(');
-vm.runInContext(source+'\nthis.auditModel=ccMrszAuditModel_;this.auditHtml=ccMrszAuditHtml_;this.auditFilter=ccMrszAuditFilterModel_;this.auditResults=ccMrszAuditResultsHtml_;this.auditCount=ccMrszAuditCountText_;',context);
+vm.runInContext(source+'\nthis.auditModel=ccMrszAuditModel_;this.auditHtml=ccMrszAuditHtml_;this.auditFilter=ccMrszAuditFilterModel_;this.auditResults=ccMrszAuditResultsHtml_;this.auditCount=ccMrszAuditCountText_;this.selectAudit=(type,query)=>{ccMrszAuditType_=type;ccMrszAuditQuery_=query;};',context);
 const leagueA='Női Budapest II. osztály – B csoport',leagueB='Férfi Budapest I. osztály – B csoport';
 const tableA={competitionLabel:leagueA,partial:false,rows:[
  {teamName:'MTK kék',played:1,wins:1,losses:0,setsFor:3,setsAgainst:1},
@@ -158,25 +158,23 @@ test('Search is case- and accent-insensitive and matches clubs, opponents, leagu
 });
 test('Filtered counts, empty states and escaped search input stay accurate',()=>{
  run([tableA],[game]);
- context.ccMrszAuditType_='Egyeztetés';
- context.ccMrszAuditQuery_='';
+ context.selectAudit('Egyeztetés','');
  let html=context.auditHtml();
  assert.ok(html.includes('1 / 1 ellenőrzendő bejegyzés'));
  assert.ok(html.includes('id="ccMrszAuditType"'));
  assert.ok(html.includes('id="ccMrszAuditSearch"'));
  assert.match(html, /<option value="Egyeztetés"\s+selected\s*>Számszaki eltérések<\/option>/);
- context.ccMrszAuditType_='Mérkőzés';
+ context.selectAudit('Mérkőzés','');
  html=context.auditHtml();
  assert.ok(html.includes('0 / 1 ellenőrzendő bejegyzés'));
  assert.ok(html.includes('Nincs találat a megadott szűrésre vagy keresésre'));
  assert.ok(!html.includes('Bajnokság megnyitása'));
- context.ccMrszAuditType_='all';
- context.ccMrszAuditQuery_='<img src=x>';
+ context.selectAudit('all','<img src=x>');
  html=context.auditHtml();
  assert.ok(html.includes('&lt;img src=x&gt;'));
  assert.ok(!html.includes('<img src=x>'));
  assert.ok(html.includes('0 / 1 ellenőrzendő bejegyzés'));
- context.ccMrszAuditQuery_='';
+ context.selectAudit('all','');
  const full=context.auditHtml();
  assert.ok(full.includes('Bajnokság megnyitása'));
 });
