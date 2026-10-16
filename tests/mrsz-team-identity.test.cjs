@@ -11,7 +11,8 @@ const section=(from,to)=>{
   return js.slice(a,b);
 };
 const norm=new Function('text',section('  function ccMrszNormPairName_(','  function ccMrszLocalKickoff_(')+';return ccMrszNormPairName_;')(text);
-const results=new Function('text','ccMrszNormPairName_',section('  function ccSavedLeagueResults_(','  function ccSavedLeagueResultsHtml_(')+';return ccSavedLeagueResults_;')(text,norm);
+const setIssue=new Function('text',section('  function ccMrszSetScoreIssue_(','  function ccMatchScoreboardHtml_(')+';return ccMrszSetScoreIssue_;')(text);
+const results=new Function('text','ccMrszNormPairName_','ccMrszSetScoreIssue_',section('  function ccSavedLeagueResults_(','  function ccSavedLeagueResultsHtml_(')+';return ccSavedLeagueResults_;')(text,norm,setIssue);
 const rank=new Function('text','ccMrszNormPairName_','ccMrszPhotoState_',section('  function ccMatchScoreboardRank_(','  function ccMatchScoreboardHtml_(')+';return ccMatchScoreboardRank_;')(text,norm,{
  tables:[{competitionLabel:'Liga A',partial:false,rows:[{teamName:'Kandó Sport Klub',position:2},{teamName:'Kandó SK',position:3}]},
  {competitionLabel:'Liga B',partial:false,rows:[{teamName:'Kandó Sport Klub',position:4}]}]
