@@ -46,14 +46,14 @@ test('Result attribution skips scored youth match for a parent club',()=>{
  const team={teamName:'Kandó Sport Klub'};
  assert.deepEqual(results(team,'Liga A',[base],[team,{teamName:'Kandó Sport Klub II.'}]),[]);
  const youth={teamName:'Kandó Sport Klub II.'};
- const actual=results(youth,'Liga A',[base],[team,youth]);
+ const actual=results(youth,'Liga A',[base],[team,youth,{teamName:'Ráckeve'}]);
  assert.equal(actual.length,1);
  assert.equal(actual[0].score,'3–1');
 });
 test('League results only match exact known saved MTK blue variant',()=>{
  const blue={teamName:'MTK Budapest kék'},plain={teamName:'MTK Budapest'};
  const base={competitionLabel:'Liga B',startsAt:'2026-10-13T19:30:00+02:00',homeName:'MTK kék',awayName:'Ráckeve',homeSets:3,awaySets:0};
- assert.equal(results(blue,'Liga B',[base],[blue,plain]).length,1);
+ assert.equal(results(blue,'Liga B',[base],[blue,plain,{teamName:'Ráckeve'}]).length,1);
  assert.equal(results(plain,'Liga B',[base],[blue,plain]).length,0);
 });
 test('Ambiguous rank aliases never select the first row by accident',()=>{

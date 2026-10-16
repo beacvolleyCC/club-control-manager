@@ -73,7 +73,7 @@ test('match-page markup retains real BEAC roster while dropping parallel league 
 });
 test('one shared scope and result provenance are visible in league scoreboard builder',()=>{
  assert.ok(source.includes("ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac'"));
- assert.ok(source.includes("meta:m.isPhoto?'2026.10.14-i mentett eredmény'"));
+ assert.ok(source.includes("meta:m.isPhoto?(table&&table.partial!==true?'2026.10.14-i mentett eredmény'"));
  assert.ok(source.includes("m.isFixture?'2026.10.01-i mentett kiírás'"));
- assert.ok(source.includes("const review=merged.filter(ccMrszUnverifiedSelfFixture_)"));
+ assert.ok(source.includes('const reason=ccMrszMatchReviewReason_(m,tableRows,!!table&&table.partial!==true,conflicts)'));
 });
