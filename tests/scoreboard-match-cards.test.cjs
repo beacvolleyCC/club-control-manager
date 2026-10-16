@@ -115,3 +115,12 @@ test('set score content stays escaped in the central result area',()=>{
  assert.ok(!html.includes('<img>'));
  assert.ok(!html.includes('Szettek:'));
 });
+
+
+test('Contradictory linked set-point records are not presented as an agreed set breakdown',()=>{
+ const html=ctx.scoreboard({...fixture,homeSets:3,awaySets:1,
+   setScores:[{home:25,away:18},{home:25,away:19},{home:25,away:20},{home:15,away:25}]},{eventId:'id123'});
+ assert.ok(html.includes('<strong>3–1</strong>'));
+ assert.ok(html.includes('Szettadat ellenőrzendő'));
+ assert.ok(!html.includes('25:18 · 25:19'));
+});
