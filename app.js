@@ -844,9 +844,9 @@
   }
   function ccVerifiedSnapshotStatsHtml_(rows,selected,snapshot,league='',matches=[]){
     if(!snapshot||!Array.isArray(rows)||!rows.length)return '';
-    const focus=rows.filter(r=>r.focus),row=selected||(focus.length===1?focus[0]:null);
+    const focus=rows.filter(r=>r.focus),selectedId=text(selected?.sourceTeamId),selectedRows=selectedId?rows.filter(r=>text(r.sourceTeamId)===selectedId):[],row=selected?(selectedRows.length===1?selectedRows[0]:null):(focus.length===1?focus[0]:null);
     if(!row)return '';
-    const valid=x=>x!==null&&x!==undefined&&text(x)!==''&&Number.isFinite(Number(x))&&Number(x)>=0;
+    const valid=x=>x!==null&&x!==undefined&&text(x)!==''&&Number.isInteger(Number(x))&&Number(x)>=0;
     const number=x=>valid(x)?String(Number(x)):'–';
     const played=number(row.played);
     const record=valid(row.wins)&&valid(row.losses)?number(row.wins)+'–'+number(row.losses):'–';

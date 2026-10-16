@@ -73,3 +73,20 @@ test('Standings introduction and empty state never imply live automatic data upd
  assert.ok(!snippet.includes('Aktuális bajnoki állás'));
  assert.ok(!snippet.includes('itt automatikusan megjelenik'));
 });
+
+test('Foreign selected team is never rendered in a different league',()=>{
+ const foreign={...other,sourceTeamId:'foreign-999',teamName:'Másik bajnokság'};
+ assert.equal(render([beac],foreign,{partial:false}),'');
+ assert.ok(!render([beac],foreign,{partial:false}).includes('Másik bajnokság'));
+});
+test('Duplicate source identifiers never select an ambiguous team',()=>{
+ const duplicate={...other,sourceTeamId:beac.sourceTeamId};
+ assert.equal(render([beac,duplicate],beac,{partial:false}),'');
+});
+test('Invalid fractional or negative snapshot counters are unavailable',()=>{
+ const html=render([{...beac,played:2.5,wins:-1,losses:1,setsFor:1.5,setsAgainst:2}],null,{partial:false});
+ assert.ok(html.includes('<span>Mérkőzések</span><b>–</b>'));
+ assert.ok(html.includes('<span>Mérleg</span><b>–</b>'));
+ assert.ok(html.includes('<span>Szettmérleg</span><b>–</b>'));
+ assert.ok(html.includes('<span>Szettarány</span><b>–</b>'));
+});
