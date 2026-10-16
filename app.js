@@ -2452,7 +2452,7 @@
   // One display for linked Manager events and read-only federation fixtures.
   // Uses actual saved outcomes only; zero-zero and missing scores are never treated as results.
   function ccMatchScoreboardRank_(league,name){
-    const table=(ccMrszPhotoState_.tables||[]).find(t=>text(t.competitionLabel)===text(league)&&t.partial!==true);
+    const table=(ccMrszPhotoState_.tables||[]).find(t=>text(t.competitionLabel)===text(league)&&t.partial===false);
     const key=ccMrszNormPairName_(name);
     const candidates=key?(table?.rows||[]).filter(r=>ccMrszNormPairName_(r.teamName)===key):[];
     const row=candidates.length===1?candidates[0]:null;
@@ -2617,7 +2617,7 @@
     }
     const matches=[],review=[];
     for(const m of merged){
-      const reason=ccMrszMatchReviewReason_(m,tableRows,!!table&&table.partial!==true,conflicts);
+      const reason=ccMrszMatchReviewReason_(m,tableRows,table?.partial===false,conflicts);
       if(!reason){matches.push(m);continue}
       // The merge prefers the latest photo for display. Preserve every conflicting
       // raw saved result in the review list instead of silently losing a version.
@@ -2638,10 +2638,10 @@
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
     const items=visible.map(m=>ccMatchScoreboardHtml_(m,{league:group,
       badge:m.isPhoto?'MRSZ · eredmény':'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
-      meta:m.isPhoto?(table&&table.partial!==true?'2026.10.14-i mentett eredmény':'2026.10.14-i mentett eredmény · teljes tabella nélkül'):m.isFixture?'2026.10.01-i mentett kiírás':'Mentett mérkőzésadat',
+      meta:m.isPhoto?(table?.partial===false?'2026.10.14-i mentett eredmény':'2026.10.14-i mentett eredmény · teljes tabella nélkül'):m.isFixture?'2026.10.01-i mentett kiírás':'Mentett mérkőzésadat',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today
     })).join('');
-    const noTableNote=(!table||table.partial===true)&&photo.length?'<p class="ms-coverage">Nincs teljes mentett tabella ehhez a bajnoksághoz. Az eredmények forrásrekordként láthatók; a csapatok teljes körű tabellás megfeleltetése nem ellenőrizhető.</p>':'';
+    const noTableNote=table?.partial!==false&&photo.length?'<p class="ms-coverage">Nincs teljes mentett tabella ehhez a bajnoksághoz. Az eredmények forrásrekordként láthatók; a csapatok teljes körű tabellás megfeleltetése nem ellenőrizhető.</p>':'';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
     return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
       +visible.length+' / '+matches.length+' meccs · '+esc(group)+'</span></div>'+controls+'</div>'+noTableNote+'<div class="ms-match-list">'

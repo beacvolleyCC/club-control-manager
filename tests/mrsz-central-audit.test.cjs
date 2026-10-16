@@ -236,3 +236,13 @@ test('Untrusted league names are escaped in the picker and item navigation',()=>
  assert.ok(!html.includes('<svg'));
  assert.ok(html.includes('data-cc-audit-league="&lt;svg'));
 });
+
+test('unknown table completeness never produces unsupported source-to-standings reconciliation',()=>{
+ const unidentified={...tableA};
+ delete unidentified.partial;
+ const model=run([unidentified],[game]);
+ assert.equal(model.issues,0);
+ assert.ok(model.groups[0].coverage.includes('teljesség nincs jelölve'));
+ assert.ok(context.auditHtml().includes('nincs kimutatott ellentmondás'));
+ assert.equal(run([{...tableA,partial:false}],[game]).issues,1);
+});
