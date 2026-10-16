@@ -6578,6 +6578,7 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 .cc-scoreboard-teamcopy>small{font-size:10px;color:#77675a;font-weight:600}
 .cc-scoreboard-score{display:grid;text-align:center;gap:2px;min-width:0}
 .cc-scoreboard-score>strong{font-size:clamp(30px,3.4vw,46px);font-weight:950;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.05;letter-spacing:-.035em}
+.cc-scoreboard-score>.cc-scoreboard-versus{font-size:clamp(25px,3vw,38px);font-weight:400;line-height:1.05;white-space:nowrap;letter-spacing:0}
 .cc-scoreboard-score>small{font-size:9px;letter-spacing:.075em;text-transform:uppercase;font-weight:800;color:#6c5d51}
 .cc-scoreboard-bottom{border-top:1px solid rgba(126,95,58,.12);padding-top:9px;margin-top:11px;font-size:10px;color:#685a4b}
 .cc-scoreboard-location{font-weight:700;overflow-wrap:anywhere}
