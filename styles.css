@@ -6127,21 +6127,23 @@ body{overflow-x:clip!important}
 }
 
 
-/* R1 UI1.9J — native time pickers on all Manager event editors */
-.cc-native-time-field input[type="time"]{
+/* Manager time fields are locale-independent 24-hour inputs (Europe/Budapest).
+   Avoid the platform's native input[type=time] AM/PM rendering. */
+.cc-native-time-field .cc-time24-input{
   width:100%!important;
   min-width:0!important;
   min-height:40px!important;
   height:40px!important;
   box-sizing:border-box!important;
-  -webkit-appearance:auto!important;
-  appearance:auto!important;
+  appearance:none!important;
   font:inherit!important;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.03em;
   color:var(--black)!important;
   background:var(--card)!important;
 }
 @media(max-width:700px){
-  .entity-dialog .cc-native-time-field input[type="time"]{
+  .entity-dialog .cc-native-time-field .cc-time24-input{
     min-height:48px!important;
     height:48px!important;
     font-size:16px!important;
