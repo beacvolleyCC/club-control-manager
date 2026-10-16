@@ -6627,6 +6627,27 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 @media(max-width:560px){.cc-league-fixture-scope{display:grid;grid-template-columns:1fr 1fr}
   .cc-league-fixture-scope button{min-height:44px;min-width:0;padding:7px}}
 
+/* Central read-only MRSZ/BRSZ audit, kept separate from editable match records. */
+.cc-mrsz-audit-tabs{display:flex;gap:6px;margin:11px 0 13px;flex-wrap:wrap}
+.cc-mrsz-audit-tabs button{border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--text);padding:10px 14px;cursor:pointer;font-size:12px;font-weight:700;min-height:40px}
+.cc-mrsz-audit-tabs button.active{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.cc-mrsz-audit-tabs button:focus-visible,.cc-mrsz-central-audit button:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:2px}
+.cc-mrsz-central-audit{min-width:0}
+.cc-mrsz-audit-note,.cc-mrsz-audit-source{font-size:12px;line-height:1.5;color:var(--muted);margin:4px 0 13px}
+.cc-mrsz-audit-groups{display:grid;gap:10px}
+.cc-mrsz-audit-group{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--card)}
+.cc-mrsz-audit-group>summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;font-size:13px}
+.cc-mrsz-audit-group>summary>span{font-size:11px;color:var(--muted);white-space:nowrap}
+.cc-mrsz-audit-group>.cc-mrsz-audit-source,.cc-mrsz-audit-group>button{margin-left:14px;margin-right:14px}
+.cc-mrsz-audit-group>ul{margin:13px 0 0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.cc-mrsz-audit-group li{padding:10px 14px;border-bottom:1px solid var(--line)}
+.cc-mrsz-audit-group li:last-child{border-bottom:0}
+.cc-mrsz-audit-item-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px}
+.cc-mrsz-audit-item-head>strong{overflow-wrap:anywhere}
+.cc-mrsz-audit-item-head>span{font-variant-numeric:tabular-nums;color:var(--muted)}
+.cc-mrsz-audit-group li>p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:700px){.cc-mrsz-audit-tabs button{flex:1;min-width:0}.cc-mrsz-audit-item-head{display:grid;gap:3px}.cc-mrsz-audit-group>summary{align-items:flex-start}}
+
 /* One competition selector and one standings table for the Manager match page. */
 .cc-match-league-context{display:grid;gap:12px;margin:12px 0 18px;min-width:0}
 .cc-match-league-controls{padding:14px 16px}

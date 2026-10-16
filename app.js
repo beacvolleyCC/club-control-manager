@@ -2579,6 +2579,7 @@
   }
 
   let ccLeagueMatchScope_='beac';
+  let ccMatchesAuditOpen_=false;
   function ccIsBeacLeagueTeam_(name){
     const key=ccMrszNormPairName_(name);
     return key==='beac'||key==='beacii'||key.startsWith('budapestiegyetemiatletikaiclub');
@@ -2651,6 +2652,95 @@
         +'</ul><p>Ellenőrzendő forrásrekordok; nem kerülnek a megerősített mérkőzések és statisztikák közé. Az eredeti adatok változatlanul megmaradnak.</p></details>':'')+'</section>';
   }
 
+  // Read-only cross-league audit. Use the same underlying result and standings
+  // validators as individual league views; never treat missing coverage as an error.
+  function ccMrszAuditModel_(store=ccMrszPhotoState_){
+    const photos=Array.isArray(store?.matches)?store.matches:[],fixtures=Array.isArray(store?.fixtures)?store.fixtures:[],
+      tables=Array.isArray(store?.tables)?store.tables:[],labels=new Set();
+    for(const record of [...photos,...fixtures,...tables])if(text(record?.competitionLabel))labels.add(text(record.competitionLabel));
+    const groups=[];
+    for(const league of [...labels].sort((a,b)=>a.localeCompare(b,'hu'))){
+      const table=tables.find(t=>text(t.competitionLabel)===league),
+        rows=Array.isArray(table?.rows)?table.rows:[],
+        saved=photos.filter(m=>text(m.competitionLabel)===league),
+        scheduled=fixtures.filter(m=>text(m.competitionLabel)===league),
+        items=[],outcomes=new Map(),conflicts=new Set(),seen=new Set();
+      const key=m=>ccMrszLocalKickoff_(m?.startsAt).date+'|'+ccMrszNormPairName_(m?.homeName)+'|'+ccMrszNormPairName_(m?.awayName);
+      for(const match of saved){
+        const k=key(match),score=text(match.homeSets)+'–'+text(match.awaySets);
+        if(outcomes.has(k)&&outcomes.get(k)!==score)conflicts.add(k);
+        else outcomes.set(k,score);
+      }
+      for(const raw of saved){
+        const match={...raw,isPhoto:true};
+        const reason=ccMrszMatchReviewReason_(match,rows,table?.partial===false,conflicts);
+        if(!reason)continue;
+        const identity=key(match)+'|'+text(match.homeSets)+'|'+text(match.awaySets)+'|'+JSON.stringify(match.setScores||[])+'|'+reason;
+        if(seen.has(identity))continue;seen.add(identity);
+        const stamp=ccMrszLocalKickoff_(match.startsAt);
+        items.push({type:'Mérkőzés',name:text(match.homeName)+' – '+text(match.awayName),
+          date:stamp.date+' '+stamp.time,reason,score:match.homeSets==null||match.awaySets==null?'':text(match.homeSets)+'–'+text(match.awaySets)});
+      }
+      for(const match of scheduled){
+        if(!ccMrszUnverifiedSelfFixture_(match))continue;
+        const identity='fixture|'+key(match);if(seen.has(identity))continue;seen.add(identity);
+        const stamp=ccMrszLocalKickoff_(match.startsAt);
+        items.push({type:'Menetrend',name:text(match.homeName)+' – '+text(match.awayName),
+          date:stamp.date+' '+stamp.time,reason:'Nem megerősített BEAC–BEAC menetrendi rekord',score:''});
+      }
+      for(const row of rows){
+        const issue=ccMrszRecordIssue_(row);
+        if(issue)items.push({type:'Tabella',name:text(row.teamName),date:'',score:'',reason:issue});
+        if(table?.partial!==false||!saved.length)continue;
+        const recorded=ccSavedLeagueResults_(row,league,saved,rows),played=ccMrszStatNumber_(row?.played);
+        // Comparisons are conditional. Unequal/unknown saved match counts do not
+        // establish an inconsistency with the archived complete table.
+        if(played==='–'||!recorded.length||recorded.length!==Number(played))continue;
+        let forSets=0,againstSets=0,wins=0,losses=0,valid=true;
+        for(const result of recorded){
+          const pair=/^(\d+)–(\d+)$/.exec(text(result?.score));
+          if(!pair){valid=false;break}
+          const a=Number(pair[1]),b=Number(pair[2]);
+          if(!((a===3&&b>=0&&b<=2)||(b===3&&a>=0&&a<=2))){valid=false;break}
+          forSets+=a;againstSets+=b;if(a>b)wins++;else losses++;
+        }
+        if(!valid)continue;
+        const sourceSets=ccMrszStatPair_(row.setsFor,row.setsAgainst),
+          sourceRecord=ccMrszRecordPair_(row),
+          actualSets=forSets+'–'+againstSets,actualRecord=wins+'–'+losses,issues=[];
+        if(sourceSets!=='–'&&sourceSets!==actualSets)
+          issues.push('Szettmérleg: tabella '+sourceSets+', mentett eredmények '+actualSets);
+        if(sourceRecord!=='–'&&sourceRecord!==actualRecord)
+          issues.push('Mérleg: tabella '+sourceRecord+', mentett eredmények '+actualRecord);
+        if(issues.length)items.push({type:'Egyeztetés',name:text(row.teamName),date:'',score:'',
+          reason:issues.join('; ')+'. '+recorded.length+'/'+played+' mentett meccs; az egyező darabszám önmagában nem igazolja a teljességet.'});
+      }
+      items.sort((a,b)=>a.type.localeCompare(b.type,'hu')||a.name.localeCompare(b.name,'hu')||a.date.localeCompare(b.date));
+      groups.push({league,coverage:table?ccMrszCoverageLabel_(table):'Nincs mentett MRSZ-tabella · nem élő adat',
+        items,savedCount:saved.length,fixtureCount:scheduled.length});
+    }
+    return {groups,issues:groups.reduce((sum,g)=>sum+g.items.length,0)};
+  }
+  function ccMrszAuditHtml_(){
+    if(!ccMrszPhotoState_.loaded)
+      return '<section class="panel cc-mrsz-central-audit"><h3>Adatellenőrzés</h3><p>Mentett bajnoki adatok betöltése…</p></section>';
+    if(ccMrszPhotoState_.error)
+      return '<section class="panel cc-mrsz-central-audit"><h3>Adatellenőrzés</h3><p class="ms-empty error">'+esc(ccMrszPhotoState_.error)+'</p></section>';
+    const model=ccMrszAuditModel_(),affected=model.groups.filter(g=>g.items.length);
+    return '<section class="panel cc-mrsz-central-audit" aria-label="Bajnoki adatellenőrzés">'
+      +'<div class="panel-head"><div><h3>Adatellenőrzés</h3><p>'+model.issues+' ellenőrzendő bejegyzés · '+affected.length+' bajnokság'
+      +' · Mentett MRSZ/BRSZ-adatok, nem élő ellenőrzés</p></div></div>'
+      +'<p class="cc-mrsz-audit-note">A lista számszaki és forrásellentmondásokat jelez. Hiányzó vagy részleges eredménylista nem bizonyít hibát. A megjelenítés nem módosítja a forrásadatokat.</p>'
+      +(affected.length?'<div class="cc-mrsz-audit-groups">'+affected.map((group,i)=>
+        '<details class="cc-mrsz-audit-group" '+(i===0?'open':'')+'><summary><b>'+esc(group.league)+'</b><span>'+group.items.length+' bejegyzés</span></summary>'
+        +'<p class="cc-mrsz-audit-source">'+esc(group.coverage)+'</p><button class="button quiet small" type="button" data-cc-audit-league="'+esc(group.league)+'">Bajnokság megnyitása</button>'
+        +'<ul>'+group.items.map(item=>
+          '<li><div class="cc-mrsz-audit-item-head"><strong>'+esc(item.type)+' · '+esc(item.name)+'</strong><span>'+esc([item.date,item.score].filter(Boolean).join(' · '))+'</span></div>'
+          +'<p>'+esc(item.reason)+'</p></li>').join('')+'</ul></details>').join('')+'</div>'
+        :'<div class="ms-empty">A jelenleg mentett adatok között nincs kimutatott ellentmondás. Ez nem igazolja az adatok teljességét.</div>')
+      +'</section>';
+  }
+
   function ccMrszPhotoResultsByLeagueHtml_(group){
     const list=(ccMrszPhotoState_.matches||[]).filter(x=>!group||text(x.competitionLabel)===group);
     if(!list.length)return '';
@@ -2706,7 +2796,16 @@
   function renderCompetitionMatchCards_(){if(!ccRouteIs_('competition','matches'))return;
     state.eventFiltersOpen=filterOpen_('competition.matches',false);
     const matchPeriod=state.ccMatchPeriod||'all',rows=effectiveCompetitionEvents(state.activityEvents).filter(e=>eventType(e)==='match'&&teamFilterMatch_('events',eventTeamId(e))&&(matchPeriod==='all'||(matchPeriod==='upcoming'&&!isEventPast(e))||(matchPeriod==='past'&&isEventPast(e)))).sort((a,b)=>(eventStart(a)?.getTime()||0)-(eventStart(b)?.getTime()||0)),active=teamFilterIds_('events').length>0||matchPeriod!=='all',periodTitle=matchPeriod==='past'?'Elmúlt meccsek':matchPeriod==='upcoming'?'Következő meccsek':'BEAC – teljes idény';
-    $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-match-page-header"><div><h2>Meccsek</h2><p>Mérkőzések és mentett bajnoki adatok.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.matches','edit')?`<button class="cc-toolbar-icon cc-refresh-icon" id="competitionSourceSync" type="button" aria-label="BRSZ frissítés" title="BRSZ frissítés" ${state.competitionSyncBusy?'disabled':''}>↻</button><button class="cc-toolbar-icon cc-add-square" id="competitionMatchAdd" type="button" aria-label="Új meccs" title="Új meccs">+</button>`:''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${matchPeriod==='upcoming'?'selected':''}>Közelgő</option><option value="past" ${matchPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${matchPeriod==='all'?'selected':''}>Teljes idény</option></select></label></div><div class="competition-live-status hidden" id="competitionLiveStatus" role="status" aria-live="polite"></div>${ccLeagueMatchesContextHtml_()}<article class="panel cc-event-card-panel cc-match-card-panel"><div class="panel-head"><div><h3>${periodTitle} · saját meccsek</h3><p>${rows.length} mérkőzés · névsor és jelentkezés</p></div></div><div class="cc-event-card-list">${rows.map(e=>ccCompetitionEventWithRosterHtml_(e,'match')).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}<button id="ccCompetitionChangeAudit" class="button quiet small cc-audit-trigger" type="button">Változások megtekintése</button></div>`;
+    $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-match-page-header"><div><h2>Meccsek</h2><p>Mérkőzések és mentett bajnoki adatok.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.matches','edit')?`<button class="cc-toolbar-icon cc-refresh-icon" id="competitionSourceSync" type="button" aria-label="BRSZ frissítés" title="BRSZ frissítés" ${state.competitionSyncBusy?'disabled':''}>↻</button><button class="cc-toolbar-icon cc-add-square" id="competitionMatchAdd" type="button" aria-label="Új meccs" title="Új meccs">+</button>`:''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${matchPeriod==='upcoming'?'selected':''}>Közelgő</option><option value="past" ${matchPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${matchPeriod==='all'?'selected':''}>Teljes idény</option></select></label></div><div class="competition-live-status hidden" id="competitionLiveStatus" role="status" aria-live="polite"></div><nav class="cc-mrsz-audit-tabs" aria-label="Mérkőzések és adatellenőrzés"><button type="button" data-cc-audit-view="matches" aria-pressed="${!ccMatchesAuditOpen_}" class="${ccMatchesAuditOpen_?'':'active'}">Mérkőzések</button><button type="button" data-cc-audit-view="audit" aria-pressed="${ccMatchesAuditOpen_}" class="${ccMatchesAuditOpen_?'active':''}">Adatellenőrzés</button></nav>${ccMatchesAuditOpen_?ccMrszAuditHtml_():''}<div ${ccMatchesAuditOpen_?'hidden':''}>${ccLeagueMatchesContextHtml_()}<article class="panel cc-event-card-panel cc-match-card-panel"><div class="panel-head"><div><h3>${periodTitle} · saját meccsek</h3><p>${rows.length} mérkőzés · névsor és jelentkezés</p></div></div><div class="cc-event-card-list">${rows.map(e=>ccCompetitionEventWithRosterHtml_(e,'match')).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}<button id="ccCompetitionChangeAudit" class="button quiet small cc-audit-trigger" type="button">Változások megtekintése</button></div></div>`;
+    document.querySelectorAll('[data-cc-audit-view]').forEach(button=>button.addEventListener('click',()=>{
+      ccMatchesAuditOpen_=button.dataset.ccAuditView==='audit';
+      renderCompetitionMatchCards_();
+    }));
+    document.querySelectorAll('[data-cc-audit-league]').forEach(button=>button.addEventListener('click',()=>{
+      const league=text(button.dataset.ccAuditLeague);
+      ccMatchesAuditOpen_=false;
+      ccSetLeagueContext_(league);
+    }));
     $('#ccCompetitionChangeAudit')?.addEventListener('click',ccOpenCompetitionChangeAudit_);$('#competitionSourceSync')?.addEventListener('click',ccOpenBrszSyncOptions_);$('#competitionMatchAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'match'));
     const toggle=$('#eventFiltersToggle'),panel=$('#eventFiltersPanel');if(toggle)toggle.classList.toggle('open',state.eventFiltersOpen);toggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.matches',!state.eventFiltersOpen);state.eventFiltersOpen=open;toggle.setAttribute('aria-expanded',String(open));toggle.classList.toggle('open',open);if(panel)panel.hidden=!open;ccBlurPointerControl_(toggle)});
     bindTeamMultiFilter_('events',renderCompetitionMatchCards_);
