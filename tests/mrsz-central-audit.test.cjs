@@ -58,7 +58,7 @@ test('Distinct conflicting saved scores are kept individually as review items wi
  const results=items.filter(x=>x.type==='Mérkőzés');
  assert.equal(results.length,2);
  assert.ok(results.every(x=>x.reason==='Eltérő mentett végeredmények'));
- assert.deepEqual(results.map(x=>x.score).sort(),['3–0','3–1']);
+ assert.deepEqual(Array.from(results,x=>x.score).sort(),['3–0','3–1']);
 });
 test('BRSZ self-fixtures and MRSZ source issues are grouped by competition across all leagues',()=>{
  const special={competitionLabel:leagueB,startsAt:'2026-10-25T19:30:00+01:00',homeName:'BEAC',awayName:'BEAC',
