@@ -87,9 +87,9 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261017-audit-league-v44'));
- assert.ok(html.includes('app.js?v=20261017-audit-league-v44'));
- assert.ok(sw.includes("cc-manager-20261017-audit-league-v44"));
+ assert.ok(html.includes('styles.css?v=20261017-snapshot-consistency-v45'));
+ assert.ok(html.includes('app.js?v=20261017-snapshot-consistency-v45'));
+ assert.ok(sw.includes("cc-manager-20261017-snapshot-consistency-v45"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
@@ -155,4 +155,34 @@ test('unconfirmed BEAC vs BEAC record in women I is also omitted',()=>{
   assert.ok(html.includes('0 / 1 meccs'),'all ordinary fixtures are non-BEAC');
   assert.ok(!html.includes('<article class="cc-match-scoreboard'));
  }finally{fixtures.pop();}
+});
+
+test('unknown-completeness standings do not falsely reject an otherwise valid archived match',()=>{
+ const league='Női Budapest II. osztály – B csoport',old=ctx.ccMrszPhotoState_.tables;
+ ctx.ccMrszPhotoState_.tables=[{competitionLabel:league,rows:[{teamName:'MTK kék',position:1}]}];
+ ctx.qa.setScope('all');
+ try{
+  const html=ctx.qa.html(league);
+  assert.ok(html.includes('cc-match-scoreboard is-played'), 'do not remove a valid saved score without a verified complete table');
+  assert.ok(html.includes('3–0'), 'saved outcome remains visible');
+  assert.ok(!html.includes('A csapat nem szerepel a mentett tabellában'), 'unknown table completeness cannot justify identity rejection');
+  assert.ok(html.includes('teljes tabella nélkül'), 'source-coverage caution is explicit');
+  assert.ok(!html.includes('1. helyen áll'), 'rank is not verified');
+ }finally{ctx.ccMrszPhotoState_.tables=old;ctx.qa.setScope('beac');}
+});
+test('match-card ranks require explicit full standings, not merely missing partial flag',()=>{
+ const league='Női Budapest II. osztály – B csoport';
+ const old=ctx.ccMrszPhotoState_.tables;
+ const base={competitionLabel:league,rows:[{teamName:'MTK kék',position:1},{teamName:'RKSK felnőtt női',position:2}]};
+ const rank=vm.runInContext('ccMatchScoreboardRank_',ctx);
+ try{
+  for(const partial of [undefined,true]){
+   ctx.ccMrszPhotoState_.tables=[{...base,partial}];
+   assert.equal(rank(league,'MTK kék'),null);
+  }
+  ctx.ccMrszPhotoState_.tables=[{...base,partial:false}];
+  assert.equal(rank(league,'MTK kék'),1);
+  assert.equal(rank(league,'RKSK felnőtt női'),2);
+  assert.equal(rank('Férfi Budapest I. osztály – A csoport','MTK kék'),null,'league isolation');
+ }finally{ctx.ccMrszPhotoState_.tables=old;}
 });
