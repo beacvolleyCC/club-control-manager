@@ -57,7 +57,10 @@ test('full-league selection restores the original match-card layout with results
  assert.ok(html.includes('cc-match-scoreboard'));
  assert.ok(html.includes('standing-logo-text'));
  assert.ok(html.includes('3–1'));
- assert.ok(html.includes('Szettek: 25:16'));
+ assert.ok(html.includes('cc-scoreboard-set-results'));
+ assert.ok(html.includes('25:16'));
+ assert.ok(!html.includes('Szettek:'));
+ assert.ok(!html.includes('Végeredmény'));
  assert.ok(!html.includes('BEAC</b>'),'unrelated league not in match list');
  ctx.qa.setScope('beac');
 });
@@ -74,15 +77,19 @@ test('main standings render does not create a second table',()=>{
 test('mobile layout keeps set scores readable beneath the match row',()=>{
  const css=fs.readFileSync('styles.css','utf8');
  assert.ok(css.includes('@media(max-width:700px){'));
- assert.ok(css.includes('.cc-scoreboard-sets{order:3;flex:1 1 100%'));
+ assert.ok(css.includes('.cc-scoreboard-set-results{'));
+ assert.ok(css.includes('  .cc-scoreboard-set-results{font-size:9px}'));
+ assert.ok(css.includes('  .cc-scoreboard-set-results{font-size:8px;line-height:1.35}'));
+ assert.ok(!css.includes('.cc-scoreboard-sets{'));
+
 });
 
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261016-results-audit-v37'));
- assert.ok(html.includes('app.js?v=20261016-results-audit-v37'));
- assert.ok(sw.includes("cc-manager-20261016-results-audit-v37"));
+ assert.ok(html.includes('styles.css?v=20261016-scoreboard-layout-v38'));
+ assert.ok(html.includes('app.js?v=20261016-scoreboard-layout-v38'));
+ assert.ok(sw.includes("cc-manager-20261016-scoreboard-layout-v38"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{

@@ -2465,25 +2465,25 @@
       rankHome=ccMatchScoreboardRank_(league,home),rankAway=ccMatchScoreboardRank_(league,away),
       validDate=/^\d{4}-\d{2}-\d{2}$/.test(kickoff.date),validTime=/^\d{2}:\d{2}$/.test(kickoff.time),
       venue=text(m.venue||m.court||league||''),badge=text(options.badge||'Bajnoki mérkőzés'),
-      status=hasScore?'Végeredmény':options.past?'Eredmény még nincs':'Következő meccs',
+      dateInsteadOfBadge=options.dateInsteadOfBadge===true,
       meta=text(options.meta||''),url=text(options.sourceUrl||m.sourceUrl||m.matchUrl||m.reportUrl),
       source=!linked&&/^https:\/\//i.test(url)?'<a class="cc-scoreboard-source" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Forrás ↗</a>':'',
       tag=linked?'button':'article';
     return '<'+tag+(linked?' type="button" data-event-id="'+esc(id)+'"':'')
       +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+'"'
-      +' aria-label="'+esc(home+' – '+away+' · '+(hasScore?score:status))+'">'
-      +'<span class="cc-scoreboard-top"><span class="cc-scoreboard-label">'+esc(badge)+'</span>'
-      +'<span class="cc-scoreboard-kickoff">'+esc(validDate?kickoff.date:'Időpont nélkül')+(validTime?' · '+esc(kickoff.time):'')+'</span></span>'
+      +' aria-label="'+esc(home+' – '+away+' · '+score)+'">'
+      +'<span class="cc-scoreboard-top"><span class="cc-scoreboard-label">'+esc(dateInsteadOfBadge?(validDate?kickoff.date:'Időpont nélkül'):badge)+'</span>'
+      +'<span class="cc-scoreboard-kickoff">'+(dateInsteadOfBadge?(validTime?esc(kickoff.time):''):(esc(validDate?kickoff.date:'Időpont nélkül')+(validTime?' · '+esc(kickoff.time):'')))+'</span></span>'
       +'<span class="cc-scoreboard-main"><span class="cc-scoreboard-team home">'
       +'<span class="cc-scoreboard-crest">'+msLogoHtml_('',home,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
       +(rankHome?'<small>'+rankHome+'. helyen áll</small>':'')+'</span></span>'
-      +'<span class="cc-scoreboard-score">'+(hasScore?'<strong>'+esc(score)+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')+'<small>'+esc(status)+'</small></span>'
+      +'<span class="cc-scoreboard-score">'+(hasScore?'<strong>'+esc(score)+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
+      +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')+'</span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
       +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span></span>'
       +'<span class="cc-scoreboard-bottom"><span class="cc-scoreboard-location">'+esc(venue||'Helyszín nincs megadva')+'</span>'
-      +(sets?'<span class="cc-scoreboard-sets">Szettek: '+esc(sets)+'</span>':'')
       +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source
       +'</span></'+tag+'>';
   }
@@ -2585,7 +2585,7 @@
       +'<button type="button" data-league-match-scope="all" aria-pressed="'+(scope==='all')+'" class="'+(scope==='all'?'active':'')+'">Összes bajnoki meccs</button></div>';
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
     const items=visible.map(m=>ccMatchScoreboardHtml_(m,{league:group,
-      badge:m.isPhoto?'MRSZ · eredmény':m.isFixture?'Mentett menetrend':'Bajnoki mérkőzés',
+      badge:m.isPhoto?'MRSZ · eredmény':'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
       meta:m.isPhoto?(table&&table.partial!==true?'2026.10.14-i mentett eredmény':'2026.10.14-i mentett eredmény · teljes tabella nélkül'):m.isFixture?'2026.10.01-i mentett kiírás':'Mentett mérkőzésadat',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today
     })).join('');
