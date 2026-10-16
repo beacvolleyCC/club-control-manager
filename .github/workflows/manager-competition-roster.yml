@@ -17,6 +17,7 @@ on:
       - tests/mass-event-safe-edit.test.cjs
       - supabase/migrations/20261015173000_cc_manager_mass_cancellations_read_v1.sql
       - tests/competition-match-integrity.test.cjs
+      - tests/manager-budapest-time24.test.cjs
       - tests/brsz-mobile-html-import.test.cjs
       - tests/competition-change-audit.test.cjs
       - tests/manager-standings-filters.test.cjs
@@ -52,6 +53,7 @@ on:
       - tests/mass-event-safe-edit.test.cjs
       - supabase/migrations/20261015173000_cc_manager_mass_cancellations_read_v1.sql
       - tests/competition-match-integrity.test.cjs
+      - tests/manager-budapest-time24.test.cjs
       - tests/brsz-mobile-html-import.test.cjs
       - tests/competition-change-audit.test.cjs
       - tests/manager-standings-filters.test.cjs
@@ -98,6 +100,7 @@ jobs:
           node --test tests/mass-event-safe-edit.test.cjs
           node --test tests/competition-training-roster.test.cjs
           node --test tests/competition-match-integrity.test.cjs
+          node --test tests/manager-budapest-time24.test.cjs
           node --test tests/brsz-mobile-html-import.test.cjs
           node --test tests/competition-change-audit.test.cjs
           node --test tests/manager-standings-filters.test.cjs
