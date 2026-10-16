@@ -2427,7 +2427,7 @@
       kickoff=ccMrszLocalKickoff_(m.startsAt),
       hasScore=m.homeSets!=null&&m.awaySets!=null&&Number.isFinite(Number(m.homeSets))&&Number.isFinite(Number(m.awaySets))
         &&(Number(m.homeSets)+Number(m.awaySets)>0),
-      score=hasScore?Number(m.homeSets)+'–'+Number(m.awaySets):'– : –',
+      score=hasScore?Number(m.homeSets)+'–'+Number(m.awaySets):'VS.',
       sets=hasScore&&Array.isArray(m.setScores)?m.setScores.filter(x=>Number.isFinite(Number(x?.home))&&Number.isFinite(Number(x?.away)))
         .map(x=>Number(x.home)+':'+Number(x.away)).join(' · '):'',
       rankHome=ccMatchScoreboardRank_(league,home),rankAway=ccMatchScoreboardRank_(league,away),
@@ -2446,7 +2446,7 @@
       +'<span class="cc-scoreboard-crest">'+msLogoHtml_('',home,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
       +(rankHome?'<small>'+rankHome+'. helyen áll</small>':'')+'</span></span>'
-      +'<span class="cc-scoreboard-score"><strong>'+esc(score)+'</strong><small>'+esc(status)+'</small></span>'
+      +'<span class="cc-scoreboard-score">'+(hasScore?'<strong>'+esc(score)+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')+'<small>'+esc(status)+'</small></span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
       +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span></span>'
