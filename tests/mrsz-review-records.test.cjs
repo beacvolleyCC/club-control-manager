@@ -75,7 +75,8 @@ test('Review scope is restricted to the selected league and leaves source record
 const modelStart=app.indexOf('  function ccSavedLeagueResults_('),modelEnd=app.indexOf('  function ccSavedLeagueResultsHtml_(',modelStart);
 const normStart=app.indexOf('  function ccMrszNormPairName_('),normEnd=app.indexOf('  function ccMrszLocalKickoff_(',normStart);
 const norm=new Function('text',app.slice(normStart,normEnd)+';return ccMrszNormPairName_;')(text);
-const derive=new Function('text','ccMrszNormPairName_',app.slice(modelStart,modelEnd)+';return ccSavedLeagueResults_;')(text,norm);
+const setIssue=new Function('text',app.slice(app.indexOf('  function ccMrszSetScoreIssue_('),app.indexOf('  function ccMatchScoreboardHtml_('))+';return ccMrszSetScoreIssue_;')(text);
+const derive=new Function('text','ccMrszNormPairName_','ccMrszSetScoreIssue_',app.slice(modelStart,modelEnd)+';return ccSavedLeagueResults_;')(text,norm,setIssue);
 test('Stored result never enters selected-team statistics when opponent is missing or ambiguous in league table',()=>{
  const team={teamName:'MTK kék'},opponent={teamName:'RKSK felnőtt női'};
  assert.equal(derive(team,league,[result],[team,opponent]).length,1);
