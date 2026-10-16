@@ -900,6 +900,38 @@
       :'Mentett MRSZ-tabella (teljesség nincs jelölve)';
     return 'MRSZ · '+status+' · Pillanatkép: 2026.10.14. · Nem élő adat';
   }
+  // Saved scores are an incomplete source until independently proven otherwise.
+  // Compare only when the count equals the played count in a complete saved table.
+  // Equal counts alone must never be described as proof of exhaustive match coverage.
+  function ccMrszSavedResultsCrosscheckHtml_(row,snapshot,recorded){
+    if(snapshot?.partial!==false||!Array.isArray(recorded))return '';
+    const played=ccMrszStatNumber_(row?.played);
+    if(played==='–')return '';
+    const count=recorded.length,limit=Number(played);
+    if(count===0&&limit===0)return '';
+    const prefix='Mentett eredmények: '+count+'/'+played+' mérkőzés';
+    if(count!==limit)return '<p class="ms-recorded-audit">'+esc(prefix+'. A lista darabszáma eltér a tabellától; a mérlegek nem vethetők össze.')+'</p>';
+    let setsFor=0,setsAgainst=0,wins=0,losses=0;
+    for(const m of recorded){
+      const pair=/^(\d+)–(\d+)$/.exec(text(m?.score));
+      if(!pair)return '<p class="ms-recorded-audit">'+esc(prefix+'. Egy eredmény nem értelmezhető; nincs számszaki összevetés.')+'</p>';
+      const own=Number(pair[1]),other=Number(pair[2]);
+      if(!((own===3&&other>=0&&other<=2)||(other===3&&own>=0&&own<=2)))
+        return '<p class="ms-recorded-audit">'+esc(prefix+'. Érvénytelen játszmaeredmény; nincs számszaki összevetés.')+'</p>';
+      setsFor+=own;setsAgainst+=other;if(own>other)wins++;else losses++;
+    }
+    const actualSets=setsFor+'–'+setsAgainst,actualRecord=wins+'–'+losses;
+    const tableSets=ccMrszStatPair_(row?.setsFor,row?.setsAgainst);
+    const tableRecord=ccMrszRecordPair_(row);
+    const issues=[];
+    if(tableSets!=='–'&&tableSets!==actualSets)issues.push('szettmérleg: tabella '+tableSets+', mentett eredmények '+actualSets);
+    if(tableRecord!=='–'&&tableRecord!==actualRecord)issues.push('mérleg: tabella '+tableRecord+', mentett eredmények '+actualRecord);
+    const caution=' Az egyező darabszám önmagában nem igazolja a lista teljességét.';
+    if(issues.length)return '<p class="ms-recorded-audit is-review">'+esc('Ellenőrzendő · '+prefix+'. '+issues.join('; ')+'.'+caution)+'</p>';
+    if(tableSets==='–'&&tableRecord==='–')
+      return '<p class="ms-recorded-audit">'+esc(prefix+'. A tabellában nincs összevethető szettmérleg vagy mérleg.'+caution)+'</p>';
+    return '<p class="ms-recorded-audit">'+esc(prefix+'. Az összevethető számszaki adatok egyeznek.'+caution)+'</p>';
+  }
   function ccVerifiedSnapshotStatsHtml_(rows,selected,snapshot,league='',matches=[]){
     if(!snapshot||!Array.isArray(rows)||!rows.length)return '';
     const focus=rows.filter(r=>r.focus),selectedId=text(selected?.sourceTeamId),selectedRows=selectedId?rows.filter(r=>text(r.sourceTeamId)===selectedId):[],row=selected?(selectedRows.length===1?selectedRows[0]:null):(focus.length===1?focus[0]:null);
@@ -917,7 +949,7 @@
     return '<section class="ms-panel ms-stats ms-verified-snapshot-stats" aria-label="Bajnoki csapatstatisztika">'
       +'<div class="ms-panel-head"><b>Statisztikák</b><span>'+esc(row.teamName||'Csapat')+'</span></div>'+ccMrszRecordNoticeHtml_(row)
       +'<div class="ms-team-summary">'+cells.map(([label,value])=>'<div><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>').join('')+'</div>'
-      +'<div class="ms-recorded-section"><div class="ms-insight-title"><b>Rögzített eredmények ('+recorded.length+')</b><span>Legfeljebb 5 mentett mérkőzés</span></div>'+ccSavedLeagueResultsHtml_(recorded)+'</div>'
+      +'<div class="ms-recorded-section"><div class="ms-insight-title"><b>Rögzített eredmények ('+recorded.length+')</b><span>Legfeljebb 5 mentett mérkőzés</span></div>'+ccSavedLeagueResultsHtml_(recorded)+ccMrszSavedResultsCrosscheckHtml_(row,snapshot,recorded)+'</div>'
        +'<p class="ms-coverage">'+esc(scope)+' · Az adatok külön frissítést igényelnek. A rögzített eredmények listája nem feltétlenül teljes. Forma és helyezésváltozás csak ellenőrzött teljes mérkőzés- és előzményadatok alapján számítható.</p>'
       +'</section>';
   }
