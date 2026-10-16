@@ -2641,7 +2641,7 @@
       meta:m.isPhoto?(table?.partial===false?'2026.10.14-i mentett eredmény':'2026.10.14-i mentett eredmény · teljes tabella nélkül'):m.isFixture?'2026.10.01-i mentett kiírás':'Mentett mérkőzésadat',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today
     })).join('');
-    const noTableNote=(!table||table.partial===true)&&photo.length?'<p class="ms-coverage">Nincs teljes mentett tabella ehhez a bajnoksághoz. Az eredmények forrásrekordként láthatók; a csapatok teljes körű tabellás megfeleltetése nem ellenőrizhető.</p>':'';
+    const noTableNote=table?.partial!==false&&photo.length?'<p class="ms-coverage">Nincs teljes mentett tabella ehhez a bajnoksághoz. Az eredmények forrásrekordként láthatók; a csapatok teljes körű tabellás megfeleltetése nem ellenőrizhető.</p>':'';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
     return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
       +visible.length+' / '+matches.length+' meccs · '+esc(group)+'</span></div>'+controls+'</div>'+noTableNote+'<div class="ms-match-list">'
