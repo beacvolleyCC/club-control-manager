@@ -88,7 +88,9 @@ test('only an exact Budapest-date and opponent match overlays archival MRSZ resu
   homeSets:3,awaySets:0,setScores:[{home:25,away:18}]}]);
  const html=context.qa.html();
  assert.ok(html.includes('3–0'));
- assert.ok(html.includes('Szettek: 25:18'));
+ assert.ok(html.includes('class="cc-scoreboard-set-results"'));
+ assert.ok(html.includes('25:18'));
+ assert.ok(!html.includes('Szettek:'));
  assert.ok(html.includes('MRSZ · 2026.10.14-i eredmény'));
  context.qa.setPhoto([]);context.qa.setScope('beac');context.qa.setGroup('all');
 });
