@@ -9,7 +9,8 @@ assert.ok(a>=0&&b>a,'real federation team normalizer');
 const norm=new Function('text',src.slice(a,b)+';return ccMrszNormPairName_;')(text);
 const start=src.indexOf('  function ccSavedLeagueResults_('),end=src.indexOf('  function ccVerifiedSnapshotStatsHtml_(',start);
 assert.ok(start>=0&&end>start,'real recorded match model');
-const model=new Function('text','esc','ccMrszNormPairName_',src.slice(start,end)+';return {select:ccSavedLeagueResults_,render:ccSavedLeagueResultsHtml_};')(text,esc,norm);
+const setIssue=new Function('text',src.slice(src.indexOf('  function ccMrszSetScoreIssue_('),src.indexOf('  function ccMatchScoreboardHtml_('))+';return ccMrszSetScoreIssue_;')(text);
+const model=new Function('text','esc','ccMrszNormPairName_','ccMrszSetScoreIssue_',src.slice(start,end)+';return {select:ccSavedLeagueResults_,render:ccSavedLeagueResultsHtml_};')(text,esc,norm,setIssue);
 const women='Női Budapest I. osztály',women2='Női Budapest II. osztály – B csoport';
 const fixtures=[
  {competitionLabel:women,homeName:'Közgáz női',awayName:'MTK Budapest',startsAt:'2026-10-08T20:00:00+02:00',homeSets:2,awaySets:3},
