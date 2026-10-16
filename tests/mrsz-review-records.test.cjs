@@ -95,6 +95,7 @@ test('Contradictory full set-point list is moved to review, without changing sav
   {home:25,away:18},{home:25,away:19},{home:25,away:21},{home:20,away:25}]};
  const html=display([invalid],[fullTable]);
  assert.ok(html.includes('1 ellenőrzendő rekord'));
+ assert.ok(html.includes('Szettadat ellenőrzendő'));
  assert.ok(html.includes('sorrendje'));
  assert.ok(!html.includes('cc-match-scoreboard'));
  assert.equal(invalid.homeSets,3);
@@ -106,4 +107,15 @@ test('Partial saved set-point snapshots remain visible without inventing missing
  assert.ok(html.includes('cc-match-scoreboard'));
  assert.ok(html.includes('25:18'));
  assert.ok(!html.includes('ellenőrzendő rekord'));
+});
+
+test('Review panel keeps explicit set coverage for non-set-related issues',()=>{
+ const invalidOpponent={...result,awayName:'Nem ismert csapat',setScores:[
+  {home:25,away:18},{home:25,away:19},{home:25,away:21}
+ ]};
+ const html=display([invalidOpponent],[fullTable]);
+ assert.ok(html.includes('A csapat nem szerepel a mentett tabellában'));
+ assert.ok(html.includes('3/3 szett'));
+ assert.ok(html.includes('1 ellenőrzendő rekord'));
+ assert.ok(!html.includes('cc-match-scoreboard'));
 });
