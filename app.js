@@ -825,6 +825,7 @@
       if(m?.homeSets==null||m?.awaySets==null||text(m.homeSets)===''||text(m.awaySets)==='')continue;
       const hs=Number(m.homeSets),as=Number(m.awaySets);
       if(!Number.isInteger(hs)||!Number.isInteger(as)||Math.max(hs,as)!==3||Math.min(hs,as)<0||Math.min(hs,as)>2)continue;
+      if(ccMrszSetScoreIssue_(m))continue;
       const stamp=text(m?.startsAt),time=Date.parse(stamp);
       if(!/^\d{4}-\d{2}-\d{2}T/.test(stamp)||!Number.isFinite(time)||time>Date.now())continue;
       const isHome=home===name,opponent=text(isHome?m.awayName:m.homeName);
@@ -2458,6 +2459,32 @@
     const rank=Number(row?.position);
     return row&&Number.isInteger(rank)&&rank>0?rank:null;
   }
+  // Check only explicitly saved set points. Missing or partial lists are not proof
+  // that the match result is wrong; an impossible saved set or a full contradictory
+  // list is separated for review instead of silently being treated as verified.
+  function ccMrszSetScoreIssue_(m){
+    const rows=m?.setScores;
+    if(!Array.isArray(rows)||rows.length===0)return '';
+    const hs=Number(m?.homeSets),as=Number(m?.awaySets);
+    if(m?.homeSets==null||m?.awaySets==null||!Number.isInteger(hs)||!Number.isInteger(as)||hs<0||as<0)return '';
+    if(rows.length>hs+as||rows.length>5)return 'Több szettpontszám van, mint amennyi játszmát a végeredmény tartalmaz';
+    let homeWins=0,awayWins=0;
+    for(let i=0;i<rows.length;i++){
+      const pair=rows[i],rawHome=text(pair?.home),rawAway=text(pair?.away);
+      if(rawHome===''||rawAway==='')return 'Hiányzó játszmapontszám';
+      const h=Number(rawHome),a=Number(rawAway);
+      if(!Number.isSafeInteger(h)||!Number.isSafeInteger(a)||h<0||a<0||h===a)
+        return 'Érvénytelen játszmapontszám';
+      const target=i===4?15:25;
+      if(Math.max(h,a)<target||Math.abs(h-a)<2)return 'A játszmapontszám nem lehet befejezett röplabdaszett eredménye';
+      if(h>a)homeWins++;else awayWins++;
+      if((homeWins===3||awayWins===3)&&i!==rows.length-1)
+        return 'A játszmák sorrendje nem egyezik a befejezett mérkőzéssel';
+    }
+    if(rows.length===hs+as&&(homeWins!==hs||awayWins!==as))
+      return 'A játszmánkénti pontszámok nem egyeznek a mentett végeredménnyel';
+    return '';
+  }
   function ccMatchScoreboardHtml_(m,options={}){
     const home=text(m.homeName||'Hazai csapat'),away=text(m.awayName||'Vendégcsapat'),
       id=text(options.eventId),linked=!!id,league=text(options.league||m.competitionLabel),
@@ -2465,7 +2492,8 @@
       hasScore=m.homeSets!=null&&m.awaySets!=null&&Number.isFinite(Number(m.homeSets))&&Number.isFinite(Number(m.awaySets))
         &&(Number(m.homeSets)+Number(m.awaySets)>0),
       score=hasScore?Number(m.homeSets)+'–'+Number(m.awaySets):'VS.',
-      sets=hasScore&&Array.isArray(m.setScores)?m.setScores.filter(x=>Number.isFinite(Number(x?.home))&&Number.isFinite(Number(x?.away)))
+      setIssue=hasScore?ccMrszSetScoreIssue_(m):'',
+      sets=hasScore&&!setIssue&&Array.isArray(m.setScores)?m.setScores.filter(x=>x?.home!=null&&x?.away!=null&&text(x.home)!==''&&text(x.away)!=='')
         .map(x=>Number(x.home)+':'+Number(x.away)).join(' · '):'',
       rankHome=ccMatchScoreboardRank_(league,home),rankAway=ccMatchScoreboardRank_(league,away),
       validDate=/^\d{4}-\d{2}-\d{2}$/.test(kickoff.date),validTime=/^\d{2}:\d{2}$/.test(kickoff.time),
@@ -2484,7 +2512,7 @@
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
       +(rankHome?'<small>'+rankHome+'. helyen áll</small>':'')+'</span></span>'
       +'<span class="cc-scoreboard-score">'+(hasScore?'<strong>'+esc(score)+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
-      +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')+'</span>'
+      +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':setIssue&&linked?'<span class="cc-scoreboard-set-results" title="'+esc(setIssue)+'">Szettadat ellenőrzendő</span>':'')+'</span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
       +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span></span>'
@@ -2523,6 +2551,8 @@
     const hs=Number(match.homeSets),as=Number(match.awaySets);
     if(!Number.isInteger(hs)||!Number.isInteger(as)||Math.max(hs,as)!==3||Math.min(hs,as)<0||Math.min(hs,as)>2)
       return 'Érvénytelen játszmaeredmény';
+    const setIssue=ccMrszSetScoreIssue_(match);
+    if(setIssue)return setIssue;
     const stamp=text(match.startsAt),time=Date.parse(stamp);
     if(!/^\d{4}-\d{2}-\d{2}T/.test(stamp)||!Number.isFinite(time)||time>Date.now())
       return 'Nem ellenőrizhető mérkőzésidőpont';

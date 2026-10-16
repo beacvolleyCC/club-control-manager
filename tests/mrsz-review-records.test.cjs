@@ -75,7 +75,8 @@ test('Review scope is restricted to the selected league and leaves source record
 const modelStart=app.indexOf('  function ccSavedLeagueResults_('),modelEnd=app.indexOf('  function ccSavedLeagueResultsHtml_(',modelStart);
 const normStart=app.indexOf('  function ccMrszNormPairName_('),normEnd=app.indexOf('  function ccMrszLocalKickoff_(',normStart);
 const norm=new Function('text',app.slice(normStart,normEnd)+';return ccMrszNormPairName_;')(text);
-const derive=new Function('text','ccMrszNormPairName_',app.slice(modelStart,modelEnd)+';return ccSavedLeagueResults_;')(text,norm);
+const setIssue=new Function('text',app.slice(app.indexOf('  function ccMrszSetScoreIssue_('),app.indexOf('  function ccMatchScoreboardHtml_('))+';return ccMrszSetScoreIssue_;')(text);
+const derive=new Function('text','ccMrszNormPairName_','ccMrszSetScoreIssue_',app.slice(modelStart,modelEnd)+';return ccSavedLeagueResults_;')(text,norm,setIssue);
 test('Stored result never enters selected-team statistics when opponent is missing or ambiguous in league table',()=>{
  const team={teamName:'MTK kék'},opponent={teamName:'RKSK felnőtt női'};
  assert.equal(derive(team,league,[result],[team,opponent]).length,1);
@@ -86,4 +87,23 @@ test('Contradictory results with different timezone timestamp spellings cannot e
  const team={teamName:'MTK kék'},opponent={teamName:'RKSK felnőtt női'};
  const conflict={...result,startsAt:'2026-10-13T16:20:00Z',homeSets:3,awaySets:1};
  assert.equal(derive(team,league,[result,conflict],[team,opponent]).length,0);
+});
+
+
+test('Contradictory full set-point list is moved to review, without changing saved final score',()=>{
+ const invalid={...result,homeSets:3,awaySets:1,setScores:[
+  {home:25,away:18},{home:25,away:19},{home:25,away:21},{home:20,away:25}]};
+ const html=display([invalid],[fullTable]);
+ assert.ok(html.includes('1 ellenőrzendő rekord'));
+ assert.ok(html.includes('sorrendje'));
+ assert.ok(!html.includes('cc-match-scoreboard'));
+ assert.equal(invalid.homeSets,3);
+ assert.equal(invalid.setScores.length,4);
+});
+test('Partial saved set-point snapshots remain visible without inventing missing sets',()=>{
+ const partial={...result,homeSets:3,awaySets:0,setScores:[{home:25,away:18}]};
+ const html=display([partial],[fullTable]);
+ assert.ok(html.includes('cc-match-scoreboard'));
+ assert.ok(html.includes('25:18'));
+ assert.ok(!html.includes('ellenőrzendő rekord'));
 });

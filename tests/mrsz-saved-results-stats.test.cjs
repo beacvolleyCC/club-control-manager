@@ -9,7 +9,8 @@ assert.ok(a>=0&&b>a,'real federation team normalizer');
 const norm=new Function('text',src.slice(a,b)+';return ccMrszNormPairName_;')(text);
 const start=src.indexOf('  function ccSavedLeagueResults_('),end=src.indexOf('  function ccVerifiedSnapshotStatsHtml_(',start);
 assert.ok(start>=0&&end>start,'real recorded match model');
-const model=new Function('text','esc','ccMrszNormPairName_',src.slice(start,end)+';return {select:ccSavedLeagueResults_,render:ccSavedLeagueResultsHtml_};')(text,esc,norm);
+const setIssue=new Function('text',src.slice(src.indexOf('  function ccMrszSetScoreIssue_('),src.indexOf('  function ccMatchScoreboardHtml_('))+';return ccMrszSetScoreIssue_;')(text);
+const model=new Function('text','esc','ccMrszNormPairName_','ccMrszSetScoreIssue_',src.slice(start,end)+';return {select:ccSavedLeagueResults_,render:ccSavedLeagueResultsHtml_};')(text,esc,norm,setIssue);
 const women='Női Budapest I. osztály',women2='Női Budapest II. osztály – B csoport';
 const fixtures=[
  {competitionLabel:women,homeName:'Közgáz női',awayName:'MTK Budapest',startsAt:'2026-10-08T20:00:00+02:00',homeSets:2,awaySets:3},
@@ -81,4 +82,15 @@ test('Full table stats and recorded results share the selected league and its sa
  const standings=src.slice(src.indexOf('  function renderManagerStandings_()'),src.indexOf('  function msSetTeam_',src.indexOf('  function renderManagerStandings_()'))>0?src.indexOf('  function msSetTeam_',src.indexOf('  function renderManagerStandings_()')):undefined);
  assert.ok(standings.includes('showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo,group,ccMrszPhotoState_.matches)'));
  assert.ok(!standings.includes('ccSavedLeagueResults_(row,group,ccMrszMergedLeagueMatches_'));
+});
+
+
+test('Saved result statistics reject contradictory complete set-point records only',()=>{
+ const team={teamName:'MTK Budapest'};
+ const opponent={teamName:'Közgáz női'};
+ const good={...fixtures[0],setScores:[{home:25,away:22}]};
+ assert.equal(model.select(team,women,[good],[team,opponent]).length,1,'partial set points are allowed');
+ const impossible={...fixtures[0],setScores:[
+  {home:25,away:19},{home:25,away:17},{home:25,away:12},{home:12,away:25},{home:12,away:25}]};
+ assert.equal(model.select(team,women,[impossible],[team,opponent]).length,0);
 });

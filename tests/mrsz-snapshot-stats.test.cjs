@@ -8,8 +8,9 @@ assert.ok(start>=0&&end>start,'snapshot renderer present');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ratio=(explicit,a,b)=>{const x=Number(explicit);if(Number.isFinite(x)&&x!==0)return x.toFixed(3);const aa=Number(a),bb=Number(b);if(a==null||b==null||!Number.isFinite(aa)||!Number.isFinite(bb)||aa===0&&bb===0)return'–';if(bb===0)return aa>0?'∞':'–';return(aa/bb).toFixed(3)};
 const statHelpers=new Function('esc',app.slice(app.indexOf('  function ccMrszStatNumber_('),app.indexOf('  // One source/coverage vocabulary'))+';return {number:ccMrszStatNumber_,pair:ccMrszStatPair_};')(esc);
-const render=new Function('text','esc','msRatio_','ccMrszNormPairName_','ccMrszStatNumber_','ccMrszStatPair_',app.slice(start,end)+';return ccVerifiedSnapshotStatsHtml_;')(
- x=>String(x??'').trim(),esc,ratio,x=>String(x??'').trim().toLowerCase(),statHelpers.number,statHelpers.pair);
+const setIssue=new Function('text',app.slice(app.indexOf('  function ccMrszSetScoreIssue_('),app.indexOf('  function ccMatchScoreboardHtml_('))+';return ccMrszSetScoreIssue_;')(x=>String(x??'').trim());
+const render=new Function('text','esc','msRatio_','ccMrszNormPairName_','ccMrszStatNumber_','ccMrszStatPair_','ccMrszSetScoreIssue_',app.slice(start,end)+';return ccVerifiedSnapshotStatsHtml_;')(
+ x=>String(x??'').trim(),esc,ratio,x=>String(x??'').trim().toLowerCase(),statHelpers.number,statHelpers.pair,setIssue);
 const beac={sourceTeamId:'299',focus:true,teamName:'BEAC',played:3,wins:2,losses:1,setsFor:7,setsAgainst:4};
 const other={sourceTeamId:'900',focus:false,teamName:'Ellenfél',played:3,wins:1,losses:2,setsFor:4,setsAgainst:7};
 test('Official saved snapshot shows only recorded match/sets totals for BEAC',()=>{
