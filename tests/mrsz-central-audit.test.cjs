@@ -164,7 +164,7 @@ test('Filtered counts, empty states and escaped search input stay accurate',()=>
  assert.ok(html.includes('1 / 1 ellenőrzendő bejegyzés'));
  assert.ok(html.includes('id="ccMrszAuditType"'));
  assert.ok(html.includes('id="ccMrszAuditSearch"'));
- assert.ok(html.includes('selected>Számszaki eltérések'));
+ assert.match(html, /<option value="Egyeztetés"\s+selected\s*>Számszaki eltérések<\/option>/);
  context.ccMrszAuditType_='Mérkőzés';
  html=context.auditHtml();
  assert.ok(html.includes('0 / 1 ellenőrzendő bejegyzés'));
