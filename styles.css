@@ -6425,6 +6425,9 @@ body{overflow-x:clip!important}
   .cc-mrsz-league-matches .ms-match-place small{display:block;font-size:10px;font-weight:650;white-space:normal;margin-top:2px;}
 }
 
+/* Neutral, non-blocking indication that archived league counters disagree. */
+.ms-stat-warning{display:block;margin-top:3px;font-size:10px;font-weight:600;line-height:1.35;color:var(--muted);white-space:normal}
+.ms-verified-snapshot-stats>.ms-stat-warning{padding:0 14px 8px}
 /* Anomalous same-team fixture audit stays in Manager below the ordinary match cards. */
 .cc-mrsz-review-fixtures{border-top:1px solid var(--line);padding:10px 14px;font-size:11px;color:var(--muted)}
 .cc-mrsz-review-fixtures summary{cursor:pointer;font-weight:750;color:var(--text);list-style:revert}

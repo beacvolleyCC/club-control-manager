@@ -7,8 +7,9 @@ const start=app.indexOf('  function ccSavedLeagueResults_('),
 assert.ok(start>=0&&end>start,'snapshot renderer present');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ratio=(explicit,a,b)=>{const x=Number(explicit);if(Number.isFinite(x)&&x!==0)return x.toFixed(3);const aa=Number(a),bb=Number(b);if(a==null||b==null||!Number.isFinite(aa)||!Number.isFinite(bb)||aa===0&&bb===0)return'–';if(bb===0)return aa>0?'∞':'–';return(aa/bb).toFixed(3)};
-const render=new Function('text','esc','msRatio_','ccMrszNormPairName_',app.slice(start,end)+';return ccVerifiedSnapshotStatsHtml_;')(
- x=>String(x??'').trim(),esc,ratio,x=>String(x??'').trim().toLowerCase());
+const statHelpers=new Function('esc',app.slice(app.indexOf('  function ccMrszStatNumber_('),app.indexOf('  // One source/coverage vocabulary'))+';return {number:ccMrszStatNumber_,pair:ccMrszStatPair_};')(esc);
+const render=new Function('text','esc','msRatio_','ccMrszNormPairName_','ccMrszStatNumber_','ccMrszStatPair_',app.slice(start,end)+';return ccVerifiedSnapshotStatsHtml_;')(
+ x=>String(x??'').trim(),esc,ratio,x=>String(x??'').trim().toLowerCase(),statHelpers.number,statHelpers.pair);
 const beac={sourceTeamId:'299',focus:true,teamName:'BEAC',played:3,wins:2,losses:1,setsFor:7,setsAgainst:4};
 const other={sourceTeamId:'900',focus:false,teamName:'Ellenfél',played:3,wins:1,losses:2,setsFor:4,setsAgainst:7};
 test('Official saved snapshot shows only recorded match/sets totals for BEAC',()=>{
@@ -89,4 +90,21 @@ test('Invalid fractional or negative snapshot counters are unavailable',()=>{
  assert.ok(html.includes('<span>Mérleg</span><b>–</b>'));
  assert.ok(html.includes('<span>Szettmérleg</span><b>–</b>'));
  assert.ok(html.includes('<span>Szettarány</span><b>–</b>'));
+});
+
+test('Inconsistent recorded standings mask the selected-team balance, not the source match count',()=>{
+ const mismatch={...beac,played:4,wins:2,losses:1};
+ const html=render([mismatch],null,{partial:false});
+ assert.ok(html.includes('<span>Mérkőzések</span><b>4</b>'));
+ assert.ok(html.includes('<span>Mérleg</span><b>–</b>'));
+ assert.ok(html.includes('Ellenőrzendő · M ≠ GY + V'));
+ assert.ok(html.includes('győzelem + vereség: 3'));
+ assert.equal(mismatch.played,4);
+ assert.equal(mismatch.wins,2);
+ assert.equal(mismatch.losses,1);
+});
+test('Partial source with one unknown record counter is not falsely accused of arithmetic mismatch',()=>{
+ const html=render([{...beac,played:2,wins:null,losses:1}],null,{partial:true});
+ assert.ok(html.includes('<span>Mérleg</span><b>–</b>'));
+ assert.ok(!html.includes('Ellenőrzendő · M ≠ GY + V'));
 });
