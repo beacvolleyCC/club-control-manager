@@ -18,7 +18,7 @@ const source=cut('  function ccSavedLeagueResults_(','  function ccSavedLeagueRe
  +cut('  function ccMrszCoverageLabel_(','  function ccMrszSavedResultsCrosscheckHtml_(')
  +cut('  function ccMrszSetScoreIssue_(','  function ccMatchScoreboardHtml_(')
  +cut('  function ccMrszNormPairName_(','  function ccMrszPhotoResultsByLeagueHtml_(');
-vm.runInContext(source+'\nthis.auditModel=ccMrszAuditModel_;this.auditHtml=ccMrszAuditHtml_;this.auditFilter=ccMrszAuditFilterModel_;this.auditResults=ccMrszAuditResultsHtml_;this.auditCount=ccMrszAuditCountText_;this.selectAudit=(type,query)=>{ccMrszAuditType_=type;ccMrszAuditQuery_=query;};',context);
+vm.runInContext(source+'\nthis.auditModel=ccMrszAuditModel_;this.auditHtml=ccMrszAuditHtml_;this.auditFilter=ccMrszAuditFilterModel_;this.auditResults=ccMrszAuditResultsHtml_;this.auditCount=ccMrszAuditCountText_;this.selectAudit=(type,query,league='all')=>{ccMrszAuditType_=type;ccMrszAuditQuery_=query;ccMrszAuditLeague_=league;};',context);
 const leagueA='Női Budapest II. osztály – B csoport',leagueB='Férfi Budapest I. osztály – B csoport';
 const tableA={competitionLabel:leagueA,partial:false,rows:[
  {teamName:'MTK kék',played:1,wins:1,losses:0,setsFor:3,setsAgainst:1},
@@ -108,6 +108,7 @@ test('Audit is view-only and the Meccsek route exposes tab switching and league 
  assert.ok(matches.includes('data-cc-audit-view="audit"'));
  assert.ok(matches.includes("ccMatchesAuditOpen_?ccMrszAuditHtml_():''"));
  assert.ok(matches.includes("$('#ccMrszAuditResults')?.addEventListener('click'"));
+ assert.ok(matches.includes("$('#ccMrszAuditLeague')?.addEventListener('change'"));
  assert.ok(matches.includes("$('#ccMrszAuditType')?.addEventListener('change'"));
  assert.ok(matches.includes("$('#ccMrszAuditSearch')?.addEventListener('input'"));
  assert.ok(matches.includes("ccMatchesAuditOpen_=false;"));
@@ -186,4 +187,52 @@ test('Search input updates only the list and count, preserving focus and control
  assert.ok(refresh.includes('results.innerHTML=ccMrszAuditResultsHtml_(filtered)'));
  assert.ok(refresh.includes('count.textContent=ccMrszAuditCountText_(filtered)'));
  assert.ok(!refresh.includes('ccMrszAuditHtml_()'), 'do not rerender and blur the search input on each keystroke');
+});
+
+test('League selection combines with type and text search without mutating source data',()=>{
+ const data={groups:[
+  {league:leagueA,coverage:'Mentett',items:[
+   {type:'Mérkőzés',name:'MTK – UTE Pink',reason:'Érvénytelen játszma',date:'2026-10-13',score:'3–1'},
+   {type:'Tabella',name:'MTK',reason:'M ≠ GY + V',date:'',score:''}]},
+  {league:leagueB,coverage:'Mentett',items:[
+   {type:'Mérkőzés',name:'BEAC – UTE',reason:'Hibás játszma',date:'2026-10-16',score:'3–0'}]}
+ ],issues:3};
+ const before=JSON.stringify(data);
+ const filtered=context.auditFilter(data,{league:leagueA,type:'Mérkőzés',query:'ute'});
+ assert.equal(filtered.selectedLeague,leagueA);
+ assert.equal(filtered.issues,1);
+ assert.equal(filtered.total,3);
+ assert.equal(filtered.groups[0].league,leagueA);
+ assert.equal(filtered.groups[0].items[0].name,'MTK – UTE Pink');
+ assert.equal(context.auditFilter(data,{league:leagueB,type:'Tabella'}).issues,0);
+ assert.equal(context.auditFilter(data,{league:'nincs ilyen'}).issues,3);
+ assert.equal(JSON.stringify(data),before);
+});
+test('League picker, direct issue navigation and return control preserve audit selections',()=>{
+ run([tableA],[game]);
+ context.selectAudit('Egyeztetés','MTK',leagueA);
+ const html=context.auditHtml();
+ assert.ok(html.includes('id="ccMrszAuditLeague"'));
+ assert.ok(html.includes('<option value="'+leagueA+'" selected>'));
+ assert.ok(html.includes('id="ccMrszAuditSearch" type="search" value="MTK"'));
+ assert.ok(html.includes('cc-mrsz-audit-open'));
+ assert.ok(html.includes('aria-label="Bajnokság megnyitása: MTK kék"'));
+ const render=cut('  function renderCompetitionMatchCards_(','  function renderEventList(');
+ assert.ok(render.includes('ccMrszAuditReturn_=true;'));
+ assert.ok(render.includes('id="ccMrszAuditReturn"'));
+ assert.ok(render.includes("$('#ccMrszAuditReturn')?.addEventListener('click'"));
+ assert.ok(render.includes('ccMrszAuditReturn_=false;'));
+ assert.ok(render.includes('ccLeagueCatalog_().some(group=>group.competitionLabel===league)'));
+ assert.ok(render.includes('ccMrszAuditLeague_=text(event.target.value)'));
+ assert.ok(render.includes('ccRefreshMrszAuditList_()'));
+ assert.ok(html.includes('1 / 1 ellenőrzendő bejegyzés'));
+});
+test('Untrusted league names are escaped in the picker and item navigation',()=>{
+ const malicious='<svg onload=alert(1)>';
+ const g={groups:[{league:malicious,coverage:'Mentett',items:[
+  {type:'Mérkőzés',name:malicious,reason:malicious,date:'',score:''}]}],issues:1};
+ const html=context.auditResults(context.auditFilter(g,{league:malicious}));
+ assert.ok(html.includes('&lt;svg'));
+ assert.ok(!html.includes('<svg'));
+ assert.ok(html.includes('data-cc-audit-league="&lt;svg'));
 });
