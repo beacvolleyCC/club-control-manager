@@ -18,7 +18,7 @@ const source=cut('  function ccSavedLeagueResults_(','  function ccSavedLeagueRe
  +cut('  function ccMrszCoverageLabel_(','  function ccMrszSavedResultsCrosscheckHtml_(')
  +cut('  function ccMrszSetScoreIssue_(','  function ccMatchScoreboardHtml_(')
  +cut('  function ccMrszNormPairName_(','  function ccMrszPhotoResultsByLeagueHtml_(');
-vm.runInContext(source+'\nthis.auditModel=ccMrszAuditModel_;this.auditHtml=ccMrszAuditHtml_;',context);
+vm.runInContext(source+'\nthis.auditModel=ccMrszAuditModel_;this.auditHtml=ccMrszAuditHtml_;this.auditFilter=ccMrszAuditFilterModel_;this.auditResults=ccMrszAuditResultsHtml_;this.auditCount=ccMrszAuditCountText_;this.selectAudit=(type,query)=>{ccMrszAuditType_=type;ccMrszAuditQuery_=query;};',context);
 const leagueA='Női Budapest II. osztály – B csoport',leagueB='Férfi Budapest I. osztály – B csoport';
 const tableA={competitionLabel:leagueA,partial:false,rows:[
  {teamName:'MTK kék',played:1,wins:1,losses:0,setsFor:3,setsAgainst:1},
@@ -107,7 +107,9 @@ test('Audit is view-only and the Meccsek route exposes tab switching and league 
  const matches=cut('  function renderCompetitionMatchCards_(','  function renderEventList(');
  assert.ok(matches.includes('data-cc-audit-view="audit"'));
  assert.ok(matches.includes("ccMatchesAuditOpen_?ccMrszAuditHtml_():''"));
- assert.ok(matches.includes("document.querySelectorAll('[data-cc-audit-league]')"));
+ assert.ok(matches.includes("$('#ccMrszAuditResults')?.addEventListener('click'"));
+ assert.ok(matches.includes("$('#ccMrszAuditType')?.addEventListener('change'"));
+ assert.ok(matches.includes("$('#ccMrszAuditSearch')?.addEventListener('input'"));
  assert.ok(matches.includes("ccMatchesAuditOpen_=false;"));
  assert.ok(matches.includes('ccSetLeagueContext_(league)'));
 });
@@ -116,4 +118,72 @@ test('When archived snapshot fails to load, the audit cannot claim clean results
  assert.ok(context.auditHtml().includes('betöltése'));
  Object.assign(store,{loaded:true,error:'Forrás nem érhető el'});
  assert.ok(context.auditHtml().includes('Forrás nem érhető el'));
+});
+
+test('Issue type filtering separates match, schedule, table and reconciliation findings',()=>{
+ const all={groups:[
+  {league:leagueA,coverage:'MRSZ mentett',items:[
+   {type:'Mérkőzés',name:'MTK kék – RKSK',reason:'Eltérő végeredmények',date:'2026-10-13',score:'3–1'},
+   {type:'Tabella',name:'Közgáz',reason:'M ≠ GY + V',date:'',score:''},
+   {type:'Egyeztetés',name:'MTK kék',reason:'Szettmérleg nem egyezik',date:'',score:''}]},
+  {league:leagueB,coverage:'BRSZ mentett',items:[
+   {type:'Menetrend',name:'BEAC – BEAC',reason:'Nem megerősített menetrend',date:'',score:''},
+   {type:'Mérkőzés',name:'BEAC – UTE Pink',reason:'Hibás játszmaeredmény',date:'2026-10-15',score:'3–0'}]}
+ ],issues:5};
+ for(const [type,number] of [['all',5],['Mérkőzés',2],['Menetrend',1],['Tabella',1],['Egyeztetés',1]]){
+  const result=context.auditFilter(all,{type});
+  assert.equal(result.issues,number,type);
+  assert.equal(result.total,5);
+  assert.ok(Array.from(result.groups,g=>g.items).flat().every(item=>type==='all'||item.type===type));
+ }
+ const other=context.auditFilter(all,{type:'invalid'});
+ assert.equal(other.selected,'all');
+ assert.equal(other.issues,5);
+ assert.equal(all.groups[0].items.length,3,'stored audit model stays unchanged');
+});
+test('Search is case- and accent-insensitive and matches clubs, opponents, leagues and reasons',()=>{
+ const model={groups:[{league:'Női Budapest II. osztály',coverage:'Mentett',items:[
+  {type:'Mérkőzés',name:'Közgáz – UTE U-20 Pink',reason:'Érvénytelen játszmaeredmény',date:'2026-10-16',score:'3–0'},
+  {type:'Tabella',name:'MTK kék',reason:'Győzelem + vereség eltér',date:'',score:''}]},
+  {league:'Férfi Budapest I. osztály',coverage:'Mentett',items:[
+  {type:'Menetrend',name:'BEAC – BEAC',reason:'Nem megerősített',date:'',score:''}]}],issues:3};
+ const matches=context.auditFilter(model,{query:'KOZGAZ   uTe'});
+ assert.equal(matches.issues,1);
+ assert.equal(matches.groups[0].items[0].name,'Közgáz – UTE U-20 Pink');
+ assert.equal(context.auditFilter(model,{query:'ERVENYTELEN'}).issues,1);
+ assert.equal(context.auditFilter(model,{query:'ferfi budapest'}).issues,1);
+ assert.equal(context.auditFilter(model,{query:'GYŐZELEM'}).issues,1);
+ assert.equal(context.auditFilter(model,{type:'Tabella',query:'UTE'}).issues,0);
+ assert.equal(context.auditFilter(model,{query:'does not exist'}).groups.length,0);
+});
+test('Filtered counts, empty states and escaped search input stay accurate',()=>{
+ run([tableA],[game]);
+ context.selectAudit('Egyeztetés','');
+ let html=context.auditHtml();
+ assert.ok(html.includes('1 / 1 ellenőrzendő bejegyzés'));
+ assert.ok(html.includes('id="ccMrszAuditType"'));
+ assert.ok(html.includes('id="ccMrszAuditSearch"'));
+ assert.match(html, /<option value="Egyeztetés"\s+selected\s*>Számszaki eltérések<\/option>/);
+ context.selectAudit('Mérkőzés','');
+ html=context.auditHtml();
+ assert.ok(html.includes('0 / 1 ellenőrzendő bejegyzés'));
+ assert.ok(html.includes('Nincs találat a megadott szűrésre vagy keresésre'));
+ assert.ok(!html.includes('Bajnokság megnyitása'));
+ context.selectAudit('all','<img src=x>');
+ html=context.auditHtml();
+ assert.ok(html.includes('&lt;img src=x&gt;'));
+ assert.ok(!html.includes('<img src=x>'));
+ assert.ok(html.includes('0 / 1 ellenőrzendő bejegyzés'));
+ context.selectAudit('all','');
+ const full=context.auditHtml();
+ assert.ok(full.includes('Bajnokság megnyitása'));
+});
+test('Search input updates only the list and count, preserving focus and controls',()=>{
+ const render=cut('  function renderCompetitionMatchCards_(','  function renderEventList(');
+ const refresh=cut('  function ccRefreshMrszAuditList_(','  function ccMrszPhotoResultsByLeagueHtml_(');
+ assert.ok(render.includes('ccMrszAuditQuery_=event.target.value;'));
+ assert.ok(render.includes("ccMrszAuditType_=text(event.target.value)||'all'"));
+ assert.ok(refresh.includes('results.innerHTML=ccMrszAuditResultsHtml_(filtered)'));
+ assert.ok(refresh.includes('count.textContent=ccMrszAuditCountText_(filtered)'));
+ assert.ok(!refresh.includes('ccMrszAuditHtml_()'), 'do not rerender and blur the search input on each keystroke');
 });
