@@ -2324,15 +2324,23 @@
 
   // League fixture cards use the existing ms-match-row design; source data is not changed.
   function ccMrszNormPairName_(name){
-    const n=text(name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    if(n.includes('kando'))return 'kando';
-    if(n.includes('kozgaz'))return 'kozgaz';
-    if(n.includes('semmelweis'))return 'semmelweis';
-    if(n.includes('emericus'))return 'emericus';
-    if(n.includes('rackeve'))return 'rackeve';
-    if(n.includes('mtk')&&n.includes('kek'))return 'mtk-kek';
-    if(n.includes('mtk'))return 'mtk';
-    return n.replace(/\bbudapest\b/g,'').replace(/\bsport klub\b/g,'').replace(/[^a-z0-9]/g,'');
+    // Match only known, complete aliases. Substring matching would merge distinct squads
+    // (e.g. MTK / MTK U20, Kandó / Kandó II) and attribute results to the wrong team.
+    const compact=text(name).normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .toLowerCase().replace(/[^a-z0-9]/g,'');
+    if(!compact)return '';
+    const aliases={
+      kando:'kando',kandosportklub:'kando',kandosk:'kando',
+      semmelweisegyetem:'semmelweis',semmelweisegyetemsportklub:'semmelweis',
+      emericus:'emericus',emericusse:'emericus',
+      rackeve:'rackeve',rackevese:'rackeve',
+      mtk:'mtk',mtkbudapest:'mtk',
+      mtkkek:'mtk-kek',mtkbudapestkek:'mtk-kek'
+    };
+    if(Object.hasOwn(aliases,compact))return aliases[compact];
+    const beac=/^budapestiegyetemiatletikaiclub(i{1,3})?$/.exec(compact);
+    if(beac)return 'beac'+(beac[1]||'');
+    return compact;
   }
   function ccMrszLocalKickoff_(value){
   const raw=String(value||'');
@@ -2349,7 +2357,9 @@
   // Uses actual saved outcomes only; zero-zero and missing scores are never treated as results.
   function ccMatchScoreboardRank_(league,name){
     const table=(ccMrszPhotoState_.tables||[]).find(t=>text(t.competitionLabel)===text(league)&&t.partial!==true);
-    const row=(table?.rows||[]).find(r=>ccMrszNormPairName_(r.teamName)===ccMrszNormPairName_(name));
+    const key=ccMrszNormPairName_(name);
+    const candidates=key?(table?.rows||[]).filter(r=>ccMrszNormPairName_(r.teamName)===key):[];
+    const row=candidates.length===1?candidates[0]:null;
     const rank=Number(row?.position);
     return row&&Number.isInteger(rank)&&rank>0?rank:null;
   }
@@ -2413,10 +2423,15 @@
   }
   function ccStandingsPhotoTeamRows_(snapshot){
     const raw=Array.isArray(snapshot?.rows)?snapshot.rows:[];
-    const canonical=msRows_();
+    const league=text(snapshot?.competitionLabel);
+    // Canonical IDs must not leak from the Manager's previously selected league.
+    const canonical=league&&text(msData_()?.competitionLabel)===league?msRows_():[];
     return raw.map((r,i)=>{
-      const pair=canonical.find(x=>ccMrszNormPairName_(x.teamName)===ccMrszNormPairName_(r.teamName));
-      return {...r,sourceTeamId:text(r.sourceTeamId||pair?.sourceTeamId||'photo-'+i),
+      const key=ccMrszNormPairName_(r.teamName);
+      const candidates=key?canonical.filter(x=>ccMrszNormPairName_(x.teamName)===key):[];
+      const pair=candidates.length===1?candidates[0]:null;
+      const fallback='photo-'+encodeURIComponent(league||'unknown')+'-'+i;
+      return {...r,sourceTeamId:text(r.sourceTeamId||pair?.sourceTeamId||fallback),
         focus:ccIsBeacLeagueTeam_(r.teamName),history:[]};
     });
   }
