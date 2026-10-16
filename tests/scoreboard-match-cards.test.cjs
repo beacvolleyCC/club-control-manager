@@ -25,6 +25,7 @@ test('played match shows prominent outcome and set-by-set scores',()=>{
  assert.ok(html.includes('is-played'));
  assert.ok(html.includes('<span class="cc-scoreboard-set-results"'));
  assert.ok(html.includes('25:19 · 25:20 · 16:25 · 25:14'));
+ assert.ok(html.includes('<small class="cc-scoreboard-set-coverage">4/4 szett</small>'));
  assert.ok(html.indexOf('<strong>3–1</strong>')<html.indexOf('cc-scoreboard-set-results'));
  assert.ok(!html.includes('Szettek:'));
  assert.ok(!html.includes('Végeredmény'));
@@ -123,4 +124,35 @@ test('Contradictory linked set-point records are not presented as an agreed set 
  assert.ok(html.includes('<strong>3–1</strong>'));
  assert.ok(html.includes('Szettadat ellenőrzendő'));
  assert.ok(!html.includes('25:18 · 25:19'));
+});
+
+test('saved set point coverage stays factual for missing, partial, full and invalid set lists',()=>{
+ const all={...fixture,homeSets:3,awaySets:1,setScores:[
+  {home:25,away:18},{home:17,away:25},{home:25,away:19},{home:25,away:23}
+ ]};
+ const full=ctx.scoreboard(all,{badge:'MRSZ · eredmény',meta:'2026.10.14-i mentett eredmény'});
+ assert.ok(full.includes('4/4 szett'));
+ assert.ok(full.includes('MRSZ · eredmény'));
+ assert.ok(full.includes('2026.10.14-i mentett eredmény'));
+ assert.ok(!full.includes('részleges'));
+ const partial=ctx.scoreboard({...all,setScores:all.setScores.slice(0,2)});
+ assert.ok(partial.includes('2/4 szett · részleges'));
+ assert.ok(partial.includes('25:18 · 17:25'));
+ const missing=ctx.scoreboard({...all,setScores:[]});
+ assert.ok(missing.includes('Nincs rögzített szettpontszám'));
+ assert.ok(!missing.includes('0/4 szett'));
+ const noField=ctx.scoreboard({...all,setScores:undefined});
+ assert.ok(noField.includes('Nincs rögzített szettpontszám'));
+ const wrong=ctx.scoreboard({...all,setScores:[{home:25,away:25}]});
+ assert.ok(wrong.includes('Szettadat ellenőrzendő'));
+ assert.ok(!wrong.includes('25:25'));
+ assert.ok(!wrong.includes('részleges'));
+});
+test('unplayed match remains VS. with no artificial set-point status',()=>{
+ const html=ctx.scoreboard({...fixture,homeSets:null,awaySets:null});
+ assert.ok(html.includes('cc-scoreboard-versus'));
+ assert.ok(!html.includes('cc-scoreboard-set-coverage'));
+ assert.ok(!html.includes('Nincs rögzített szettpontszám'));
+ assert.ok(css.includes('.cc-scoreboard-set-coverage{'));
+ assert.ok(css.includes('  .cc-scoreboard-set-coverage{font-size:8px;'));
 });
