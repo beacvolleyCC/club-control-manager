@@ -2580,6 +2580,8 @@
 
   let ccLeagueMatchScope_='beac';
   let ccMatchesAuditOpen_=false;
+  let ccMrszAuditType_='all';
+  let ccMrszAuditQuery_='';
   function ccIsBeacLeagueTeam_(name){
     const key=ccMrszNormPairName_(name);
     return key==='beac'||key==='beacii'||key.startsWith('budapestiegyetemiatletikaiclub');
@@ -2721,24 +2723,60 @@
     }
     return {groups,issues:groups.reduce((sum,g)=>sum+g.items.length,0)};
   }
+  // Pure client-side filters: no source record is rewritten or reclassified.
+  function ccMrszAuditFilterModel_(model,{type='all',query=''}={}){
+    const allowed=new Set(['all','Mérkőzés','Menetrend','Tabella','Egyeztetés']);
+    const selected=allowed.has(type)?type:'all';
+    const normalized=value=>text(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('hu-HU');
+    const parts=normalized(query).split(/\s+/).filter(Boolean);
+    const groups=(Array.isArray(model?.groups)?model.groups:[]).map(group=>{
+      const items=group.items.filter(item=>{
+        if(selected!=='all'&&item.type!==selected)return false;
+        const searchable=normalized([group.league,item.type,item.name,item.reason,item.date,item.score].join(' '));
+        return parts.every(part=>searchable.includes(part));
+      });
+      return {...group,items};
+    }).filter(group=>group.items.length);
+    return {groups,issues:groups.reduce((sum,group)=>sum+group.items.length,0),
+      total:Number(model?.issues)||0,selected,query:text(query)};
+  }
+  function ccMrszAuditCountText_(filtered){
+    return filtered.issues+' / '+filtered.total+' ellenőrzendő bejegyzés · '+filtered.groups.length+' bajnokság';
+  }
+  function ccMrszAuditResultsHtml_(filtered){
+    if(!filtered.groups.length)return '<div class="ms-empty">'+(filtered.total
+      ?'Nincs találat a megadott szűrésre vagy keresésre.'
+      :'A jelenleg mentett adatok között nincs kimutatott ellentmondás. Ez nem igazolja az adatok teljességét.')+'</div>';
+    return '<div class="cc-mrsz-audit-groups">'+filtered.groups.map((group,i)=>
+      '<details class="cc-mrsz-audit-group" '+(i===0?'open':'')+'><summary><b>'+esc(group.league)+'</b><span>'+group.items.length+' bejegyzés</span></summary>'
+      +'<p class="cc-mrsz-audit-source">'+esc(group.coverage)+'</p><button class="button quiet small" type="button" data-cc-audit-league="'+esc(group.league)+'">Bajnokság megnyitása</button>'
+      +'<ul>'+group.items.map(item=>
+        '<li><div class="cc-mrsz-audit-item-head"><strong>'+esc(item.type)+' · '+esc(item.name)+'</strong><span>'+esc([item.date,item.score].filter(Boolean).join(' · '))+'</span></div>'
+        +'<p>'+esc(item.reason)+'</p></li>').join('')+'</ul></details>').join('')+'</div>';
+  }
   function ccMrszAuditHtml_(){
     if(!ccMrszPhotoState_.loaded)
       return '<section class="panel cc-mrsz-central-audit"><h3>Adatellenőrzés</h3><p>Mentett bajnoki adatok betöltése…</p></section>';
     if(ccMrszPhotoState_.error)
       return '<section class="panel cc-mrsz-central-audit"><h3>Adatellenőrzés</h3><p class="ms-empty error">'+esc(ccMrszPhotoState_.error)+'</p></section>';
-    const model=ccMrszAuditModel_(),affected=model.groups.filter(g=>g.items.length);
+    const filtered=ccMrszAuditFilterModel_(ccMrszAuditModel_(),{type:ccMrszAuditType_,query:ccMrszAuditQuery_});
+    const types=[['all','Összes típus'],['Mérkőzés','Mérkőzéshibák'],['Menetrend','Menetrendi hibák'],
+      ['Tabella','Tabellahibák'],['Egyeztetés','Számszaki eltérések']];
     return '<section class="panel cc-mrsz-central-audit" aria-label="Bajnoki adatellenőrzés">'
-      +'<div class="panel-head"><div><h3>Adatellenőrzés</h3><p>'+model.issues+' ellenőrzendő bejegyzés · '+affected.length+' bajnokság'
-      +' · Mentett MRSZ/BRSZ-adatok, nem élő ellenőrzés</p></div></div>'
-      +'<p class="cc-mrsz-audit-note">A lista számszaki és forrásellentmondásokat jelez. Hiányzó vagy részleges eredménylista nem bizonyít hibát. A megjelenítés nem módosítja a forrásadatokat.</p>'
-      +(affected.length?'<div class="cc-mrsz-audit-groups">'+affected.map((group,i)=>
-        '<details class="cc-mrsz-audit-group" '+(i===0?'open':'')+'><summary><b>'+esc(group.league)+'</b><span>'+group.items.length+' bejegyzés</span></summary>'
-        +'<p class="cc-mrsz-audit-source">'+esc(group.coverage)+'</p><button class="button quiet small" type="button" data-cc-audit-league="'+esc(group.league)+'">Bajnokság megnyitása</button>'
-        +'<ul>'+group.items.map(item=>
-          '<li><div class="cc-mrsz-audit-item-head"><strong>'+esc(item.type)+' · '+esc(item.name)+'</strong><span>'+esc([item.date,item.score].filter(Boolean).join(' · '))+'</span></div>'
-          +'<p>'+esc(item.reason)+'</p></li>').join('')+'</ul></details>').join('')+'</div>'
-        :'<div class="ms-empty">A jelenleg mentett adatok között nincs kimutatott ellentmondás. Ez nem igazolja az adatok teljességét.</div>')
-      +'</section>';
+      +'<div class="panel-head"><div><h3>Adatellenőrzés</h3><p id="ccMrszAuditCount" role="status" aria-live="polite">'+esc(ccMrszAuditCountText_(filtered))+'</p></div></div>'
+      +'<div class="cc-mrsz-audit-filters"><label class="field"><span>Hibatípus</span><select id="ccMrszAuditType" aria-label="Ellenőrzendő rekordok típusa">'
+      +types.map(([value,label])=>'<option value="'+esc(value)+'" '+(filtered.selected===value?'selected':'')+'>'+esc(label)+'</option>').join('')
+      +'</select></label><label class="field"><span>Keresés</span><input id="ccMrszAuditSearch" type="search" value="'+esc(ccMrszAuditQuery_)
+      +'" placeholder="Csapat, ellenfél, hibaok…" autocomplete="off" aria-label="Ellenőrzendő rekordok keresése"></label></div>'
+      +'<p class="cc-mrsz-audit-note">Mentett MRSZ/BRSZ-adatok · nem élő ellenőrzés. A részleges eredménylista önmagában nem bizonyít hibát. A szűrés és keresés nem módosít forrásadatot.</p>'
+      +'<div id="ccMrszAuditResults">'+ccMrszAuditResultsHtml_(filtered)+'</div></section>';
+  }
+  function ccRefreshMrszAuditList_(){
+    if(!ccMrszPhotoState_.loaded||ccMrszPhotoState_.error)return;
+    const filtered=ccMrszAuditFilterModel_(ccMrszAuditModel_(),{type:ccMrszAuditType_,query:ccMrszAuditQuery_});
+    const count=$('#ccMrszAuditCount'),results=$('#ccMrszAuditResults');
+    if(count)count.textContent=ccMrszAuditCountText_(filtered);
+    if(results)results.innerHTML=ccMrszAuditResultsHtml_(filtered);
   }
 
   function ccMrszPhotoResultsByLeagueHtml_(group){
@@ -2801,11 +2839,21 @@
       ccMatchesAuditOpen_=button.dataset.ccAuditView==='audit';
       renderCompetitionMatchCards_();
     }));
-    document.querySelectorAll('[data-cc-audit-league]').forEach(button=>button.addEventListener('click',()=>{
+    $('#ccMrszAuditType')?.addEventListener('change',event=>{
+      ccMrszAuditType_=text(event.target.value)||'all';
+      ccRefreshMrszAuditList_();
+    });
+    $('#ccMrszAuditSearch')?.addEventListener('input',event=>{
+      ccMrszAuditQuery_=event.target.value;
+      ccRefreshMrszAuditList_();
+    });
+    $('#ccMrszAuditResults')?.addEventListener('click',event=>{
+      const button=event.target.closest('[data-cc-audit-league]');
+      if(!button)return;
       const league=text(button.dataset.ccAuditLeague);
       ccMatchesAuditOpen_=false;
       ccSetLeagueContext_(league);
-    }));
+    });
     $('#ccCompetitionChangeAudit')?.addEventListener('click',ccOpenCompetitionChangeAudit_);$('#competitionSourceSync')?.addEventListener('click',ccOpenBrszSyncOptions_);$('#competitionMatchAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'match'));
     const toggle=$('#eventFiltersToggle'),panel=$('#eventFiltersPanel');if(toggle)toggle.classList.toggle('open',state.eventFiltersOpen);toggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.matches',!state.eventFiltersOpen);state.eventFiltersOpen=open;toggle.setAttribute('aria-expanded',String(open));toggle.classList.toggle('open',open);if(panel)panel.hidden=!open;ccBlurPointerControl_(toggle)});
     bindTeamMultiFilter_('events',renderCompetitionMatchCards_);
