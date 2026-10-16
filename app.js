@@ -2582,6 +2582,8 @@
   let ccMatchesAuditOpen_=false;
   let ccMrszAuditType_='all';
   let ccMrszAuditQuery_='';
+  let ccMrszAuditLeague_='all';
+  let ccMrszAuditReturn_=false;
   function ccIsBeacLeagueTeam_(name){
     const key=ccMrszNormPairName_(name);
     return key==='beac'||key==='beacii'||key.startsWith('budapestiegyetemiatletikaiclub');
@@ -2724,12 +2726,14 @@
     return {groups,issues:groups.reduce((sum,g)=>sum+g.items.length,0)};
   }
   // Pure client-side filters: no source record is rewritten or reclassified.
-  function ccMrszAuditFilterModel_(model,{type='all',query=''}={}){
+  function ccMrszAuditFilterModel_(model,{type='all',query='',league='all'}={}){
     const allowed=new Set(['all','Mérkőzés','Menetrend','Tabella','Egyeztetés']);
     const selected=allowed.has(type)?type:'all';
+    const sourceGroups=Array.isArray(model?.groups)?model.groups:[];
+    const selectedLeague=league==='all'||sourceGroups.some(group=>group.league===league)?league:'all';
     const normalized=value=>text(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('hu-HU');
     const parts=normalized(query).split(/\s+/).filter(Boolean);
-    const groups=(Array.isArray(model?.groups)?model.groups:[]).map(group=>{
+    const groups=sourceGroups.filter(group=>selectedLeague==='all'||group.league===selectedLeague).map(group=>{
       const items=group.items.filter(item=>{
         if(selected!=='all'&&item.type!==selected)return false;
         const searchable=normalized([group.league,item.type,item.name,item.reason,item.date,item.score].join(' '));
@@ -2738,7 +2742,7 @@
       return {...group,items};
     }).filter(group=>group.items.length);
     return {groups,issues:groups.reduce((sum,group)=>sum+group.items.length,0),
-      total:Number(model?.issues)||0,selected,query:text(query)};
+      total:Number(model?.issues)||0,selected,selectedLeague,query:text(query)};
   }
   function ccMrszAuditCountText_(filtered){
     return filtered.issues+' / '+filtered.total+' ellenőrzendő bejegyzés · '+filtered.groups.length+' bajnokság';
@@ -2752,19 +2756,23 @@
       +'<p class="cc-mrsz-audit-source">'+esc(group.coverage)+'</p><button class="button quiet small" type="button" data-cc-audit-league="'+esc(group.league)+'">Bajnokság megnyitása</button>'
       +'<ul>'+group.items.map(item=>
         '<li><div class="cc-mrsz-audit-item-head"><strong>'+esc(item.type)+' · '+esc(item.name)+'</strong><span>'+esc([item.date,item.score].filter(Boolean).join(' · '))+'</span></div>'
-        +'<p>'+esc(item.reason)+'</p></li>').join('')+'</ul></details>').join('')+'</div>';
+        +'<p>'+esc(item.reason)+'</p><button class="button quiet small cc-mrsz-audit-open" type="button" data-cc-audit-league="'+esc(group.league)+'" aria-label="Bajnokság megnyitása: '+esc(item.name)+'">Megnyitás</button></li>').join('')+'</ul></details>').join('')+'</div>';
   }
   function ccMrszAuditHtml_(){
     if(!ccMrszPhotoState_.loaded)
       return '<section class="panel cc-mrsz-central-audit"><h3>Adatellenőrzés</h3><p>Mentett bajnoki adatok betöltése…</p></section>';
     if(ccMrszPhotoState_.error)
       return '<section class="panel cc-mrsz-central-audit"><h3>Adatellenőrzés</h3><p class="ms-empty error">'+esc(ccMrszPhotoState_.error)+'</p></section>';
-    const filtered=ccMrszAuditFilterModel_(ccMrszAuditModel_(),{type:ccMrszAuditType_,query:ccMrszAuditQuery_});
+    const model=ccMrszAuditModel_();
+    const filtered=ccMrszAuditFilterModel_(model,{type:ccMrszAuditType_,query:ccMrszAuditQuery_,league:ccMrszAuditLeague_});
     const types=[['all','Összes típus'],['Mérkőzés','Mérkőzéshibák'],['Menetrend','Menetrendi hibák'],
       ['Tabella','Tabellahibák'],['Egyeztetés','Számszaki eltérések']];
+    const leagues=[['all','Összes bajnokság'],...model.groups.map(group=>[group.league,group.league])];
     return '<section class="panel cc-mrsz-central-audit" aria-label="Bajnoki adatellenőrzés">'
       +'<div class="panel-head"><div><h3>Adatellenőrzés</h3><p id="ccMrszAuditCount" role="status" aria-live="polite">'+esc(ccMrszAuditCountText_(filtered))+'</p></div></div>'
-      +'<div class="cc-mrsz-audit-filters"><label class="field"><span>Hibatípus</span><select id="ccMrszAuditType" aria-label="Ellenőrzendő rekordok típusa">'
+      +'<div class="cc-mrsz-audit-filters"><label class="field"><span>Bajnokság / csoport</span><select id="ccMrszAuditLeague" aria-label="Bajnokság szűrése">'
+      +leagues.map(([value,label])=>'<option value="'+esc(value)+'" '+(filtered.selectedLeague===value?'selected':'')+'>'+esc(label)+'</option>').join('')
+      +'</select></label><label class="field"><span>Hibatípus</span><select id="ccMrszAuditType" aria-label="Ellenőrzendő rekordok típusa">'
       +types.map(([value,label])=>'<option value="'+esc(value)+'" '+(filtered.selected===value?'selected':'')+'>'+esc(label)+'</option>').join('')
       +'</select></label><label class="field"><span>Keresés</span><input id="ccMrszAuditSearch" type="search" value="'+esc(ccMrszAuditQuery_)
       +'" placeholder="Csapat, ellenfél, hibaok…" autocomplete="off" aria-label="Ellenőrzendő rekordok keresése"></label></div>'
@@ -2773,7 +2781,7 @@
   }
   function ccRefreshMrszAuditList_(){
     if(!ccMrszPhotoState_.loaded||ccMrszPhotoState_.error)return;
-    const filtered=ccMrszAuditFilterModel_(ccMrszAuditModel_(),{type:ccMrszAuditType_,query:ccMrszAuditQuery_});
+    const filtered=ccMrszAuditFilterModel_(ccMrszAuditModel_(),{type:ccMrszAuditType_,query:ccMrszAuditQuery_,league:ccMrszAuditLeague_});
     const count=$('#ccMrszAuditCount'),results=$('#ccMrszAuditResults');
     if(count)count.textContent=ccMrszAuditCountText_(filtered);
     if(results)results.innerHTML=ccMrszAuditResultsHtml_(filtered);
@@ -2834,11 +2842,16 @@
   function renderCompetitionMatchCards_(){if(!ccRouteIs_('competition','matches'))return;
     state.eventFiltersOpen=filterOpen_('competition.matches',false);
     const matchPeriod=state.ccMatchPeriod||'all',rows=effectiveCompetitionEvents(state.activityEvents).filter(e=>eventType(e)==='match'&&teamFilterMatch_('events',eventTeamId(e))&&(matchPeriod==='all'||(matchPeriod==='upcoming'&&!isEventPast(e))||(matchPeriod==='past'&&isEventPast(e)))).sort((a,b)=>(eventStart(a)?.getTime()||0)-(eventStart(b)?.getTime()||0)),active=teamFilterIds_('events').length>0||matchPeriod!=='all',periodTitle=matchPeriod==='past'?'Elmúlt meccsek':matchPeriod==='upcoming'?'Következő meccsek':'BEAC – teljes idény';
-    $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-match-page-header"><div><h2>Meccsek</h2><p>Mérkőzések és mentett bajnoki adatok.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.matches','edit')?`<button class="cc-toolbar-icon cc-refresh-icon" id="competitionSourceSync" type="button" aria-label="BRSZ frissítés" title="BRSZ frissítés" ${state.competitionSyncBusy?'disabled':''}>↻</button><button class="cc-toolbar-icon cc-add-square" id="competitionMatchAdd" type="button" aria-label="Új meccs" title="Új meccs">+</button>`:''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${matchPeriod==='upcoming'?'selected':''}>Közelgő</option><option value="past" ${matchPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${matchPeriod==='all'?'selected':''}>Teljes idény</option></select></label></div><div class="competition-live-status hidden" id="competitionLiveStatus" role="status" aria-live="polite"></div><nav class="cc-mrsz-audit-tabs" aria-label="Mérkőzések és adatellenőrzés"><button type="button" data-cc-audit-view="matches" aria-pressed="${!ccMatchesAuditOpen_}" class="${ccMatchesAuditOpen_?'':'active'}">Mérkőzések</button><button type="button" data-cc-audit-view="audit" aria-pressed="${ccMatchesAuditOpen_}" class="${ccMatchesAuditOpen_?'active':''}">Adatellenőrzés</button></nav>${ccMatchesAuditOpen_?ccMrszAuditHtml_():''}<div ${ccMatchesAuditOpen_?'hidden':''}>${ccLeagueMatchesContextHtml_()}<article class="panel cc-event-card-panel cc-match-card-panel"><div class="panel-head"><div><h3>${periodTitle} · saját meccsek</h3><p>${rows.length} mérkőzés · névsor és jelentkezés</p></div></div><div class="cc-event-card-list">${rows.map(e=>ccCompetitionEventWithRosterHtml_(e,'match')).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}<button id="ccCompetitionChangeAudit" class="button quiet small cc-audit-trigger" type="button">Változások megtekintése</button></div></div>`;
+    $('#viewContent').innerHTML=`<div class="page-intro competition-list-intro cc-page-header-panel cc-match-page-header"><div><h2>Meccsek</h2><p>Mérkőzések és mentett bajnoki adatok.</p></div><div class="page-actions competition-list-toolbar cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="eventFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggle" aria-expanded="${state.eventFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canAnyAction('competition.matches','edit')?`<button class="cc-toolbar-icon cc-refresh-icon" id="competitionSourceSync" type="button" aria-label="BRSZ frissítés" title="BRSZ frissítés" ${state.competitionSyncBusy?'disabled':''}>↻</button><button class="cc-toolbar-icon cc-add-square" id="competitionMatchAdd" type="button" aria-label="Új meccs" title="Új meccs">+</button>`:''}</div></div><div class="event-filter-head event-filter-head-inline-hidden"><button class="matrix-filter-toggle ${state.eventFiltersOpen?'open':''} ${active?'has-filter':''}" id="eventFiltersToggleLegacy" type="button"></button></div><div class="filter-panel parity-event-filters" id="eventFiltersPanel" ${state.eventFiltersOpen?'':'hidden'}><div class="field compact">${teamMultiFilterHtml_('events')}</div><label class="field compact"><span>Időszak</span><select id="eventPeriodFilter"><option value="upcoming" ${matchPeriod==='upcoming'?'selected':''}>Közelgő</option><option value="past" ${matchPeriod==='past'?'selected':''}>Elmúlt</option><option value="all" ${matchPeriod==='all'?'selected':''}>Teljes idény</option></select></label></div><div class="competition-live-status hidden" id="competitionLiveStatus" role="status" aria-live="polite"></div><nav class="cc-mrsz-audit-tabs" aria-label="Mérkőzések és adatellenőrzés"><button type="button" data-cc-audit-view="matches" aria-pressed="${!ccMatchesAuditOpen_}" class="${ccMatchesAuditOpen_?'':'active'}">Mérkőzések</button><button type="button" data-cc-audit-view="audit" aria-pressed="${ccMatchesAuditOpen_}" class="${ccMatchesAuditOpen_?'active':''}">Adatellenőrzés</button></nav>${ccMatchesAuditOpen_?ccMrszAuditHtml_():''}<div ${ccMatchesAuditOpen_?'hidden':''}>${!ccMatchesAuditOpen_&&ccMrszAuditReturn_?'<div class="cc-mrsz-audit-return"><button type="button" id="ccMrszAuditReturn" class="button quiet small">← Vissza az adatellenőrzéshez</button></div>':''}${ccLeagueMatchesContextHtml_()}<article class="panel cc-event-card-panel cc-match-card-panel"><div class="panel-head"><div><h3>${periodTitle} · saját meccsek</h3><p>${rows.length} mérkőzés · névsor és jelentkezés</p></div></div><div class="cc-event-card-list">${rows.map(e=>ccCompetitionEventWithRosterHtml_(e,'match')).join('')||emptyInline('Nincs meccs ebben a szűrésben.')}</div></article><div class="competition-sync-strip ${ccCompetitionSyncLastRun_()?.status||'idle'}"><span class="sync-dot"></span><span>${esc(ccCompetitionSyncSummary_())}</span>${Number(state.competitionSyncStatus?.pendingChanges||0)?`<b>${num(state.competitionSyncStatus.pendingChanges)} naplózott változás</b>`:''}<button id="ccCompetitionChangeAudit" class="button quiet small cc-audit-trigger" type="button">Változások megtekintése</button></div></div>`;
     document.querySelectorAll('[data-cc-audit-view]').forEach(button=>button.addEventListener('click',()=>{
       ccMatchesAuditOpen_=button.dataset.ccAuditView==='audit';
+      if(ccMatchesAuditOpen_)ccMrszAuditReturn_=false;
       renderCompetitionMatchCards_();
     }));
+    $('#ccMrszAuditLeague')?.addEventListener('change',event=>{
+      ccMrszAuditLeague_=text(event.target.value)||'all';
+      ccRefreshMrszAuditList_();
+    });
     $('#ccMrszAuditType')?.addEventListener('change',event=>{
       ccMrszAuditType_=text(event.target.value)||'all';
       ccRefreshMrszAuditList_();
@@ -2851,8 +2864,15 @@
       const button=event.target.closest('[data-cc-audit-league]');
       if(!button)return;
       const league=text(button.dataset.ccAuditLeague);
+      if(!ccLeagueCatalog_().some(group=>group.competitionLabel===league))return;
       ccMatchesAuditOpen_=false;
+      ccMrszAuditReturn_=true;
       ccSetLeagueContext_(league);
+    });
+    $('#ccMrszAuditReturn')?.addEventListener('click',()=>{
+      ccMatchesAuditOpen_=true;
+      ccMrszAuditReturn_=false;
+      renderCompetitionMatchCards_();
     });
     $('#ccCompetitionChangeAudit')?.addEventListener('click',ccOpenCompetitionChangeAudit_);$('#competitionSourceSync')?.addEventListener('click',ccOpenBrszSyncOptions_);$('#competitionMatchAdd')?.addEventListener('click',()=>openCompetitionEventEditor(null,'match'));
     const toggle=$('#eventFiltersToggle'),panel=$('#eventFiltersPanel');if(toggle)toggle.classList.toggle('open',state.eventFiltersOpen);toggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.matches',!state.eventFiltersOpen);state.eventFiltersOpen=open;toggle.setAttribute('aria-expanded',String(open));toggle.classList.toggle('open',open);if(panel)panel.hidden=!open;ccBlurPointerControl_(toggle)});
