@@ -91,3 +91,20 @@ test('Invalid fractional or negative snapshot counters are unavailable',()=>{
  assert.ok(html.includes('<span>Szettmérleg</span><b>–</b>'));
  assert.ok(html.includes('<span>Szettarány</span><b>–</b>'));
 });
+
+test('Inconsistent recorded standings mask the selected-team balance, not the source match count',()=>{
+ const mismatch={...beac,played:4,wins:2,losses:1};
+ const html=render([mismatch],null,{partial:false});
+ assert.ok(html.includes('<span>Mérkőzések</span><b>4</b>'));
+ assert.ok(html.includes('<span>Mérleg</span><b>–</b>'));
+ assert.ok(html.includes('Ellenőrzendő · M ≠ GY + V'));
+ assert.ok(html.includes('győzelem + vereség: 3'));
+ assert.equal(mismatch.played,4);
+ assert.equal(mismatch.wins,2);
+ assert.equal(mismatch.losses,1);
+});
+test('Partial source with one unknown record counter is not falsely accused of arithmetic mismatch',()=>{
+ const html=render([{...beac,played:2,wins:null,losses:1}],null,{partial:true});
+ assert.ok(html.includes('<span>Mérleg</span><b>–</b>'));
+ assert.ok(!html.includes('Ellenőrzendő · M ≠ GY + V'));
+});
