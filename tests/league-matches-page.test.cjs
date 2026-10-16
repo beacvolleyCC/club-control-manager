@@ -18,12 +18,13 @@ function harness(opts={}){
           {competitionLabel:womenB,rows:[{teamName:'MTK Budapest kék',position:1}]}]};
  const ctx={rows:[],table:[],fixture:[]};
  const api=new Function('teamFilterIds_','text','state','ccMrszMenGroup_','ccCurrentLeague_','ccMrszPhotoState_',
-   'ccLeagueContextSelectHtml_','esc','ccMrszMainPhotoTableHtml_','ccMrszLeagueFixturePanelHtml_',
+   'ccLeagueContextSelectHtml_','esc','ccMrszMainPhotoTableHtml_','ccMrszLeagueFixturePanelHtml_','ccMrszCoverageLabel_',
    code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_};')(
    ()=>opts.selectedTeamIds||[],x=>String(x??''),state,opts.menGroup||'B',
    fallback=>selection||fallback,photo,label=>'<select id="ccLeagueContextSelect"><option>'+label+'</option></select>',
    x=>String(x??''),t=>{ctx.table.push(t.competitionLabel);return '<article class="ms-standings-card">TABLE:'+t.competitionLabel+'</article>'},
-   group=>{ctx.fixture.push(group);return '<article class="ms-match-panel">FIXTURE:'+group+'</article>';});
+   group=>{ctx.fixture.push(group);return '<article class="ms-match-panel">FIXTURE:'+group+'</article>';},
+   snapshot=>snapshot?'MRSZ · mentett tabella':'MRSZ · Nincs mentett tabella');
  return {...api,ctx,state};
 }
 test('default context follows a single BEAC team, without guessing group membership',()=>{
@@ -46,7 +47,7 @@ test('missing official standings never fall back to another competition',()=>{
  const html=h.ccLeagueMatchesContextHtml_();
  assert.deepEqual(h.ctx.table,[]);
  assert.deepEqual(h.ctx.fixture,[menB]);
- assert.ok(html.includes('nincs hiteles mentett tabella'));
+ assert.ok(html.includes('Nincs mentett tabella'));
  assert.ok(!html.includes('TABLE:'+menA));
 });
 test('missing snapshot and read errors do not manufacture fixtures or results',()=>{

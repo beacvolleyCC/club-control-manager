@@ -67,9 +67,9 @@ test('Standings introduction and empty state never imply live automatic data upd
  const from=app.indexOf('  function renderManagerStandings_()');
  const end=app.indexOf('  function msPositionDelta_(',from);
  const snippet=app.slice(from,end>from?end:from+12000);
- assert.ok(snippet.includes('MRSZ – mentett pillanatkép (2026.10.14.) · nem élő adat'));
- assert.ok(snippet.includes('MRSZ – részleges pillanatkép (2026.10.14.) · nem élő adat'));
- assert.ok(snippet.includes('A mentett MRSZ-pillanatképek nem frissülnek automatikusan.'));
+ assert.ok(snippet.includes('const meta=showPhoto?[group,ccMrszCoverageLabel_(photo)]'));
+ assert.ok(snippet.includes('ccMrszCoverageLabel_(null)'));
+ assert.ok(snippet.includes('Még nincs tabellaadat'));
  assert.ok(!snippet.includes('Aktuális bajnoki állás'));
  assert.ok(!snippet.includes('itt automatikusan megjelenik'));
 });
