@@ -10,7 +10,7 @@ const slice=(a,b)=>{
 };
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const helpers=new Function('esc',slice('  function ccMrszStatNumber_(','  // One source/coverage vocabulary')+
- ';return {number:ccMrszStatNumber_,position:ccMrszStatPosition_,pair:ccMrszStatPair_,ratio:ccMrszStatRatio_,recordNumber:ccMrszRecordNumber_,notice:ccMrszRecordNoticeHtml_};')(esc);
+ ';return {number:ccMrszStatNumber_,position:ccMrszStatPosition_,pair:ccMrszStatPair_,ratio:ccMrszStatRatio_,issue:ccMrszRecordIssue_,recordNumber:ccMrszRecordNumber_,recordPair:ccMrszRecordPair_,notice:ccMrszRecordNoticeHtml_};')(esc);
 const coverage=new Function(slice('  function ccMrszCoverageLabel_(','  function ccVerifiedSnapshotStatsHtml_(')+';return ccMrszCoverageLabel_;')();
 test('Missing, negative, fractional and malformed numbers never become false zeros',()=>{
  for(const value of [null,undefined,'',' ',NaN,Infinity,-1,-0.5,1.4,'N/A'])
@@ -79,4 +79,32 @@ test('Standalone standings and auxiliary men-group table apply the same missing-
  assert.ok(men.includes('ccMrszStatNumber_'));
  assert.ok(men.includes('ccMrszStatPosition_'));
  assert.ok(standings.includes('showPhoto?photo:null'));
+});
+
+
+test('Played equals wins plus losses only when all saved counters exist',()=>{
+ const consistent={played:5,wins:3,losses:2};
+ assert.equal(helpers.issue(consistent),'');
+ assert.equal(helpers.recordPair(consistent),'3–2');
+ assert.equal(helpers.recordNumber(consistent,'wins'),'3');
+ assert.equal(helpers.issue({played:0,wins:0,losses:0}),'');
+ for(const incomplete of [{played:null,wins:1,losses:0},{played:2,wins:2,losses:null},{played:2,wins:1,losses:undefined},{played:'',wins:1,losses:1}])
+  assert.equal(helpers.issue(incomplete),'',JSON.stringify(incomplete));
+});
+test('Arithmetic mismatch hides win/loss balance, keeps original played count and explains why',()=>{
+ const corrupted={played:4,wins:2,losses:1};
+ assert.match(helpers.issue(corrupted),/Lejátszott mérkőzés: 4; győzelem \+ vereség: 3/);
+ assert.equal(helpers.recordNumber(corrupted,'played'),'4');
+ assert.equal(helpers.recordNumber(corrupted,'wins'),'–');
+ assert.equal(helpers.recordNumber(corrupted,'losses'),'–');
+ assert.equal(helpers.recordPair(corrupted),'–');
+ assert.ok(helpers.notice(corrupted).includes('Ellenőrzendő · M ≠ GY + V'));
+ assert.ok(!helpers.notice({played:3,wins:2,losses:1}));
+ assert.deepEqual(corrupted,{played:4,wins:2,losses:1},'source record remains unchanged');
+});
+test('Meccsek table flags contradiction instead of displaying a fictitious winning record',()=>{
+ const html=makePhoto({partial:false,competitionLabel:'Liga A',rows:[{...row,played:4,wins:2,losses:1}]});
+ assert.match(html,/Ellenőrzendő · M ≠ GY \+ V/);
+ assert.ok(html.includes('<td>4</td><td>–</td><td>–</td>'),html);
+ assert.ok(!html.includes('<td>2</td><td>1</td>'));
 });
