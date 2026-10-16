@@ -25,6 +25,7 @@ on:
       - tests/mrsz-saved-results-stats.test.cjs
       - tests/mrsz-team-identity.test.cjs
       - tests/mrsz-review-records.test.cjs
+      - tests/mrsz-central-audit.test.cjs
       - tests/mrsz-set-score-integrity.test.cjs
       - tests/mrsz-data-coverage.test.cjs
       - tests/mrsz-stat-missing-values.test.cjs
@@ -62,6 +63,7 @@ on:
       - tests/mrsz-saved-results-stats.test.cjs
       - tests/mrsz-team-identity.test.cjs
       - tests/mrsz-review-records.test.cjs
+      - tests/mrsz-central-audit.test.cjs
       - tests/mrsz-set-score-integrity.test.cjs
       - tests/mrsz-data-coverage.test.cjs
       - tests/mrsz-stat-missing-values.test.cjs
@@ -110,6 +112,7 @@ jobs:
           node --test tests/mrsz-saved-results-stats.test.cjs
           node --test tests/mrsz-team-identity.test.cjs
           node --test tests/mrsz-review-records.test.cjs
+          node --test tests/mrsz-central-audit.test.cjs
           node --test tests/mrsz-set-score-integrity.test.cjs
           node --test tests/mrsz-data-coverage.test.cjs
           node --test tests/mrsz-stat-missing-values.test.cjs
