@@ -23,6 +23,12 @@ test('played match shows prominent outcome and set-by-set scores',()=>{
  for(const expected of ['BEAC II.','UTE','3–1','25:19','16:25','19:30','Bogdánfy'])
    assert.ok(html.includes(expected),expected);
  assert.ok(html.includes('is-played'));
+ assert.ok(html.includes('<span class="cc-scoreboard-set-results"'));
+ assert.ok(html.includes('25:19 · 25:20 · 16:25 · 25:14'));
+ assert.ok(html.indexOf('<strong>3–1</strong>')<html.indexOf('cc-scoreboard-set-results'));
+ assert.ok(!html.includes('Szettek:'));
+ assert.ok(!html.includes('Végeredmény'));
+ assert.ok(!html.includes('Következő meccs'));
 });
 test('upcoming and unscored matches display regular-weight VS. instead of score placeholders',()=>{
  for(const m of [{...fixture,homeSets:null,awaySets:null},{...fixture,homeSets:0,awaySets:0},{...fixture,homeSets:3,awaySets:null}]){
@@ -31,12 +37,15 @@ test('upcoming and unscored matches display regular-weight VS. instead of score 
    assert.ok(!html.includes('– : –'));
    assert.ok(!html.includes('0–0'));
    assert.ok(!html.includes('<strong>VS.</strong>'));
+   assert.ok(!html.includes('cc-scoreboard-set-results'));
    assert.ok(!html.includes('Szettek:'));
+   assert.ok(!html.includes('Következő meccs'));
    assert.ok(html.includes('is-upcoming'));
  }
  const past=ctx.scoreboard({...fixture,homeSets:null,awaySets:null},{past:true});
  assert.ok(past.includes('<span class="cc-scoreboard-versus">VS.</span>'));
- assert.ok(past.includes('Eredmény még nincs'));
+ assert.ok(!past.includes('Eredmény még nincs'));
+ assert.ok(!past.includes('Következő meccs'));
 });
 test('completed results stay bold and upcoming VS. styling stays nonbold on desktop and mobile',()=>{
  const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:2});
@@ -44,6 +53,10 @@ test('completed results stay bold and upcoming VS. styling stays nonbold on desk
  assert.ok(!played.includes('cc-scoreboard-versus'));
  assert.ok(css.includes('.cc-scoreboard-score>.cc-scoreboard-versus{'));
  assert.match(css,/\.cc-scoreboard-score>\.cc-scoreboard-versus\{[^}]*font-weight:400;/);
+ assert.ok(css.includes('font-size:clamp(18px,1.8vw,23px)'));
+ assert.ok(css.includes('.cc-scoreboard-set-results{'));
+ assert.ok(!css.includes('.cc-scoreboard-sets{'));
+ assert.ok(!css.includes('.cc-scoreboard-score>small{'));
  assert.ok(css.includes('@media(max-width:700px)'));
  assert.ok(css.includes('@media(max-width:430px)'));
 });
@@ -82,4 +95,23 @@ test('desktop and phone scoreboard styling remains responsive',()=>{
  assert.ok(css.includes('.cc-scoreboard-main{'));
  assert.ok(css.includes('@media(max-width:700px)'));
  assert.ok(css.includes('@media(max-width:430px)'));
+});
+
+test('saved fixture shows match date in place of the Mentett menetrend label and time at right',()=>{
+ const html=ctx.scoreboard({...fixture,homeSets:null,awaySets:null},{badge:'Mentett menetrend',dateInsteadOfBadge:true});
+ assert.ok(html.includes('<span class="cc-scoreboard-label">2026-10-13</span>'));
+ assert.ok(html.includes('<span class="cc-scoreboard-kickoff">19:30</span>'));
+ assert.ok(!html.includes('Mentett menetrend'));
+ assert.ok(!html.includes('Következő meccs'));
+ assert.ok(html.includes('<span class="cc-scoreboard-versus">VS.</span>'));
+ const normal=ctx.scoreboard({...fixture,homeSets:null,awaySets:null},{badge:'Hazai meccs'});
+ assert.ok(normal.includes('<span class="cc-scoreboard-label">Hazai meccs</span>'));
+ assert.ok(normal.includes('<span class="cc-scoreboard-kickoff">2026-10-13 · 19:30</span>'));
+});
+test('set score content stays escaped in the central result area',()=>{
+ const html=ctx.scoreboard({...fixture,homeSets:3,awaySets:1,setScores:[{home:'25',away:'19'},{home:'<img>',away:20}]});
+ assert.ok(html.includes('<span class="cc-scoreboard-set-results"'));
+ assert.ok(html.includes('25:19'));
+ assert.ok(!html.includes('<img>'));
+ assert.ok(!html.includes('Szettek:'));
 });
