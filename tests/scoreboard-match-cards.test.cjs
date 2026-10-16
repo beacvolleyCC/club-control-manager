@@ -108,11 +108,11 @@ test('saved fixture shows match date in place of the Mentett menetrend label and
  assert.ok(normal.includes('<span class="cc-scoreboard-label">Hazai meccs</span>'));
  assert.ok(normal.includes('<span class="cc-scoreboard-kickoff">2026-10-13 · 19:30</span>'));
 });
-test('set score content stays escaped in the central result area',()=>{
- const html=ctx.scoreboard({...fixture,homeSets:3,awaySets:1,setScores:[{home:'25',away:'19'},{home:'<img>',away:20}]});
- assert.ok(html.includes('<span class="cc-scoreboard-set-results"'));
- assert.ok(html.includes('25:19'));
+test('untrusted or invalid set-score content is quarantined from the central result area',()=>{
+ const html=ctx.scoreboard({...fixture,homeSets:3,awaySets:1,setScores:[{home:'25',away:'19'},{home:'<img>',away:20}]},{eventId:'match-123'});
+ assert.ok(html.includes('Szettadat ellenőrzendő'));
  assert.ok(!html.includes('<img>'));
+ assert.ok(!html.includes('25:19 ·'));
  assert.ok(!html.includes('Szettek:'));
 });
 
