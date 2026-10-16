@@ -2579,6 +2579,7 @@
   }
 
   let ccLeagueMatchScope_='beac';
+  let ccMatchesAuditOpen_=false;
   function ccIsBeacLeagueTeam_(name){
     const key=ccMrszNormPairName_(name);
     return key==='beac'||key==='beacii'||key.startsWith('budapestiegyetemiatletikaiclub');
@@ -2649,6 +2650,95 @@
             +(score?' · '+esc(score):'')+'<small> · '+esc(reason)+'</small>'
             +(coverage?'<small> · '+esc(coverage)+'</small>':'')+'</li>'}).join('')
         +'</ul><p>Ellenőrzendő forrásrekordok; nem kerülnek a megerősített mérkőzések és statisztikák közé. Az eredeti adatok változatlanul megmaradnak.</p></details>':'')+'</section>';
+  }
+
+  // Read-only cross-league audit. Use the same underlying result and standings
+  // validators as individual league views; never treat missing coverage as an error.
+  function ccMrszAuditModel_(store=ccMrszPhotoState_){
+    const photos=Array.isArray(store?.matches)?store.matches:[],fixtures=Array.isArray(store?.fixtures)?store.fixtures:[],
+      tables=Array.isArray(store?.tables)?store.tables:[],labels=new Set();
+    for(const record of [...photos,...fixtures,...tables])if(text(record?.competitionLabel))labels.add(text(record.competitionLabel));
+    const groups=[];
+    for(const league of [...labels].sort((a,b)=>a.localeCompare(b,'hu'))){
+      const table=tables.find(t=>text(t.competitionLabel)===league),
+        rows=Array.isArray(table?.rows)?table.rows:[],
+        saved=photos.filter(m=>text(m.competitionLabel)===league),
+        scheduled=fixtures.filter(m=>text(m.competitionLabel)===league),
+        items=[],outcomes=new Map(),conflicts=new Set(),seen=new Set();
+      const key=m=>ccMrszLocalKickoff_(m?.startsAt).date+'|'+ccMrszNormPairName_(m?.homeName)+'|'+ccMrszNormPairName_(m?.awayName);
+      for(const match of saved){
+        const k=key(match),score=text(match.homeSets)+'–'+text(match.awaySets);
+        if(outcomes.has(k)&&outcomes.get(k)!==score)conflicts.add(k);
+        else outcomes.set(k,score);
+      }
+      for(const raw of saved){
+        const match={...raw,isPhoto:true};
+        const reason=ccMrszMatchReviewReason_(match,rows,table?.partial===false,conflicts);
+        if(!reason)continue;
+        const identity=key(match)+'|'+text(match.homeSets)+'|'+text(match.awaySets)+'|'+JSON.stringify(match.setScores||[])+'|'+reason;
+        if(seen.has(identity))continue;seen.add(identity);
+        const stamp=ccMrszLocalKickoff_(match.startsAt);
+        items.push({type:'Mérkőzés',name:text(match.homeName)+' – '+text(match.awayName),
+          date:stamp.date+' '+stamp.time,reason,score:match.homeSets==null||match.awaySets==null?'':text(match.homeSets)+'–'+text(match.awaySets)});
+      }
+      for(const match of scheduled){
+        if(!ccMrszUnverifiedSelfFixture_(match))continue;
+        const identity='fixture|'+key(match);if(seen.has(identity))continue;seen.add(identity);
+        const stamp=ccMrszLocalKickoff_(match.startsAt);
+        items.push({type:'Menetrend',name:text(match.homeName)+' – '+text(match.awayName),
+          date:stamp.date+' '+stamp.time,reason:'Nem megerősített BEAC–BEAC menetrendi rekord',score:''});
+      }
+      for(const row of rows){
+        const issue=ccMrszRecordIssue_(row);
+        if(issue)items.push({type:'Tabella',name:text(row.teamName),date:'',score:'',reason:issue});
+        if(table?.partial!==false||!saved.length)continue;
+        const recorded=ccSavedLeagueResults_(row,league,saved,rows),played=ccMrszStatNumber_(row?.played);
+        // Comparisons are conditional. Unequal/unknown saved match counts do not
+        // establish an inconsistency with the archived complete table.
+        if(played==='–'||!recorded.length||recorded.length!==Number(played))continue;
+        let forSets=0,againstSets=0,wins=0,losses=0,valid=true;
+        for(const result of recorded){
+          const pair=/^(\d+)–(\d+)$/.exec(text(result?.score));
+          if(!pair){valid=false;break}
+          const a=Number(pair[1]),b=Number(pair[2]);
+          if(!((a===3&&b>=0&&b<=2)||(b===3&&a>=0&&a<=2))){valid=false;break}
+          forSets+=a;againstSets+=b;if(a>b)wins++;else losses++;
+        }
+        if(!valid)continue;
+        const sourceSets=ccMrszStatPair_(row.setsFor,row.setsAgainst),
+          sourceRecord=ccMrszRecordPair_(row),
+          actualSets=forSets+'–'+againstSets,actualRecord=wins+'–'+losses,issues=[];
+        if(sourceSets!=='–'&&sourceSets!==actualSets)
+          issues.push('Szettmérleg: tabella '+sourceSets+', mentett eredmények '+actualSets);
+        if(sourceRecord!=='–'&&sourceRecord!==actualRecord)
+          issues.push('Mérleg: tabella '+sourceRecord+', mentett eredmények '+actualRecord);
+        if(issues.length)items.push({type:'Egyeztetés',name:text(row.teamName),date:'',score:'',
+          reason:issues.join('; ')+'. '+recorded.length+'/'+played+' mentett meccs; az egyező darabszám önmagában nem igazolja a teljességet.'});
+      }
+      items.sort((a,b)=>a.type.localeCompare(b.type,'hu')||a.name.localeCompare(b.name,'hu')||a.date.localeCompare(b.date));
+      groups.push({league,coverage:table?ccMrszCoverageLabel_(table):'Nincs mentett MRSZ-tabella · nem élő adat',
+        items,savedCount:saved.length,fixtureCount:scheduled.length});
+    }
+    return {groups,issues:groups.reduce((sum,g)=>sum+g.items.length,0)};
+  }
+  function ccMrszAuditHtml_(){
+    if(!ccMrszPhotoState_.loaded)
+      return '<section class="panel cc-mrsz-central-audit"><h3>Adatellenőrzés</h3><p>Mentett bajnoki adatok betöltése…</p></section>';
+    if(ccMrszPhotoState_.error)
+      return '<section class="panel cc-mrsz-central-audit"><h3>Adatellenőrzés</h3><p class="ms-empty error">'+esc(ccMrszPhotoState_.error)+'</p></section>';
+    const model=ccMrszAuditModel_(),affected=model.groups.filter(g=>g.items.length);
+    return '<section class="panel cc-mrsz-central-audit" aria-label="Bajnoki adatellenőrzés">'
+      +'<div class="panel-head"><div><h3>Adatellenőrzés</h3><p>'+model.issues+' ellenőrzendő bejegyzés · '+affected.length+' bajnokság'
+      +' · Mentett MRSZ/BRSZ-adatok, nem élő ellenőrzés</p></div></div>'
+      +'<p class="cc-mrsz-audit-note">A lista számszaki és forrásellentmondásokat jelez. Hiányzó vagy részleges eredménylista nem bizonyít hibát. A megjelenítés nem módosítja a forrásadatokat.</p>'
+      +(affected.length?'<div class="cc-mrsz-audit-groups">'+affected.map((group,i)=>
+        '<details class="cc-mrsz-audit-group" '+(i===0?'open':'')+'><summary><b>'+esc(group.league)+'</b><span>'+group.items.length+' bejegyzés</span></summary>'
+        +'<p class="cc-mrsz-audit-source">'+esc(group.coverage)+'</p><button class="button quiet small" type="button" data-cc-audit-league="'+esc(group.league)+'">Bajnokság megnyitása</button>'
+        +'<ul>'+group.items.map(item=>
+          '<li><div class="cc-mrsz-audit-item-head"><strong>'+esc(item.type)+' · '+esc(item.name)+'</strong><span>'+esc([item.date,item.score].filter(Boolean).join(' · '))+'</span></div>'
+          +'<p>'+esc(item.reason)+'</p></li>').join('')+'</ul></details>').join('')+'</div>'
+        :'<div class="ms-empty">A jelenleg mentett adatok között nincs kimutatott ellentmondás. Ez nem igazolja az adatok teljességét.</div>')
+      +'</section>';
   }
 
   function ccMrszPhotoResultsByLeagueHtml_(group){
