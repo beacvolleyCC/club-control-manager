@@ -9,8 +9,8 @@ const slice=(a,b)=>{
  return js.slice(start,end);
 };
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const helpers=new Function(slice('  function ccMrszStatNumber_(','  // One source/coverage vocabulary')+
- ';return {number:ccMrszStatNumber_,position:ccMrszStatPosition_,pair:ccMrszStatPair_,ratio:ccMrszStatRatio_};')();
+const helpers=new Function('esc',slice('  function ccMrszStatNumber_(','  // One source/coverage vocabulary')+
+ ';return {number:ccMrszStatNumber_,position:ccMrszStatPosition_,pair:ccMrszStatPair_,ratio:ccMrszStatRatio_,recordNumber:ccMrszRecordNumber_,notice:ccMrszRecordNoticeHtml_};')(esc);
 const coverage=new Function(slice('  function ccMrszCoverageLabel_(','  function ccVerifiedSnapshotStatsHtml_(')+';return ccMrszCoverageLabel_;')();
 test('Missing, negative, fractional and malformed numbers never become false zeros',()=>{
  for(const value of [null,undefined,'',' ',NaN,Infinity,-1,-0.5,1.4,'N/A'])
@@ -41,9 +41,9 @@ test('Unverified or partial MRSZ table positions must remain unavailable',()=>{
  assert.equal(helpers.position(2,{partial:false}), '2');
  assert.equal(helpers.position(2,null), '2');
 });
-const makePhoto=new Function('text','esc','num','msLogoHtml_','ccMrszCoverageLabel_','ccMrszStatNumber_','ccMrszStatPosition_','ccMrszStatPair_','ccMrszStatRatio_',
+const makePhoto=new Function('text','esc','num','msLogoHtml_','ccMrszCoverageLabel_','ccMrszStatNumber_','ccMrszStatPosition_','ccMrszStatPair_','ccMrszStatRatio_','ccMrszRecordNumber_','ccMrszRecordNoticeHtml_',
  slice('  function ccMrszMainPhotoTableHtml_(','  // League fixture cards')+';return ccMrszMainPhotoTableHtml_;')(
- x=>String(x??''),esc,x=>Number(x)||0,()=>'',coverage,helpers.number,helpers.position,helpers.pair,helpers.ratio);
+ x=>String(x??''),esc,x=>Number(x)||0,()=>'',coverage,helpers.number,helpers.position,helpers.pair,helpers.ratio,helpers.recordNumber,helpers.notice);
 const row={teamName:'MTK',position:1,played:1,wins:1,losses:0,tablePoints:3,setsFor:3,setsAgainst:0,pointsFor:null,pointsAgainst:55};
 test('Meccsek saved table displays genuine zero, unknown points and a defined set ratio',()=>{
  const html=makePhoto({partial:false,competitionLabel:'Liga A',rows:[row]});
@@ -60,10 +60,10 @@ test('Meccsek partial table shows no unverified ranking but keeps actual result 
  assert.ok(html.includes('<td>0</td>'));
  assert.ok(!html.includes('<td><b>1</b></td>'));
 });
-const makeOverview=new Function('ccOverviewStandingsModel_','teamById','text','esc','msLogoHtml_','ccMrszStatNumber_','ccMrszStatPosition_','ccMrszStatPair_','ccMrszStatRatio_',
+const makeOverview=new Function('ccOverviewStandingsModel_','teamById','text','esc','msLogoHtml_','ccMrszStatNumber_','ccMrszStatPosition_','ccMrszStatPair_','ccMrszStatRatio_','ccMrszRecordNumber_','ccMrszRecordNoticeHtml_',
  slice('  function standingsCard_(','  function ccOpenStandingsContext_(')+';return standingsCard_;')(
  ()=>({rows:[{...row,sourceTeamId:'x'}],group:'Liga A',source:coverage({partial:true}),snapshot:{partial:true}}),
- ()=>({name:'Női I',color:'#000'}),x=>String(x??''),esc,()=>'',helpers.number,helpers.position,helpers.pair,helpers.ratio);
+ ()=>({name:'Női I',color:'#000'}),x=>String(x??''),esc,()=>'',helpers.number,helpers.position,helpers.pair,helpers.ratio,helpers.recordNumber,helpers.notice);
 test('Áttekintő does not display partial rank or fabricate missing point counts',()=>{
  const html=makeOverview('1');
  assert.ok(html.includes('<td><b>–</b></td>'));
