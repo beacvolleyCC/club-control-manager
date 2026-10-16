@@ -24,13 +24,28 @@ test('played match shows prominent outcome and set-by-set scores',()=>{
    assert.ok(html.includes(expected),expected);
  assert.ok(html.includes('is-played'));
 });
-test('upcoming and unscored matches never show invented results',()=>{
- for(const m of [{...fixture,homeSets:null,awaySets:null},{...fixture,homeSets:0,awaySets:0}]){
+test('upcoming and unscored matches display regular-weight VS. instead of score placeholders',()=>{
+ for(const m of [{...fixture,homeSets:null,awaySets:null},{...fixture,homeSets:0,awaySets:0},{...fixture,homeSets:3,awaySets:null}]){
    const html=ctx.scoreboard(m);
-   assert.ok(html.includes('– : –'));
+   assert.ok(html.includes('<span class="cc-scoreboard-versus">VS.</span>'));
+   assert.ok(!html.includes('– : –'));
    assert.ok(!html.includes('0–0'));
+   assert.ok(!html.includes('<strong>VS.</strong>'));
    assert.ok(!html.includes('Szettek:'));
+   assert.ok(html.includes('is-upcoming'));
  }
+ const past=ctx.scoreboard({...fixture,homeSets:null,awaySets:null},{past:true});
+ assert.ok(past.includes('<span class="cc-scoreboard-versus">VS.</span>'));
+ assert.ok(past.includes('Eredmény még nincs'));
+});
+test('completed results stay bold and upcoming VS. styling stays nonbold on desktop and mobile',()=>{
+ const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:2});
+ assert.ok(played.includes('<strong>3–2</strong>'));
+ assert.ok(!played.includes('cc-scoreboard-versus'));
+ assert.ok(css.includes('.cc-scoreboard-score>.cc-scoreboard-versus{'));
+ assert.match(css,/\.cc-scoreboard-score>\.cc-scoreboard-versus\{[^}]*font-weight:400;/);
+ assert.ok(css.includes('@media(max-width:700px)'));
+ assert.ok(css.includes('@media(max-width:430px)'));
 });
 test('linked match retains its event ID and live RSVP count',()=>{
  const html=ctx.scoreboard({...fixture,homeSets:null,awaySets:null},{eventId:'match-id',meta:'12 jövök / 14 kerettag',badge:'Hazai meccs'});
