@@ -23,7 +23,7 @@ function harness(opts={}){
    ()=>opts.selectedTeamIds||[],x=>String(x??''),state,opts.menGroup||'B',
    fallback=>selection||fallback,photo,label=>'<select id="ccLeagueContextSelect"><option>'+label+'</option></select>',
    x=>String(x??''),t=>{ctx.table.push(t.competitionLabel);return '<article class="ms-standings-card">TABLE:'+t.competitionLabel+'</article>'},
-   group=>{ctx.fixture.push(group);return '<article class="ms-match-panel">FIXTURE:'+group+'</article';},
+   group=>{ctx.fixture.push(group);return '<article class="ms-match-panel">FIXTURE:'+group+'</article>';},
    snapshot=>snapshot?'MRSZ · mentett tabella':'MRSZ · Nincs mentett tabella');
  return {...api,ctx,state};
 }
