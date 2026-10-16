@@ -26,6 +26,7 @@ on:
       - tests/mrsz-review-records.test.cjs
       - tests/mrsz-data-coverage.test.cjs
       - tests/mrsz-stat-missing-values.test.cjs
+      - tests/mrsz-results-crosscheck.test.cjs
       - tests/scoreboard-match-cards.test.cjs
       - supabase/migrations/20261014153502_cc_manager_competition_change_audit_readonly_v1.sql
       - tests/competition-source-identity.test.cjs
@@ -60,6 +61,7 @@ on:
       - tests/mrsz-review-records.test.cjs
       - tests/mrsz-data-coverage.test.cjs
       - tests/mrsz-stat-missing-values.test.cjs
+      - tests/mrsz-results-crosscheck.test.cjs
       - tests/scoreboard-match-cards.test.cjs
       - supabase/migrations/20261014153502_cc_manager_competition_change_audit_readonly_v1.sql
       - tests/competition-source-identity.test.cjs
@@ -105,6 +107,7 @@ jobs:
           node --test tests/mrsz-review-records.test.cjs
           node --test tests/mrsz-data-coverage.test.cjs
           node --test tests/mrsz-stat-missing-values.test.cjs
+          node --test tests/mrsz-results-crosscheck.test.cjs
           node --test tests/competition-source-identity.test.cjs
           node --test tests/competition-league-fixture-reference.test.cjs
           node --test tests/mrsz-screenshot-finance.test.cjs
