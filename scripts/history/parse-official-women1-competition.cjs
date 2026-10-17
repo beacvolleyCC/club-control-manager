@@ -11,7 +11,7 @@ function dayMarkers(html){
 function parseRows(html){
  const raw=String(html||'');
  const dates=dayMarkers(raw);
- const pat=/\bOnClick="oldal_submit_publikus\('([^']*p_merkozes_kod=\d+[^']*)'\)"/gi;
+ const pat=/\bOnClick="oldal_submit_publikus\('([^']*p_merkozes_kod=\d+[^']*)'\)\s*;?\s*"/gi;
  let dateCursor=0,lastDate=null;
  const matches=[],ids=new Set(),errors=[];
  for(const m of raw.matchAll(pat)){
