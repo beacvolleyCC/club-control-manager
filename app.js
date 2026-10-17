@@ -988,6 +988,7 @@
       else $('#viewContent').insertAdjacentHTML('beforeend',matches);
     }
     msBind_();
+    ccBindMrszProtocol_();
     ccBindMrszMenGroup_();
     document.querySelectorAll('[data-league-match-scope]').forEach(button=>button.addEventListener('click',()=>{
       ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac';renderManagerStandings_();
@@ -2031,6 +2032,7 @@
     $('#eventFilterReset')?.addEventListener('click',()=>{state.eventTeam='';state.teamFilters.events=[];state.eventPeriod='upcoming';ccTrainingVisibleLimit_=30;renderCompetitionTrainingCards_()});
     $('#ccTrainingShowMore')?.addEventListener('click',()=>{ccTrainingVisibleLimit_+=30;renderCompetitionTrainingCards_()});
     bindEventDetailActions();
+    ccBindMrszProtocol_();
     ccBindTrainingRosterToggles_();
     void ccHydrateCardPositions_(visibleRows,renderCompetitionTrainingCards_);
   }
@@ -2512,6 +2514,7 @@
       dateInsteadOfBadge=options.dateInsteadOfBadge===true,
       meta=text(options.meta||''),url=text(options.sourceUrl||m.sourceUrl||m.matchUrl||m.reportUrl),
       source=!linked&&/^https:\/\//i.test(url)?'<a class="cc-scoreboard-source" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Forrás ↗</a>':'',
+      protocolAvailable=!linked&&text(m.matchCode)&&m.protocol&&Array.isArray(m.protocol.teams)&&m.protocol.teams.length===2,
       tag=linked?'button':'article';
     return '<'+tag+(linked?' type="button" data-event-id="'+esc(id)+'"':'')
       +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+'"'
@@ -2530,7 +2533,88 @@
       +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span></span>'
       +'<span class="cc-scoreboard-bottom"><span class="cc-scoreboard-location">'+esc(venue||'Helyszín nincs megadva')+'</span>'
       +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source
+      +(protocolAvailable?'<button class="button quiet small cc-scoreboard-protocol" type="button" data-cc-mrsz-protocol="'+esc(m.matchCode)+'" data-cc-mrsz-protocol-league="'+esc(league)+'">Jegyzőkönyv megnyitása</button>':'')
       +'</span></'+tag+'>';
+  }
+
+
+  // Source-verified record links only. Federation ID alone is NOT an URL or
+  // sufficient evidence of an individual profile; keep unmatched names plain.
+  function ccMrszProfileUrl_(candidate){
+    const raw=text(candidate);
+    if(!raw)return '';
+    try{
+      const url=new URL(raw);
+      if(url.protocol!=='https:')return '';
+      if(!['hunvolley.hu','www.hunvolley.hu','backoffice.hunvolley.hu','www.hunvolley.info','hunvolley.info'].includes(url.hostname.toLowerCase()))return '';
+      if(url.username||url.password)return '';
+      return url.href;
+    }catch(_){return ''}
+  }
+  function ccMrszProtocolPersonHtml_(person){
+    const label=text(person?.name||person);
+    if(!label)return '–';
+    const url=ccMrszProfileUrl_(person?.profileUrl);
+    return url?'<a class="cc-protocol-person-link" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+' ↗</a>'
+      :'<span class="cc-protocol-person-unlinked">'+esc(label)+'</span>';
+  }
+  function ccMrszProtocolTeamHtml_(side,label){
+    const players=Array.isArray(side?.players)?side.players:[];
+    const staff=Array.isArray(side?.staff)?side.staff:[];
+    const name=ccMrszProtocolPersonHtml_({name:side?.name||label,profileUrl:side?.profileUrl});
+    const rows=players.map(p=>{
+      const designation=text(p?.designation),libero=text(p?.libero),captain=p?.captain===true;
+      const badges=[designation==='K'?'Kezdő':designation==='CS'?'Csere':'',libero?'Libero '+libero:'',captain?'Kapitány':''].filter(Boolean);
+      return '<tr><td class="cc-protocol-jersey">'+esc(text(p?.number)||'–')+'</td>'
+        +'<td>'+ccMrszProtocolPersonHtml_(p)+'</td><td>'+esc(badges.join(' · ')||'–')+'</td></tr>';
+    }).join('');
+    const staffHtml=staff.length?'<div class="cc-protocol-staff"><h4>Stáb</h4>'+staff.map(p=>
+      '<div><span>'+esc(text(p?.role)||'Stábtag')+'</span><b>'+ccMrszProtocolPersonHtml_(p)+'</b></div>').join('')+'</div>':'';
+    return '<section class="cc-protocol-team"><h3>'+name+'</h3><div class="cc-protocol-table-scroll"><table><thead><tr><th>Mez</th><th>Játékos</th><th>Jelölés</th></tr></thead><tbody>'
+      +(rows||'<tr><td colspan="3">A névsor még nincs rögzítve.</td></tr>')+'</tbody></table></div>'+staffHtml+'</section>';
+  }
+  function ccMrszProtocolHtml_(m){
+    const p=m?.protocol||{},home=text(m?.homeName),away=text(m?.awayName);
+    const kickoff=ccMrszLocalKickoff_(m?.startsAt);
+    const hasScore=m?.homeSets!=null&&m?.awaySets!=null;
+    const score=hasScore?text(m.homeSets)+' : '+text(m.awaySets):'VS.';
+    const sets=Array.isArray(m?.setScores)?m.setScores.map((s,i)=>
+      '<div><span>'+(i+1)+'. játszma</span><strong>'+esc(text(s?.home))+' : '+esc(text(s?.away))+'</strong></div>').join(''):'';
+    const teams=Array.isArray(p.teams)?p.teams:[];
+    const officials=Array.isArray(p.officials)?p.officials:[];
+    const matchCode=text(m?.matchCode);
+    const verifiedUrl=ccMrszProfileUrl_(p?.sourceUrl||m?.sourceUrl);
+    return '<div class="cc-protocol-report">'
+      +'<p class="cc-protocol-provenance">Mentett MRSZ-jegyzőkönyvadatok · 2026/27 · nem élő szövetségi kapcsolat</p>'
+      +'<div class="cc-protocol-meta"><span>'+esc(text(m?.competitionLabel))+'</span><span>'+esc(kickoff.date+' · '+kickoff.time)+'</span>'
+      +(matchCode?'<span>Mérkőzéskód: '+esc(matchCode)+'</span>':'')
+      +(text(m?.venue)?'<span>'+esc(m.venue)+'</span>':'')+'</div>'
+      +'<div class="cc-protocol-result"><span>'+esc(home)+'</span><strong>'+esc(score)+'</strong><span>'+esc(away)+'</span></div>'
+      +(sets?'<div class="cc-protocol-sets">'+sets+'</div>':'')
+      +'<div class="cc-protocol-teams">'+ccMrszProtocolTeamHtml_(teams[0],home)+ccMrszProtocolTeamHtml_(teams[1],away)+'</div>'
+      +(officials.length?'<section class="cc-protocol-officials"><h3>Hivatalos személyek</h3><div>'+officials.map(o=>
+        '<div><span>'+esc(text(o?.role)||'Hivatalos személy')+'</span><strong>'+ccMrszProtocolPersonHtml_(o)+'</strong></div>').join('')+'</div></section>':'')
+      +(text(p?.notes)?'<p class="cc-protocol-notes">'+esc(p.notes)+'</p>':'')
+      +(verifiedUrl?'<p><a class="button quiet small" href="'+esc(verifiedUrl)+'" target="_blank" rel="noopener noreferrer">Eredeti Hunvolley-jegyzőkönyv ↗</a></p>':'')
+      +'<p class="cc-protocol-footnote">A nevek csak ellenőrzött Hunvolley-adatlap esetén hivatkozások. A jegyzőkönyvben szereplő azonosító önmagában nem igazolt adatlap-URL.</p>'
+      +'</div>';
+  }
+  function ccOpenMrszProtocol_(code,league){
+    const matches=Array.isArray(ccMrszPhotoState_?.matches)?ccMrszPhotoState_.matches:[];
+    const found=matches.filter(m=>text(m?.matchCode)===text(code)&&text(m?.competitionLabel)===text(league)&&Array.isArray(m?.protocol?.teams));
+    if(found.length!==1){status('A jegyzőkönyv nem azonosítható egyértelműen.','error');return}
+    const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');
+    if(!d||!body||!title)return;
+    if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='VERSENYSPORT · JEGYZŐKÖNYV';
+    title.textContent=text(found[0].homeName)+' – '+text(found[0].awayName);
+    body.innerHTML=ccMrszProtocolHtml_(found[0]);
+    d.classList.add('cc-protocol-dialog');
+    d.addEventListener('close',()=>d.classList.remove('cc-protocol-dialog'),{once:true});
+    ccOpenDialogStable_(d);
+  }
+  function ccBindMrszProtocol_(){
+    $('#viewContent [data-cc-mrsz-protocol]').forEach(button=>
+      button.addEventListener('click',()=>ccOpenMrszProtocol_(button.dataset.ccMrszProtocol,button.dataset.ccMrszProtocolLeague)));
   }
 
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
