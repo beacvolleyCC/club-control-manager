@@ -2560,21 +2560,25 @@
     return url?'<a class="cc-protocol-person-link" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+' ↗</a>'
       :'<span class="cc-protocol-person-unlinked">'+esc(label)+'</span>';
   }
+  function ccMrszProtocolBadgesHtml_(p){
+    const badges=[];
+    if(p?.designation==='CS')badges.push('<span class="cc-protocol-marker is-subs" title="Csere" aria-label="Csere"><svg viewBox="0 0 28 19" role="img" aria-hidden="true"><path class="sub-in" d="M3 5h18m-5-4 5 4-5 4"/><path class="sub-out" d="M25 14H7m5-4-5 4 5 4"/></svg></span>');
+    if(p?.captain===true)badges.push('<span class="cc-protocol-marker is-captain" title="Kapitány" aria-label="Kapitány">C</span>');
+    if(p?.libero)badges.push('<span class="cc-protocol-marker is-libero" title="Libero" aria-label="Libero">'+esc(text(p.libero))+'</span>');
+    return '<span class="cc-protocol-markers">'+badges.join('')+'</span>';
+  }
   function ccMrszProtocolTeamHtml_(side,label){
     const players=Array.isArray(side?.players)?side.players:[];
     const staff=Array.isArray(side?.staff)?side.staff:[];
     const name=ccMrszProtocolPersonHtml_({name:side?.name||label,profileUrl:side?.profileUrl});
-    const rows=players.map(p=>{
-      const designation=text(p?.designation),libero=text(p?.libero),captain=p?.captain===true;
-      const badges=[designation==='K'?'Kezdő':designation==='CS'?'Csere':'',libero?'Libero '+libero:'',captain?'Kapitány':''].filter(Boolean);
-      return '<tr><td class="cc-protocol-jersey">'+esc(text(p?.number)||'–')+'</td>'
-        +'<td>'+ccMrszProtocolPersonHtml_(p)+'</td><td>'+esc(badges.join(' · ')||'–')+'</td></tr>';
-    }).join('');
+    const rows=players.map(p=>'<tr><td class="cc-protocol-jersey">'+esc(text(p?.number)||'–')+'</td>'
+      +'<td>'+ccMrszProtocolPersonHtml_(p)+'</td><td>'+ccMrszProtocolBadgesHtml_(p)+'</td></tr>').join('');
     const staffHtml=staff.length?'<div class="cc-protocol-staff"><h4>Stáb</h4>'+staff.map(p=>
       '<div><span>'+esc(text(p?.role)||'Stábtag')+'</span><b>'+ccMrszProtocolPersonHtml_(p)+'</b></div>').join('')+'</div>':'';
-    return '<section class="cc-protocol-team"><h3>'+name+'</h3><div class="cc-protocol-table-scroll"><table><thead><tr><th>Mez</th><th>Játékos</th><th>Jelölés</th></tr></thead><tbody>'
+    return '<section class="cc-protocol-team"><h3>'+name+'</h3><div class="cc-protocol-table-scroll"><table><thead><tr><th>Mez</th><th>Játékos</th><th></th></tr></thead><tbody>'
       +(rows||'<tr><td colspan="3">A névsor még nincs rögzítve.</td></tr>')+'</tbody></table></div>'+staffHtml+'</section>';
   }
+
   function ccMrszProtocolHtml_(m){
     const p=m?.protocol||{},home=text(m?.homeName),away=text(m?.awayName);
     const kickoff=ccMrszLocalKickoff_(m?.startsAt);
@@ -2587,7 +2591,7 @@
     const matchCode=text(m?.matchCode);
     const verifiedUrl=ccMrszProfileUrl_(p?.sourceUrl||m?.sourceUrl);
     return '<div class="cc-protocol-report">'
-      +'<p class="cc-protocol-provenance">Mentett MRSZ-jegyzőkönyvadatok · 2026/27 · nem élő szövetségi kapcsolat</p>'
+
       +'<div class="cc-protocol-meta"><span>'+esc(text(m?.competitionLabel))+'</span><span>'+esc(kickoff.date+' · '+kickoff.time)+'</span>'
       +(matchCode?'<span>Mérkőzéskód: '+esc(matchCode)+'</span>':'')
       +(text(m?.venue)?'<span>'+esc(m.venue)+'</span>':'')+'</div>'
@@ -2598,7 +2602,7 @@
         '<div><span>'+esc(text(o?.role)||'Hivatalos személy')+'</span><strong>'+ccMrszProtocolPersonHtml_(o)+'</strong></div>').join('')+'</div></section>':'')
       +(text(p?.notes)?'<p class="cc-protocol-notes">'+esc(p.notes)+'</p>':'')
       +(verifiedUrl?'<p><a class="button quiet small" href="'+esc(verifiedUrl)+'" target="_blank" rel="noopener noreferrer">Eredeti Hunvolley-jegyzőkönyv ↗</a></p>':'')
-      +'<p class="cc-protocol-footnote">A nevek csak ellenőrzött Hunvolley-adatlap esetén hivatkozások. A jegyzőkönyvben szereplő azonosító önmagában nem igazolt adatlap-URL.</p>'
+
       +'</div>';
   }
   function ccOpenMrszProtocol_(code,league){
@@ -2726,22 +2730,24 @@
         review.push({match:variant,reason});
       }
     }
-    const scope=ccLeagueMatchScope_;
+    const hasBeac=[...matches,...review.map(r=>r.match)].some(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName))
+      ||tableRows.some(r=>ccIsBeacLeagueTeam_(r.teamName));
+    const scope=hasBeac?ccLeagueMatchScope_:'all';
     const visible=scope==='all'?matches:matches.filter(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName));
-    const controls='<div class="cc-league-match-scope" role="group" aria-label="Bajnoki mérkőzések szűrése">'
+    const controls=hasBeac?'<div class="cc-league-match-scope" role="group" aria-label="Bajnoki mérkőzések szűrése">'
       +'<button type="button" data-league-match-scope="beac" aria-pressed="'+(scope==='beac')+'" class="'+(scope==='beac'?'active':'')+'">BEAC meccsek</button>'
       +'<button type="button" data-league-match-scope="all" aria-pressed="'+(scope==='all')+'" class="'+(scope==='all'?'active':'')+'">Összes bajnoki meccs</button></div>';
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
     const items=visible.map(m=>ccMatchScoreboardHtml_(m,{league:group,
-      badge:m.isPhoto?'MRSZ · eredmény':'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
-      meta:m.isPhoto?(table?.partial===false?'2026.10.14-i mentett eredmény':'2026.10.14-i mentett eredmény · teljes tabella nélkül'):m.isFixture?'2026.10.01-i mentett kiírás':'Mentett mérkőzésadat',
+      badge:'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
+      meta:'',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today
     })).join('');
-    const noTableNote=table?.partial!==false&&photo.length?'<p class="ms-coverage">Nincs teljes mentett tabella ehhez a bajnoksághoz. Az eredmények forrásrekordként láthatók; a csapatok teljes körű tabellás megfeleltetése nem ellenőrizhető.</p>':'';
+    const noTableNote='';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
     return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
       +visible.length+' / '+matches.length+' meccs · '+esc(group)+'</span></div>'+controls+'</div>'+noTableNote+'<div class="ms-match-list">'
-      +(items||'<div class="ms-empty">'+(scope==='beac'?'Nincs BEAC-mérkőzés ebben a szűrésben. Az összes bajnoki meccs a fenti kapcsolóval elérhető.':'Ebben a bajnoki csoportban nincs mentett mérkőzés.')+'</div>')+'</div>'
+      +(items||'<div class="ms-empty">'+(scope==='beac'?'Nincs megjeleníthető mérkőzés.':'Ebben a bajnoki csoportban nincs mentett mérkőzés.')+'</div>')+'</div>'
       +(review.length?'<details class="cc-mrsz-review-fixtures"><summary>'+review.length+(unverifiedOnly?' ellenőrzendő BRSZ-rekord':' ellenőrzendő rekord')+' · külön a meccslistától</summary><ul>'
         +review.map(({match:m,reason})=>{const kick=ccMrszLocalKickoff_(m.startsAt);
           const score=m.homeSets==null||m.awaySets==null?'':text(m.homeSets)+'–'+text(m.awaySets);
