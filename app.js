@@ -1787,7 +1787,7 @@
     if(payload.active)throw new Error('Automatikus aktiválást csak inaktív edzéshez állíthatsz be.');
     if($('#meRepeat')?.value==='weekly')throw new Error('Heti ismétlődésnél előbb hozd létre az alkalmakat, majd külön időzítsd az aktiválásukat.');
     const date=text($('#meActivationDate')?.value),time=ccNormalizeTime24_($('#meActivationTime')?.value);
-    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!time)throw new Error('Add meg az automatikus aktiválás napját és időpontját.');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!time)throw new Error('Add meg az automatikus aktiválás napját és időpontját.');
     const at=Date.parse(ccLocalIso_(date,time)),start=Date.parse(ccLocalIso_(payload.eventDate,payload.startTime));
     if(!Number.isFinite(at)||at<=Date.now())throw new Error('Az automatikus aktiválás időpontja legyen a jövőben.');
     if(!Number.isFinite(start)||at>=start)throw new Error('Az aktiválásnak az edzés kezdete előtt kell megtörténnie.');
