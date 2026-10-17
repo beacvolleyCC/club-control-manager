@@ -7,6 +7,7 @@
  */
 const https=require('node:https');
 const {TextDecoder}=require('node:util');
+const {auditLeaguePage}=require('./parse-official-women1-competition.cjs');
 const MAX_BYTES=8_000_000;
 const ENDPOINTS=Object.freeze([
  {id:'women1_competition_2025',url:'https://www.hunvolley.info/pr_a/010/002/p_002.asp?p_verseny_al_kod=93&p_evad_kod=2025&p_fo_cim=NoiBudapestI.osztaly'},
@@ -56,6 +57,7 @@ function extractIndexEvidence(html,id){
    const match=raw.match(new RegExp('OnClick="[^"]*p_merkozes_kod='+code+'\\b[^\"]*"','i'));
    return {code,markup:match?raw.slice(Math.max(0,match.index-350),match.index+1300):null};
  });
+ const officialAudit=id==='women1_competition_2025'?auditLeaguePage(raw):null;
  const tablePos=clean.indexOf('TABELLA');
  const standingsExcerpt=tablePos>=0?clean.slice(tablePos,tablePos+1700):null;
  const knownLeagueLinks=links.filter(x=>/p_verseny_al_kod=93(?:&|$)/.test(x));
@@ -69,6 +71,17 @@ function extractIndexEvidence(html,id){
    samplePageLinks:compactLinks,
    directKnownLeagueLinks:knownLeagueLinks.slice(0,25),
    officialMatchLinkCount:officialMatchLinks.length,
+   officialAudit:officialAudit?{
+     matchCount:officialAudit.matchCount,scoredCount:officialAudit.scoredCount,
+     unscoredCount:officialAudit.unscoredCount,invalidScoreCount:officialAudit.invalidScoreCount,
+     standingsTeams:officialAudit.standingsTeams,standingsValid:officialAudit.standingsValid,
+     playedMatchesPerStandings:officialAudit.playedMatchesPerStandings,
+     scoreCountAgreesWithStandings:officialAudit.scoreCountAgreesWithStandings,
+     uniqueFixtureTeamNames:officialAudit.uniqueFixtureTeamNames,
+     issues:officialAudit.issues.slice(0,12),
+     standings:officialAudit.standings,
+     matchRows:officialAudit.matches
+   }:null,
    uniqueLeagueMatchCodes:codes.length,
    rawMatchCodes:codes,
    matchMarkupSamples,
