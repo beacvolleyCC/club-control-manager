@@ -2516,7 +2516,8 @@
       protocolAvailable=!linked&&text(m.matchCode)&&m.protocol&&Array.isArray(m.protocol.teams)&&m.protocol.teams.length===2,
       tag=linked?'button':'article';
     return '<'+tag+(linked?' type="button" data-event-id="'+esc(id)+'"':'')
-      +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+'"'
+      +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+(protocolAvailable?' has-protocol':'')+'"'
+      +(protocolAvailable?' data-cc-mrsz-protocol="'+esc(m.matchCode)+'" data-cc-mrsz-protocol-league="'+esc(league)+'" role="button" tabindex="0"':'')
       +' aria-label="'+esc(home+' – '+away+' · '+score)+'">'
       +'<span class="cc-scoreboard-top"><span class="cc-scoreboard-label">'+esc(dateInsteadOfBadge?(validDate?kickoff.date:'Időpont nélkül'):badge)+'</span>'
       +'<span class="cc-scoreboard-kickoff">'+(dateInsteadOfBadge?(validTime?esc(kickoff.time):''):(esc(validDate?kickoff.date:'Időpont nélkül')+(validTime?' · '+esc(kickoff.time):'')))+'</span></span>'
@@ -2524,15 +2525,15 @@
       +'<span class="cc-scoreboard-crest">'+msLogoHtml_('',home,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
       +(rankHome?'<small>'+rankHome+'. helyen áll</small>':'')+'</span></span>'
-      +'<span class="cc-scoreboard-score">'+(hasScore?'<strong>'+esc(score)+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
-      +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')
+      +'<span class="cc-scoreboard-score">'+(hasScore?'<strong>'+esc(score.replace('–',' – '))+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
       +(setCoverage?'<small class="cc-scoreboard-set-coverage"'+(setIssue?' title="'+esc(setIssue)+'"':'')+'>'+esc(setCoverage)+'</small>':'')+'</span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
-      +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span></span>'
+      +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span>'
+      +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')+'</span>'
       +'<span class="cc-scoreboard-bottom"><span class="cc-scoreboard-location">'+esc(venue||'Helyszín nincs megadva')+'</span>'
       +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source
-      +(protocolAvailable?'<button class="button quiet small cc-scoreboard-protocol" type="button" data-cc-mrsz-protocol="'+esc(m.matchCode)+'" data-cc-mrsz-protocol-league="'+esc(league)+'">Jegyzőkönyv megnyitása</button>':'')
+      +(protocolAvailable?'<span class="cc-scoreboard-protocol" aria-hidden="true">Jegyzőkönyv ↗</span>':'')
       +'</span></'+tag+'>';
   }
 
@@ -2612,8 +2613,18 @@
     ccOpenDialogStable_(d);
   }
   function ccBindMrszProtocol_(){
-    $('#viewContent [data-cc-mrsz-protocol]').forEach(button=>
-      button.addEventListener('click',()=>ccOpenMrszProtocol_(button.dataset.ccMrszProtocol,button.dataset.ccMrszProtocolLeague)));
+    $$('#viewContent [data-cc-mrsz-protocol]').forEach(card=>{
+      const open=()=>ccOpenMrszProtocol_(card.dataset.ccMrszProtocol,card.dataset.ccMrszProtocolLeague);
+      card.addEventListener('click',event=>{
+        if(event.target.closest('a,button,select,input'))return;
+        open();
+      });
+      card.addEventListener('keydown',event=>{
+        if((event.key==='Enter'||event.key===' ')&&!event.target.closest('a,button,select,input')){
+          event.preventDefault();open();
+        }
+      });
+    });
   }
 
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
