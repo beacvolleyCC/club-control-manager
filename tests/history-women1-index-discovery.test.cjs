@@ -2,9 +2,11 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {ENDPOINTS,extractIndexEvidence,decodePage}=require('../scripts/history/discover-women1-index.cjs');
-test('source discovery is strictly limited to official index and known score sheet',()=>{
+test('source discovery is strictly limited to official competition detail and known score sheet',()=>{
  assert.equal(ENDPOINTS.length,2);
  assert.ok(ENDPOINTS.every(x=>new URL(x.url).hostname==='www.hunvolley.info'));
+ assert.ok(ENDPOINTS[0].url.includes('/pr_a/010/002/p_002.asp'));
+ assert.ok(ENDPOINTS[0].url.includes('p_verseny_al_kod=93'));
  assert.ok(ENDPOINTS[0].url.includes('p_evad_kod=2025'));
  assert.ok(ENDPOINTS[1].url.includes('p_merkozes_kod=2446'));
 });
