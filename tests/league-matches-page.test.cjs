@@ -11,7 +11,7 @@ const stop=source.indexOf('  function renderCompetitionMatchCards_()',start);
 assert.ok(start>0&&stop>start,'Unified Manager match-page helpers must exist');
 const code=source.slice(start,stop);
 function harness(opts={}){
- const state={managerStandingsContext:opts.team||''};
+ const state={managerStandingsContext:opts.team||'',teams:[{id:'10000000-0000-4000-8000-000000000001',name:'BEAC Női 1',active:true},{id:'10000000-0000-4000-8000-000000000002',name:'BEAC Női 2',active:true},{id:'10000000-0000-4000-8000-000000000003',name:'BEAC Férfi',active:true}]};
  const selection=opts.selected||'';
  const photo={loaded:opts.loaded!==false,error:opts.error||'',
   tables:[{competitionLabel:menA,rows:[{teamName:'MAFC-Kármán',position:1}]},
@@ -19,7 +19,7 @@ function harness(opts={}){
  const ctx={rows:[],table:[],fixture:[]};
  const api=new Function('teamFilterIds_','text','state','ccMrszMenGroup_','ccCurrentLeague_','ccMrszPhotoState_',
    'ccLeagueContextSelectHtml_','esc','ccMrszMainPhotoTableHtml_','ccMrszLeagueFixturePanelHtml_','ccMrszCoverageLabel_',
-   code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_};')(
+   code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_,ccMatchesTeamSelectHtml_};')(
    ()=>opts.selectedTeamIds||[],x=>String(x??''),state,opts.menGroup||'B',
    fallback=>selection||fallback,photo,label=>'<select id="ccLeagueContextSelect"><option>'+label+'</option></select>',
    x=>String(x??''),t=>{ctx.table.push(t.competitionLabel);return '<article class="ms-standings-card">TABLE:'+t.competitionLabel+'</article>'},
@@ -33,24 +33,25 @@ test('default context follows a single BEAC team, without guessing group members
  assert.equal(harness({team:'10000000-0000-4000-8000-000000000003'}).ccMatchesDefaultLeague_(),menB);
  assert.equal(harness({team:'10000000-0000-4000-8000-000000000003',menGroup:'A'}).ccMatchesDefaultLeague_(),menA);
 });
-test('a selected external league updates the only table and fixture context together',()=>{
- const h=harness({selected:menA});
- const html=h.ccLeagueMatchesContextHtml_();
- assert.deepEqual(h.ctx.table,[menA]);
- assert.deepEqual(h.ctx.fixture,[menA]);
- assert.ok(html.includes('TABLE:'+menA));
- assert.ok(html.includes('FIXTURE:'+menA));
- assert.ok(!html.includes('FIXTURE:'+womenB));
-});
-test('missing official standings never fall back to another competition',()=>{
- const h=harness({selected:menB});
+test('a selected BEAC team determines the league match list but never shows a second standings table',()=>{
+ const h=harness({selected:menA,team:'10000000-0000-4000-8000-000000000003'});
  const html=h.ccLeagueMatchesContextHtml_();
  assert.deepEqual(h.ctx.table,[]);
- assert.deepEqual(h.ctx.fixture,[menB]);
- assert.ok(html.includes('Nincs mentett tabella'));
- assert.ok(!html.includes('TABLE:'+menA));
+ assert.deepEqual(h.ctx.fixture,[menB],'matches follow the BEAC team context instead of the previously selected league');
+ assert.ok(html.includes('FIXTURE:'+menB));
+ assert.ok(!html.includes('TABLE:'));
+ assert.ok(!html.includes('ccLeagueContextSelect'));
 });
-test('missing snapshot and read errors do not manufacture fixtures or results',()=>{
+test('matches team picker has one selector and supports all three BEAC teams',()=>{
+ const h=harness({selectedTeamIds:['10000000-0000-4000-8000-000000000002']});
+ const html=h.ccMatchesTeamSelectHtml_();
+ assert.ok(html.includes('id="ccMatchTeamSelect"'));
+ assert.ok(html.includes('BEAC Női 1'));
+ assert.ok(html.includes('BEAC Női 2'));
+ assert.ok(html.includes('BEAC Férfi'));
+ assert.equal((html.match(/<select/g)||[]).length,1);
+});
+test('missing photo snapshots show a neutral source state, without leaking another standings table',()=>{
  for(const options of [{loaded:false},{error:'TEMPORARY_ERROR'}]){
   const h=harness(options);
   const html=h.ccLeagueMatchesContextHtml_();
@@ -64,7 +65,12 @@ test('match-page markup retains real BEAC roster while dropping parallel league 
  const end=source.indexOf('  function renderEventList(',begin);
  const rendered=source.slice(begin,end);
  assert.ok(rendered.includes('ccLeagueMatchesContextHtml_()'));
- assert.ok(rendered.includes("ccSetLeagueContext_(e.target.value)"));
+ assert.ok(rendered.includes("ccMatchesTeamSelectHtml_()"));
+ assert.ok(rendered.includes("id=\"ccMatchesAuditToggle\""));
+ assert.ok(rendered.includes("id=\"ccMatchesOpenStandings\""));
+ assert.ok(rendered.includes("ccBindMrszProtocol_()"));
+ assert.ok(rendered.includes("setRoute('competition','standings')"));
+ assert.ok(!rendered.includes('cc-mrsz-audit-tabs'));
  assert.ok(rendered.includes("data-league-match-scope"));
  assert.ok(rendered.includes("ccCompetitionEventWithRosterHtml_(e,'match')"));
  assert.ok(rendered.includes("bindEventDetailActions()"));
@@ -78,4 +84,23 @@ test('one shared scope and result provenance are visible in league scoreboard bu
  assert.ok(source.includes("m.isFixture?'2026.10.01-i mentett kiírás'"));
  assert.ok(source.includes('const reason=ccMrszMatchReviewReason_(m,tableRows,table?.partial===false,conflicts)'));
  assert.ok(source.includes('const noTableNote=table?.partial!==false&&photo.length'));
+});
+
+test('standings alone has the league selector and matches still binds full-league toggle',()=>{
+ const st=source.slice(source.indexOf('  function renderManagerStandings_()'),source.indexOf('  function eventPlace('));
+ assert.ok(st.includes('ccLeagueContextSelectHtml_(group)'));
+ assert.ok(!st.includes('id="msContextSelect"'));
+ assert.ok(!st.includes('id="msTeamSelect"'));
+ assert.ok(st.includes("ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac';renderManagerStandings_()"));
+ const matches=source.slice(source.indexOf('  function renderCompetitionMatchCards_()'),source.indexOf('  function renderEventList('));
+ assert.ok(matches.includes("ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac'"));
+});
+test('protocol binds via multiple-element selector, not a single-element query',()=>{
+ const begin=source.indexOf('  function ccBindMrszProtocol_()');
+ const end=source.indexOf('  function ccMrszMergedLeagueMatches_',begin);
+ const code=source.slice(begin,end);
+ assert.ok(code.includes("$$('#viewContent [data-cc-mrsz-protocol]')"));
+ assert.ok(code.includes("event.key==='Enter'"));
+ assert.ok(code.includes("event.key===' '"));
+ assert.ok(code.includes("event.target.closest('a,button,select,input')"));
 });

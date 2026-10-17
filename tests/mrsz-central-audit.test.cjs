@@ -105,7 +105,8 @@ test('Audit is view-only and the Meccsek route exposes tab switching and league 
  context.auditHtml();
  assert.equal(JSON.stringify({base,table}),before);
  const matches=cut('  function renderCompetitionMatchCards_(','  function renderEventList(');
- assert.ok(matches.includes('data-cc-audit-view="audit"'));
+ assert.ok(matches.includes('id="ccMatchesAuditToggle"'));
+ assert.ok(matches.includes('ccMatchesAuditOpen_=!ccMatchesAuditOpen_;'));
  assert.ok(matches.includes("ccMatchesAuditOpen_?ccMrszAuditHtml_():''"));
  assert.ok(matches.includes("$('#ccMrszAuditResults')?.addEventListener('click'"));
  assert.ok(matches.includes("$('#ccMrszAuditLeague')?.addEventListener('change'"));
@@ -219,8 +220,9 @@ test('League picker, direct issue navigation and return control preserve audit s
  assert.ok(html.includes('aria-label="Bajnokság megnyitása: MTK kék"'));
  const render=cut('  function renderCompetitionMatchCards_(','  function renderEventList(');
  assert.ok(render.includes('ccMrszAuditReturn_=true;'));
- assert.ok(render.includes('id="ccMrszAuditReturn"'));
- assert.ok(render.includes("$('#ccMrszAuditReturn')?.addEventListener('click'"));
+ assert.ok(render.includes('id="ccMatchesAuditToggle"'));
+ assert.ok(render.includes('aria-pressed="${ccMatchesAuditOpen_?\'true\':\'false\'}"'));
+ assert.ok(render.includes("$('#ccMatchesAuditToggle')?.addEventListener('click'"));
  assert.ok(render.includes('ccMrszAuditReturn_=false;'));
  assert.ok(render.includes('ccLeagueCatalog_().some(group=>group.competitionLabel===league)'));
  assert.ok(render.includes('ccMrszAuditLeague_=text(event.target.value)'));

@@ -26,7 +26,7 @@ test('played match shows prominent outcome and set-by-set scores',()=>{
  assert.ok(html.includes('<span class="cc-scoreboard-set-results"'));
  assert.ok(html.includes('25:19 · 25:20 · 16:25 · 25:14'));
  assert.ok(html.includes('<small class="cc-scoreboard-set-coverage">4/4 szett</small>'));
- assert.ok(html.indexOf('<strong>3–1</strong>')<html.indexOf('cc-scoreboard-set-results'));
+ assert.ok(html.indexOf('<strong>3 – 1</strong>')<html.indexOf('cc-scoreboard-set-results'));
  assert.ok(!html.includes('Szettek:'));
  assert.ok(!html.includes('Végeredmény'));
  assert.ok(!html.includes('Következő meccs'));
@@ -50,7 +50,7 @@ test('upcoming and unscored matches display regular-weight VS. instead of score 
 });
 test('completed results stay bold and upcoming VS. styling stays nonbold on desktop and mobile',()=>{
  const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:2});
- assert.ok(played.includes('<strong>3–2</strong>'));
+ assert.ok(played.includes('<strong>3 – 2</strong>'));
  assert.ok(!played.includes('cc-scoreboard-versus'));
  assert.ok(css.includes('.cc-scoreboard-score>.cc-scoreboard-versus{'));
  assert.match(css,/\.cc-scoreboard-score>\.cc-scoreboard-versus\{[^}]*font-weight:400;/);
@@ -121,7 +121,7 @@ test('untrusted or invalid set-score content is quarantined from the central res
 test('Contradictory linked set-point records are not presented as an agreed set breakdown',()=>{
  const html=ctx.scoreboard({...fixture,homeSets:3,awaySets:1,
    setScores:[{home:25,away:18},{home:25,away:19},{home:25,away:20},{home:15,away:25}]},{eventId:'id123'});
- assert.ok(html.includes('<strong>3–1</strong>'));
+ assert.ok(html.includes('<strong>3 – 1</strong>'));
  assert.ok(html.includes('Szettadat ellenőrzendő'));
  assert.ok(!html.includes('25:18 · 25:19'));
 });
