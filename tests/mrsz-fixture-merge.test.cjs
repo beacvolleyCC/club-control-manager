@@ -18,7 +18,7 @@ const matches=[
 {competitionLabel:'Férfi Budapest I. osztály – A csoport',startsAt:'2026-10-13T19:00:00+02:00',homeName:'MAFC-Kármán',awayName:'Ráckeve',homeSets:3,awaySets:0}
 ];
 const text=x=>String(x??''),esc=x=>text(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const ctx={text,esc,num:x=>Number(x)||0,msLogoHtml_:()=>'<span class="standing-logo-text">TEAM</span>',
+const ctx={URL,text,esc,num:x=>Number(x)||0,msLogoHtml_:()=>'<span class="standing-logo-text">TEAM</span>',
   ccMrszPhotoState_:{matches,fixtures}};
 vm.createContext(ctx);
 vm.runInContext(js.slice(start,end)+'\nthis.qa={merge:ccMrszMergedLeagueMatches_,html:ccMrszLeagueFixturePanelHtml_,setScope:(x)=>{ccLeagueMatchScope_=x}}',ctx);
@@ -87,9 +87,9 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261017-snapshot-consistency-v45'));
- assert.ok(html.includes('app.js?v=20261017-snapshot-consistency-v45'));
- assert.ok(sw.includes("cc-manager-20261017-snapshot-consistency-v45"));
+ assert.ok(html.includes('styles.css?v=20261017-interactive-protocol-v46'));
+ assert.ok(html.includes('app.js?v=20261017-interactive-protocol-v46'));
+ assert.ok(sw.includes("cc-manager-20261017-interactive-protocol-v46"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
@@ -185,4 +185,35 @@ test('match-card ranks require explicit full standings, not merely missing parti
   assert.equal(rank(league,'RKSK felnőtt női'),2);
   assert.equal(rank('Férfi Budapest I. osztály – A csoport','MTK kék'),null,'league isolation');
  }finally{ctx.ccMrszPhotoState_.tables=old;}
+});
+
+
+test('verified protocol can be opened without changing federation match scorecards or roster actions',()=>{
+ const league='Női Budapest I. osztály';
+ const match={competitionLabel:league,matchCode:'2330',startsAt:'2026-10-16T19:30:00+02:00',
+  homeName:'BEAC',awayName:'MAFC-ÉPK',homeSets:3,awaySets:1,
+  setScores:[{home:25,away:21},{home:23,away:25},{home:25,away:18},{home:25,away:13}],
+  protocol:{teams:[{name:'BEAC',players:[{number:'1',name:'Imre Eszter',designation:'K',captain:true,code:'42988'}]},
+   {name:'MAFC-ÉPK',players:[{number:'5',name:'Stéger Babett',designation:'K'}]}],
+   officials:[{role:'I. játékvezető',name:'Juták Lili',code:'30421'}]}};
+ matches.push(match);
+ ctx.qa.setScope('all');
+ try{
+  const html=ctx.qa.html(league);
+  assert.ok(html.includes('Jegyzőkönyv megnyitása'));
+  assert.ok(html.includes('data-cc-mrsz-protocol="2330"'));
+  const detail=vm.runInContext('ccMrszProtocolHtml_',ctx)(match);
+  assert.ok(detail.includes('Imre Eszter'));
+  assert.ok(detail.includes('Kezdő'));
+  assert.ok(detail.includes('Kapitány'));
+  assert.ok(detail.includes('Juták Lili'));
+  assert.ok(detail.includes('25 : 21'));
+  assert.ok(!detail.includes('cc-protocol-person-link'), 'unverified athlete IDs are not guessed as hyperlinks');
+ }finally{matches.pop();ctx.qa.setScope('beac');}
+});
+test('federation person URLs require HTTPS and an approved Hunvolley host',()=>{
+ const url=vm.runInContext('ccMrszProfileUrl_',ctx);
+ assert.equal(url('https://hunvolley.hu/person?id=123'),'https://hunvolley.hu/person?id=123');
+ for(const x of ['http://hunvolley.hu/person','https://hunvolley.hu.evil.net/person',
+  'javascript:alert(1)','https://example.com/person',''])assert.equal(url(x),'');
 });
