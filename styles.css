@@ -6735,3 +6735,48 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
  .cc-protocol-sets{gap:6px}
  .cc-protocol-sets>div{min-width:76px;padding:7px}
 }
+
+/* Matches layout: single header/picker card, with filter button first. */
+.cc-match-page-header{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"title actions" "team team";gap:10px 14px!important;align-items:center!important}
+.cc-match-page-header .cc-match-header-title{grid-area:title;min-width:0}
+.cc-match-page-header .cc-icon-toolbar{grid-area:actions;display:flex!important;flex-wrap:nowrap!important;justify-content:flex-end!important;max-width:none!important}
+.cc-match-header-team{grid-area:team;display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:12px;border-top:1px solid var(--line);padding-top:12px;min-width:0}
+.cc-match-team-picker{display:grid;gap:5px;min-width:220px;max-width:450px;flex:1}
+.cc-match-team-picker>span{font-size:11px;color:var(--muted);font-weight:700}
+.cc-match-team-picker select{width:100%;min-width:0;min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);padding:8px 12px;font:inherit;font-size:13px}
+.cc-match-standings-link{min-height:40px;white-space:nowrap;display:inline-flex;gap:9px;align-items:center}
+.cc-match-audit-shortcut{font-weight:800!important;font-size:20px!important}
+.cc-match-audit-shortcut.active{background:var(--ink)!important;color:var(--card)!important}
+.cc-match-reset-inside{align-self:end}
+.cc-match-league-context{margin:12px 0 18px}
+.cc-match-page-header .cc-icon-toolbar .matrix-filter-toggle{order:0}
+.cc-match-page-header .cc-icon-toolbar .cc-match-audit-shortcut{order:1}
+.cc-match-page-header .cc-icon-toolbar .cc-refresh-icon{order:2}
+.cc-match-page-header .cc-icon-toolbar .cc-add-square{order:3}
+@media(max-width:620px){
+ .cc-match-page-header{grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important}
+ .cc-match-page-header .cc-icon-toolbar{gap:4px!important}
+ .cc-match-header-team{align-items:stretch;gap:9px}
+ .cc-match-team-picker{min-width:0;flex:1 1 100%}
+ .cc-match-team-picker select{font-size:16px}
+ .cc-match-standings-link{width:100%;justify-content:space-between}
+}
+/* Results: prominent typography, separated en dash, five set scores in one row. */
+.cc-mrsz-league-matches .cc-scoreboard-main{grid-template-columns:minmax(0,1fr) minmax(130px,175px) minmax(0,1fr);column-gap:clamp(10px,2.5vw,30px)!important;row-gap:8px}
+.cc-mrsz-league-matches .cc-scoreboard-score>strong{font-size:clamp(38px,4.6vw,60px)!important;letter-spacing:.01em!important;line-height:1.12}
+.cc-mrsz-league-matches .cc-scoreboard-set-results{grid-column:1/-1;text-align:center;white-space:nowrap!important;overflow-wrap:normal!important;font-size:clamp(11px,1.35vw,15px)!important;font-weight:650;letter-spacing:.025em;line-height:1.4}
+.cc-mrsz-league-matches .cc-match-scoreboard.has-protocol{cursor:pointer;transition:transform 160ms ease,box-shadow 160ms ease,border-color 160ms ease}
+.cc-mrsz-league-matches .cc-match-scoreboard.has-protocol:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:2px}
+.cc-scoreboard-protocol{display:inline-flex;font-weight:700;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+@media(hover:hover) and (pointer:fine){
+ .cc-mrsz-league-matches .cc-match-scoreboard.has-protocol:hover{transform:translateY(-2px);box-shadow:0 9px 24px rgba(0,0,0,.08);border-color:var(--yellow-dark)}
+}
+@media(max-width:700px){
+ .cc-mrsz-league-matches .cc-scoreboard-main{grid-template-columns:minmax(0,1fr) minmax(89px,112px) minmax(0,1fr);gap:8px 6px}
+ .cc-mrsz-league-matches .cc-scoreboard-score>strong{font-size:clamp(29px,6.8vw,42px)!important}
+ .cc-mrsz-league-matches .cc-scoreboard-set-results{font-size:clamp(10px,2.5vw,13px)!important;letter-spacing:0}
+}
+@media(max-width:430px){
+ .cc-mrsz-league-matches .cc-scoreboard-main{grid-template-columns:minmax(0,1fr) minmax(83px,94px) minmax(0,1fr);column-gap:5px}
+ .cc-mrsz-league-matches .cc-scoreboard-set-results{font-size:10px!important}
+}
