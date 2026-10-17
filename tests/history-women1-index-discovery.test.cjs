@@ -29,3 +29,17 @@ test('a linkless, unrelated index does not become a complete fixture list',()=>{
  assert.deepEqual(r.rawMatchCodes,[]);
  assert.equal(r.confirmedCompleteLeagueFixtureList,false);
 });
+
+test('competition match onclick URLs are parsed without mixing seasons or leagues',()=>{
+ const html=[
+ '<div OnClick="oldal_submit_publikus(\'/pr_a/010/009/p_009.asp?p_merkozes_kod=2424&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly\');">A</div>',
+ '<div OnClick="oldal_submit_publikus(\'/pr_a/010/009/p_009.asp?p_merkozes_kod=2446&p_evad_kod=2025&p_verseny_al_kod=93\');">B</div>',
+ '<div OnClick="oldal_submit_publikus(\'/pr_a/010/009/p_009.asp?p_merkozes_kod=2446&p_evad_kod=2025&p_verseny_al_kod=93\');">repeat</div>',
+ '<div OnClick="oldal_submit_publikus(\'/pr_a/010/009/p_009.asp?p_merkozes_kod=8888&p_evad_kod=2025&p_verseny_al_kod=96\');">other league</div>',
+ '<div OnClick="oldal_submit_publikus(\'/pr_a/010/009/p_009.asp?p_merkozes_kod=9999&p_evad_kod=2024&p_verseny_al_kod=93\');">other season</div>'
+ ].join('');
+ const r=extractIndexEvidence(html,'official_women1');
+ assert.equal(r.uniqueLeagueMatchCodes,2);
+ assert.deepEqual(r.rawMatchCodes,['2424','2446']);
+ assert.equal(r.confirmedCompleteLeagueFixtureList,false);
+});
