@@ -4,8 +4,11 @@ on:
     paths:
       - scripts/history/discover-women1-index.cjs
       - scripts/history/parse-official-women1-competition.cjs
+      - scripts/history/audit-official-women1-snapshot.cjs
+      - data/competition-history/women1_2025_26_official_league_snapshot.json
       - tests/history-women1-index-discovery.test.cjs
       - tests/history-women1-competition.test.cjs
+      - tests/history-official-women1-snapshot.test.cjs
       - .github/workflows/history-women1-index-discovery.yml
   workflow_dispatch:
 permissions:
@@ -23,7 +26,11 @@ jobs:
         run: |
           node --check scripts/history/discover-women1-index.cjs
           node --check scripts/history/parse-official-women1-competition.cjs
+          node --check scripts/history/audit-official-women1-snapshot.cjs
           node --test tests/history-women1-index-discovery.test.cjs
           node --test tests/history-women1-competition.test.cjs
+          node --test tests/history-official-women1-snapshot.test.cjs
+      - name: Audit stored 2025/26 full league snapshot
+        run: node scripts/history/audit-official-women1-snapshot.cjs
       - name: Probe the two allowlisted official URLs once
         run: node scripts/history/discover-women1-index.cjs --network
