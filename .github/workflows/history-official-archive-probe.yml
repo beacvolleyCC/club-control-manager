@@ -1,0 +1,25 @@
+name: Historical federation source probe
+on:
+  pull_request:
+    paths:
+      - scripts/history/probe-federation-pages.cjs
+      - tests/history-official-probe.test.cjs
+      - .github/workflows/history-official-archive-probe.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and offline safety tests
+        run: |
+          node --check scripts/history/probe-federation-pages.cjs
+          node --test tests/history-official-probe.test.cjs
+      - name: Read-only access check – four allowlisted historic pages
+        run: node scripts/history/probe-federation-pages.cjs --network
