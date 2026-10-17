@@ -6849,3 +6849,36 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 /* Manager v50: starring lineup, understated no-appearance marker. */
 .cc-protocol-team td .cc-protocol-starter{font-weight:750;color:var(--text)}
 .cc-protocol-marker.is-no-entry{min-width:20px;height:20px;color:var(--muted);font-size:15px;font-weight:400}
+
+/* Restored classic full-width mass training create panel (creation only). */
+.mass-legacy-create-section{display:grid;gap:12px;padding:16px 18px 20px;min-width:0}
+.mass-legacy-create-toggle{width:100%;min-height:52px;text-align:center;background:#ffc400;border:1px solid #e4ab00;border-radius:9px;color:#141414;font:inherit;font-weight:800;font-size:13px;cursor:pointer}
+.mass-legacy-create-toggle:hover{background:#ffce25}
+.mass-legacy-create-toggle:focus-visible{outline:3px solid #222;outline-offset:2px}
+.mass-legacy-editor-host{min-width:0}
+.mass-legacy-editor{padding:16px;background:var(--card,#fff);border:1px solid var(--line,#ddd);border-radius:15px}
+.mass-legacy-editor>h3{font-size:17px;margin:0 0 14px;font-weight:850;color:var(--black,#181818)}
+.mass-legacy-editor .action-form{max-width:none}
+.mass-legacy-editor .action-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}
+.mass-legacy-editor .action-form-grid>.field{min-width:0}
+.mass-legacy-editor .action-form-grid>.field:nth-child(8){order:1}
+.mass-legacy-editor .action-form-grid>.field:nth-child(1){order:2}
+.mass-legacy-editor .action-form-grid>.field:nth-child(4){order:3}
+.mass-legacy-editor .action-form-grid>.field:nth-child(2){order:4}
+.mass-legacy-editor .action-form-grid>.field:nth-child(3){order:5}
+.mass-legacy-editor .action-form-grid>.field:nth-child(5){order:6}
+.mass-legacy-editor .action-form-grid>.field:nth-child(6){order:7}
+.mass-legacy-editor .action-form-grid>.field:nth-child(7){order:8}
+.mass-legacy-editor .action-form-grid>.field:nth-child(9){order:9;grid-column:1/-1}
+.mass-legacy-editor .action-form-grid input,.mass-legacy-editor .action-form-grid select{width:100%;min-height:43px}
+.mass-legacy-editor .action-form-repeat{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:12px}
+.mass-legacy-editor .action-form-repeat>.field{flex:1 1 210px}
+.mass-legacy-editor .action-form-repeat>.field select,.mass-legacy-editor .action-form-repeat>.field input{width:100%;min-height:43px}
+.mass-legacy-editor .action-checkbox{margin-top:14px}
+.mass-legacy-editor .dialog-action-row{justify-content:flex-start;margin-top:16px}
+@media(max-width:700px){
+ .mass-legacy-create-section{padding:12px 10px 16px}
+ .mass-legacy-editor{padding:13px}
+ .mass-legacy-editor .action-form-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+ .mass-legacy-editor .action-form-grid>.field:nth-child(9){grid-column:auto}
+}
