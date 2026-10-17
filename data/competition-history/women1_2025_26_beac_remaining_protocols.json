@@ -1,0 +1,1376 @@
+{
+  "schemaVersion": 1,
+  "source": "MRSZ 2025/26 Női Budapest I. official protocols, same season's match ID index",
+  "parentFixtureFile": "women1_2025_26_official_league_snapshot.json",
+  "capturedOn": "2026-10-17",
+  "season": "2025/26",
+  "competitionSubId": "93",
+  "selectedFromOfficialFixtureCodes": true,
+  "requestedProtocols": 17,
+  "sourceScoresMatched": 17,
+  "validatedBeacRosters": 16,
+  "emptyOfficialBeacRosters": [
+    "7803"
+  ],
+  "uniqueBeacPlayerCodes": 15,
+  "playerNominations": 162,
+  "verifiedWholeSeasonRoster": false,
+  "verifiedIndividualPlayedSets": false,
+  "allowPlayerStrengthRating": false,
+  "allowTeamRetentionPercentage": false,
+  "notes": [
+    "K/CS is a public match sheet designation, not proof of minutes or played sets.",
+    "MRSZ score can be present while both teams' roster fields are empty; such a sheet has no verified player appearances.",
+    "Only 17 remaining (non-pilot) matches are in this file; merge with the previous five-match pilot by matchCode without double counting.",
+    "The original 2026/27 roster is not copied into this public archive file."
+  ],
+  "results": [
+    {
+      "matchCode": "2809",
+      "date": "2025-11-06",
+      "time": "20:20",
+      "home": "MAFC-ÉPK",
+      "away": "BEAC",
+      "homeSets": 0,
+      "awaySets": 3,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=2809&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "MAFC-ÉPK",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 16
+    },
+    {
+      "matchCode": "2832",
+      "date": "2025-11-13",
+      "time": "20:00",
+      "home": "Közgáz SC",
+      "away": "BEAC",
+      "homeSets": 3,
+      "awaySets": 2,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=2832&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31266",
+          "name": "SZABÓ CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Közgáz női",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 22
+    },
+    {
+      "matchCode": "3052",
+      "date": "2025-11-21",
+      "time": "19:30",
+      "home": "BEAC",
+      "away": "Mozdulj",
+      "homeSets": 3,
+      "awaySets": 2,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=3052&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31266",
+          "name": "SZABÓ CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Budapesti Egyetemi Atlétikai Club",
+      "sourceOfficialAway": "Mozdulj",
+      "allTeamPlayerRows": 23
+    },
+    {
+      "matchCode": "3201",
+      "date": "2025-11-26",
+      "time": "20:45",
+      "home": "MTK Budapest",
+      "away": "BEAC",
+      "homeSets": 0,
+      "awaySets": 3,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=3201&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "MTK Budapest",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 21
+    },
+    {
+      "matchCode": "5251",
+      "date": "2025-12-19",
+      "time": "19:30",
+      "home": "BEAC",
+      "away": "Vasas SC Tartalék",
+      "homeSets": 3,
+      "awaySets": 1,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=5251&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Budapesti Egyetemi Atlétikai Club",
+      "sourceOfficialAway": "Vasas Sport Club Tartalék",
+      "allTeamPlayerRows": 14
+    },
+    {
+      "matchCode": "6201",
+      "date": "2026-01-30",
+      "time": "20:40",
+      "home": "KSE",
+      "away": "BEAC",
+      "homeSets": 1,
+      "awaySets": 3,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=6201&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "KSE",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 17
+    },
+    {
+      "matchCode": "6670",
+      "date": "2026-02-12",
+      "time": "18:50",
+      "home": "EMERICUS SE",
+      "away": "BEAC",
+      "homeSets": 2,
+      "awaySets": 3,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=6670&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "65666",
+          "name": "KŐRÖSI LUCA ANNA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31266",
+          "name": "SZABÓ CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "EMERICUS SE",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 22
+    },
+    {
+      "matchCode": "7117",
+      "date": "2026-02-24",
+      "time": "19:30",
+      "home": "BEAC",
+      "away": "RSZSE",
+      "homeSets": 3,
+      "awaySets": 2,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7117&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "65666",
+          "name": "KŐRÖSI LUCA ANNA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "23656",
+          "name": "PAPP LAURA DOROTTYA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Budapesti Egyetemi Atlétikai Club",
+      "sourceOfficialAway": "Ráckeve",
+      "allTeamPlayerRows": 22
+    },
+    {
+      "matchCode": "7359",
+      "date": "2026-03-13",
+      "time": "19:30",
+      "home": "RSZSE",
+      "away": "BEAC",
+      "homeSets": 0,
+      "awaySets": 3,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7359&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "65666",
+          "name": "KŐRÖSI LUCA ANNA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "23656",
+          "name": "PAPP LAURA DOROTTYA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Ráckeve",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 21
+    },
+    {
+      "matchCode": "7587",
+      "date": "2026-03-20",
+      "time": "19:30",
+      "home": "BEAC",
+      "away": "Közgáz SC",
+      "homeSets": 3,
+      "awaySets": 1,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7587&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "65666",
+          "name": "KŐRÖSI LUCA ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "23656",
+          "name": "PAPP LAURA DOROTTYA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Budapesti Egyetemi Atlétikai Club",
+      "sourceOfficialAway": "Közgáz női",
+      "allTeamPlayerRows": 18
+    },
+    {
+      "matchCode": "6990",
+      "date": "2026-03-27",
+      "time": "19:30",
+      "home": "BEAC",
+      "away": "MAFC-ÉPK",
+      "homeSets": 3,
+      "awaySets": 0,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=6990&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "65666",
+          "name": "KŐRÖSI LUCA ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "23656",
+          "name": "PAPP LAURA DOROTTYA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31266",
+          "name": "SZABÓ CSENGE",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Budapesti Egyetemi Atlétikai Club",
+      "sourceOfficialAway": "MAFC-ÉPK",
+      "allTeamPlayerRows": 20
+    },
+    {
+      "matchCode": "7737",
+      "date": "2026-04-01",
+      "time": "20:00",
+      "home": "Mozdulj",
+      "away": "BEAC",
+      "homeSets": 3,
+      "awaySets": 0,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7737&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "65666",
+          "name": "KŐRÖSI LUCA ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "20799",
+          "name": "SZÉLES-NEIZER LILI",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Mozdulj",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 20
+    },
+    {
+      "matchCode": "7782",
+      "date": "2026-04-16",
+      "time": "19:30",
+      "home": "KRE SC",
+      "away": "BEAC",
+      "homeSets": 1,
+      "awaySets": 3,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7782&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "37523",
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "23656",
+          "name": "PAPP LAURA DOROTTYA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "21243",
+          "name": "KOVÁCS NÓRA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "51046",
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Károli Gáspár Református Egyetem Sport Club",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 21
+    },
+    {
+      "matchCode": "7803",
+      "date": "2026-04-21",
+      "time": "18:00",
+      "home": "Vasas SC Tartalék",
+      "away": "BEAC",
+      "homeSets": 0,
+      "awaySets": 3,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7803&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": false,
+      "beacPlayers": [],
+      "rejectionReasons": [
+        "no_beac_player_rows"
+      ],
+      "sourceOfficialHome": "Vasas Sport Club Tartalék",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 0
+    },
+    {
+      "matchCode": "6170",
+      "date": "2026-04-27",
+      "time": "19:30",
+      "home": "BEAC",
+      "away": "Panoráma SE",
+      "homeSets": 3,
+      "awaySets": 0,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=6170&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "65666",
+          "name": "KŐRÖSI LUCA ANNA",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "23656",
+          "name": "PAPP LAURA DOROTTYA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        },
+        {
+          "code": "30317",
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "libero": "L2"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Budapesti Egyetemi Atlétikai Club",
+      "sourceOfficialAway": "Panoráma SE",
+      "allTeamPlayerRows": 16
+    },
+    {
+      "matchCode": "8199",
+      "date": "2026-05-08",
+      "time": "19:30",
+      "home": "BEAC",
+      "away": "DKLSN",
+      "homeSets": 3,
+      "awaySets": 0,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=8199&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "65666",
+          "name": "KŐRÖSI LUCA ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "23656",
+          "name": "PAPP LAURA DOROTTYA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "CS",
+          "libero": "L1"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Budapesti Egyetemi Atlétikai Club",
+      "sourceOfficialAway": "DUNAKANYAR Labdasport Nonprofit Közhasznú Kft",
+      "allTeamPlayerRows": 14
+    },
+    {
+      "matchCode": "8451",
+      "date": "2026-05-11",
+      "time": "19:00",
+      "home": "Panoráma SE",
+      "away": "BEAC",
+      "homeSets": 1,
+      "awaySets": 3,
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=8451&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "http": 200,
+      "parserStatus": "verified_official_score",
+      "officialScoreVerified": true,
+      "officialDateVerified": true,
+      "beacPositionVerified": true,
+      "officialBeacRosterVerified": true,
+      "beacPlayers": [
+        {
+          "code": "42988",
+          "name": "IMRE ESZTER",
+          "designation": "CS",
+          "libero": null
+        },
+        {
+          "code": "23656",
+          "name": "PAPP LAURA DOROTTYA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27101",
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "30645",
+          "name": "NAGY-TÓTH CSENGE",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "31475",
+          "name": "PETRI ZSÓFIA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "54846",
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "27892",
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "libero": null
+        },
+        {
+          "code": "32910",
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "libero": "L1"
+        }
+      ],
+      "rejectionReasons": [],
+      "sourceOfficialHome": "Panoráma SE",
+      "sourceOfficialAway": "Budapesti Egyetemi Atlétikai Club",
+      "allTeamPlayerRows": 17
+    }
+  ]
+}

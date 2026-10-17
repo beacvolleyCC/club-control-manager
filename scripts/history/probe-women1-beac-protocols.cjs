@@ -91,4 +91,4 @@ if(require.main===module){
  if(process.argv[2]!=='--network'){process.stderr.write('Requires explicit --network\n');process.exitCode=2}
  else main().catch(e=>{process.stderr.write(String(e)+'\n');process.exitCode=1});
 }
-module.exports={selectBeacPilot,classify};
+module.exports={selectBeacPilot,classify,fetchOfficial};
