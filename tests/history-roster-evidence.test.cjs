@@ -63,3 +63,22 @@ test('names with no common community profile ID do not count as confirmed cross-
  assert.equal(result.matchedCommunityProfiles.length,0);
  assert.equal(result.rosterRetentionPercent,null);
 });
+
+test('2025/26 team list compared with 2026/27 exposes only four literal club/team-name hints',()=>{
+ const t=evaluate(sample).teamIdentity;
+ assert.equal(t.historicalCommunityTeams,12);
+ assert.equal(t.currentSavedTeams,12);
+ assert.deepEqual(t.sameNormalizedNameHints,['BEAC','MAFC-ÉPK','Mozdulj SE','Panoráma SE']);
+ assert.ok(t.unmatchedCurrentNames.includes('MTK'));
+ assert.ok(t.unmatchedCurrentNames.includes('Emericus SE'));
+ assert.equal(t.officialTeamIdentityLinks,0);
+ assert.equal(t.automaticAliasMerges,0);
+ assert.equal(t.verifiedTeamRetentionPercent,null);
+});
+test('II. teams and similar club names are never silently mapped to first squads',()=>{
+ const x=structuredClone(sample);
+ x.leagueTeamCandidates.riskExamples[0].verified=true;
+ const result=evaluate(x);
+ assert.equal(result.valid,false);
+ assert.ok(result.errors.some(e=>e.includes('Unsafe historical club/team identity merge')));
+});
