@@ -1,0 +1,44 @@
+name: Historical women I opponent protocols
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - scripts/history/audit-women1-opponents.cjs
+      - scripts/history/validate-women1-opponent-archive.cjs
+      - tests/history-women1-opponents-audit.test.cjs
+      - tests/history-women1-opponent-archive.test.cjs
+      - .github/workflows/history-women1-opponents.yml
+      - data/competition-history/women1_2025_26_opponent_protocols.json
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate source guard and competition mapping
+        run: |
+          node --check scripts/history/audit-women1-opponents.cjs
+          node --check scripts/history/validate-women1-opponent-archive.cjs
+          node --test tests/history-women1-opponents-audit.test.cjs
+          node --test tests/history-women1-opponent-archive.test.cjs
+          node scripts/history/validate-women1-opponent-archive.cjs
+  fetch-one-batch:
+    needs: offline
+    # Run once on PR opening; later code/doc edits do not trigger repeat
+    # archival requests. Manual run permitted if revalidation is needed.
+    if: github.event_name == 'workflow_dispatch' || github.event.action == 'opened'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch 107 official source-listed non-BEAC protocols once
+        run: node scripts/history/audit-women1-opponents.cjs --network all
