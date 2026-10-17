@@ -26,6 +26,16 @@ function extractIndexEvidence(html,id){
    .replace(/<[^>]*>/g,' ').replace(/&nbsp;|&#160;/gi,' ')
    .replace(/\s+/g,' ').trim();
  const needles=['Női Budapest I. osztály','Női Budapest-bajnokság','2025/2026','2025-2026','p_verseny_al_kod=93'];
+ const rawLeagueContexts=[];
+ const re=/Női Budapest I\. osztály/gi;
+ let m;
+ while((m=re.exec(raw))!==null&&rawLeagueContexts.length<6)
+   rawLeagueContexts.push(raw.slice(Math.max(0,m.index-1100),m.index+750));
+ const rawFieldPatterns={};
+ for(const term of ['p_verseny_al_kod','p_verseny_kod','verseny_al_kod','d_verseny_al_kod','kivalaszt_verseny']){
+   const i=raw.toLowerCase().indexOf(term.toLowerCase());
+   rawFieldPatterns[term]=i>=0?raw.slice(Math.max(0,i-130),i+270):null;
+ }
  const excerpts=[];
  for(const needle of needles){
    const pos=clean.toLowerCase().indexOf(needle.toLowerCase());
@@ -43,6 +53,7 @@ function extractIndexEvidence(html,id){
  const compactLinks=[...new Set(links)].slice(0,35);
  return{
    id,hasWomen1:excerpts.some(x=>x.needle==='Női Budapest I. osztály'),
+   rawLeagueContexts,rawFieldPatterns,
    excerptSamples:excerpts,
    samplePageLinks:compactLinks,
    directKnownLeagueLinks:knownLeagueLinks.slice(0,25),
