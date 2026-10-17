@@ -1,0 +1,25 @@
+name: MRSZ women I league index discovery
+on:
+  pull_request:
+    paths:
+      - scripts/history/discover-women1-index.cjs
+      - tests/history-women1-index-discovery.test.cjs
+      - .github/workflows/history-women1-index-discovery.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-index:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate parser and index matching
+        run: |
+          node --check scripts/history/discover-women1-index.cjs
+          node --test tests/history-women1-index-discovery.test.cjs
+      - name: Probe the two allowlisted official URLs once
+        run: node scripts/history/discover-women1-index.cjs --network
