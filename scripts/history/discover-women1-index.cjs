@@ -136,4 +136,4 @@ if(require.main===module){
  }else{probe().then(x=>process.stdout.write(JSON.stringify(x,null,2)+'\n'),
     e=>{process.stderr.write(String(e)+'\n');process.exitCode=1})}
 }
-module.exports={ENDPOINTS,decodePage,extractIndexEvidence,probe};
+module.exports={ENDPOINTS,decodePage,extractIndexEvidence,fetchAllowed,probe};
