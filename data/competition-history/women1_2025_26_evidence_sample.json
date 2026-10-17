@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "label": "2025/26 Női Budapest I. osztály — ellenőrizendő nyilvános forrásminta",
+  "sport": "volleyball",
+  "season": "2025/26",
+  "competition": "Női Budapest I. osztály",
+  "sampleIsComplete": false,
+  "manualTranscription": true,
+  "officialResultsVerified": false,
+  "sourceNotes": [
+    {
+      "url": "https://panoramase.hu/2025-2026-esemenyek/",
+      "kind": "club_site",
+      "caveat": "A klub 2025/26-os eseménynaptárának női Bp. I. részéből. Egyes más hónapokban hibásan 2025-ös év szerepel, ezért csak a novemberi ellenőrzött dátumok."
+    },
+    {
+      "url": "https://m.24score.com/volleyball/team/hungary/mafc_epk_%28f%29/",
+      "kind": "third_party_score",
+      "caveat": "Másodlagos eredményoldal; a rögzített állásokat MRSZ eredménylistával még egyeztetni kell."
+    },
+    {
+      "url": "https://en.24score.com/volleyball/team/hungary/vasas_sc_2_%28f%29/",
+      "kind": "third_party_score",
+      "caveat": "Másodlagos eredményoldal."
+    },
+    {
+      "url": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+      "kind": "third_party_score",
+      "caveat": "Több 2025. őszi meccs találata, nem igazolt teljes bajnoki export."
+    }
+  ],
+  "matches": [
+    {
+      "date": "2025-10-17",
+      "home": "BEAC",
+      "away": "EMERICUS SE",
+      "homeSets": 3,
+      "awaySets": 0,
+      "sourceType": "third_party",
+      "sourceUrl": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2025-11-06",
+      "home": "KRE SC",
+      "away": "Panoráma SE",
+      "homeSets": 1,
+      "awaySets": 3,
+      "sourceType": "club_site",
+      "sourceUrl": "https://panoramase.hu/2025-2026-esemenyek/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2025-11-06",
+      "home": "MAFC-ÉPK",
+      "away": "BEAC",
+      "homeSets": 0,
+      "awaySets": 3,
+      "sourceType": "third_party",
+      "sourceUrl": "https://m.24score.com/volleyball/team/hungary/mafc_epk_%28f%29/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2025-11-13",
+      "home": "EMERICUS SE",
+      "away": "Panoráma SE",
+      "homeSets": 3,
+      "awaySets": 1,
+      "sourceType": "club_site",
+      "sourceUrl": "https://panoramase.hu/2025-2026-esemenyek/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2025-11-20",
+      "home": "MAFC-ÉPK",
+      "away": "Panoráma SE",
+      "homeSets": 1,
+      "awaySets": 3,
+      "sourceType": "club_site",
+      "sourceUrl": "https://panoramase.hu/2025-2026-esemenyek/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2025-11-24",
+      "home": "Ráckeve",
+      "away": "Panoráma SE",
+      "homeSets": 3,
+      "awaySets": 2,
+      "sourceType": "club_site",
+      "sourceUrl": "https://panoramase.hu/2025-2026-esemenyek/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2025-11-26",
+      "home": "MTK Budapest",
+      "away": "BEAC",
+      "homeSets": 0,
+      "awaySets": 3,
+      "sourceType": "third_party",
+      "sourceUrl": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2025-12-19",
+      "home": "BEAC",
+      "away": "Vasas SC 2",
+      "homeSets": 3,
+      "awaySets": 1,
+      "sourceType": "third_party",
+      "sourceUrl": "https://en.24score.com/volleyball/team/hungary/vasas_sc_2_%28f%29/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2026-03-05",
+      "home": "MAFC-ÉPK",
+      "away": "Közgáz SC",
+      "homeSets": 0,
+      "awaySets": 3,
+      "sourceType": "third_party",
+      "sourceUrl": "https://m.24score.com/volleyball/team/hungary/mafc_epk_%28f%29/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2026-03-27",
+      "home": "BEAC",
+      "away": "MAFC-ÉPK",
+      "homeSets": 3,
+      "awaySets": 0,
+      "sourceType": "third_party",
+      "sourceUrl": "https://m.24score.com/volleyball/team/hungary/mafc_epk_%28f%29/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2026-04-10",
+      "home": "KSE",
+      "away": "MAFC-ÉPK",
+      "homeSets": 2,
+      "awaySets": 3,
+      "sourceType": "third_party",
+      "sourceUrl": "https://m.24score.com/volleyball/team/hungary/mafc_epk_%28f%29/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2026-04-21",
+      "home": "Vasas SC 2",
+      "away": "BEAC",
+      "homeSets": 0,
+      "awaySets": 3,
+      "sourceType": "third_party",
+      "sourceUrl": "https://en.24score.com/volleyball/team/hungary/vasas_sc_2_%28f%29/",
+      "verifiedOfficial": false
+    },
+    {
+      "date": "2026-05-20",
+      "home": "Mozdulj SE",
+      "away": "MAFC-ÉPK",
+      "homeSets": 3,
+      "awaySets": 0,
+      "sourceType": "third_party",
+      "sourceUrl": "https://m.24score.com/volleyball/team/hungary/mafc_epk_%28f%29/",
+      "verifiedOfficial": false
+    }
+  ],
+  "officialProtocolExamples": [
+    {
+      "season": "2025/26",
+      "date": "2026-01-21",
+      "home": "Mozdulj",
+      "away": "EMERICUS SE",
+      "matchCode": "6161",
+      "observedP_evad_kod": "2025",
+      "observedP_verseny_al_kod": "93",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_fo_cim=NoiBudapestI.osztaly&p_merkozes_kod=6161&p_verseny_al_kod=93",
+      "playerIdExtracted": false,
+      "hasNamedRosterVerified": false,
+      "scoreVerified": false,
+      "observation": "Nyilvánosan indexelt fejléc és a K/CS/kód mezők, tényleges játékosadat nem volt kiolvasható."
+    }
+  ],
+  "current2026Teams": [
+    "BEAC",
+    "Emericus SE",
+    "Közgáz SC",
+    "KRE SC",
+    "KSE",
+    "MAFC-ÉPK",
+    "Mozdulj SE",
+    "MTK",
+    "Óbudai Egyetem-Kandó SC",
+    "Panoráma SE",
+    "Ráckeve",
+    "Semmelweis Egyetem"
+  ],
+  "aliasReview": [
+    {
+      "history": "MTK Budapest",
+      "current": "MTK",
+      "status": "needs_official_team_id",
+      "reason": "MTK és MTK második csapat / kék/fehér nem vonható össze csak név alapján"
+    },
+    {
+      "history": "Mozdulj",
+      "current": "Mozdulj SE",
+      "status": "needs_official_team_id",
+      "reason": "A protokollpélda és a 24score találat eltérő alakú csapatnevet használ"
+    },
+    {
+      "history": "Vasas SC 2",
+      "current": null,
+      "status": "historical_only",
+      "reason": "Nem azonosítható a 2026/27-es női I. névsorban"
+    }
+  ]
+}
