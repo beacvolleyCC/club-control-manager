@@ -1,0 +1,33 @@
+name: Historical volleyball evidence QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/competition-history/**
+      - scripts/history/**
+      - tests/history-evidence-audit.test.cjs
+      - .github/workflows/history-evidence-qa.yml
+  pull_request:
+    paths:
+      - data/competition-history/**
+      - scripts/history/**
+      - tests/history-evidence-audit.test.cjs
+      - .github/workflows/history-evidence-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: node --check scripts/history/evidence-audit.cjs
+      - name: Audit candidate match evidence
+        run: node scripts/history/evidence-audit.cjs
+      - name: Unit and integrity tests
+        run: node --test tests/history-evidence-audit.test.cjs
