@@ -45,10 +45,10 @@ test('canonical feed results overlay archived fixture, and submitted photo score
 });
 test('initial league list defaults to BEAC fixtures and offers full-league switch',()=>{
  const html=ctx.qa.html('Női Budapest I. osztály');
- assert.ok(html.includes('data-league-match-scope="beac"'));
- assert.ok(html.includes('aria-pressed="true"'));
- assert.ok(html.includes('Összes bajnoki meccs'));
- assert.ok(!html.includes('cc-match-scoreboard'),'no BEAC player in sample league fixtures');
+ assert.ok(!html.includes('data-league-match-scope="beac"'));
+ assert.ok(html.includes('1 / 1 meccs'));
+ assert.ok(!html.includes('Összes bajnoki meccs'));
+ assert.ok(html.includes('cc-match-scoreboard'),'without BEAC the full group is shown');
 });
 test('full-league selection restores the original match-card layout with results',()=>{
  ctx.qa.setScope('all');
