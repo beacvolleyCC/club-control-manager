@@ -7,10 +7,12 @@ on:
       - scripts/history/audit-official-women1-snapshot.cjs
       - scripts/history/probe-women1-beac-protocols.cjs
       - data/competition-history/women1_2025_26_official_league_snapshot.json
+      - data/competition-history/women1_2025_26_beac_roster_pilot.json
       - tests/history-women1-index-discovery.test.cjs
       - tests/history-women1-competition.test.cjs
       - tests/history-official-women1-snapshot.test.cjs
       - tests/history-women1-protocol-pilot.test.cjs
+      - tests/history-women1-beac-pilot-evidence.test.cjs
       - .github/workflows/history-women1-index-discovery.yml
   workflow_dispatch:
 permissions:
@@ -34,6 +36,7 @@ jobs:
           node --test tests/history-women1-competition.test.cjs
           node --test tests/history-official-women1-snapshot.test.cjs
           node --test tests/history-women1-protocol-pilot.test.cjs
+          node --test tests/history-women1-beac-pilot-evidence.test.cjs
       - name: Audit stored 2025/26 full league snapshot
         run: node scripts/history/audit-official-women1-snapshot.cjs
       - name: Probe the two allowlisted official URLs once
