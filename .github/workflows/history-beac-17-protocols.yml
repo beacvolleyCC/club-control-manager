@@ -1,0 +1,26 @@
+name: BEAC historical 17-protocol pilot
+on:
+  pull_request:
+    paths:
+      - scripts/history/fetch-women1-beac-remaining.cjs
+      - scripts/history/probe-women1-beac-protocols.cjs
+      - tests/history-women1-beac-remaining.test.cjs
+      - .github/workflows/history-beac-17-protocols.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only-protocol-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check strict source guards
+        run: |
+          node --check scripts/history/fetch-women1-beac-remaining.cjs
+          node --test tests/history-women1-beac-remaining.test.cjs
+      - name: Read 17 known historical BEAC match sheets
+        run: node scripts/history/fetch-women1-beac-remaining.cjs --network
