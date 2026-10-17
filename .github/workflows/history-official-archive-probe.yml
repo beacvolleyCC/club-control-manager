@@ -3,7 +3,9 @@ on:
   pull_request:
     paths:
       - scripts/history/probe-federation-pages.cjs
+      - scripts/history/parse-official-women1-protocol.cjs
       - tests/history-official-probe.test.cjs
+      - tests/history-official-parser.test.cjs
       - .github/workflows/history-official-archive-probe.yml
   workflow_dispatch:
 permissions:
@@ -20,6 +22,8 @@ jobs:
       - name: Syntax and offline safety tests
         run: |
           node --check scripts/history/probe-federation-pages.cjs
+          node --check scripts/history/parse-official-women1-protocol.cjs
           node --test tests/history-official-probe.test.cjs
+          node --test tests/history-official-parser.test.cjs
       - name: Read-only access check – four allowlisted historic pages
         run: node scripts/history/probe-federation-pages.cjs --network
