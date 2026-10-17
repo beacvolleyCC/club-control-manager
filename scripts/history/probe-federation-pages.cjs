@@ -34,7 +34,7 @@ function summarizePage(entry,status,headers,buffer){
  const title=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/<[^>]*>/g,' ').trim()||null;
  const protocolMarker=text.toLowerCase().indexOf('versenyjegyzőkönyv');
  const start=protocolMarker>=0?protocolMarker:0;
- const excerpt=(status===200?text.slice(start,start+750):'').trim();
+ const excerpt=(status===200?text.slice(start,start+2250):'').trim();
  const candidates=[...html.matchAll(/href\s*=\s*["']([^"']{1,300})["']/gi)]
   .map(m=>m[1]).filter(s=>/verseny|bajnoksag|tabella|p_\d\d\d\.asp/i.test(s)).slice(0,8);
  return{
