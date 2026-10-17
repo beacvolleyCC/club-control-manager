@@ -4,7 +4,9 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - scripts/history/audit-women1-opponents.cjs
+      - scripts/history/validate-women1-opponent-archive.cjs
       - tests/history-women1-opponents-audit.test.cjs
+      - tests/history-women1-opponent-archive.test.cjs
       - .github/workflows/history-women1-opponents.yml
       - data/competition-history/women1_2025_26_opponent_protocols.json
   workflow_dispatch:
@@ -22,7 +24,10 @@ jobs:
       - name: Validate source guard and competition mapping
         run: |
           node --check scripts/history/audit-women1-opponents.cjs
+          node --check scripts/history/validate-women1-opponent-archive.cjs
           node --test tests/history-women1-opponents-audit.test.cjs
+          node --test tests/history-women1-opponent-archive.test.cjs
+          node scripts/history/validate-women1-opponent-archive.cjs
   fetch-one-batch:
     needs: offline
     # Run once on PR opening; later code/doc edits do not trigger repeat
