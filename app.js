@@ -2730,7 +2730,7 @@
         review.push({match:variant,reason});
       }
     }
-    const hasBeac=[...matches,...review.map(r=>r.match)].some(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName))
+    const hasBeac=matches.some(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName))
       ||tableRows.some(r=>ccIsBeacLeagueTeam_(r.teamName));
     const scope=hasBeac?ccLeagueMatchScope_:'all';
     const visible=scope==='all'?matches:matches.filter(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName));
