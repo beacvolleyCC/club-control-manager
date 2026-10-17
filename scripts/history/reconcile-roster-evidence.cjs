@@ -25,10 +25,15 @@ function compareRosters(previousCommunityRoster,currentProtocolPlayers){
    if(!k||!id){
      collisions.push({name:String(p.name||''),reason:'missing current player code/name'});continue;
    }
-   if(currentCodes.has(id)||currentNames.has(k)||previousDuplicates.has(k)){
+   if(currentCodes.has(id)||currentNames.has(k)){
      collisions.push({name:p.name,reason:'duplicate or ambiguous match'});continue;
    }
+   // Reserve ID/name even if the matching historical roster is ambiguous.
+   // A second current occurrence of the same code must also be rejected.
    currentCodes.add(id);currentNames.add(k);
+   if(previousDuplicates.has(k)){
+     collisions.push({name:p.name,reason:'duplicate historical community name'});continue;
+   }
    const community=candidates.get(k);
    if(!community){notMatched.push(p.name);continue}
    pairs.push({
