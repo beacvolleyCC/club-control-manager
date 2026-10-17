@@ -1,0 +1,34 @@
+name: Historical federation source probe
+on:
+  pull_request:
+    paths:
+      - scripts/history/probe-federation-pages.cjs
+      - scripts/history/parse-official-women1-protocol.cjs
+      - scripts/history/compare-official-rosters.cjs
+      - data/competition-history/women1_2025_26_official_m2446.json
+      - tests/history-official-probe.test.cjs
+      - tests/history-official-parser.test.cjs
+      - tests/history-official-roster-match.test.cjs
+      - .github/workflows/history-official-archive-probe.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and offline safety tests
+        run: |
+          node --check scripts/history/probe-federation-pages.cjs
+          node --check scripts/history/parse-official-women1-protocol.cjs
+          node --check scripts/history/compare-official-rosters.cjs
+          node --test tests/history-official-probe.test.cjs
+          node --test tests/history-official-parser.test.cjs
+          node --test tests/history-official-roster-match.test.cjs
+      - name: Read-only access check – four allowlisted historic pages
+        run: node scripts/history/probe-federation-pages.cjs --network

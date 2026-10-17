@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "competition": "Női Budapest I. osztály",
+  "season": "2025/26",
+  "source": "official_mrsz",
+  "sourceMatchCode": "2446",
+  "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_merkozes_kod=2446&p_verseny_al_kod=93",
+  "validatedAt": "2026-10-17",
+  "capturedVia": "read-only Windows-1250 federation match sheet",
+  "match": {
+    "date": "2025-10-17",
+    "time": "19:30",
+    "home": "Budapesti Egyetemi Atlétikai Club",
+    "away": "EMERICUS SE",
+    "homeSets": 3,
+    "awaySets": 0,
+    "setScores": [
+      [
+        25,
+        17
+      ],
+      [
+        25,
+        21
+      ],
+      [
+        25,
+        23
+      ]
+    ]
+  },
+  "teams": [
+    {
+      "name": "Budapesti Egyetemi Atlétikai Club",
+      "players": [
+        {
+          "shirt": 2,
+          "name": "SZALONTAI REBEKA",
+          "designation": "K",
+          "code": "37523",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 4,
+          "name": "PETRI ZSÓFIA",
+          "designation": "CS",
+          "code": "31475",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 5,
+          "name": "SZABÓ CSENGE",
+          "designation": "CS",
+          "code": "31266",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 8,
+          "name": "PÁSZTOR DORINA",
+          "designation": "K",
+          "code": "54846",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 16,
+          "name": "ALBERT ANNA",
+          "designation": "K",
+          "code": "27892",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 18,
+          "name": "UHRI SÁRA",
+          "designation": "K",
+          "code": "27101",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 19,
+          "name": "KOLBA KATA",
+          "designation": "K",
+          "code": "51046",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 21,
+          "name": "IMRE ESZTER",
+          "designation": "K",
+          "code": "42988",
+          "captain": true,
+          "libero": null
+        },
+        {
+          "shirt": 3,
+          "name": "IGLÓI NÓRA",
+          "designation": "CS",
+          "code": "32910",
+          "captain": false,
+          "libero": "L1"
+        },
+        {
+          "shirt": 10,
+          "name": "DIÓSZEGI RÉKA",
+          "designation": "CS",
+          "code": "30317",
+          "captain": false,
+          "libero": "L2"
+        }
+      ]
+    },
+    {
+      "name": "EMERICUS SE",
+      "players": [
+        {
+          "shirt": 40,
+          "name": "SCHULEK ÁGNES",
+          "designation": "K",
+          "code": "23302",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 41,
+          "name": "VINCZE DÓRA",
+          "designation": "K",
+          "code": "35649",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 45,
+          "name": "GERENCSÉR MELINDA",
+          "designation": "CS",
+          "code": "24510",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 46,
+          "name": "CSÁKÁNY ZINA VIVIEN",
+          "designation": "CS",
+          "code": "31437",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 48,
+          "name": "HAINZMANN REGE KATA",
+          "designation": "K",
+          "code": "28517",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 61,
+          "name": "BÁRSONY JOLÁN",
+          "designation": "CS",
+          "code": "65362",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 63,
+          "name": "KUCSERA ESZTER MÁRTA",
+          "designation": "CS",
+          "code": "27222",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 80,
+          "name": "JAKAB ESZTER",
+          "designation": "K",
+          "code": "28741",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 81,
+          "name": "HORUCZI BORBÁLA HANNA",
+          "designation": "K",
+          "code": "24811",
+          "captain": false,
+          "libero": null
+        },
+        {
+          "shirt": 97,
+          "name": "JANKOVITS HANNA",
+          "designation": "K",
+          "code": "28743",
+          "captain": true,
+          "libero": null
+        },
+        {
+          "shirt": 38,
+          "name": "BÁLINT ANGELIKA",
+          "designation": "CS",
+          "code": "28748",
+          "captain": false,
+          "libero": "L1"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "K = jegyzőkönyvben jelölt kezdő, CS = csere; a megnevezések nem bizonyítanak egyéni játszott szetteket.",
+    "A rekord egyetlen mérkőzés, nem bizonyít teljes évados keretösszetételt.",
+    "Az egyedi játékoskódokból képezhető idényközi azonosság, játékosérték és játszott idő nem.",
+    "2026/27-es játékosnévlistát nem másolunk a publikusan verziózott történeti mintaállományba."
+  ]
+}
