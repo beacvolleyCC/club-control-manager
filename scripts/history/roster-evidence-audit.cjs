@@ -64,6 +64,30 @@ function evaluate(src){
    if(!list.some(q=>q.communityProfileId===p.communityProfileId&&q.name===p.name))
      errors.push('Transfer destination not supported by community roster: '+p.name);
  }
+ const l=src.leagueTeamCandidates||{};
+ if(l.identityMapVerified!==false||l.source2025OfficiallyVerified!==false||l.source2026OfficiallyVerified!==false)
+   errors.push('Team identity evidence must remain unverified pending official IDs');
+ const prevTeams=Array.isArray(l.historical2025)?l.historical2025:[];
+ const nextTeams=Array.isArray(l.current2026)?l.current2026:[];
+ const previousNames=new Set(prevTeams.map(key)),currentNames=new Set(nextTeams.map(key));
+ if(prevTeams.length!==previousNames.size||nextTeams.length!==currentNames.size)
+   errors.push('Duplicate league team names');
+ const exactLeagueNameHints=nextTeams.filter(x=>previousNames.has(key(x)));
+ const unmatchedLeagueTeams=nextTeams.filter(x=>!previousNames.has(key(x)));
+ for(const p of l.riskExamples||[]){
+   if(p.verified!==false)errors.push('Unsafe historical club/team identity merge: '+p.previous);
+   if(!prevTeams.includes(p.previous)||!nextTeams.includes(p.current))
+     errors.push('Alias review references missing team: '+p.previous);
+ }
+ const teamIdentity={
+   historicalSeason:'2025/26',currentSeason:'2026/27',
+   historicalCommunityTeams:prevTeams.length,currentSavedTeams:nextTeams.length,
+   sameNormalizedNameHints:exactLeagueNameHints,
+   unmatchedCurrentNames:unmatchedLeagueTeams,
+   officialTeamIdentityLinks:0,
+   automaticAliasMerges:0,
+   verifiedTeamRetentionPercent:null
+ };
  const comparisons=[];
  for(let i=1;i<chronology.length;i++){
    const a=chronology[i-1],b=chronology[i];
@@ -92,6 +116,7 @@ function evaluate(src){
      reportedPlacement:bySeason.get(x.season).reportedPlacement,
      officialRosterVerified:false,officialPlacementVerified:false})),
    comparisons,
+   teamIdentity,
    candidateTransfers:(src.historicalTransferCandidates||[]).map(p=>({
      name:p.name,fromTeam:p.fromTeam,toTeam:p.toTeam,season:p.toSeason,
      communityProfileId:p.communityProfileId,
