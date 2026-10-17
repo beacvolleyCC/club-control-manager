@@ -5,10 +5,13 @@ on:
     paths:
       - scripts/history/parse-flexible-women1-protocol.cjs
       - scripts/history/audit-stage10-beac-and-exceptions.cjs
+      - scripts/history/audit-two-beac-seasons-stage10.cjs
       - tests/history-flexible-protocol.test.cjs
       - tests/history-stage10-sourced-beac.test.cjs
+      - tests/history-two-beac-seasons-stage10.test.cjs
       - .github/workflows/history-stage10-beac.yml
       - data/competition-history/women1_2024_25_beac_protocols_stage10.json
+      - data/competition-history/women1_2025_26_recovered_protocols_stage10.json
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,8 +28,11 @@ jobs:
         run: |
           node --check scripts/history/parse-flexible-women1-protocol.cjs
           node --check scripts/history/audit-stage10-beac-and-exceptions.cjs
+          node --check scripts/history/audit-two-beac-seasons-stage10.cjs
           node --test tests/history-flexible-protocol.test.cjs
           node --test tests/history-stage10-sourced-beac.test.cjs
+          node --test tests/history-two-beac-seasons-stage10.test.cjs
+          node scripts/history/audit-two-beac-seasons-stage10.cjs
   source-probe:
     needs: offline
     if: github.event.action == 'opened' || github.event_name == 'workflow_dispatch'
