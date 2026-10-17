@@ -87,9 +87,9 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261017-standings-filter-v48'));
- assert.ok(html.includes('app.js?v=20261017-standings-filter-v48'));
- assert.ok(sw.includes("cc-manager-20261017-standings-filter-v48"));
+ assert.ok(html.includes('styles.css?v=20261017-protocol-clean-v49'));
+ assert.ok(html.includes('app.js?v=20261017-protocol-clean-v49'));
+ assert.ok(sw.includes("cc-manager-20261017-protocol-clean-v49"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
@@ -152,8 +152,9 @@ test('unconfirmed BEAC vs BEAC record in women I is also omitted',()=>{
  try{
   const html=ctx.qa.html(league);
   assert.ok(html.includes('1 ellenőrzendő BRSZ-rekord'));
-  assert.ok(html.includes('0 / 1 meccs'),'all ordinary fixtures are non-BEAC');
-  assert.ok(!html.includes('<article class="cc-match-scoreboard'));
+  assert.ok(html.includes('1 / 1 meccs'),'groups without BEAC show the full schedule');
+  assert.ok(!html.includes('data-league-match-scope="beac"'));
+  assert.ok(!html.includes('cc-match-scoreboard is-upcoming'),'unverified self fixture is not an ordinary match');
  }finally{fixtures.pop();}
 });
 
@@ -166,7 +167,7 @@ test('unknown-completeness standings do not falsely reject an otherwise valid ar
   assert.ok(html.includes('cc-match-scoreboard is-played'), 'do not remove a valid saved score without a verified complete table');
   assert.ok(html.includes('3–0'), 'saved outcome remains visible');
   assert.ok(!html.includes('A csapat nem szerepel a mentett tabellában'), 'unknown table completeness cannot justify identity rejection');
-  assert.ok(html.includes('teljes tabella nélkül'), 'source-coverage caution is explicit');
+  assert.ok(!html.includes('teljes tabella nélkül'), 'source-coverage boilerplate does not clutter the match page');
   assert.ok(!html.includes('1. helyen áll'), 'rank is not verified');
  }finally{ctx.ccMrszPhotoState_.tables=old;ctx.qa.setScope('beac');}
 });
@@ -204,8 +205,11 @@ test('verified protocol can be opened without changing federation match scorecar
   assert.ok(html.includes('data-cc-mrsz-protocol="2330"'));
   const detail=vm.runInContext('ccMrszProtocolHtml_',ctx)(match);
   assert.ok(detail.includes('Imre Eszter'));
-  assert.ok(detail.includes('Kezdő'));
-  assert.ok(detail.includes('Kapitány'));
+  assert.ok(!detail.includes('>Kezdő</span>'));
+  assert.ok(!detail.includes('nem élő'));
+  assert.ok(!detail.includes('MRSZ-jegyzőkönyvadatok'));
+  assert.ok(detail.includes('is-captain'));
+  assert.ok(detail.includes('>C</span>'));
   assert.ok(detail.includes('Juták Lili'));
   assert.ok(detail.includes('25 : 21'));
   assert.ok(!detail.includes('cc-protocol-person-link'), 'unverified athlete IDs are not guessed as hyperlinks');
@@ -216,4 +220,13 @@ test('federation person URLs require HTTPS and an approved Hunvolley host',()=>{
  assert.equal(url('https://hunvolley.hu/person?id=123'),'https://hunvolley.hu/person?id=123');
  for(const x of ['http://hunvolley.hu/person','https://hunvolley.hu.evil.net/person',
   'javascript:alert(1)','https://example.com/person',''])assert.equal(url(x),'');
+});
+
+test('Manager protocol role badges are concise and link checks remain independent',()=>{
+ const badges=vm.runInContext('ccMrszProtocolBadgesHtml_',ctx)({designation:'CS',captain:true,libero:'L1'});
+ assert.ok(badges.includes('sub-in'));
+ assert.ok(badges.includes('sub-out'));
+ assert.ok(badges.includes('>C</span>'));
+ assert.ok(badges.includes('>L1</span>'));
+ assert.ok(!badges.includes('>Csere</span>'));
 });
