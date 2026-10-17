@@ -1,0 +1,36 @@
+name: Women I 2024 official MRSZ league
+on:
+  pull_request:
+    paths:
+      - scripts/history/discover-official-women1-2024.cjs
+      - scripts/history/discover-women1-index.cjs
+      - tests/history-official-women1-2024.test.cjs
+      - .github/workflows/history-women1-2024.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify public source link and parser
+        run: |
+          node --check scripts/history/discover-official-women1-2024.cjs
+          node --test tests/history-official-women1-2024.test.cjs
+  verify-public-league:
+    needs: offline
+    if: github.event.action == 'opened' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read one 2024 official MRSZ competition page
+        run: node scripts/history/discover-official-women1-2024.cjs --network
