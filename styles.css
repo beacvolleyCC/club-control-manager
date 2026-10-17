@@ -6845,3 +6845,7 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
  .cc-protocol-markers{gap:3px}
  .cc-protocol-marker.is-captain,.cc-protocol-marker.is-libero{min-width:18px;height:18px}
 }
+
+/* Manager v50: starring lineup, understated no-appearance marker. */
+.cc-protocol-team td .cc-protocol-starter{font-weight:750;color:var(--text)}
+.cc-protocol-marker.is-no-entry{min-width:20px;height:20px;color:var(--muted);font-size:15px;font-weight:400}
