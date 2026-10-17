@@ -26,7 +26,7 @@ function parseRows(html){
    const end=raw.indexOf('</div>',m.index);
    if(end<0){errors.push('Unclosed match card '+matchCode);continue}
    const card=raw.slice(m.index,end+6);
-   const teamCells=[...card.matchAll(/<td\s+class="vw_black_cr_\d\d"[^>]*>([\s\S]*?)<\/td>/gi)]
+   const teamCells=[...card.matchAll(/<td\s+class="vw_black_(?:cr|cl)_\d\d"[^>]*>([\s\S]*?)<\/td>/gi)]
     .map(x=>visibleText(x[1])).filter(Boolean);
    const time=card.match(/<td\s+class="vw_black_cc_\d\d"[^>]*>\s*(\d{2}:\d{2})\s*<\/td>/i)?.[1]||null;
    const score=card.match(/<strong>\s*(\d)\s*-\s*(\d)\s*<\/strong>/i);
