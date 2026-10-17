@@ -169,5 +169,78 @@
     "Exact same spelling alone cannot establish identity; cross-season community ID is evidence of a community match only.",
     "The 2026/27 listing contains only two players and must not be used to estimate roster retention.",
     "The source may have club/team alias and classification errors. No live Supabase write."
-  ]
+  ],
+  "leagueTeamCandidates": {
+    "source2025": "https://women.volleybox.net/women-budapest-volleyball-championship-1-division-2025-26-o43403",
+    "source2026": "Supabase 2026/27 cc_competition_mrsz_screenshot_v1 fixture-name inventory (read-only, Oct 17)",
+    "source2025OfficiallyVerified": false,
+    "source2026OfficiallyVerified": false,
+    "historical2025": [
+      "BEAC",
+      "Dunakanyar LSE",
+      "Emericus SE II.",
+      "Kertvárosi SE",
+      "Közgáz II.",
+      "KRE II.",
+      "MAFC-ÉPK",
+      "Mozdulj SE",
+      "MTK Budapest II.",
+      "Panoráma SE",
+      "Ráckeve SZSE",
+      "Vasas SC Reserves"
+    ],
+    "current2026": [
+      "BEAC",
+      "Emericus SE",
+      "Közgáz SC",
+      "KRE SC",
+      "KSE",
+      "MAFC-ÉPK",
+      "Mozdulj SE",
+      "MTK",
+      "Óbudai Egyetem-Kandó SC",
+      "Panoráma SE",
+      "Ráckeve",
+      "Semmelweis Egyetem"
+    ],
+    "identityMapVerified": false,
+    "riskExamples": [
+      {
+        "previous": "Emericus SE II.",
+        "current": "Emericus SE",
+        "reason": "II team designation may refer to a different squad",
+        "verified": false
+      },
+      {
+        "previous": "Közgáz II.",
+        "current": "Közgáz SC",
+        "reason": "II team designation may refer to a different squad",
+        "verified": false
+      },
+      {
+        "previous": "KRE II.",
+        "current": "KRE SC",
+        "reason": "II team designation may refer to a different squad",
+        "verified": false
+      },
+      {
+        "previous": "MTK Budapest II.",
+        "current": "MTK",
+        "reason": "MTK reserve and first team ambiguity",
+        "verified": false
+      },
+      {
+        "previous": "Kertvárosi SE",
+        "current": "KSE",
+        "reason": "Abbreviation alone is insufficient",
+        "verified": false
+      },
+      {
+        "previous": "Ráckeve SZSE",
+        "current": "Ráckeve",
+        "reason": "Club-name similarity alone is insufficient",
+        "verified": false
+      }
+    ]
+  }
 }
