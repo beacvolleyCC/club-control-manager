@@ -2429,7 +2429,7 @@
       .toLowerCase().replace(/[^a-z0-9]/g,'');
     if(!compact)return '';
     const aliases={
-      kando:'kando',kandosportklub:'kando',kandosk:'kando',obudaiegyetemkandosc:'kando',
+      kando:'kando',kandosportklub:'kando',kandosportclub:'kando',kandosk:'kando',obudaiegyetemkandosc:'kando',
       btdse:'btdse',btdsetaksony:'btdse',broziktibortaksonyidiaksportegyesulet:'btdse',
       semmelweisegyetem:'semmelweis',semmelweisegyetemsportklub:'semmelweis',
       emericus:'emericus',emericusse:'emericus',
