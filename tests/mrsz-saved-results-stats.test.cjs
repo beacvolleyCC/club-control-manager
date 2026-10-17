@@ -94,3 +94,13 @@ test('Saved result statistics reject contradictory complete set-point records on
   {home:25,away:19},{home:25,away:17},{home:25,away:12},{home:12,away:25},{home:12,away:25}]};
  assert.equal(model.select(team,women,[impossible],[team,opponent]).length,0);
 });
+
+test('Manager statistics panels omit redundant grey explanatory subtitles',()=>{
+ for(const caption of ['helyezés · helyezésváltozás · legutóbbi 5','meccsek / frissítések','aktuális helyezés alapján','Legfeljebb 5 mentett mérkőzés']){
+   assert.ok(!src.includes(caption),caption);
+ }
+ assert.ok(!src.includes('<b>Statisztikák</b><span>Bajnokság</span>'));
+ assert.ok(src.includes('Részleges BRSZ-adat:'),'essential source coverage warning remains');
+ assert.ok(src.includes('msTrendHtml_'),'rank changes remain');
+ assert.ok(src.includes('msFormHtml_'),'recent match data remain');
+});
