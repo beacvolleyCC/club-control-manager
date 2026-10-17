@@ -42,7 +42,8 @@ test('Manager overview, main standings and matches route use one snapshot covera
  assert.ok(standings.includes('ccMrszCoverageLabel_(photo)'));
  assert.ok(standings.includes('ccMrszCoverageLabel_(null)'));
  assert.ok(matchTable.includes('ccMrszCoverageLabel_(table)'));
- assert.ok(matchPage.includes('ccMrszCoverageLabel_(null)'));
+ assert.ok(!matchPage.includes('ccMrszCoverageLabel_(null)'),'the Meccsek view no longer renders a second standings table');
+ assert.ok(matchPage.includes('ccMrszLeagueFixturePanelHtml_'));
 });
 test('Match-page archived table renders actual shared source label for complete and partial data',()=>{
  const code=section('  function ccMrszMainPhotoTableHtml_(','  // League fixture cards');
