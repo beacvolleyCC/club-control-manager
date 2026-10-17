@@ -5,14 +5,17 @@ on:
       - scripts/history/discover-women1-index.cjs
       - scripts/history/parse-official-women1-competition.cjs
       - scripts/history/audit-official-women1-snapshot.cjs
+      - scripts/history/audit-beac-full-season-rosters.cjs
       - scripts/history/probe-women1-beac-protocols.cjs
       - data/competition-history/women1_2025_26_official_league_snapshot.json
       - data/competition-history/women1_2025_26_beac_roster_pilot.json
+      - data/competition-history/women1_2025_26_beac_remaining_protocols.json
       - tests/history-women1-index-discovery.test.cjs
       - tests/history-women1-competition.test.cjs
       - tests/history-official-women1-snapshot.test.cjs
       - tests/history-women1-protocol-pilot.test.cjs
       - tests/history-women1-beac-pilot-evidence.test.cjs
+      - tests/history-beac-full-season.test.cjs
       - .github/workflows/history-women1-index-discovery.yml
   workflow_dispatch:
 permissions:
@@ -31,14 +34,18 @@ jobs:
           node --check scripts/history/discover-women1-index.cjs
           node --check scripts/history/parse-official-women1-competition.cjs
           node --check scripts/history/audit-official-women1-snapshot.cjs
+          node --check scripts/history/audit-beac-full-season-rosters.cjs
           node --check scripts/history/probe-women1-beac-protocols.cjs
           node --test tests/history-women1-index-discovery.test.cjs
           node --test tests/history-women1-competition.test.cjs
           node --test tests/history-official-women1-snapshot.test.cjs
           node --test tests/history-women1-protocol-pilot.test.cjs
           node --test tests/history-women1-beac-pilot-evidence.test.cjs
+          node --test tests/history-beac-full-season.test.cjs
       - name: Audit stored 2025/26 full league snapshot
-        run: node scripts/history/audit-official-women1-snapshot.cjs
+        run: |
+          node scripts/history/audit-official-women1-snapshot.cjs
+          node scripts/history/audit-beac-full-season-rosters.cjs
       - name: Probe the two allowlisted official URLs once
         run: node scripts/history/discover-women1-index.cjs --network
       - name: Five verified-index BEAC official protocol coverage checks
