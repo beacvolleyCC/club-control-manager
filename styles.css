@@ -6882,3 +6882,14 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
  .mass-legacy-editor .action-form-grid{grid-template-columns:minmax(0,1fr);gap:10px}
  .mass-legacy-editor .action-form-grid>.field:nth-child(9){grid-column:auto}
 }
+
+/* Optional server-scheduled activation for inactive mass-sport events. */
+.mass-activation-options{display:flex;flex-wrap:wrap;gap:10px 30px;align-items:center;margin-top:14px}
+.mass-activation-options .action-checkbox{margin:0;display:flex;gap:8px;align-items:center}
+.mass-activation-options .action-checkbox:has(input:disabled){opacity:.48}
+.mass-activation-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;padding:12px 14px;margin-top:10px;border:1px solid var(--line,#ddd);border-radius:10px;background:var(--card,#fff)}
+.mass-activation-fields[hidden],.mass-legacy-editor-host[hidden]{display:none!important}
+.mass-activation-fields .field{min-width:0}
+.mass-activation-fields select,.mass-activation-fields input{width:100%;min-height:42px}
+.mass-activation-zone{grid-column:1/-1;font-size:11px;color:var(--muted,#666)}
+@media(max-width:600px){.mass-activation-fields{grid-template-columns:minmax(0,1fr)}}
