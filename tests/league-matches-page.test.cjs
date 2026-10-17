@@ -81,7 +81,7 @@ test('match-page markup retains real BEAC roster while dropping parallel league 
 test('one shared scope and result provenance are visible in league scoreboard builder',()=>{
  assert.ok(source.includes("ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac'"));
  assert.ok(source.includes("meta:'',"));
- assert.ok(source.includes('const hasBeac=[...matches,...review.map(r=>r.match)]'));
+ assert.ok(source.includes('const hasBeac=matches'));
  assert.ok(source.includes("const scope=hasBeac?ccLeagueMatchScope_:'all'"));
  assert.ok(source.includes('const reason=ccMrszMatchReviewReason_(m,tableRows,table?.partial===false,conflicts)'));
  assert.ok(source.includes("const noTableNote='';"));
