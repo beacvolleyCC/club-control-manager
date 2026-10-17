@@ -201,7 +201,7 @@ test('verified protocol can be opened without changing federation match scorecar
  ctx.qa.setScope('all');
  try{
   const html=ctx.qa.html(league);
-  assert.ok(html.includes('Jegyzőkönyv ↗'));
+  assert.ok(!html.includes('Jegyzőkönyv ↗'));
   assert.ok(html.includes('data-cc-mrsz-protocol="2330"'));
   const detail=vm.runInContext('ccMrszProtocolHtml_',ctx)(match);
   assert.ok(detail.includes('Imre Eszter'));
@@ -229,4 +229,51 @@ test('Manager protocol role badges are concise and link checks remain independen
  assert.ok(badges.includes('>C</span>'));
  assert.ok(badges.includes('>L1</span>'));
  assert.ok(!badges.includes('>Csere</span>'));
+});
+
+
+test('Kandó Sport Club is the same team as Óbudai Egyetem-Kandó SC, but not Kandó II',()=>{
+ const normalize=vm.runInContext('ccMrszNormPairName_',ctx);
+ assert.equal(normalize('Kandó Sport Club'),normalize('Óbudai Egyetem-Kandó SC'));
+ assert.notEqual(normalize('Kandó II'),normalize('Óbudai Egyetem-Kandó SC'));
+ assert.equal(normalize('BTDSE Taksony'),normalize('Brózik Tibor Taksonyi Diáksport Egyesület'));
+});
+test('Men A October 14 Kandó–Taksony fixture and uploaded match merge into one',()=>{
+ const label='Férfi Budapest I. osztály – A csoport';
+ const fixture={competitionLabel:label,startsAt:'2026-10-14T18:30:00',homeName:'Óbudai Egyetem-Kandó SC',
+  awayName:'BTDSE Taksony',homeSets:null,awaySets:null};
+ const played={competitionLabel:label,startsAt:'2026-10-14T18:30:00+02:00',homeName:'Kandó Sport Club',
+  awayName:'Brózik Tibor Taksonyi Diáksport Egyesület',homeSets:3,awaySets:1};
+ fixtures.push(fixture);matches.push(played);
+ try{
+  const list=ctx.qa.merge(label).filter(m=>m.startsAt.startsWith('2026-10-14'));
+  assert.equal(list.length,1);
+  assert.equal(list[0].homeSets,3);
+ }finally{fixtures.pop();matches.pop();}
+});
+test('Women I October 13 Kandó–Ráckeve fixture and score merge into one',()=>{
+ const label='Női Budapest I. osztály';
+ const fixture={competitionLabel:label,startsAt:'2026-10-13T20:30:00',homeName:'Óbudai Egyetem-Kandó SC',
+  awayName:'Ráckeve',homeSets:null,awaySets:null};
+ const played={competitionLabel:label,startsAt:'2026-10-13T20:30:00+02:00',homeName:'Kandó Sport Club',
+  awayName:'Ráckeve',homeSets:3,awaySets:0};
+ fixtures.push(fixture);matches.push(played);
+ try{
+  const list=ctx.qa.merge(label).filter(m=>m.startsAt.startsWith('2026-10-13T20:30'));
+  assert.equal(list.length,1);
+  assert.equal(list[0].homeSets,3);
+ }finally{fixtures.pop();matches.pop();}
+});
+test('Manager protocol uses bold starter and dash where source has no court-entry status',()=>{
+ const render=vm.runInContext('ccMrszProtocolTeamHtml_',ctx);
+ const html=render({name:'BEAC',players:[{number:1,name:'Player A',designation:'K'},
+  {number:2,name:'Player B',designation:'CS'},
+  {number:3,name:'Player C'},
+  {number:4,name:'Player D',captain:true},
+  {number:5,name:'Player E',libero:'L2'}]});
+ assert.ok(html.includes('<strong class="cc-protocol-starter">'));
+ assert.ok(html.includes('is-no-entry'));
+ assert.ok(html.includes('is-subs'));
+ assert.ok(html.includes('>C</span>'));
+ assert.ok(html.includes('>L2</span>'));
 });
