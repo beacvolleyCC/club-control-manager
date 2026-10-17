@@ -51,10 +51,10 @@ test('overview fetch updates itself when standings snapshot arrives',()=>{
  const overview=slice('  function renderOverview(){','  function notificationRecipientById(');
  assert.ok(overview.includes('void ccLoadMrszPhotoSnapshot_()'));
 });
-test('standalone standings honors team filter for photographic league snapshot and never invents alphabetic ranks',()=>{
+test('standalone standings shows all teams after removing hidden filter and never invents alphabetic ranks',()=>{
  const view=slice('  function renderManagerStandings_(){','  function eventPlace(');
- assert.ok(view.includes('const selected=rows.length?msSelectedRow_(rows):null;'));
- assert.ok(view.includes('const displayRows=selected?rows.filter'));
+ assert.ok(view.includes('const selected=null;'));
+ assert.ok(view.includes('const displayRows=rows;'));
  assert.ok(view.includes('!r.provisionalAlphabetical'));
  const other=slice('  function ccMrszMenGroupTableHtml_(){','  function ccMrszMenGroupSwitcherHtml_');
  assert.ok(other.includes("Number(r.position)>0&&Number(r.played)>0"));

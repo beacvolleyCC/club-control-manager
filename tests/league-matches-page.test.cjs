@@ -104,3 +104,10 @@ test('protocol binds via multiple-element selector, not a single-element query',
  assert.ok(code.includes("event.key===' '"));
  assert.ok(code.includes("event.target.closest('a,button,select,input')"));
 });
+
+test('full standings never narrow to a hidden persisted player selection',()=>{
+ const st=source.slice(source.indexOf('  function renderManagerStandings_()'),source.indexOf('  function eventPlace('));
+ assert.ok(st.includes('const selected=null;'));
+ assert.ok(st.includes('const displayRows=rows;'));
+ assert.ok(!st.includes('const selected=rows.length?msSelectedRow_'));
+});
