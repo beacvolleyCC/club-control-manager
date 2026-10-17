@@ -44,9 +44,16 @@ function extractIndexEvidence(html,id){
  const links=[...raw.matchAll(/(?:href|action)\s*=\s*["']([^"'<>]{1,700})["']/gi)]
    .map(x=>x[1].replace(/&amp;/g,'&'))
    .filter(x=>/p_verseny_al_kod|p_evad_kod|p_merkozes_kod|010\/\d\d\d\/p_\d\d\d\.asp/i.test(x));
- const onclick=[...raw.matchAll(/(?:onclick|onchange)\s*=\s*["']([^"']{1,300})["']/gi)]
-   .map(x=>x[1]).filter(x=>/p_verseny|p_evad|p_merkozes|p_0\d\d/i.test(x));
- const codes=[...new Set([...links,...onclick].flatMap(x=>[...x.matchAll(/p_merkozes_kod\s*[=:'"\s]+\s*(\d+)/gi)].map(y=>y[1])))];
+ const onclick=[...raw.matchAll(/\b(?:onclick|onchange)\s*=\s*(["'])([\s\S]{1,900}?)\1/gi)]
+   .map(x=>x[2]).filter(x=>/p_verseny|p_evad|p_merkozes|p_0\d\d/i.test(x));
+ const embeddedLinks=onclick.map(x=>x.match(/oldal_submit_publikus\('([^']+)'\)/)?.[1]).filter(Boolean);
+ const allLinks=[...links,...embeddedLinks];
+ const officialMatchLinks=[...new Set(allLinks.filter(x=>/p_merkozes_kod=\d+/.test(x)
+   &&/p_verseny_al_kod=93(?:&|$)/.test(x)
+   &&/p_evad_kod=2025(?:&|$)/.test(x)))];
+ const codes=[...new Set(officialMatchLinks.map(x=>x.match(/p_merkozes_kod=(\d+)/)?.[1]).filter(Boolean))];
+ const tablePos=clean.indexOf('TABELLA');
+ const standingsExcerpt=tablePos>=0?clean.slice(tablePos,tablePos+1700):null;
  const knownLeagueLinks=links.filter(x=>/p_verseny_al_kod=93(?:&|$)/.test(x));
  const seasonSelects=[...raw.matchAll(/<select[^>]{0,700}>[\s\S]{0,6000}?<\/select>/gi)]
    .map(x=>x[0]).filter(x=>/2025/.test(x)).slice(0,2).map(x=>x.slice(0,750));
@@ -57,7 +64,10 @@ function extractIndexEvidence(html,id){
    excerptSamples:excerpts,
    samplePageLinks:compactLinks,
    directKnownLeagueLinks:knownLeagueLinks.slice(0,25),
+   officialMatchLinkCount:officialMatchLinks.length,
+   uniqueLeagueMatchCodes:codes.length,
    rawMatchCodes:codes.slice(0,60),
+   standingsExcerpt,
    seasonSelectSamples:seasonSelects,
    onclickSamples:[...new Set(onclick)].slice(0,15),
    evidenceType:'index-discovery-only',
