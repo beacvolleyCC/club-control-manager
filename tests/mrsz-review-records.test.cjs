@@ -52,7 +52,7 @@ test('Unknown league table does not hide otherwise valid saved MRSZ results',()=
  const html=display([result],[]);
  assert.ok(html.includes('cc-match-scoreboard'));
  assert.ok(!html.includes('Nincs teljes mentett tabella'),'source explanation stays in Adatellenőrzés');
- assert.ok(html.includes('teljes tabella nélkül'));
+ assert.ok(!html.includes('teljes tabella nélkül'),'public match cards do not include source boilerplate');
  assert.ok(!html.includes('1 ellenőrzendő rekord'));
 });
 test('Incomplete league table is not used to falsely reject a saved opponent',()=>{
