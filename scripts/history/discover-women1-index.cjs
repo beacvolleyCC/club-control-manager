@@ -52,6 +52,10 @@ function extractIndexEvidence(html,id){
    &&/p_verseny_al_kod=93(?:&|$)/.test(x)
    &&/p_evad_kod=2025(?:&|$)/.test(x)))];
  const codes=[...new Set(officialMatchLinks.map(x=>x.match(/p_merkozes_kod=(\d+)/)?.[1]).filter(Boolean))];
+ const matchMarkupSamples=['2424','2446','6161'].map(code=>{
+   const match=raw.match(new RegExp('OnClick="[^"]*p_merkozes_kod='+code+'\\b[^\"]*"','i'));
+   return {code,markup:match?raw.slice(Math.max(0,match.index-350),match.index+1300):null};
+ });
  const tablePos=clean.indexOf('TABELLA');
  const standingsExcerpt=tablePos>=0?clean.slice(tablePos,tablePos+1700):null;
  const knownLeagueLinks=links.filter(x=>/p_verseny_al_kod=93(?:&|$)/.test(x));
@@ -66,7 +70,8 @@ function extractIndexEvidence(html,id){
    directKnownLeagueLinks:knownLeagueLinks.slice(0,25),
    officialMatchLinkCount:officialMatchLinks.length,
    uniqueLeagueMatchCodes:codes.length,
-   rawMatchCodes:codes.slice(0,60),
+   rawMatchCodes:codes,
+   matchMarkupSamples,
    standingsExcerpt,
    seasonSelectSamples:seasonSelects,
    onclickSamples:[...new Set(onclick)].slice(0,15),
