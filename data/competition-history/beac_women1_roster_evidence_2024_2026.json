@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "label": "Női Budapest I. – BEAC történeti keretminta, 2024/25–2026/27",
+  "sourceType": "community_edited",
+  "primarySource": "https://women.volleybox.net/budapesti-eac-t12638",
+  "crossSeasonEvidence": "https://women.volleybox.net/anna-albert-p21497",
+  "transferListing": "https://women.volleybox.net/transfers/2025-26/ALL/370",
+  "officialProtocolExamples": [
+    {
+      "season": "2025/26",
+      "team1": "Mozdulj",
+      "team2": "EMERICUS SE",
+      "matchCode": "6161",
+      "competitionSubId": "93",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_fo_cim=NoiBudapestI.osztaly&p_merkozes_kod=6161&p_verseny_al_kod=93",
+      "rosterExtracted": false,
+      "individualPlayedSetsVerified": false
+    },
+    {
+      "season": "2025/26",
+      "team1": "BEAC",
+      "team2": null,
+      "matchCode": "2446",
+      "competitionSubId": "93",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=2446&p_evad_kod=2025&p_verseny_al_kod=93",
+      "rosterExtracted": false,
+      "individualPlayedSetsVerified": false,
+      "note": "Community listing points to this MRSZ match. Home/away and official roster not fetched."
+    }
+  ],
+  "seasons": [
+    {
+      "season": "2024/25",
+      "reportedPlacement": 5,
+      "placementVerifiedByFederation": false,
+      "rosterComplete": false,
+      "roster": [
+        {
+          "name": "Léna Nagy",
+          "role": "Libero"
+        },
+        {
+          "name": "Nóra Iglói",
+          "role": "Libero",
+          "communityProfileId": "77091"
+        },
+        {
+          "name": "Dea Szokol-Humay",
+          "role": "Universal"
+        }
+      ]
+    },
+    {
+      "season": "2025/26",
+      "reportedPlacement": 2,
+      "placementVerifiedByFederation": false,
+      "rosterComplete": false,
+      "roster": [
+        {
+          "name": "Csenge Szabó",
+          "role": "Setter"
+        },
+        {
+          "name": "Anna Albert",
+          "role": "Setter",
+          "communityProfileId": "21497"
+        },
+        {
+          "name": "Lili Széles-Neizer",
+          "role": "Setter"
+        },
+        {
+          "name": "Rebeka Szalontai",
+          "role": "Opposite"
+        },
+        {
+          "name": "Laura Dorottya Papp",
+          "role": "Outside Hitter"
+        },
+        {
+          "name": "Nóra Kovács",
+          "role": "Outside Hitter"
+        },
+        {
+          "name": "Dorina Pásztor",
+          "role": "Outside Hitter"
+        },
+        {
+          "name": "Kata Kolba",
+          "role": "Outside Hitter"
+        },
+        {
+          "name": "Eszter Imre",
+          "role": "Middle-blocker"
+        },
+        {
+          "name": "Luca Anna Kőrösi",
+          "role": "Middle-blocker"
+        },
+        {
+          "name": "Sára Uhri",
+          "role": "Middle-blocker"
+        },
+        {
+          "name": "Tóth Csenge",
+          "role": "Middle-blocker"
+        },
+        {
+          "name": "Nóra Iglói",
+          "role": "Libero",
+          "communityProfileId": "77091"
+        },
+        {
+          "name": "Réka Diószegi",
+          "role": "Libero"
+        },
+        {
+          "name": "Zsófia Petri",
+          "role": "Universal"
+        }
+      ]
+    },
+    {
+      "season": "2026/27",
+      "reportedPlacement": null,
+      "placementVerifiedByFederation": false,
+      "rosterComplete": false,
+      "roster": [
+        {
+          "name": "Szandra Tóth",
+          "role": "Outside Hitter"
+        },
+        {
+          "name": "Lili Iglói",
+          "role": "Libero"
+        }
+      ]
+    }
+  ],
+  "historicalTransferCandidates": [
+    {
+      "name": "Anna Albert",
+      "fromTeam": "MAFC-ÉPK",
+      "fromSeason": "2024/25",
+      "toTeam": "BEAC",
+      "toSeason": "2025/26",
+      "sourceType": "community_edited",
+      "sourceUrl": "https://women.volleybox.net/anna-albert-p21497",
+      "transferListUrl": "https://women.volleybox.net/transfers/2025-26/ALL/370",
+      "communityProfileId": "21497",
+      "reportedMrszPersonId": "27892",
+      "officialProfileContentVerified": false,
+      "officialMatchParticipationVerified": false,
+      "note": "Volleybox references MRSZ person profile 27892 and match 2446, but links could not be read directly; candidate only."
+    }
+  ],
+  "qualityGate": {
+    "federationRosterVerified": false,
+    "federationStandingsVerified": false,
+    "officialMatchParticipationVerified": false,
+    "join2024to2025CanOnlyUseCommunityProfileIds": true,
+    "join2025to2026CanOnlyUseCommunityProfileIds": true,
+    "publishTeamRatings": false,
+    "publishPlayerRatings": false
+  },
+  "notes": [
+    "No assumption that rosters are complete: a team listing is not evidence of official registration.",
+    "Community tournament placement 2 and 5 is not an MRSZ-verified official final table.",
+    "Exact same spelling alone cannot establish identity; cross-season community ID is evidence of a community match only.",
+    "The 2026/27 listing contains only two players and must not be used to estimate roster retention.",
+    "The source may have club/team alias and classification errors. No live Supabase write."
+  ]
+}
