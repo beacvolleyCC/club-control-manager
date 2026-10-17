@@ -23,4 +23,5 @@ jobs:
           node --check scripts/history/fetch-women1-beac-remaining.cjs
           node --test tests/history-women1-beac-remaining.test.cjs
       - name: Read 17 known historical BEAC match sheets
+        if: github.event_name == 'workflow_dispatch'
         run: node scripts/history/fetch-women1-beac-remaining.cjs --network
