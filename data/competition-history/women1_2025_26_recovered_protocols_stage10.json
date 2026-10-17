@@ -1,0 +1,2110 @@
+{
+  "schemaVersion": 1,
+  "source": "Official public MRSZ 2025/26 women Budapest I match sheets, second parser inspection of eight previous incomplete records",
+  "capturedOn": "2026-10-17",
+  "season": "2025/26",
+  "competitionSubId": "93",
+  "parentFixture": "women1_2025_26_official_league_snapshot.json",
+  "requested": 8,
+  "rosterListsRecovered": 7,
+  "emptyRosterCodes": [
+    "4071"
+  ],
+  "scorelessProtocolWithRosters": [
+    "2443"
+  ],
+  "nominationOnly": true,
+  "legacyFilesUnchanged": true,
+  "results": [
+    {
+      "code": "2443",
+      "season": "2025/26",
+      "date": "2025-10-15",
+      "home": "Mozdulj",
+      "away": "RSZSE",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=2443&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "officialListHomeSets": 3,
+      "officialListAwaySets": 0,
+      "http": 200,
+      "parseStatus": "no_verified_protocol_score",
+      "dateMatches": true,
+      "teamNamesMatch": true,
+      "protocolScoreAgrees": false,
+      "twoCompleteRostersById": true,
+      "officialScoreAndBothRosters": false,
+      "beacRosterVerified": false,
+      "warnings": [
+        {
+          "team": "Ráckeve",
+          "code": "33634",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Ráckeve",
+          "code": "76738",
+          "reason": "no_K_or_CS_marker"
+        }
+      ],
+      "errors": [],
+      "rosterTeams": [
+        {
+          "name": "Mozdulj",
+          "players": [
+            {
+              "code": "68634",
+              "name": "TARR GLÓRIA",
+              "shirt": 3,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "24218",
+              "name": "ERDÉLYI ANDREA",
+              "shirt": 4,
+              "designation": "K",
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "23917",
+              "name": "BUCSI MERCÉDESZ",
+              "shirt": 5,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21345",
+              "name": "HACKL SZILVIA",
+              "shirt": 6,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "20785",
+              "name": "LUTTER LIZA VIRÁG",
+              "shirt": 7,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "48921",
+              "name": "RASKA SÁRA",
+              "shirt": 9,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "65529",
+              "name": "MOLNÁR LAURA",
+              "shirt": 10,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "25825",
+              "name": "SZENTE KATALIN",
+              "shirt": 16,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28171",
+              "name": "ULLRICH BOGLÁRKA ANNA",
+              "shirt": 17,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "27937",
+              "name": "KORMOS HENRIETT",
+              "shirt": 1,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            },
+            {
+              "code": "28593",
+              "name": "IGLÓI LILI",
+              "shirt": 8,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L2",
+              "title": null
+            }
+          ]
+        },
+        {
+          "name": "Ráckeve",
+          "players": [
+            {
+              "code": "25038",
+              "name": "MOLNÁR NIKOLETTA",
+              "shirt": 1,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": "DR"
+            },
+            {
+              "code": "51405",
+              "name": "SABJÁNNÉ ILLÉS PETRA",
+              "shirt": 2,
+              "designation": "K",
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "77052",
+              "name": "SZÁSZ DÓRA OTTILIA",
+              "shirt": 5,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "68436",
+              "name": "KOVÁCS ZITA",
+              "shirt": 8,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "33634",
+              "name": "PAPP GRÉTA",
+              "shirt": 10,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "25016",
+              "name": "BELÉNYI-KÓKAI PETRA JULIA",
+              "shirt": 11,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "37986",
+              "name": "TIMÁR RÉKA",
+              "shirt": 12,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "26751",
+              "name": "KOLLÁR ZITA",
+              "shirt": 13,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "67869",
+              "name": "PÁSZTOR BOGLÁRKA",
+              "shirt": 14,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "76738",
+              "name": "JESZENSZKI BLANKA",
+              "shirt": 24,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "57646",
+              "name": "LEÉB ZSÓFIA",
+              "shirt": 21,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            },
+            {
+              "code": "79521",
+              "name": "GAVALOVICS HANNA",
+              "shirt": 9,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L2",
+              "title": null
+            }
+          ]
+        }
+      ],
+      "rejectedReasons": [
+        "protocol_score_missing_or_different"
+      ]
+    },
+    {
+      "code": "2667",
+      "season": "2025/26",
+      "date": "2025-11-05",
+      "home": "MTK Budapest",
+      "away": "Közgáz SC",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=2667&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "officialListHomeSets": 2,
+      "officialListAwaySets": 3,
+      "http": 200,
+      "parseStatus": "verified_official_score",
+      "dateMatches": true,
+      "teamNamesMatch": true,
+      "protocolScoreAgrees": true,
+      "twoCompleteRostersById": true,
+      "officialScoreAndBothRosters": true,
+      "beacRosterVerified": false,
+      "warnings": [
+        {
+          "team": "MTK Budapest",
+          "code": "21301",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "21303",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "21570",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "31340",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "21311",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "53808",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "21232",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "27270",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "25162",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "22823",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "22178",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "21482",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "22091",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "25526",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "30555",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "23219",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "22459",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "21523",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "29594",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "21352",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Közgáz női",
+          "code": "22066",
+          "reason": "no_K_or_CS_marker"
+        }
+      ],
+      "errors": [],
+      "rosterTeams": [
+        {
+          "name": "MTK Budapest",
+          "players": [
+            {
+              "code": "21301",
+              "name": "JUHOS ROZÁLIA",
+              "shirt": 1,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21303",
+              "name": "KISS VIRÁG BARBARA",
+              "shirt": 5,
+              "designation": null,
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21570",
+              "name": "EHMANN KATA",
+              "shirt": 7,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "31340",
+              "name": "CZENE DORKA",
+              "shirt": 8,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21311",
+              "name": "VÁRADI ORSOLYA",
+              "shirt": 9,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "53808",
+              "name": "CSÓKA ESZTER LUCA",
+              "shirt": 10,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21232",
+              "name": "PUSKÁS IVETT",
+              "shirt": 11,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "27270",
+              "name": "SOÓS BRIGITTA",
+              "shirt": 12,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "25162",
+              "name": "RÓNYAI ERIKA",
+              "shirt": 14,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22823",
+              "name": "MUHI LAURA ORSOLYA",
+              "shirt": 17,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22178",
+              "name": "FÖLDI LUCA",
+              "shirt": 23,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21482",
+              "name": "DELI-GERMANN OLGA",
+              "shirt": 13,
+              "designation": null,
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            }
+          ]
+        },
+        {
+          "name": "Közgáz női",
+          "players": [
+            {
+              "code": "22091",
+              "name": "SZENTIMREY-HORVÁTH ORSOLYA",
+              "shirt": 3,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "25526",
+              "name": "VAJDA LILLA",
+              "shirt": 4,
+              "designation": null,
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "30555",
+              "name": "MOLNÁR ÁGOTA",
+              "shirt": 5,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "23219",
+              "name": "THURÁNSZKY ALIZ MARIETTA",
+              "shirt": 6,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22459",
+              "name": "GEISZELHARDT ÁGNES",
+              "shirt": 10,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": "DR"
+            },
+            {
+              "code": "21523",
+              "name": "CSARKÓ EDINA",
+              "shirt": 13,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "29594",
+              "name": "VAS KITTI",
+              "shirt": 14,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21352",
+              "name": "FÜZY-RICHTER ZSÓFIA",
+              "shirt": 2,
+              "designation": null,
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            },
+            {
+              "code": "22066",
+              "name": "TÓTH-SZITA VERONIKA DIÁNA",
+              "shirt": 9,
+              "designation": null,
+              "captain": false,
+              "libero": "L2",
+              "title": null
+            }
+          ]
+        }
+      ],
+      "rejectedReasons": []
+    },
+    {
+      "code": "3053",
+      "season": "2025/26",
+      "date": "2025-11-21",
+      "home": "KSE",
+      "away": "EMERICUS SE",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=3053&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "officialListHomeSets": 0,
+      "officialListAwaySets": 3,
+      "http": 200,
+      "parseStatus": "verified_official_score",
+      "dateMatches": true,
+      "teamNamesMatch": true,
+      "protocolScoreAgrees": true,
+      "twoCompleteRostersById": true,
+      "officialScoreAndBothRosters": true,
+      "beacRosterVerified": false,
+      "warnings": [
+        {
+          "team": "KSE",
+          "code": "30493",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "KSE",
+          "code": "67965",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "KSE",
+          "code": "30496",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "KSE",
+          "code": "30521",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "KSE",
+          "code": "31628",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "KSE",
+          "code": "22102",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "KSE",
+          "code": "68397",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "KSE",
+          "code": "22280",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "KSE",
+          "code": "21305",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "23302",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "35649",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "28739",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "28517",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "59643",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "65362",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "28741",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "24811",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "28743",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "EMERICUS SE",
+          "code": "28748",
+          "reason": "no_K_or_CS_marker"
+        }
+      ],
+      "errors": [],
+      "rosterTeams": [
+        {
+          "name": "KSE",
+          "players": [
+            {
+              "code": "30493",
+              "name": "SVANTNER KÍRA",
+              "shirt": 1,
+              "designation": null,
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "67965",
+              "name": "FARKAS NÓRA",
+              "shirt": 3,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "30496",
+              "name": "TÓTH EMESE",
+              "shirt": 5,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "30521",
+              "name": "HARSÁNYI ANNA",
+              "shirt": 6,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "31628",
+              "name": "KÓKAI EMMA",
+              "shirt": 7,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22102",
+              "name": "HARSÁNYINÉ BODÓCZI ILDIKÓ",
+              "shirt": 10,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "68397",
+              "name": "KASZÁS ESZTER",
+              "shirt": 12,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22280",
+              "name": "HEGEDŰS ANNA",
+              "shirt": 20,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21305",
+              "name": "MEDVE BEATRIX",
+              "shirt": 21,
+              "designation": null,
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            }
+          ]
+        },
+        {
+          "name": "EMERICUS SE",
+          "players": [
+            {
+              "code": "23302",
+              "name": "SCHULEK ÁGNES",
+              "shirt": 40,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "35649",
+              "name": "VINCZE DÓRA",
+              "shirt": 41,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28739",
+              "name": "SZARKA LILLA ANNAMÁRIA",
+              "shirt": 44,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28517",
+              "name": "HAINZMANN REGE KATA",
+              "shirt": 48,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "59643",
+              "name": "VUKOBRAD MARINA",
+              "shirt": 49,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "65362",
+              "name": "BÁRSONY JOLÁN",
+              "shirt": 61,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28741",
+              "name": "JAKAB ESZTER",
+              "shirt": 80,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "24811",
+              "name": "HORUCZI BORBÁLA HANNA",
+              "shirt": 81,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28743",
+              "name": "JANKOVITS HANNA",
+              "shirt": 97,
+              "designation": null,
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28748",
+              "name": "BÁLINT ANGELIKA",
+              "shirt": 38,
+              "designation": null,
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            }
+          ]
+        }
+      ],
+      "rejectedReasons": []
+    },
+    {
+      "code": "4071",
+      "season": "2025/26",
+      "date": "2025-12-10",
+      "home": "MTK Budapest",
+      "away": "DKLSN",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=4071&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "officialListHomeSets": 3,
+      "officialListAwaySets": 2,
+      "http": 200,
+      "parseStatus": "verified_official_score",
+      "dateMatches": true,
+      "teamNamesMatch": true,
+      "protocolScoreAgrees": true,
+      "twoCompleteRostersById": false,
+      "officialScoreAndBothRosters": false,
+      "beacRosterVerified": false,
+      "warnings": [],
+      "errors": [],
+      "rosterTeams": [],
+      "rejectedReasons": [
+        "incomplete_roster_source"
+      ]
+    },
+    {
+      "code": "7354",
+      "season": "2025/26",
+      "date": "2026-03-12",
+      "home": "Közgáz SC",
+      "away": "MTK Budapest",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7354&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "officialListHomeSets": 3,
+      "officialListAwaySets": 1,
+      "http": 200,
+      "parseStatus": "verified_official_score",
+      "dateMatches": true,
+      "teamNamesMatch": true,
+      "protocolScoreAgrees": true,
+      "twoCompleteRostersById": true,
+      "officialScoreAndBothRosters": true,
+      "beacRosterVerified": false,
+      "warnings": [
+        {
+          "team": "Közgáz női",
+          "reason": "duplicate_shirt_number",
+          "shirt": 4,
+          "count": 2
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "22178",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MTK Budapest",
+          "code": "21482",
+          "reason": "no_shirt_number"
+        }
+      ],
+      "errors": [],
+      "rosterTeams": [
+        {
+          "name": "Közgáz női",
+          "players": [
+            {
+              "code": "23870",
+              "name": "PÁVEL-OSTORHÁZI NOÉMI",
+              "shirt": 1,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22091",
+              "name": "SZENTIMREY-HORVÁTH ORSOLYA",
+              "shirt": 3,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "25526",
+              "name": "VAJDA LILLA",
+              "shirt": 4,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "29594",
+              "name": "VAS KITTI",
+              "shirt": 4,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "23219",
+              "name": "THURÁNSZKY ALIZ MARIETTA",
+              "shirt": 6,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28903",
+              "name": "VARGA-GYŐRI LAURA ZSÓFIA",
+              "shirt": 7,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22459",
+              "name": "GEISZELHARDT ÁGNES",
+              "shirt": 10,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": "DR"
+            },
+            {
+              "code": "27083",
+              "name": "KOVÁCSNÉ HERÉDI ESZTER",
+              "shirt": 11,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21352",
+              "name": "FÜZY-RICHTER ZSÓFIA",
+              "shirt": 2,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            }
+          ]
+        },
+        {
+          "name": "MTK Budapest",
+          "players": [
+            {
+              "code": "21301",
+              "name": "JUHOS ROZÁLIA",
+              "shirt": 1,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21303",
+              "name": "KISS VIRÁG BARBARA",
+              "shirt": 5,
+              "designation": "K",
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21570",
+              "name": "EHMANN KATA",
+              "shirt": 7,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "31340",
+              "name": "CZENE DORKA",
+              "shirt": 8,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "53808",
+              "name": "CSÓKA ESZTER LUCA",
+              "shirt": 10,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21232",
+              "name": "PUSKÁS IVETT",
+              "shirt": 11,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "27270",
+              "name": "SOÓS BRIGITTA",
+              "shirt": 12,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "25162",
+              "name": "RÓNYAI ERIKA",
+              "shirt": 14,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22823",
+              "name": "MUHI LAURA ORSOLYA",
+              "shirt": 17,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22178",
+              "name": "FÖLDI LUCA",
+              "shirt": 23,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21482",
+              "name": "DELI-GERMANN OLGA",
+              "shirt": null,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            }
+          ]
+        }
+      ],
+      "rejectedReasons": []
+    },
+    {
+      "code": "7777",
+      "season": "2025/26",
+      "date": "2026-04-15",
+      "home": "MTK Budapest",
+      "away": "Vasas SC Tartalék",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7777&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "officialListHomeSets": 2,
+      "officialListAwaySets": 3,
+      "http": 200,
+      "parseStatus": "verified_official_score",
+      "dateMatches": true,
+      "teamNamesMatch": true,
+      "protocolScoreAgrees": true,
+      "twoCompleteRostersById": true,
+      "officialScoreAndBothRosters": true,
+      "beacRosterVerified": false,
+      "warnings": [
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "reason": "duplicate_shirt_number",
+          "shirt": 17,
+          "count": 2
+        }
+      ],
+      "errors": [],
+      "rosterTeams": [
+        {
+          "name": "MTK Budapest",
+          "players": [
+            {
+              "code": "21301",
+              "name": "JUHOS ROZÁLIA",
+              "shirt": 1,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21303",
+              "name": "KISS VIRÁG BARBARA",
+              "shirt": 5,
+              "designation": "K",
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21570",
+              "name": "EHMANN KATA",
+              "shirt": 7,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "31340",
+              "name": "CZENE DORKA",
+              "shirt": 8,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "53808",
+              "name": "CSÓKA ESZTER LUCA",
+              "shirt": 10,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21232",
+              "name": "PUSKÁS IVETT",
+              "shirt": 11,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "27270",
+              "name": "SOÓS BRIGITTA",
+              "shirt": 12,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "25162",
+              "name": "RÓNYAI ERIKA",
+              "shirt": 14,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22823",
+              "name": "MUHI LAURA ORSOLYA",
+              "shirt": 17,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "22178",
+              "name": "FÖLDI LUCA",
+              "shirt": 23,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21482",
+              "name": "DELI-GERMANN OLGA",
+              "shirt": 13,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            }
+          ]
+        },
+        {
+          "name": "Vasas Sport Club Tartalék",
+          "players": [
+            {
+              "code": "65224",
+              "name": "SÁNDOR NÓRA",
+              "shirt": 2,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "37566",
+              "name": "KIS GRÉTA",
+              "shirt": 4,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "46347",
+              "name": "CSÍKOS DORKA LUCA",
+              "shirt": 11,
+              "designation": "CS",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "71167",
+              "name": "BALÁZSY ANNA",
+              "shirt": 13,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "65361",
+              "name": "PÁSZTI-NAGY JÚLIA",
+              "shirt": 17,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "59492",
+              "name": "INDRA SÁRA",
+              "shirt": 18,
+              "designation": "K",
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "72449",
+              "name": "PÓK VERONIKA",
+              "shirt": 19,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "54863",
+              "name": "VAKA CSENGE",
+              "shirt": 43,
+              "designation": "K",
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "53904",
+              "name": "ÓNODI JAMINA",
+              "shirt": 6,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            },
+            {
+              "code": "63240",
+              "name": "ROTA DÓRA ANNAMÁRIA",
+              "shirt": 17,
+              "designation": "CS",
+              "captain": false,
+              "libero": "L2",
+              "title": null
+            }
+          ]
+        }
+      ],
+      "rejectedReasons": []
+    },
+    {
+      "code": "7803",
+      "season": "2025/26",
+      "date": "2026-04-21",
+      "home": "Vasas SC Tartalék",
+      "away": "BEAC",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7803&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "officialListHomeSets": 0,
+      "officialListAwaySets": 3,
+      "http": 200,
+      "parseStatus": "verified_official_score",
+      "dateMatches": true,
+      "teamNamesMatch": true,
+      "protocolScoreAgrees": true,
+      "twoCompleteRostersById": true,
+      "officialScoreAndBothRosters": true,
+      "beacRosterVerified": true,
+      "warnings": [
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "65224",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "37566",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "46347",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "71167",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "65361",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "59492",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "72449",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "54863",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "61543",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "53904",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Vasas Sport Club Tartalék",
+          "code": "63240",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "42988",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "37523",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "23656",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "27101",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "30645",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "21243",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "31475",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "54846",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "27892",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "20799",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "32910",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Budapesti Egyetemi Atlétikai Club",
+          "code": "30317",
+          "reason": "no_K_or_CS_marker"
+        }
+      ],
+      "errors": [],
+      "rosterTeams": [
+        {
+          "name": "Vasas Sport Club Tartalék",
+          "players": [
+            {
+              "code": "65224",
+              "name": "SÁNDOR NÓRA",
+              "shirt": 2,
+              "designation": null,
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "37566",
+              "name": "KIS GRÉTA",
+              "shirt": 4,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "46347",
+              "name": "CSÍKOS DORKA LUCA",
+              "shirt": 11,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "71167",
+              "name": "BALÁZSY ANNA",
+              "shirt": 13,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "65361",
+              "name": "PÁSZTI-NAGY JÚLIA",
+              "shirt": 17,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "59492",
+              "name": "INDRA SÁRA",
+              "shirt": 18,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "72449",
+              "name": "PÓK VERONIKA",
+              "shirt": 19,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "54863",
+              "name": "VAKA CSENGE",
+              "shirt": 43,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "61543",
+              "name": "SÁRECZKY PETRA LILI",
+              "shirt": 80,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "53904",
+              "name": "ÓNODI JAMINA",
+              "shirt": 6,
+              "designation": null,
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            },
+            {
+              "code": "63240",
+              "name": "ROTA DÓRA ANNAMÁRIA",
+              "shirt": 14,
+              "designation": null,
+              "captain": false,
+              "libero": "L2",
+              "title": null
+            }
+          ]
+        },
+        {
+          "name": "Budapesti Egyetemi Atlétikai Club",
+          "players": [
+            {
+              "code": "42988",
+              "name": "IMRE ESZTER",
+              "shirt": 1,
+              "designation": null,
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "37523",
+              "name": "SZALONTAI REBEKA",
+              "shirt": 2,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "23656",
+              "name": "PAPP LAURA DOROTTYA",
+              "shirt": 5,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "27101",
+              "name": "UHRI SÁRA",
+              "shirt": 6,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "30645",
+              "name": "NAGY-TÓTH CSENGE",
+              "shirt": 7,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "21243",
+              "name": "KOVÁCS NÓRA",
+              "shirt": 8,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "31475",
+              "name": "PETRI ZSÓFIA",
+              "shirt": 9,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "54846",
+              "name": "PÁSZTOR DORINA",
+              "shirt": 12,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "27892",
+              "name": "ALBERT ANNA",
+              "shirt": 25,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "20799",
+              "name": "SZÉLES-NEIZER LILI",
+              "shirt": 33,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "32910",
+              "name": "IGLÓI NÓRA",
+              "shirt": 15,
+              "designation": null,
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            },
+            {
+              "code": "30317",
+              "name": "DIÓSZEGI RÉKA",
+              "shirt": 18,
+              "designation": null,
+              "captain": false,
+              "libero": "L2",
+              "title": null
+            }
+          ]
+        }
+      ],
+      "rejectedReasons": []
+    },
+    {
+      "code": "7822",
+      "season": "2025/26",
+      "date": "2026-04-23",
+      "home": "MAFC-ÉPK",
+      "away": "KRE SC",
+      "sourceUrl": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_merkozes_kod=7822&p_evad_kod=2025&p_verseny_al_kod=93&p_fo_cim=NoiBudapestI.osztaly",
+      "officialListHomeSets": 1,
+      "officialListAwaySets": 3,
+      "http": 200,
+      "parseStatus": "verified_official_score",
+      "dateMatches": true,
+      "teamNamesMatch": true,
+      "protocolScoreAgrees": true,
+      "twoCompleteRostersById": true,
+      "officialScoreAndBothRosters": true,
+      "beacRosterVerified": false,
+      "warnings": [
+        {
+          "team": "MAFC-ÉPK",
+          "code": "79417",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "30608",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "30611",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "32024",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "60997",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "31431",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "28974",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "24406",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "37731",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "54409",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "43248",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "MAFC-ÉPK",
+          "code": "44449",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "26149",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "28774",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "27005",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "57648",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "83086",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "30046",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "73112",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "30103",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "45112",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "44893",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "24118",
+          "reason": "no_K_or_CS_marker"
+        },
+        {
+          "team": "Károli Gáspár Református Egyetem Sport Club",
+          "code": "33012",
+          "reason": "no_K_or_CS_marker"
+        }
+      ],
+      "errors": [],
+      "rosterTeams": [
+        {
+          "name": "MAFC-ÉPK",
+          "players": [
+            {
+              "code": "79417",
+              "name": "HELLER SARA ESZTER",
+              "shirt": 5,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": "DR."
+            },
+            {
+              "code": "30608",
+              "name": "MÁRKUS RÉKA",
+              "shirt": 6,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "30611",
+              "name": "ZIMMER CSENGE",
+              "shirt": 8,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "32024",
+              "name": "NAGY BLANKA",
+              "shirt": 10,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "60997",
+              "name": "SZERBÁK VERONIKA",
+              "shirt": 13,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "31431",
+              "name": "FORNAY PIROSKA",
+              "shirt": 15,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28974",
+              "name": "GRACZA SÓTI FANNI",
+              "shirt": 16,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "24406",
+              "name": "MAGYAR LIZA ANNA",
+              "shirt": 17,
+              "designation": null,
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "37731",
+              "name": "REICHARDT ÁGNES GABRIELLA",
+              "shirt": 21,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "54409",
+              "name": "CZELTER VIVIEN",
+              "shirt": 23,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "43248",
+              "name": "TAKÁCS MÁRIA FLÓRA",
+              "shirt": 11,
+              "designation": null,
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            },
+            {
+              "code": "44449",
+              "name": "KURUCZ DINA KISANNA",
+              "shirt": 1,
+              "designation": null,
+              "captain": false,
+              "libero": "L2",
+              "title": null
+            }
+          ]
+        },
+        {
+          "name": "Károli Gáspár Református Egyetem Sport Club",
+          "players": [
+            {
+              "code": "26149",
+              "name": "FEHÉR VIKTÓRIA ÉVA",
+              "shirt": 2,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "28774",
+              "name": "BENKŐ RÉKA",
+              "shirt": 3,
+              "designation": null,
+              "captain": true,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "27005",
+              "name": "BORSIK LILI",
+              "shirt": 4,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "57648",
+              "name": "GELENCSÉR DÓRA",
+              "shirt": 5,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "83086",
+              "name": "BODNÁR MAJA DÓRA",
+              "shirt": 6,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "30046",
+              "name": "HERTELENDY DÓRA",
+              "shirt": 9,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "73112",
+              "name": "KÁLLAI JÚLIA",
+              "shirt": 12,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "30103",
+              "name": "GYARMATI FRUZSINA EMMA",
+              "shirt": 18,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "45112",
+              "name": "GUO FANNI",
+              "shirt": 26,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "44893",
+              "name": "BERCZIK FLÓRA",
+              "shirt": 28,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "24118",
+              "name": "FAZEKAS SZILVIA",
+              "shirt": 88,
+              "designation": null,
+              "captain": false,
+              "libero": null,
+              "title": null
+            },
+            {
+              "code": "33012",
+              "name": "CSÍK BIANKA",
+              "shirt": 11,
+              "designation": null,
+              "captain": false,
+              "libero": "L1",
+              "title": null
+            }
+          ]
+        }
+      ],
+      "rejectedReasons": []
+    }
+  ]
+}
