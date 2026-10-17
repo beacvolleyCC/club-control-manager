@@ -2429,7 +2429,8 @@
       .toLowerCase().replace(/[^a-z0-9]/g,'');
     if(!compact)return '';
     const aliases={
-      kando:'kando',kandosportklub:'kando',kandosk:'kando',
+      kando:'kando',kandosportklub:'kando',kandosportclub:'kando',kandosk:'kando',obudaiegyetemkandosc:'kando',
+      btdse:'btdse',btdsetaksony:'btdse',broziktibortaksonyidiaksportegyesulet:'btdse',
       semmelweisegyetem:'semmelweis',semmelweisegyetemsportklub:'semmelweis',
       emericus:'emericus',emericusse:'emericus',
       rackeve:'rackeve',rackevese:'rackeve',
@@ -2535,7 +2536,7 @@
       +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')+'</span>'
       +'<span class="cc-scoreboard-bottom"><span class="cc-scoreboard-location">'+esc(venue||'Helyszín nincs megadva')+'</span>'
       +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source
-      +(protocolAvailable?'<span class="cc-scoreboard-protocol" aria-hidden="true">Jegyzőkönyv ↗</span>':'')
+
       +'</span></'+tag+'>';
   }
 
@@ -2565,6 +2566,7 @@
     if(p?.designation==='CS')badges.push('<span class="cc-protocol-marker is-subs" title="Csere" aria-label="Csere"><svg viewBox="0 0 28 19" role="img" aria-hidden="true"><path class="sub-in" d="M3 5h18m-5-4 5 4-5 4"/><path class="sub-out" d="M25 14H7m5-4-5 4 5 4"/></svg></span>');
     if(p?.captain===true)badges.push('<span class="cc-protocol-marker is-captain" title="Kapitány" aria-label="Kapitány">C</span>');
     if(p?.libero)badges.push('<span class="cc-protocol-marker is-libero" title="Libero" aria-label="Libero">'+esc(text(p.libero))+'</span>');
+    if(!p?.designation)badges.push('<span class="cc-protocol-marker is-no-entry" title="Nincs pályára lépési jelölés" aria-label="Nincs pályára lépési jelölés">–</span>');
     return '<span class="cc-protocol-markers">'+badges.join('')+'</span>';
   }
   function ccMrszProtocolTeamHtml_(side,label){
@@ -2572,7 +2574,7 @@
     const staff=Array.isArray(side?.staff)?side.staff:[];
     const name=ccMrszProtocolPersonHtml_({name:side?.name||label,profileUrl:side?.profileUrl});
     const rows=players.map(p=>'<tr><td class="cc-protocol-jersey">'+esc(text(p?.number)||'–')+'</td>'
-      +'<td>'+ccMrszProtocolPersonHtml_(p)+'</td><td>'+ccMrszProtocolBadgesHtml_(p)+'</td></tr>').join('');
+      +'<td>'+(p?.designation==='K'?'<strong class="cc-protocol-starter">'+ccMrszProtocolPersonHtml_(p)+'</strong>':ccMrszProtocolPersonHtml_(p))+'</td><td>'+ccMrszProtocolBadgesHtml_(p)+'</td></tr>').join('');
     const staffHtml=staff.length?'<div class="cc-protocol-staff"><h4>Stáb</h4>'+staff.map(p=>
       '<div><span>'+esc(text(p?.role)||'Stábtag')+'</span><b>'+ccMrszProtocolPersonHtml_(p)+'</b></div>').join('')+'</div>':'';
     return '<section class="cc-protocol-team"><h3>'+name+'</h3><div class="cc-protocol-table-scroll"><table><thead><tr><th>Mez</th><th>Játékos</th><th></th></tr></thead><tbody>'
