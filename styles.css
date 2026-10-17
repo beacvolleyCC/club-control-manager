@@ -6780,3 +6780,68 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
  .cc-mrsz-league-matches .cc-scoreboard-main{grid-template-columns:minmax(0,1fr) minmax(83px,94px) minmax(0,1fr);column-gap:5px}
  .cc-mrsz-league-matches .cc-scoreboard-set-results{font-size:10px!important}
 }
+
+/* Manager v49: unobstructed full-width protocol sheet and discreet player roles. */
+#entityDialog.cc-protocol-dialog{
+  width:min(1090px,calc(100vw - 22px)) !important;
+  max-width:calc(100vw - 22px) !important;
+  max-height:94dvh !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+#entityDialog.cc-protocol-dialog .entity-dialog-card{
+  position:relative !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  max-height:94dvh !important;
+  box-sizing:border-box !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+#entityDialog.cc-protocol-dialog .dialog-head{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+  min-height:48px !important;
+}
+#entityDialog.cc-protocol-dialog .dialog-head>div{min-width:0;flex:1}
+#entityDialog.cc-protocol-dialog #entityDialogClose{
+  position:relative !important;
+  inset:auto !important;
+  width:44px !important;
+  height:44px !important;
+  min-width:44px !important;
+  min-height:44px !important;
+  padding:0 !important;
+  margin:0 !important;
+  flex:0 0 44px !important;
+  border:0 !important;
+  border-radius:50% !important;
+  display:grid !important;
+  place-items:center !important;
+  font:500 30px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+}
+#entityDialog.cc-protocol-dialog .cc-protocol-team th:last-child,
+#entityDialog.cc-protocol-dialog .cc-protocol-team td:last-child{
+  text-align:right;
+  width:95px;
+  white-space:nowrap;
+}
+.cc-protocol-markers{display:inline-flex;gap:5px;align-items:center;justify-content:flex-end;min-height:21px}
+.cc-protocol-marker{display:inline-grid;align-items:center;justify-items:center;color:var(--text);font-weight:750;font-size:11px;line-height:1;flex:0 0 auto}
+.cc-protocol-marker.is-captain,.cc-protocol-marker.is-libero{height:20px;min-width:20px;padding:0 3px;border:1px solid currentColor;border-radius:5px;font-variant-numeric:tabular-nums}
+.cc-protocol-marker.is-libero{font-size:10px}
+.cc-protocol-marker.is-subs{width:28px;height:20px}
+.cc-protocol-marker.is-subs svg{display:block;width:26px;height:18px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cc-protocol-marker.is-subs .sub-in{stroke:#308e61}
+.cc-protocol-marker.is-subs .sub-out{stroke:#c15c59}
+@media(max-width:700px){
+ #entityDialog.cc-protocol-dialog{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important}
+ #entityDialog.cc-protocol-dialog .entity-dialog-card{padding:12px!important}
+ #entityDialog.cc-protocol-dialog .cc-protocol-team th:last-child,
+ #entityDialog.cc-protocol-dialog .cc-protocol-team td:last-child{width:73px;padding-left:2px;padding-right:6px}
+ .cc-protocol-markers{gap:3px}
+ .cc-protocol-marker.is-captain,.cc-protocol-marker.is-libero{min-width:18px;height:18px}
+}
