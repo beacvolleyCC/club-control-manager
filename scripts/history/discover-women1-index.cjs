@@ -1,7 +1,7 @@
 'use strict';
 /**
  * Read-only index discovery for a specifically named MRSZ adult women's league.
- * Fetches ONLY the season selector page and one known official match sheet.
+ * Fetches ONLY the source-linked women I competition page and one known official match sheet.
  * No range/ID guessing, cookies, credentials, or DB writes.
  * Usage: node scripts/history/discover-women1-index.cjs --network
  */
@@ -9,7 +9,7 @@ const https=require('node:https');
 const {TextDecoder}=require('node:util');
 const MAX_BYTES=8_000_000;
 const ENDPOINTS=Object.freeze([
- {id:'competition_index_2025',url:'https://www.hunvolley.info/pr_a/010/001/p_001.asp?p_evad_kod=2025'},
+ {id:'women1_competition_2025',url:'https://www.hunvolley.info/pr_a/010/002/p_002.asp?p_verseny_al_kod=93&p_evad_kod=2025&p_fo_cim=NoiBudapestI.osztaly'},
  {id:'verified_2446_sheet',url:'https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_merkozes_kod=2446&p_verseny_al_kod=93'}
 ]);
 function decodePage(buf,headers){
