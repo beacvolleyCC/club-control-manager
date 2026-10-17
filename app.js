@@ -2566,7 +2566,7 @@
     if(p?.designation==='CS')badges.push('<span class="cc-protocol-marker is-subs" title="Csere" aria-label="Csere"><svg viewBox="0 0 28 19" role="img" aria-hidden="true"><path class="sub-in" d="M3 5h18m-5-4 5 4-5 4"/><path class="sub-out" d="M25 14H7m5-4-5 4 5 4"/></svg></span>');
     if(p?.captain===true)badges.push('<span class="cc-protocol-marker is-captain" title="Kapitány" aria-label="Kapitány">C</span>');
     if(p?.libero)badges.push('<span class="cc-protocol-marker is-libero" title="Libero" aria-label="Libero">'+esc(text(p.libero))+'</span>');
-    if(!badges.length&&p?.designation!=='K')badges.push('<span class="cc-protocol-marker is-no-entry" title="Nincs pályára lépési jelölés" aria-label="Nincs pályára lépési jelölés">–</span>');
+    if(!p?.designation)badges.push('<span class="cc-protocol-marker is-no-entry" title="Nincs pályára lépési jelölés" aria-label="Nincs pályára lépési jelölés">–</span>');
     return '<span class="cc-protocol-markers">'+badges.join('')+'</span>';
   }
   function ccMrszProtocolTeamHtml_(side,label){
