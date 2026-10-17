@@ -7,7 +7,7 @@
  */
 const https=require('node:https');
 const {TextDecoder}=require('node:util');
-const MAX_BYTES=1_500_000;
+const MAX_BYTES=8_000_000;
 const ENDPOINTS=Object.freeze([
  {id:'competition_index_2025',url:'https://www.hunvolley.info/pr_a/010/001/p_001.asp?p_evad_kod=2025'},
  {id:'verified_2446_sheet',url:'https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_merkozes_kod=2446&p_verseny_al_kod=93'}
