@@ -8,7 +8,7 @@ function dayMarkers(html){
  const re=/<strong>\s*(20\d{2})\.\s*(január|február|március|április|május|június|július|augusztus|szeptember|október|november|december)\s+(\d{1,2})\.\s*[^<]{0,32}<\/strong>/gi;
  return[...html.matchAll(re)].map(m=>({offset:m.index,date:m[1]+'-'+MONTHS[m[2].toLowerCase()]+'-'+m[3].padStart(2,'0')}));
 }
-function parseRows(html){
+function parseRows(html,options={season:'2025',competition:'93'}){
  const raw=String(html||'');
  const dates=dayMarkers(raw);
  const pat=/\bOnClick="oldal_submit_publikus\('([^']*p_merkozes_kod=\d+[^']*)'\)\s*;?\s*"/gi;
@@ -17,7 +17,8 @@ function parseRows(html){
  let repeatedResponsiveCards=0;
  for(const m of raw.matchAll(pat)){
    const path=m[1].replace(/&amp;/g,'&');
-   if(!/p_verseny_al_kod=93(?:&|$)/.test(path)||!/p_evad_kod=2025(?:&|$)/.test(path))continue;
+   const params=new URL(path,'https://www.hunvolley.info').searchParams;
+   if(params.get('p_verseny_al_kod')!==options.competition||params.get('p_evad_kod')!==options.season)continue;
    while(dateCursor<dates.length&&dates[dateCursor].offset<m.index){
      lastDate=dates[dateCursor++].date;
    }
@@ -49,7 +50,7 @@ function parseRows(html){
  }
  return{rows:matches,errors,repeatedResponsiveCards};
 }
-function parseStandings(html){
+function parseStandings(html,expectedTeamCount=12){
  const full=visibleText(html);
  const begin=full.indexOf('TABELLA'),end=full.indexOf('MŰSOR, EREDMÉNY',begin);
  if(begin<0||end<begin)return{rows:[],valid:false,error:'Standings boundary missing'};
@@ -61,7 +62,7 @@ function parseStandings(html){
    setsFor:Number(m[7]),setsAgainst:Number(m[8]),setRatio:m[9],
    pointsFor:Number(m[10]),pointsAgainst:Number(m[11]),pointRatio:m[12]});
  }
- const completeRanks=rows.length===12&&rows.every((r,i)=>r.rank===i+1);
+ const completeRanks=rows.length===expectedTeamCount&&rows.every((r,i)=>r.rank===i+1);
  const valid=completeRanks&&rows.every(r=>r.wins+r.losses===r.played);
  return{rows,valid,error:valid?null:'Incomplete or inconsistent standings'};
 }
