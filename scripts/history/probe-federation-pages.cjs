@@ -4,6 +4,7 @@
 // Run: node scripts/history/probe-federation-pages.cjs --network
 const https=require('node:https');
 const {TextDecoder}=require('node:util');
+const {parseOfficialWomen1Protocol}=require('./parse-official-women1-protocol.cjs');
 
 const SOURCES=Object.freeze([
   {id:'mrsz_2025_women1_m6161',host:'www.hunvolley.info',url:'https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_merkozes_kod=6161&p_verseny_al_kod=93',expected:['Mozdulj','EMERICUS']},
@@ -32,6 +33,8 @@ function summarizePage(entry,status,headers,buffer){
   .replace(/<[^>]*>/g,' ').replace(/&nbsp;|&#160;/gi,' ')
   .replace(/\s+/g,' ').trim();
  const title=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/<[^>]*>/g,' ').trim()||null;
+ const expectedCode=entry.id.match(/_m(\d+)$/)?.[1]||null;
+ const parsed=expectedCode&&status===200?parseOfficialWomen1Protocol(html,expectedCode):null;
  const protocolMarker=text.toLowerCase().indexOf('versenyjegyzőkönyv');
  const start=protocolMarker>=0?protocolMarker:0;
  const excerpt=(status===200?text.slice(start,start+2250):'').trim();
@@ -47,7 +50,13 @@ function summarizePage(entry,status,headers,buffer){
    expectedTokensRequired:entry.expected.length,
    possibleCompetitionLinks:candidates,
    // DO NOT claim roster or result completeness from a decoded document.
-   officialPlayerRowsVerified:0,officialResultsVerified:0,
+   officialPlayerRowsVerified:parsed?.status==='verified_official_score'?parsed.validRosterRows:0,
+   officialResultsVerified:parsed?.status==='verified_official_score'?1:0,
+   parsedMatch:parsed?{status:parsed.status,matchCode:parsed.matchCode,
+     home:parsed.home||null,away:parsed.away||null,
+     score:parsed.homeSets!=null?parsed.homeSets+'–'+parsed.awaySets:null,
+     setScores:parsed.setScores||null,
+     playerRowCounts:parsed.teams?.map(t=>t.players.length)||[]} : null,
    warning:'Page loaded only. Historical records, player IDs and match results NOT verified.'
  };
 }
