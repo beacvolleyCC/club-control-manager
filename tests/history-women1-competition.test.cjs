@@ -34,8 +34,9 @@ test('standings missing a full rank set cannot be treated as verified league sta
  assert.equal(r.rows[0].played,22);
  assert.equal(r.valid,false);
 });
-test('duplicate match IDs are rejected',()=>{
+test('identical responsive copies of one match are deduplicated',()=>{
  const x=parseRows('<strong>2025. október 17. péntek</strong>'+card(2446,'3 - 0')+card(2446,'3 - 0'));
  assert.equal(x.rows.length,1);
- assert.ok(x.errors.some(e=>e.includes('Duplicate')));
+ assert.equal(x.repeatedResponsiveCards,1);
+ assert.deepEqual(x.errors,[]);
 });
