@@ -1,0 +1,35 @@
+name: Women I stage 8 MRSZ exception audit
+on:
+  pull_request:
+    paths:
+      - scripts/history/inspect-eight-exceptions-and-2024.cjs
+      - tests/history-eight-exceptions-and-2024.test.cjs
+      - .github/workflows/history-stage8-mrsz.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check source guards
+        run: |
+          node --check scripts/history/inspect-eight-exceptions-and-2024.cjs
+          node --test tests/history-eight-exceptions-and-2024.test.cjs
+  read-only-audit:
+    needs: offline
+    if: github.event.action == 'opened' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect 8 source-linked sheets and one 2024 index
+        run: node scripts/history/inspect-eight-exceptions-and-2024.cjs --network
