@@ -1,0 +1,41 @@
+name: MRSZ women I 2024 BEAC rosters and 2025 exceptions
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - scripts/history/parse-flexible-women1-protocol.cjs
+      - scripts/history/audit-stage10-beac-and-exceptions.cjs
+      - tests/history-flexible-protocol.test.cjs
+      - tests/history-stage10-sourced-beac.test.cjs
+      - .github/workflows/history-stage10-beac.yml
+      - data/competition-history/women1_2024_25_beac_protocols_stage10.json
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test resilient parser and sourced fixtures
+        run: |
+          node --check scripts/history/parse-flexible-women1-protocol.cjs
+          node --check scripts/history/audit-stage10-beac-and-exceptions.cjs
+          node --test tests/history-flexible-protocol.test.cjs
+          node --test tests/history-stage10-sourced-beac.test.cjs
+  source-probe:
+    needs: offline
+    if: github.event.action == 'opened' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read 24 official 2024 BEAC and 8 known 2025 exception sheets
+        run: node scripts/history/audit-stage10-beac-and-exceptions.cjs --network
