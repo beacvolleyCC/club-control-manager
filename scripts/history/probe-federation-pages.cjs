@@ -32,12 +32,17 @@ function summarizePage(entry,status,headers,buffer){
   .replace(/<[^>]*>/g,' ').replace(/&nbsp;|&#160;/gi,' ')
   .replace(/\s+/g,' ').trim();
  const title=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/<[^>]*>/g,' ').trim()||null;
+ const protocolMarker=text.toLowerCase().indexOf('versenyjegyzőkönyv');
+ const start=protocolMarker>=0?protocolMarker:0;
+ const excerpt=(status===200?text.slice(start,start+750):'').trim();
  const candidates=[...html.matchAll(/href\s*=\s*["']([^"']{1,300})["']/gi)]
   .map(m=>m[1]).filter(s=>/verseny|bajnoksag|tabella|p_\d\d\d\.asp/i.test(s)).slice(0,8);
  return{
    id:entry.id,status,charset,declaredCharset:declared,contentBytes:buffer.length,
    htmlTitle:title?.slice(0,120)||null,decodedCharacters:html.length,
    appearsHtml:/<html|<!doctype|<table|<body/i.test(html.slice(0,4096)),
+   officialProtocolLayoutRecognized:status===200&&protocolMarker>=0,
+   firstProtocolTextExcerpt:excerpt,
    expectedTokensFound:entry.expected.filter(token=>text.toLowerCase().includes(token.toLowerCase())),
    expectedTokensRequired:entry.expected.length,
    possibleCompetitionLinks:candidates,
