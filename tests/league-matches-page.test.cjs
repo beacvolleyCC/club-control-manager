@@ -80,10 +80,11 @@ test('match-page markup retains real BEAC roster while dropping parallel league 
 });
 test('one shared scope and result provenance are visible in league scoreboard builder',()=>{
  assert.ok(source.includes("ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac'"));
- assert.ok(source.includes("meta:m.isPhoto?(table?.partial===false?'2026.10.14-i mentett eredmény'"));
- assert.ok(source.includes("m.isFixture?'2026.10.01-i mentett kiírás'"));
+ assert.ok(source.includes("meta:'',"));
+ assert.ok(source.includes('const hasBeac=[...matches,...review.map(r=>r.match)]'));
+ assert.ok(source.includes("const scope=hasBeac?ccLeagueMatchScope_:'all'"));
  assert.ok(source.includes('const reason=ccMrszMatchReviewReason_(m,tableRows,table?.partial===false,conflicts)'));
- assert.ok(source.includes('const noTableNote=table?.partial!==false&&photo.length'));
+ assert.ok(source.includes("const noTableNote='';"));
 });
 
 test('standings alone has the league selector and matches still binds full-league toggle',()=>{
