@@ -3,7 +3,9 @@ on:
   pull_request:
     paths:
       - scripts/history/discover-women1-index.cjs
+      - scripts/history/parse-official-women1-competition.cjs
       - tests/history-women1-index-discovery.test.cjs
+      - tests/history-women1-competition.test.cjs
       - .github/workflows/history-women1-index-discovery.yml
   workflow_dispatch:
 permissions:
@@ -20,6 +22,8 @@ jobs:
       - name: Validate parser and index matching
         run: |
           node --check scripts/history/discover-women1-index.cjs
+          node --check scripts/history/parse-official-women1-competition.cjs
           node --test tests/history-women1-index-discovery.test.cjs
+          node --test tests/history-women1-competition.test.cjs
       - name: Probe the two allowlisted official URLs once
         run: node scripts/history/discover-women1-index.cjs --network
