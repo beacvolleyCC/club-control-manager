@@ -13,7 +13,8 @@ function parseRows(html){
  const dates=dayMarkers(raw);
  const pat=/\bOnClick="oldal_submit_publikus\('([^']*p_merkozes_kod=\d+[^']*)'\)\s*;?\s*"/gi;
  let dateCursor=0,lastDate=null;
- const matches=[],ids=new Set(),errors=[];
+ const matches=[],ids=new Map(),errors=[];
+ let repeatedResponsiveCards=0;
  for(const m of raw.matchAll(pat)){
    const path=m[1].replace(/&amp;/g,'&');
    if(!/p_verseny_al_kod=93(?:&|$)/.test(path)||!/p_evad_kod=2025(?:&|$)/.test(path))continue;
@@ -21,8 +22,13 @@ function parseRows(html){
      lastDate=dates[dateCursor++].date;
    }
    const matchCode=path.match(/p_merkozes_kod=(\d+)/)?.[1];
-   if(!matchCode||ids.has(matchCode)){if(matchCode)errors.push('Duplicate official match ID: '+matchCode);continue}
-   ids.add(matchCode);
+   if(!matchCode)continue;
+   if(ids.has(matchCode)){
+     if(ids.get(matchCode)!==path)errors.push('Conflicting match link '+matchCode);
+     else repeatedResponsiveCards++;
+     continue;
+   }
+   ids.set(matchCode,path);
    const end=raw.indexOf('</div>',m.index);
    if(end<0){errors.push('Unclosed match card '+matchCode);continue}
    const card=raw.slice(m.index,end+6);
@@ -41,7 +47,7 @@ function parseRows(html){
      status:validScore?'scored':score?'invalid_score':'unscored',
      sourcePath:path});
  }
- return{rows:matches,errors};
+ return{rows:matches,errors,repeatedResponsiveCards};
 }
 function parseStandings(html){
  const full=visibleText(html);
@@ -71,6 +77,7 @@ function auditLeaguePage(html){
    season:'2025/26',competition:'Női Budapest I. osztály',subcompetitionCode:'93',
    matchCount:fixtures.rows.length,scoredCount:scored.length,unscoredCount:unscored.length,
    invalidScoreCount:invalid.length,uniqueFixtureTeamNames:uniqueTeams.length,
+   repeatedResponsiveCards:fixtures.repeatedResponsiveCards,
    standingsTeams:table.rows.length,standingsValid:table.valid,
    playedMatchesPerStandings:table.valid?table.rows.reduce((s,t)=>s+t.played,0)/2:null,
    scoreCountAgreesWithStandings:table.valid?scored.length===table.rows.reduce((s,t)=>s+t.played,0)/2:null,
