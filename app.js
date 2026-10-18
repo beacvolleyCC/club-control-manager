@@ -2780,7 +2780,7 @@
     });
   }
   function ccBindSourceMatchEdit_(){
-    $('#viewContent [data-match-edit]').forEach(btn=>btn.addEventListener('click',event=>{
+    $$('#viewContent [data-match-edit]').forEach(btn=>btn.addEventListener('click',event=>{
       event.stopPropagation();event.preventDefault();
       const id={system:text(btn.dataset.matchSystem),season:text(btn.dataset.matchSeason),key:text(btn.dataset.matchEdit)};
       const match=ccMatchSourceFind_(id);
