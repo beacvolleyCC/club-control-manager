@@ -2713,7 +2713,7 @@
   }
   function ccMatchBindTimeWheels_(){
     // Native selects permit touch spinning; desktop wheels move 1 hour/minute per tick.
-    for(const id of ['ccMHour','ccMMinute']){
+    for(const id of ['ccMHour','ccMMinute','ccMMeetingHour','ccMMeetingMinute']){
       const select=$('#'+id);
       select?.addEventListener('wheel',event=>{
         if(!event.deltaY||document.activeElement!==select)return;
@@ -2773,12 +2773,25 @@
     if(!id||!body||!title||!ccCanEditLeagueSource_())return;
     title.textContent='Bajnoki mérkőzés szerkesztése';
     const dt=ccMrszLocalKickoff_(m.startsAt),hadScore=m.homeSets!=null&&m.awaySets!=null;
+    const clubMatch=ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName);
+    const meeting=ccMrszLocalKickoff_(m.meetingAt);
+    const huDate=value=>String(value||'').replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$1. $2. $3.');
     const field=(label,key,value,type='text')=>'<label class="field"><span>'+label+'</span><input id="'+key+'" type="'+type+'" value="'+esc(value||'')+'" required></label>';
     body.innerHTML='<form class="action-form" id="ccSourceMatchForm"><div class="action-form-grid">'
       +field('Hazai csapat','ccMHome',m.homeName)+field('Vendégcsapat','ccMAway',m.awayName)
       +'<label class="field"><span>Dátum (ÉÉÉÉ. HH. NN.)</span><input id="ccMDate" type="text" inputmode="numeric" maxlength="12" pattern="[0-9]{4}\\. ?[0-9]{1,2}\\. ?[0-9]{1,2}\\." placeholder="2026. 10. 20." value="'+esc(dt.date.replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$1. $2. $3.'))+'" required></label>'
       +'<label class="field"><span>Kezdés (24 órás)</span><span class="cc-match-time-wheel"><select id="ccMHour" aria-label="Kezdés órája">'+Array.from({length:24},(_,h)=>'<option value="'+String(h).padStart(2,'0')+'"'+(dt.time.slice(0,2)===String(h).padStart(2,'0')?' selected':'')+'>'+String(h).padStart(2,'0')+'</option>').join('')+'</select><b>:</b><select id="ccMMinute" aria-label="Kezdés perce">'+Array.from({length:60},(_,m)=>'<option value="'+String(m).padStart(2,'0')+'"'+(dt.time.slice(3,5)===String(m).padStart(2,'0')?' selected':'')+'>'+String(m).padStart(2,'0')+'</option>').join('')+'</select></span></label>'
       +'<label class="field span-2"><span>Helyszín</span><input id="ccMVenue" maxlength="300" value="'+esc(m.venue||'')+'"></label>'
+      +(clubMatch?'<div class="cc-match-meeting-fields span-2">'
+        +'<h4>BEAC · találkozó és játékosinformáció</h4>'
+        +'<div class="cc-match-meeting-grid">'
+        +'<label class="field"><span>Találkozó dátuma</span><input id="ccMMeetDate" inputmode="numeric" maxlength="12" placeholder="2026. 10. 20." value="'+esc(huDate(meeting.date||dt.date))+'" required></label>'
+        +'<label class="field"><span>Találkozó időpontja</span><span class="cc-match-time-wheel">'
+        +'<select id="ccMMeetingHour" aria-label="Találkozó órája">'+Array.from({length:24},(_,h)=>'<option value="'+String(h).padStart(2,'0')+'"'+(meeting.time.slice(0,2)===String(h).padStart(2,'0')?' selected':'')+'>'+String(h).padStart(2,'0')+'</option>').join('')+'</select><b>:</b>'
+        +'<select id="ccMMeetingMinute" aria-label="Találkozó perce">'+Array.from({length:60},(_,x)=>'<option value="'+String(x).padStart(2,'0')+'"'+(meeting.time.slice(3,5)===String(x).padStart(2,'0')?' selected':'')+'>'+String(x).padStart(2,'0')+'</option>').join('')+'</select></span></label>'
+        +'<label class="field span-2"><span>Találkozó helye</span><input id="ccMMeetingPlace" maxlength="300" value="'+esc(m.meetingPlace||'')+'"></label>'
+        +'<label class="field span-2"><span>Megjegyzés a játékosoknak (nem kötelező)</span><textarea id="ccMPlayerNote" rows="3" maxlength="1000" placeholder="Csak akkor jelenik meg a Playerben, ha írsz ide valamit.">'+esc(m.playerNote||'')+'</textarea></label>'
+        +'</div></div>':'')
       +'<label class="field"><span>Állapot</span><select id="ccMStatus">'
       +[['scheduled','Tervezett'],['played','Lejátszott'],['postponed','Elhalasztva'],['cancelled','Törölve']].map(([code,label])=>'<option value="'+code+'"'+((text(m.status||m.sourceStatus||(hadScore?'played':'scheduled'))===code)?' selected':'')+'>'+label+'</option>').join('')
       +'</select></label>'
@@ -2830,9 +2843,17 @@
           venue:text($('#ccMVenue').value),homeSets:h===''?null:Number(h),
           awaySets:a===''?null:Number(a),setScores,status:$('#ccMStatus').value};
         if((patch.status==='played')!==(h!==''))throw Error('A lejátszott állapothoz eredmény kell; a többi állapot eredmény nélküli.');
-        const result=await rpc('cc_manager_competition_match_override_save_v1',{
+        const arrangement=clubMatch?{
+          meetingAt:ccMatchEditorDateIso_(ccMatchDateFromHu_(text($('#ccMMeetDate')?.value)),
+            text($('#ccMMeetingHour')?.value)+':'+text($('#ccMMeetingMinute')?.value)),
+          meetingPlace:text($('#ccMMeetingPlace')?.value),
+          playerNote:text($('#ccMPlayerNote')?.value)
+        }:null;
+        const result=await rpc('cc_manager_competition_match_full_save_v1',{
           p_source_system:id.system,p_source_key:id.key,p_season:id.season,p_patch:patch,
-          p_expected_version:Number(m._ccOverrideVersion||0)});
+          p_expected_match_version:Number(m._ccOverrideVersion||0),
+          p_arrangement:arrangement,
+          p_expected_arrangement_version:Number(m._ccArrangementVersion||0)});
         await ccMatchSourceRefresh_(id,Number(result._ccOverrideVersion));
         ccCloseEntityDialog_();status('Mérkőzés mentve.','success');
       }catch(err){status(err.message||'Mentési hiba.','error');btn.disabled=false}
