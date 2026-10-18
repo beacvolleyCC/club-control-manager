@@ -2649,9 +2649,13 @@
     return [...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_]
       .find(m=>{const x=ccMatchSourceId_(m);return x&&x.system===id.system&&x.key===id.key&&x.season===id.season});
   }
+  function ccCanEditLeagueSource_(){
+    return (state.permissions||[]).some(p=>p==='*'
+      ||(typeof p==='object'&&text(p?.moduleKey)==='competition.matches'&&p.canEdit===true&&!p.teamId));
+  }
   function ccMatchEditAction_(m){
     const id=ccMatchSourceId_(m);
-    if(!id||!canAnyAction('competition.matches','edit'))return '';
+    if(!id||!ccCanEditLeagueSource_())return '';
     return '<button type="button" class="cc-league-manual-edit" data-match-edit="'+esc(id.key)
       +'" data-match-system="'+esc(id.system)+'" data-match-season="'+esc(id.season)+'">'
       +(m._ccManualOverride?'Kézi módosítás · Szerkesztés':'Szerkesztés')+'</button>';
@@ -2675,7 +2679,7 @@
   }
   function ccOpenSourceMatchEditor_(m){
     const id=ccMatchSourceId_(m),body=$('#entityDialogBody'),title=$('#entityDialogTitle');
-    if(!id||!body||!title||!canAnyAction('competition.matches','edit'))return;
+    if(!id||!body||!title||!ccCanEditLeagueSource_())return;
     title.textContent='Bajnoki mérkőzés szerkesztése';
     const dt=ccMrszLocalKickoff_(m.startsAt),hadScore=m.homeSets!=null&&m.awaySets!=null;
     const field=(label,key,value,type='text')=>'<label class="field"><span>'+label+'</span><input id="'+key+'" type="'+type+'" value="'+esc(value||'')+'" required></label>';
