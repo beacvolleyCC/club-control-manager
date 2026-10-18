@@ -1040,7 +1040,7 @@
   function ccMatchKindFromEvent_(e){const raw=text(e?.matchKind||e?.match_kind||e?.metadata?.matchKind||e?.meta?.matchKind).toLowerCase();return raw==='friendly'?'friendly':'official'}
   function ccSyncMatchKindUi_(){const kind=text($('#ceMatchKind')?.value)||'official',wrap=$('#ceEndWrap');if(wrap)wrap.hidden=kind!=='friendly';if(kind!=='friendly'&&$('#ceEnd'))$('#ceEnd').value=''}
   function ccEventFormHtml_(e,kind){
-    const editing=!!e,s=editing?eventStart(e):new Date(),en=editing?eventEnd(e):new Date(s.getTime()+2*3600000),teamId=editing?eventTeamId(e):(teamFilterIds_('events')[0]||state.eventTeam||state.selectedTeam||state.teams[0]?.id||''),isMatch=kind==='match',matchKind=isMatch?ccMatchKindFromEvent_(e):'',baseTeam=teamById(teamId),baseDefaults=ccTeamBaseDefaults_(teamId),defaultCourt=!editing&&!isMatch?(baseDefaults?.defaultCourt||baseTeam?.defaultCourt||'').replace(/\. pálya$/,''):'',defaultVenue=!editing&&!isMatch?'BEAC csarnok':'',defaultAddress=!editing&&!isMatch?'1117 Budapest, Bogdánfy u. 10/B.':'';
+    const editing=!!e,s=editing?eventStart(e):new Date(),en=editing?eventEnd(e):new Date(s.getTime()+2*3600000),teamId=editing?eventTeamId(e):(teamFilterIds_('events')[0]||state.eventTeam||state.selectedTeam||state.teams[0]?.id||''),isMatch=kind==='match',matchKind=isMatch?ccMatchKindFromEvent_(e):'',baseTeam=teamById(teamId),baseDefaults=ccTeamBaseDefaults_(teamId),defaultCourt=!editing&&!isMatch?(baseDefaults?.defaultCourt||baseTeam?.defaultCourt||'').replace(/\. pálya$/,''):!editing&&isMatch?(text(teamId)==='10000000-0000-4000-8000-000000000002'?'2':'3'):'',defaultVenue=!editing?'BEAC csarnok':'',defaultAddress=!editing&&!isMatch?'1117 Budapest, Bogdánfy u. 10/B.':'';
     return `<form id="competitionEventForm" class="action-form"><div class="action-form-grid">${isMatch?`<label class="field"><span>Meccstípus</span><select id="ceMatchKind"><option value="official" ${matchKind==='official'?'selected':''}>Sima meccs</option><option value="friendly" ${matchKind==='friendly'?'selected':''}>Edzőmeccs</option></select></label>`:''}<label class="field"><span>Csapat</span><select id="ceTeam" required>${ccEventFormTeamOptions_(teamId,kind)}</select></label><label class="field ${isMatch?'span-2':''}"><span>${isMatch?'Meccs neve / ellenfél':'Megnevezés'}</span><input id="ceTitle" maxlength="160" value="${esc(editing?(e.title||''):(isMatch?'Meccs':'Edzés'))}" required></label><label class="field"><span>Dátum</span><input id="ceDate" type="date" value="${esc(ccDateInputValue_(s))}" required></label>${ccTimeField_('ceStart','Kezdés',ccTimeInputValue_(s),{required:true})}${ccTimeField_('ceEnd','Befejezés',ccTimeInputValue_(en),{wrapId:'ceEndWrap'})}<label class="field"><span>Pálya</span><input id="ceCourt" value="${esc(editing?e.court:defaultCourt)}"></label><label class="field"><span>Helyszín</span><input id="ceVenue" value="${esc(editing?e.venue:defaultVenue)}"></label><label class="field span-2"><span>Cím</span><input id="ceAddress" value="${esc(editing?e.address:defaultAddress)}"></label>${isMatch?`<label class="field"><span>Hazai / idegen</span><select id="ceHomeAway"><option value="">–</option><option value="home" ${text(e?.homeAway||e?.home_away)==='home'?'selected':''}>Hazai</option><option value="away" ${text(e?.homeAway||e?.home_away)==='away'?'selected':''}>Idegen</option></select></label>${ccTimeField_('ceMeetingTime','Találkozó időpont',ccTimeInputValue_(e?.meetingAt||e?.meeting_at))}<label class="field span-2"><span>Találkozó helye</span><input id="ceMeetingPlace" value="${esc(e?.meetingPlace||e?.meeting_place||'')}"></label>`:''}</div>${!editing&&!isMatch?`<div class="action-form-repeat"><label><input id="ceRepeat" type="checkbox"> Hetente ismétlődjön</label><label class="field compact"><span>Ismétlés vége</span><input id="ceRepeatEnd" type="date"></label></div>`:''}<label class="action-checkbox"><input id="ceNotify" type="checkbox"> <span>Értesítés küldése a játékosoknak a változásról</span></label><div class="dialog-action-row"><button type="button" class="button quiet" id="ceCancel">Mégse</button>${editing&&!isEventPast(e)?'<button type="button" class="button danger" id="ceDelete">Esemény lemondása</button>':''}<button type="submit" class="button primary" id="ceSave">Mentés</button></div></form>`
   }
 
@@ -1154,6 +1154,12 @@
     });
   }
 
+  function ccMatchDefaultMeeting_(homeAway,start){
+    if(homeAway==='home')return '18:30';
+    if(homeAway!=='away'||!/^\\d{2}:\\d{2}$/.test(start))return '';
+    const [h,m]=start.split(':').map(Number),minutes=h*60+m-60;
+    return String((Math.floor(minutes/60)+24)%24).padStart(2,'0')+':'+String((minutes%60+60)%60).padStart(2,'0');
+  }
   function openCompetitionEventEditor(eventId=null,kind='training'){
     const e=eventId?findEventById(eventId):null,actualKind=e?eventType(e):kind,module=actualKind==='match'?'competition.matches':'competition.trainings',preferred=teamFilterIds_('events')[0]||state.eventTeam||state.selectedTeam||'',teamId=e?eventTeamId(e):(state.teams.find(t=>text(t.id)===text(preferred)&&canAction(module,'edit',t.id))?.id||state.teams.find(t=>canAction(module,'edit',t.id))?.id||null);
     if(!teamId||!canAction(module,'edit',teamId)){status('Nincs szerkesztési jogosultságod ehhez az eseménytípushoz.','error');return}
@@ -1161,6 +1167,19 @@
     if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent=`VERSENYSPORT · ${actualKind==='match'?'MECCS':'EDZÉS'} · SZERKESZTÉS`;
     title.textContent=e?'Esemény szerkesztése':(actualKind==='match'?'Új meccs':'Új edzés');body.innerHTML=ccEventFormHtml_(e,actualKind);ccOpenDialogStable_(d);
     $('#ceCancel')?.addEventListener('click',ccCloseEntityDialog_);
+    if(actualKind==='match'&&!e){
+      const applyDefaults=()=>{
+        const mode=text($('#ceHomeAway')?.value),start=text($('#ceStart')?.value);
+        const meeting=ccMatchDefaultMeeting_(mode,start),field=$('#ceMeetingTime');
+        if(field&&meeting)field.value=meeting;
+        const court=$('#ceCourt'),team=text($('#ceTeam')?.value);
+        if(mode==='home'&&court)court.value=team==='10000000-0000-4000-8000-000000000002'?'2':'3';
+      };
+      $('#ceHomeAway')?.addEventListener('change',applyDefaults);
+      $('#ceStart')?.addEventListener('change',applyDefaults);
+      $('#ceTeam')?.addEventListener('change',applyDefaults);
+    }
+
     $('#ceRepeat')?.addEventListener('change',ev=>{const x=$('#ceRepeatEnd');if(x)x.disabled=!ev.target.checked});if($('#ceRepeatEnd'))$('#ceRepeatEnd').disabled=true;
     if(actualKind==='match'){
       ccSyncMatchKindUi_();
@@ -2365,6 +2384,7 @@
   // Isolated Hunvolley screenshots: not the automatic BRSZ schedule or league source.
   let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[]};
   let ccBrszEffectiveMatches_=[];
+  let ccUserEffectiveMatches_=[];
   // Snapshot-based league selection is independent from BEAC team permissions.
   // Empty value means follow the existing BEAC team context.
   let ccLeagueContextSelection_=(()=>{try{return text(localStorage.getItem('cc-manager-league-context-v1'))}catch(_){return''}})();
@@ -2404,6 +2424,13 @@
     try{
       const [data,sourceMatches]=await Promise.all([rpc('cc_manager_competition_mrsz_snapshot_v2'),rpc('cc_manager_competition_source_matches_effective_v1')]);
       ccBrszEffectiveMatches_=Array.isArray(sourceMatches)?sourceMatches:[];
+      // Imported full 2026/27 user-provided fixture matrix is a newer, separately
+      // auditable source. Keep snapshots read-only and preserve manually patched rows.
+      try{
+        const imported=await rpc('cc_manager_competition_user_schedule_v1');
+        ccUserEffectiveMatches_=Array.isArray(imported)?imported:[];
+      }catch(error){ccUserEffectiveMatches_=[];console.warn('User competition schedule not available',error)}
+
       ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[]};
     }catch(err){ccBrszEffectiveMatches_=[];ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
@@ -2661,7 +2688,7 @@
     return null;
   }
   function ccMatchSourceFind_(id){
-    return [...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_]
+    return [...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_,...ccUserEffectiveMatches_]
       .find(m=>{const x=ccMatchSourceId_(m);return x&&x.system===id.system&&x.key===id.key&&x.season===id.season});
   }
   function ccCanEditLeagueSource_(){
@@ -2686,7 +2713,7 @@
   }
   function ccMatchBindTimeWheels_(){
     // Native selects permit touch spinning; desktop wheels move 1 hour/minute per tick.
-    for(const id of ['ccMHour','ccMMinute']){
+    for(const id of ['ccMHour','ccMMinute','ccMMeetingHour','ccMMeetingMinute']){
       const select=$('#'+id);
       select?.addEventListener('wheel',event=>{
         if(!event.deltaY||document.activeElement!==select)return;
@@ -2709,6 +2736,7 @@
   }
   async function ccMatchSourceRefresh_(id,version){
     ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[]};
+    ccUserEffectiveMatches_=[];
     await ccLoadMrszPhotoSnapshot_();
     if(ccMrszPhotoState_.error)throw Error(ccMrszPhotoState_.error);
     const m=ccMatchSourceFind_(id);
@@ -2745,12 +2773,25 @@
     if(!id||!body||!title||!ccCanEditLeagueSource_())return;
     title.textContent='Bajnoki mérkőzés szerkesztése';
     const dt=ccMrszLocalKickoff_(m.startsAt),hadScore=m.homeSets!=null&&m.awaySets!=null;
+    const clubMatch=ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName);
+    const meeting=ccMrszLocalKickoff_(m.meetingAt);
+    const huDate=value=>String(value||'').replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$1. $2. $3.');
     const field=(label,key,value,type='text')=>'<label class="field"><span>'+label+'</span><input id="'+key+'" type="'+type+'" value="'+esc(value||'')+'" required></label>';
     body.innerHTML='<form class="action-form" id="ccSourceMatchForm"><div class="action-form-grid">'
       +field('Hazai csapat','ccMHome',m.homeName)+field('Vendégcsapat','ccMAway',m.awayName)
       +'<label class="field"><span>Dátum (ÉÉÉÉ. HH. NN.)</span><input id="ccMDate" type="text" inputmode="numeric" maxlength="12" pattern="[0-9]{4}\\. ?[0-9]{1,2}\\. ?[0-9]{1,2}\\." placeholder="2026. 10. 20." value="'+esc(dt.date.replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$1. $2. $3.'))+'" required></label>'
       +'<label class="field"><span>Kezdés (24 órás)</span><span class="cc-match-time-wheel"><select id="ccMHour" aria-label="Kezdés órája">'+Array.from({length:24},(_,h)=>'<option value="'+String(h).padStart(2,'0')+'"'+(dt.time.slice(0,2)===String(h).padStart(2,'0')?' selected':'')+'>'+String(h).padStart(2,'0')+'</option>').join('')+'</select><b>:</b><select id="ccMMinute" aria-label="Kezdés perce">'+Array.from({length:60},(_,m)=>'<option value="'+String(m).padStart(2,'0')+'"'+(dt.time.slice(3,5)===String(m).padStart(2,'0')?' selected':'')+'>'+String(m).padStart(2,'0')+'</option>').join('')+'</select></span></label>'
       +'<label class="field span-2"><span>Helyszín</span><input id="ccMVenue" maxlength="300" value="'+esc(m.venue||'')+'"></label>'
+      +(clubMatch?'<div class="cc-match-meeting-fields span-2">'
+        +'<h4>BEAC · találkozó és játékosinformáció</h4>'
+        +'<div class="cc-match-meeting-grid">'
+        +'<label class="field"><span>Találkozó dátuma</span><input id="ccMMeetDate" inputmode="numeric" maxlength="12" placeholder="2026. 10. 20." value="'+esc(huDate(meeting.date||dt.date))+'" required></label>'
+        +'<label class="field"><span>Találkozó időpontja</span><span class="cc-match-time-wheel">'
+        +'<select id="ccMMeetingHour" aria-label="Találkozó órája">'+Array.from({length:24},(_,h)=>'<option value="'+String(h).padStart(2,'0')+'"'+(meeting.time.slice(0,2)===String(h).padStart(2,'0')?' selected':'')+'>'+String(h).padStart(2,'0')+'</option>').join('')+'</select><b>:</b>'
+        +'<select id="ccMMeetingMinute" aria-label="Találkozó perce">'+Array.from({length:60},(_,x)=>'<option value="'+String(x).padStart(2,'0')+'"'+(meeting.time.slice(3,5)===String(x).padStart(2,'0')?' selected':'')+'>'+String(x).padStart(2,'0')+'</option>').join('')+'</select></span></label>'
+        +'<label class="field span-2"><span>Találkozó helye</span><input id="ccMMeetingPlace" maxlength="300" value="'+esc(m.meetingPlace||'')+'"></label>'
+        +'<label class="field span-2"><span>Megjegyzés a játékosoknak (nem kötelező)</span><textarea id="ccMPlayerNote" rows="3" maxlength="1000" placeholder="Csak akkor jelenik meg a Playerben, ha írsz ide valamit.">'+esc(m.playerNote||'')+'</textarea></label>'
+        +'</div></div>':'')
       +'<label class="field"><span>Állapot</span><select id="ccMStatus">'
       +[['scheduled','Tervezett'],['played','Lejátszott'],['postponed','Elhalasztva'],['cancelled','Törölve']].map(([code,label])=>'<option value="'+code+'"'+((text(m.status||m.sourceStatus||(hadScore?'played':'scheduled'))===code)?' selected':'')+'>'+label+'</option>').join('')
       +'</select></label>'
@@ -2802,9 +2843,17 @@
           venue:text($('#ccMVenue').value),homeSets:h===''?null:Number(h),
           awaySets:a===''?null:Number(a),setScores,status:$('#ccMStatus').value};
         if((patch.status==='played')!==(h!==''))throw Error('A lejátszott állapothoz eredmény kell; a többi állapot eredmény nélküli.');
-        const result=await rpc('cc_manager_competition_match_override_save_v1',{
+        const arrangement=clubMatch?{
+          meetingAt:ccMatchEditorDateIso_(ccMatchDateFromHu_(text($('#ccMMeetDate')?.value)),
+            text($('#ccMMeetingHour')?.value)+':'+text($('#ccMMeetingMinute')?.value)),
+          meetingPlace:text($('#ccMMeetingPlace')?.value),
+          playerNote:text($('#ccMPlayerNote')?.value)
+        }:null;
+        const result=await rpc('cc_manager_competition_match_full_save_v1',{
           p_source_system:id.system,p_source_key:id.key,p_season:id.season,p_patch:patch,
-          p_expected_version:Number(m._ccOverrideVersion||0)});
+          p_expected_match_version:Number(m._ccOverrideVersion||0),
+          p_arrangement:arrangement,
+          p_expected_arrangement_version:Number(m._ccArrangementVersion||0)});
         await ccMatchSourceRefresh_(id,Number(result._ccOverrideVersion));
         ccCloseEntityDialog_();status('Mérkőzés mentve.','success');
       }catch(err){status(err.message||'Mentési hiba.','error');btn.disabled=false}
@@ -2829,13 +2878,54 @@
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
-    const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
-    const key=m=>ccMrszLocalKickoff_(m._ccOriginalStartsAt||m.startsAt).date+'|'+ccMrszNormPairName_(m._ccOriginalHomeName||m.homeName)+'|'+ccMrszNormPairName_(m._ccOriginalAwayName||m.awayName);
+    const brsz=(typeof ccBrszEffectiveMatches_!=='undefined'&&Array.isArray(ccBrszEffectiveMatches_)?ccBrszEffectiveMatches_:[]).filter(m=>text(m.competitionLabel)===group);
+    const user=(typeof ccUserEffectiveMatches_!=='undefined'&&Array.isArray(ccUserEffectiveMatches_)?ccUserEffectiveMatches_:[]).filter(m=>text(m.competitionLabel)===group);
+    const norm=m=>ccMrszNormPairName_(m),pair=m=>norm(m._ccOriginalHomeName||m.homeName)+'|'+norm(m._ccOriginalAwayName||m.awayName);
+    const localSort=m=>{const d=ccMrszLocalKickoff_(m.startsAt);return d.date+'T'+d.time};
+    if(user.length){
+      // The latest user-supplied fixture matrix is complete per group.
+      // Old unedited rows are evidence, not additional scheduled fixtures.
+      const oldManual=[...fixtures,...brsz,...photo].filter(m=>m._ccManualOverride);
+      const used=new Set();
+      const importedFixtures=user.filter(m=>m._ccSourceKind==='fixture').map(m=>{
+        if(m._ccManualOverride)return m;
+        const matchDate=Date.parse(m._ccOriginalStartsAt||m.startsAt);
+        const alternatives=oldManual.filter(old=>{
+          if(used.has(old)||pair(old)!==pair(m))return false;
+          const original=Date.parse(old._ccOriginalStartsAt||old.startsAt);
+          return Number.isFinite(original)&&Number.isFinite(matchDate)
+            &&Math.abs(original-matchDate)<=60*86400000;
+        }).sort((a,b)=>Math.abs(Date.parse(a._ccOriginalStartsAt||a.startsAt)-matchDate)
+          -Math.abs(Date.parse(b._ccOriginalStartsAt||b.startsAt)-matchDate));
+        const manual=alternatives[0];
+        if(!manual)return m;
+        used.add(manual);
+        // Arrange logistics from the new complete schedule unless the earlier
+        // manually edited source already has explicitly saved arrangements.
+        return {...m,...manual,meetingAt:manual._ccHasMeetingOverride?manual.meetingAt:m.meetingAt,
+          meetingPlace:manual._ccHasMeetingOverride?manual.meetingPlace:m.meetingPlace,
+          playerNote:manual._ccHasMeetingOverride?manual.playerNote:m.playerNote,
+          _ccReconciledUserSourceKey:m._ccSourceKey,
+          _ccImportedFixture:true};
+      });
+      const results=user.filter(m=>m._ccSourceKind==='result');
+      for(const legacy of photo){
+        const same=results.some(r=>pair(r)===pair(legacy)&&
+          ccMrszLocalKickoff_(r.startsAt).date===ccMrszLocalKickoff_(legacy.startsAt).date);
+        if(!same)results.push(legacy);
+      }
+      // An existing manual correction with no revised fixture partner remains visible
+      // for review rather than silently being dropped.
+      const manualUnmatched=oldManual.filter(m=>!used.has(m)&&
+        !importedFixtures.some(x=>x._ccSourceKey===m._ccSourceKey));
+      return [...importedFixtures,...results,...manualUnmatched]
+        .sort((a,b)=>localSort(a).localeCompare(localSort(b))
+          ||text(a.homeName).localeCompare(text(b.homeName),'hu'));
+    }
+    const key=m=>ccMrszLocalKickoff_(m._ccOriginalStartsAt||m.startsAt).date+'|'+pair(m);
     const unique=new Map();
     const take=(match,priority)=>{
-      const k=key(match),prior=unique.get(k);
-      const annotated={...match,__sourcePriority:priority};
-      // Explicit admin corrections win over unchanged snapshots even after a sync.
+      const k=key(match),prior=unique.get(k),annotated={...match,__sourcePriority:priority};
       if(!prior||(!prior._ccManualOverride&&annotated._ccManualOverride)
         ||(!!prior._ccManualOverride===!!annotated._ccManualOverride&&priority>=prior.__sourcePriority))
         unique.set(k,annotated);
@@ -2844,8 +2934,8 @@
     canonicalMatches.forEach(m=>take(m,2));
     brsz.forEach(m=>take(m,2));
     photo.forEach(m=>take(m,3));
-    const localSort=m=>{const t=ccMrszLocalKickoff_(m.startsAt);return t.date+'T'+t.time};
-    return [...unique.values()].sort((a,b)=>localSort(a).localeCompare(localSort(b))||text(a.homeName).localeCompare(text(b.homeName),'hu'));
+    return [...unique.values()].sort((a,b)=>localSort(a).localeCompare(localSort(b))
+      ||text(a.homeName).localeCompare(text(b.homeName),'hu'));
   }
 
   // An unscored BEAC–BEAC record is a source anomaly, not a confirmed fixture.
