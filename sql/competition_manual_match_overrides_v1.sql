@@ -191,7 +191,9 @@ returns jsonb language sql stable security invoker set search_path='' as $functi
 select coalesce(jsonb_agg(
  s.data || coalesce(o.patch,'{}'::jsonb) ||
  jsonb_build_object('_ccSourceSystem','snapshot','_ccSourceKey',s.source_key,
-  '_ccSourceKind',s.record_kind,'_ccOverrideVersion',coalesce(o.version,0),
+  '_ccSourceKind',s.record_kind,'_ccOriginalStartsAt',s.data->>'startsAt',
+  '_ccOriginalHomeName',s.data->>'homeName','_ccOriginalAwayName',s.data->>'awayName',
+  '_ccOverrideVersion',coalesce(o.version,0),
   '_ccManualOverride',coalesce(o.patch<>'{}'::jsonb,false))
  order by s.data->>'startsAt',s.source_key),'[]'::jsonb)
 from public.cc_competition_mrsz_screenshot_v1 s
@@ -237,6 +239,8 @@ begin
    'setScores',coalesce(s.set_scores,'[]'::jsonb),'status',s.source_status,'sourceUrl',s.source_url)
   ||coalesce(o.patch,'{}'::jsonb)||
    jsonb_build_object('_ccSourceSystem','brsz','_ccSourceKey',s.source_match_key,
+   '_ccOriginalStartsAt',s.starts_at,'_ccOriginalHomeName',s.home_name,
+   '_ccOriginalAwayName',s.away_name,
    '_ccOverrideVersion',coalesce(o.version,0),'_ccManualOverride',coalesce(o.patch<>'{}'::jsonb,false))
   order by s.starts_at,s.source_match_key),'[]'::jsonb) into v_rows
  from public.competition_source_matches s
@@ -264,6 +268,8 @@ begin
    'setScores',coalesce(s.set_scores,'[]'::jsonb),'status',s.source_status,'sourceUrl',s.source_url)
   ||coalesce(o.patch,'{}'::jsonb)||
    jsonb_build_object('_ccSourceSystem','brsz','_ccSourceKey',s.source_match_key,
+   '_ccOriginalStartsAt',s.starts_at,'_ccOriginalHomeName',s.home_name,
+   '_ccOriginalAwayName',s.away_name,
    '_ccOverrideVersion',coalesce(o.version,0),
    '_ccManualOverride',coalesce(o.patch<>'{}'::jsonb,false))
   order by s.starts_at,s.source_match_key),'[]'::jsonb) into v_rows
