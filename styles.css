@@ -6961,3 +6961,10 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
    min-height:38px;padding:8px 12px!important;
  }
 }
+
+/* Federation match editor: explicit HU date + 24-hour spin selectors. */
+#ccSourceMatchForm .cc-match-time-wheel{display:flex;align-items:center;gap:7px;width:100%;min-width:0}
+#ccSourceMatchForm .cc-match-time-wheel select{flex:1 1 0;min-width:0;max-width:120px;text-align:center;min-height:44px;font:inherit;font-size:16px;font-variant-numeric:tabular-nums;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)}
+#ccSourceMatchForm .cc-match-time-wheel b{flex:0 0 auto;font-size:18px}
+#ccSourceMatchForm #ccMDate{min-height:44px;box-sizing:border-box;font:inherit;font-size:15px;font-variant-numeric:tabular-nums}
+@media(max-width:550px){#ccSourceMatchForm .cc-match-time-wheel select{max-width:none;min-height:48px}}
