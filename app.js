@@ -2677,6 +2677,32 @@
     const m=ccMatchSourceFind_(id);
     if(!m||Number(m._ccOverrideVersion||0)!==version)throw Error('A mentés visszaolvasása nem egyezik.');
   }
+  function ccSourceMatchHistoryHtml_(items){
+    if(!Array.isArray(items)||!items.length)return '<p class="cc-source-history-empty">Ehhez a meccshez még nincs kézi módosítás.</p>';
+    const fields={homeName:'Hazai',awayName:'Vendég',startsAt:'Kezdés',venue:'Helyszín',
+      homeSets:'Hazai szettek',awaySets:'Vendég szettek',setScores:'Játszmák',status:'Állapot'};
+    const show=(k,v)=>{
+      if(v===undefined||v===null||v==='')return '–';
+      if(k==='setScores'&&Array.isArray(v))return v.map(x=>String(x.home)+':'+String(x.away)).join(' · ')||'–';
+      if(k==='startsAt')return ccMrszLocalKickoff_(v).date+' '+ccMrszLocalKickoff_(v).time;
+      return String(v);
+    };
+    return '<ol class="cc-source-history-list">'+items.map(item=>{
+      const old=item.oldPatch&&typeof item.oldPatch==='object'?item.oldPatch:{};
+      const now=item.newPatch&&typeof item.newPatch==='object'?item.newPatch:{};
+      const changed=Object.keys({...old,...now}).filter(k=>Object.hasOwn(fields,k)&&JSON.stringify(old[k])!==JSON.stringify(now[k]));
+      const dt=Date.parse(item.happenedAt||'');
+      const when=Number.isFinite(dt)?new Intl.DateTimeFormat('hu-HU',{timeZone:'Europe/Budapest',
+        year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(dt)):'';
+      const reset=item.action==='reset';
+      return '<li><div class="cc-source-history-head"><b>'+(reset?'Forrás visszaállítása':'Kézi módosítás')+'</b>'
+        +'<small>'+esc(when)+' · '+esc(item.actor||'Admin')+'</small></div>'
+        +(reset?'':('<div class="cc-source-history-fields">'+changed.map(k=>'<div><span>'+esc(fields[k])+'</span>'
+           +'<span>'+esc(show(k,old[k]))+' → '+esc(show(k,now[k]))+'</span></div>').join('')+'</div>'))
+        +'</li>';
+    }).join('')+'</ol>';
+  }
+
   function ccOpenSourceMatchEditor_(m){
     const id=ccMatchSourceId_(m),body=$('#entityDialogBody'),title=$('#entityDialogTitle');
     if(!id||!body||!title||!ccCanEditLeagueSource_())return;
@@ -2697,9 +2723,30 @@
       +'<label class="field span-2"><span>Játszmák (25:20, 25:18)</span><input id="ccMSets" value="'+esc((m.setScores||[]).map(p=>p.home+':'+p.away).join(', '))+'"></label>'
       +'</div><div class="dialog-action-row"><button type="button" class="button quiet" id="ccMCancel">Mégse</button>'
       +(m._ccManualOverride?'<button type="button" class="button quiet" id="ccMReset">Forrás visszaállítása</button>':'')
-      +'<button type="submit" class="button primary" id="ccMSave">Mentés</button></div></form>';
+      +'<button type="submit" class="button primary" id="ccMSave">Mentés</button></div></form>'
+      +'<details id="ccMHistory" class="cc-source-history"><summary>Módosítási előzmények</summary>'
+      +'<div id="ccMHistoryBody" class="cc-source-history-body">Megnyitáskor betöltés…</div></details>';
     ccOpenDialogStable_($('#entityDialog'));
     $('#ccMCancel')?.addEventListener('click',ccCloseEntityDialog_);
+    // History is queried on demand; never block a save because an audit read failed.
+    let historyLoaded=false;
+    $('#ccMHistory')?.addEventListener('toggle',async event=>{
+      if(!event.target.open||historyLoaded)return;
+      historyLoaded=true;
+      const pane=$('#ccMHistoryBody');
+      try{
+        const items=await rpc('cc_manager_competition_match_override_history_v1',{
+          p_source_system:id.system,p_season:id.season,p_source_key:id.key
+        });
+        if(pane&&pane.isConnected&&$('#ccMHistoryBody')===pane)
+          pane.innerHTML=ccSourceMatchHistoryHtml_(items);
+      }catch(error){
+        historyLoaded=false;
+        if(pane&&pane.isConnected&&$('#ccMHistoryBody')===pane)
+          pane.innerHTML='<p role="alert">Az előzmények nem tölthetők be: '+esc(error?.message||'Ismeretlen hiba')+'</p>';
+      }
+    });
+
     $('#ccSourceMatchForm')?.addEventListener('submit',async e=>{
       e.preventDefault();const btn=$('#ccMSave');btn.disabled=true;
       try{
