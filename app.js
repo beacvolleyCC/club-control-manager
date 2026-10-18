@@ -2720,7 +2720,7 @@
       try{
         await rpc('cc_manager_competition_match_override_reset_v1',{p_source_system:id.system,
           p_season:id.season,p_source_key:id.key,p_expected_version:Number(m._ccOverrideVersion||0)});
-        await ccMatchSourceRefresh_(id,0);ccCloseEntityDialog_();status('Forrásadatok visszaállítva.','success');
+        await ccMatchSourceRefresh_(id,Number(m._ccOverrideVersion||0)+1);ccCloseEntityDialog_();status('Forrásadatok visszaállítva.','success');
       }catch(err){status(err.message||'Visszaállítás sikertelen.','error')}
     });
   }
