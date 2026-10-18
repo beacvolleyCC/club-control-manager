@@ -277,3 +277,31 @@ test('Manager protocol uses bold starter and dash where source has no court-entr
  assert.ok(html.includes('>C</span>'));
  assert.ok(html.includes('>L2</span>'));
 });
+
+test('manually edited kickoff and team remain one fixture against uncorrected archival sources',()=>{
+ const original=fixtures[0];
+ const override={...original,source:'brsz',season:'2026/27',_ccManualOverride:true,
+  startsAt:'2026-10-17T19:30:00+02:00',homeSets:3,awaySets:2,
+  _ccOriginalStartsAt:original.startsAt,
+  _ccOriginalHomeName:original.homeName,_ccOriginalAwayName:original.awayName};
+ ctx.ccBrszEffectiveMatches_=[override];
+ try{
+  const rows=ctx.qa.merge('Női Budapest I. osztály');
+  assert.equal(rows.length,1);
+  assert.equal(rows[0].homeSets,3);
+  assert.equal(rows[0].awaySets,2);
+  assert.equal(rows[0].startsAt,override.startsAt);
+ }finally{ctx.ccBrszEffectiveMatches_=[]}
+});
+test('manual correction schema is source preserving, manager-gated and auditable',()=>{
+ const migration=fs.readFileSync('sql/competition_manual_match_overrides_v1.sql','utf8');
+ assert.ok(migration.includes('public.cc_competition_match_overrides_v1'));
+ assert.ok(migration.includes('public.cc_competition_match_override_audit_v1'));
+ assert.ok(migration.includes("private.cc_manager_require_any_v1('competition.matches','edit')"));
+ assert.ok(migration.includes('MATCH_VERSION_CONFLICT'));
+ assert.ok(migration.includes("patch='{}'::jsonb"));
+ assert.ok(migration.includes('enable row level security'));
+ assert.ok(migration.includes("from public, anon, authenticated;"));
+ assert.ok(!migration.includes('update public.competition_source_matches set'));
+ assert.ok(!migration.includes('update public.cc_competition_mrsz_screenshot_v1 set'));
+});
