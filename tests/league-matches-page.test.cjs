@@ -33,14 +33,14 @@ test('default context follows a single BEAC team, without guessing group members
  assert.equal(harness({team:'10000000-0000-4000-8000-000000000003'}).ccMatchesDefaultLeague_(),menB);
  assert.equal(harness({team:'10000000-0000-4000-8000-000000000003',menGroup:'A'}).ccMatchesDefaultLeague_(),menA);
 });
-test('a selected BEAC team determines the league match list but never shows a second standings table',()=>{
+test('default selected BEAC team determines league until a separate explicit match-page selection',()=>{
  const h=harness({selected:menA,team:'10000000-0000-4000-8000-000000000003'});
  const html=h.ccLeagueMatchesContextHtml_();
  assert.deepEqual(h.ctx.table,[]);
  assert.deepEqual(h.ctx.fixture,[menB],'matches follow the BEAC team context instead of the previously selected league');
  assert.ok(html.includes('FIXTURE:'+menB));
  assert.ok(!html.includes('TABLE:'));
- assert.ok(!html.includes('ccLeagueContextSelect'));
+ assert.ok(html.includes('ccLeagueContextSelect'),'Admin may select other league groups explicitly');
 });
 test('matches team picker has one selector and supports all three BEAC teams',()=>{
  const h=harness({selectedTeamIds:['10000000-0000-4000-8000-000000000002']});
@@ -87,7 +87,7 @@ test('one shared scope and result provenance are visible in league scoreboard bu
  assert.ok(source.includes("const noTableNote='';"));
 });
 
-test('standings alone has the league selector and matches still binds full-league toggle',()=>{
+test('standings and matches offer league filtering without duplicating the standings table',()=>{
  const st=source.slice(source.indexOf('  function renderManagerStandings_()'),source.indexOf('  function eventPlace('));
  assert.ok(st.includes('ccLeagueContextSelectHtml_(group)'));
  assert.ok(!st.includes('id="msContextSelect"'));
