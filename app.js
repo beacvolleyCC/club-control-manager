@@ -2384,6 +2384,7 @@
   // Isolated Hunvolley screenshots: not the automatic BRSZ schedule or league source.
   let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[]};
   let ccBrszEffectiveMatches_=[];
+  let ccUserEffectiveMatches_=[];
   // Snapshot-based league selection is independent from BEAC team permissions.
   // Empty value means follow the existing BEAC team context.
   let ccLeagueContextSelection_=(()=>{try{return text(localStorage.getItem('cc-manager-league-context-v1'))}catch(_){return''}})();
@@ -2423,6 +2424,13 @@
     try{
       const [data,sourceMatches]=await Promise.all([rpc('cc_manager_competition_mrsz_snapshot_v2'),rpc('cc_manager_competition_source_matches_effective_v1')]);
       ccBrszEffectiveMatches_=Array.isArray(sourceMatches)?sourceMatches:[];
+      // Imported full 2026/27 user-provided fixture matrix is a newer, separately
+      // auditable source. Keep snapshots read-only and preserve manually patched rows.
+      try{
+        const imported=await rpc('cc_manager_competition_user_schedule_v1');
+        ccUserEffectiveMatches_=Array.isArray(imported)?imported:[];
+      }catch(error){ccUserEffectiveMatches_=[];console.warn('User competition schedule not available',error)}
+
       ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[]};
     }catch(err){ccBrszEffectiveMatches_=[];ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
@@ -2680,7 +2688,7 @@
     return null;
   }
   function ccMatchSourceFind_(id){
-    return [...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_]
+    return [...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_,...ccUserEffectiveMatches_]
       .find(m=>{const x=ccMatchSourceId_(m);return x&&x.system===id.system&&x.key===id.key&&x.season===id.season});
   }
   function ccCanEditLeagueSource_(){
@@ -2728,6 +2736,7 @@
   }
   async function ccMatchSourceRefresh_(id,version){
     ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[]};
+    ccUserEffectiveMatches_=[];
     await ccLoadMrszPhotoSnapshot_();
     if(ccMrszPhotoState_.error)throw Error(ccMrszPhotoState_.error);
     const m=ccMatchSourceFind_(id);
@@ -2848,13 +2857,54 @@
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
-    const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
-    const key=m=>ccMrszLocalKickoff_(m._ccOriginalStartsAt||m.startsAt).date+'|'+ccMrszNormPairName_(m._ccOriginalHomeName||m.homeName)+'|'+ccMrszNormPairName_(m._ccOriginalAwayName||m.awayName);
+    const brsz=(ccBrszEffectiveMatches_||[]).filter(m=>text(m.competitionLabel)===group);
+    const user=(ccUserEffectiveMatches_||[]).filter(m=>text(m.competitionLabel)===group);
+    const norm=m=>ccMrszNormPairName_(m),pair=m=>norm(m._ccOriginalHomeName||m.homeName)+'|'+norm(m._ccOriginalAwayName||m.awayName);
+    const localSort=m=>{const d=ccMrszLocalKickoff_(m.startsAt);return d.date+'T'+d.time};
+    if(user.length){
+      // The latest user-supplied fixture matrix is complete per group.
+      // Old unedited rows are evidence, not additional scheduled fixtures.
+      const oldManual=[...fixtures,...brsz,...photo].filter(m=>m._ccManualOverride);
+      const used=new Set();
+      const importedFixtures=user.filter(m=>m._ccSourceKind==='fixture').map(m=>{
+        if(m._ccManualOverride)return m;
+        const matchDate=Date.parse(m._ccOriginalStartsAt||m.startsAt);
+        const alternatives=oldManual.filter(old=>{
+          if(used.has(old)||pair(old)!==pair(m))return false;
+          const original=Date.parse(old._ccOriginalStartsAt||old.startsAt);
+          return Number.isFinite(original)&&Number.isFinite(matchDate)
+            &&Math.abs(original-matchDate)<=60*86400000;
+        }).sort((a,b)=>Math.abs(Date.parse(a._ccOriginalStartsAt||a.startsAt)-matchDate)
+          -Math.abs(Date.parse(b._ccOriginalStartsAt||b.startsAt)-matchDate));
+        const manual=alternatives[0];
+        if(!manual)return m;
+        used.add(manual);
+        // Arrange logistics from the new complete schedule unless the earlier
+        // manually edited source already has explicitly saved arrangements.
+        return {...m,...manual,meetingAt:manual._ccHasMeetingOverride?manual.meetingAt:m.meetingAt,
+          meetingPlace:manual._ccHasMeetingOverride?manual.meetingPlace:m.meetingPlace,
+          playerNote:manual._ccHasMeetingOverride?manual.playerNote:m.playerNote,
+          _ccReconciledUserSourceKey:m._ccSourceKey,
+          _ccImportedFixture:true};
+      });
+      const results=user.filter(m=>m._ccSourceKind==='result');
+      for(const legacy of photo){
+        const same=results.some(r=>pair(r)===pair(legacy)&&
+          ccMrszLocalKickoff_(r.startsAt).date===ccMrszLocalKickoff_(legacy.startsAt).date);
+        if(!same)results.push(legacy);
+      }
+      // An existing manual correction with no revised fixture partner remains visible
+      // for review rather than silently being dropped.
+      const manualUnmatched=oldManual.filter(m=>!used.has(m)&&
+        !importedFixtures.some(x=>x._ccSourceKey===m._ccSourceKey));
+      return [...importedFixtures,...results,...manualUnmatched]
+        .sort((a,b)=>localSort(a).localeCompare(localSort(b))
+          ||text(a.homeName).localeCompare(text(b.homeName),'hu'));
+    }
+    const key=m=>ccMrszLocalKickoff_(m._ccOriginalStartsAt||m.startsAt).date+'|'+pair(m);
     const unique=new Map();
     const take=(match,priority)=>{
-      const k=key(match),prior=unique.get(k);
-      const annotated={...match,__sourcePriority:priority};
-      // Explicit admin corrections win over unchanged snapshots even after a sync.
+      const k=key(match),prior=unique.get(k),annotated={...match,__sourcePriority:priority};
       if(!prior||(!prior._ccManualOverride&&annotated._ccManualOverride)
         ||(!!prior._ccManualOverride===!!annotated._ccManualOverride&&priority>=prior.__sourcePriority))
         unique.set(k,annotated);
@@ -2863,8 +2913,8 @@
     canonicalMatches.forEach(m=>take(m,2));
     brsz.forEach(m=>take(m,2));
     photo.forEach(m=>take(m,3));
-    const localSort=m=>{const t=ccMrszLocalKickoff_(m.startsAt);return t.date+'T'+t.time};
-    return [...unique.values()].sort((a,b)=>localSort(a).localeCompare(localSort(b))||text(a.homeName).localeCompare(text(b.homeName),'hu'));
+    return [...unique.values()].sort((a,b)=>localSort(a).localeCompare(localSort(b))
+      ||text(a.homeName).localeCompare(text(b.homeName),'hu'));
   }
 
   // An unscored BEAC–BEAC record is a source anomaly, not a confirmed fixture.
