@@ -2635,8 +2635,103 @@
         }
       });
     });
+    ccBindSourceMatchEdit_();
   }
 
+
+  // A saved federation/screenshot key is mandatory. Name+date are display only.
+  function ccMatchSourceId_(m){
+    if(m?._ccSourceKey&&m?.season)return {system:text(m._ccSourceSystem),key:text(m._ccSourceKey),season:text(m.season)};
+    if(m?.source==='brsz'&&m?.sourceMatchKey&&m?.season)return {system:'brsz',key:text(m.sourceMatchKey),season:text(m.season)};
+    return null;
+  }
+  function ccMatchSourceFind_(id){
+    return [...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_]
+      .find(m=>{const x=ccMatchSourceId_(m);return x&&x.system===id.system&&x.key===id.key&&x.season===id.season});
+  }
+  function ccMatchEditAction_(m){
+    const id=ccMatchSourceId_(m);
+    if(!id||!canAnyAction('competition.matches','edit'))return '';
+    return '<button type="button" class="cc-league-manual-edit" data-match-edit="'+esc(id.key)
+      +'" data-match-system="'+esc(id.system)+'" data-match-season="'+esc(id.season)+'">'
+      +(m._ccManualOverride?'Kézi módosítás · Szerkesztés':'Szerkesztés')+'</button>';
+  }
+  function ccMatchEditorDateIso_(day,time){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time))throw Error('Hibás dátum vagy időpont.');
+    const utc=Date.parse(day+'T'+time+':00Z');
+    const fmt=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+    for(const offset of [60,120]){
+      const stamp=new Date(utc-offset*60000),parts=Object.fromEntries(fmt.formatToParts(stamp).map(p=>[p.type,p.value]));
+      if(parts.year+'-'+parts.month+'-'+parts.day===day&&parts.hour+':'+parts.minute===time)return stamp.toISOString();
+    }
+    throw Error('A budapesti időpont nem értelmezhető.');
+  }
+  async function ccMatchSourceRefresh_(id,version){
+    ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[]};
+    await ccLoadMrszPhotoSnapshot_();
+    if(ccMrszPhotoState_.error)throw Error(ccMrszPhotoState_.error);
+    const m=ccMatchSourceFind_(id);
+    if(!m||Number(m._ccOverrideVersion||0)!==version)throw Error('A mentés visszaolvasása nem egyezik.');
+  }
+  function ccOpenSourceMatchEditor_(m){
+    const id=ccMatchSourceId_(m),body=$('#entityDialogBody'),title=$('#entityDialogTitle');
+    if(!id||!body||!title||!canAnyAction('competition.matches','edit'))return;
+    title.textContent='Bajnoki mérkőzés szerkesztése';
+    const dt=ccMrszLocalKickoff_(m.startsAt),hadScore=m.homeSets!=null&&m.awaySets!=null;
+    const field=(label,key,value,type='text')=>'<label class="field"><span>'+label+'</span><input id="'+key+'" type="'+type+'" value="'+esc(value||'')+'" required></label>';
+    body.innerHTML='<form class="action-form" id="ccSourceMatchForm"><div class="action-form-grid">'
+      +field('Hazai csapat','ccMHome',m.homeName)+field('Vendégcsapat','ccMAway',m.awayName)
+      +field('Dátum','ccMDate',dt.date,'date')+field('Kezdés (HH:MM)','ccMTime',dt.time)
+      +'<label class="field span-2"><span>Helyszín</span><input id="ccMVenue" maxlength="300" value="'+esc(m.venue||'')+'"></label>'
+      +'<label class="field"><span>Hazai szettek</span><select id="ccMHs"><option value="">–</option>'
+      +[0,1,2,3].map(n=>'<option value="'+n+'"'+(hadScore&&Number(m.homeSets)===n?' selected':'')+'>'+n+'</option>').join('')+'</select></label>'
+      +'<label class="field"><span>Vendég szettek</span><select id="ccMAs"><option value="">–</option>'
+      +[0,1,2,3].map(n=>'<option value="'+n+'"'+(hadScore&&Number(m.awaySets)===n?' selected':'')+'>'+n+'</option>').join('')+'</select></label>'
+      +'<label class="field span-2"><span>Játszmák (25:20, 25:18)</span><input id="ccMSets" value="'+esc((m.setScores||[]).map(p=>p.home+':'+p.away).join(', '))+'"></label>'
+      +'</div><div class="dialog-action-row"><button type="button" class="button quiet" id="ccMCancel">Mégse</button>'
+      +(m._ccManualOverride?'<button type="button" class="button quiet" id="ccMReset">Forrás visszaállítása</button>':'')
+      +'<button type="submit" class="button primary" id="ccMSave">Mentés</button></div></form>';
+    ccOpenDialogStable_($('#entityDialog'));
+    $('#ccMCancel')?.addEventListener('click',ccCloseEntityDialog_);
+    $('#ccSourceMatchForm')?.addEventListener('submit',async e=>{
+      e.preventDefault();const btn=$('#ccMSave');btn.disabled=true;
+      try{
+        const h=text($('#ccMHs').value),a=text($('#ccMAs').value);
+        if((h==='')!==(a===''))throw Error('Mindkét szetteredmény szükséges.');
+        const raw=text($('#ccMSets').value);
+        const setScores=raw?raw.split(',').map(pair=>{
+          const parts=pair.trim().match(/^(\d{1,2})\s*:\s*(\d{1,2})$/);
+          if(!parts)throw Error('Hibás játszmaeredmény. Példa: 25:20, 25:18');
+          return {home:Number(parts[1]),away:Number(parts[2])};
+        }):[];
+        const patch={homeName:text($('#ccMHome').value),awayName:text($('#ccMAway').value),
+          startsAt:ccMatchEditorDateIso_(text($('#ccMDate').value),text($('#ccMTime').value)),
+          venue:text($('#ccMVenue').value),homeSets:h===''?null:Number(h),
+          awaySets:a===''?null:Number(a),setScores,status:h===''?'scheduled':'played'};
+        const result=await rpc('cc_manager_competition_match_override_save_v1',{
+          p_source_system:id.system,p_source_key:id.key,p_season:id.season,p_patch:patch,
+          p_expected_version:Number(m._ccOverrideVersion||0)});
+        await ccMatchSourceRefresh_(id,Number(result._ccOverrideVersion));
+        ccCloseEntityDialog_();status('Mérkőzés mentve.','success');
+      }catch(err){status(err.message||'Mentési hiba.','error');btn.disabled=false}
+    });
+    $('#ccMReset')?.addEventListener('click',async()=>{
+      if(!confirm('Visszaállítod az eredeti forrásadatokat?'))return;
+      try{
+        await rpc('cc_manager_competition_match_override_reset_v1',{p_source_system:id.system,
+          p_season:id.season,p_source_key:id.key,p_expected_version:Number(m._ccOverrideVersion||0)});
+        await ccMatchSourceRefresh_(id,0);ccCloseEntityDialog_();status('Forrásadatok visszaállítva.','success');
+      }catch(err){status(err.message||'Visszaállítás sikertelen.','error')}
+    });
+  }
+  function ccBindSourceMatchEdit_(){
+    $('#viewContent [data-match-edit]').forEach(btn=>btn.addEventListener('click',event=>{
+      event.stopPropagation();event.preventDefault();
+      const id={system:text(btn.dataset.matchSystem),season:text(btn.dataset.matchSeason),key:text(btn.dataset.matchEdit)};
+      const match=ccMatchSourceFind_(id);
+      if(match)ccOpenSourceMatchEditor_(match);else status('A forrásrekord nem található.','error');
+    }));
+  }
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
@@ -2753,11 +2848,11 @@
       +'<button type="button" data-league-match-scope="beac" aria-pressed="'+(scope==='beac')+'" class="'+(scope==='beac'?'active':'')+'">BEAC meccsek</button>'
       +'<button type="button" data-league-match-scope="all" aria-pressed="'+(scope==='all')+'" class="'+(scope==='all'?'active':'')+'">Összes bajnoki meccs</button></div>':'';
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    const items=visible.map(m=>ccMatchScoreboardHtml_(m,{league:group,
+    const items=visible.map(m=>'<div class="cc-league-manual-match">'+ccMatchScoreboardHtml_(m,{league:group,
       badge:'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
       meta:'',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today
-    })).join('');
+    })+ccMatchEditAction_(m)+'</div>').join('');
     const noTableNote='';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
     return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
