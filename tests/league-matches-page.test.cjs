@@ -19,7 +19,7 @@ function harness(opts={}){
  const ctx={rows:[],table:[],fixture:[]};
  const api=new Function('teamFilterIds_','text','state','ccMrszMenGroup_','ccCurrentLeague_','ccMrszPhotoState_',
    'ccLeagueContextSelectHtml_','esc','ccMrszMainPhotoTableHtml_','ccMrszLeagueFixturePanelHtml_','ccMrszCoverageLabel_',
-   code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_,ccMatchesTeamSelectHtml_};')(
+   'let ccMatchesSelectedGroup_="";'+code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_,ccMatchesTeamSelectHtml_};')(
    ()=>opts.selectedTeamIds||[],x=>String(x??''),state,opts.menGroup||'B',
    fallback=>selection||fallback,photo,label=>'<select id="ccLeagueContextSelect"><option>'+label+'</option></select>',
    x=>String(x??''),t=>{ctx.table.push(t.competitionLabel);return '<article class="ms-standings-card">TABLE:'+t.competitionLabel+'</article>'},
