@@ -6849,3 +6849,14 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 /* Manager v50: starring lineup, understated no-appearance marker. */
 .cc-protocol-team td .cc-protocol-starter{font-weight:750;color:var(--text)}
 .cc-protocol-marker.is-no-entry{min-width:20px;height:20px;color:var(--muted);font-size:15px;font-weight:400}
+
+/* Source-preserving federation correction controls in Manager. */
+.cc-league-manual-match{min-width:0;position:relative;}
+.cc-league-manual-match>.cc-match-scoreboard{width:100%;box-sizing:border-box}
+.cc-league-manual-edit{display:block;margin:4px 9px 11px auto;border:1px solid var(--line);
+ background:transparent;color:var(--text,inherit);border-radius:8px;cursor:pointer;
+ font:inherit;font-size:11px;font-weight:700;padding:7px 11px}
+.cc-league-manual-edit:hover{background:var(--soft,rgba(125,125,125,.08))}
+.cc-league-manual-edit:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.cc-mrsz-review-fixtures .cc-league-manual-edit{display:inline-block;margin:5px 0 1px 10px}
+@media(max-width:580px){.cc-league-manual-edit{padding:8px 9px;margin-right:6px}}
