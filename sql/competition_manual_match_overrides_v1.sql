@@ -59,7 +59,7 @@ end;
 $function$;
 
 create or replace function private.cc_competition_match_patch_validate_v1(p_base jsonb,p_patch jsonb)
-returns jsonb language plpgsql immutable security invoker set search_path = '' as $function$
+returns jsonb language plpgsql stable security invoker set search_path = '' as $function$
 declare
   v_key text; v jsonb; v_h integer; v_a integer; v_sets jsonb;
   v_set jsonb; v_sh integer; v_sa integer; v_homewins integer:=0; v_awaywins integer:=0;
