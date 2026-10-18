@@ -2687,6 +2687,9 @@
       +field('Hazai csapat','ccMHome',m.homeName)+field('Vendégcsapat','ccMAway',m.awayName)
       +field('Dátum','ccMDate',dt.date,'date')+field('Kezdés (HH:MM)','ccMTime',dt.time)
       +'<label class="field span-2"><span>Helyszín</span><input id="ccMVenue" maxlength="300" value="'+esc(m.venue||'')+'"></label>'
+      +'<label class="field"><span>Állapot</span><select id="ccMStatus">'
+      +[['scheduled','Tervezett'],['played','Lejátszott'],['postponed','Elhalasztva'],['cancelled','Törölve']].map(([code,label])=>'<option value="'+code+'"'+((text(m.status||m.sourceStatus||(hadScore?'played':'scheduled'))===code)?' selected':'')+'>'+label+'</option>').join('')
+      +'</select></label>'
       +'<label class="field"><span>Hazai szettek</span><select id="ccMHs"><option value="">–</option>'
       +[0,1,2,3].map(n=>'<option value="'+n+'"'+(hadScore&&Number(m.homeSets)===n?' selected':'')+'>'+n+'</option>').join('')+'</select></label>'
       +'<label class="field"><span>Vendég szettek</span><select id="ccMAs"><option value="">–</option>'
@@ -2711,7 +2714,8 @@
         const patch={homeName:text($('#ccMHome').value),awayName:text($('#ccMAway').value),
           startsAt:ccMatchEditorDateIso_(text($('#ccMDate').value),text($('#ccMTime').value)),
           venue:text($('#ccMVenue').value),homeSets:h===''?null:Number(h),
-          awaySets:a===''?null:Number(a),setScores,status:h===''?'scheduled':'played'};
+          awaySets:a===''?null:Number(a),setScores,status:$('#ccMStatus').value};
+        if((patch.status==='played')!==(h!==''))throw Error('A lejátszott állapothoz eredmény kell; a többi állapot eredmény nélküli.');
         const result=await rpc('cc_manager_competition_match_override_save_v1',{
           p_source_system:id.system,p_source_key:id.key,p_season:id.season,p_patch:patch,
           p_expected_version:Number(m._ccOverrideVersion||0)});
