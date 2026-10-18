@@ -91,7 +91,8 @@ begin
   if (v->>'status') is not null and lower(v->>'status') not in
      ('scheduled','played','completed','postponed','cancelled','canceled','pending')
   then raise exception 'MATCH_STATUS_INVALID' using errcode='22023'; end if;
-  if (v->'homeSets'='null'::jsonb) <> (v->'awaySets'='null'::jsonb)
+  if ((v->'homeSets' is null or v->'homeSets'='null'::jsonb)
+       <> (v->'awaySets' is null or v->'awaySets'='null'::jsonb))
   then raise exception 'MATCH_PARTIAL_RESULT' using errcode='22023'; end if;
   if jsonb_typeof(v->'homeSets')='null' and jsonb_typeof(v->'awaySets')='null' then
     v_h:=null; v_a:=null;
@@ -117,6 +118,10 @@ begin
     v_homewins:=v_homewins+(v_sh>v_sa)::int;
     v_awaywins:=v_awaywins+(v_sa>v_sh)::int;
   end loop;
+  if (v->>'status') in ('played','completed') and v_h is null
+    then raise exception 'MATCH_PLAYED_NEEDS_SCORE' using errcode='22023'; end if;
+  if (v->>'status') in ('scheduled','postponed','cancelled','canceled','pending') and v_h is not null
+    then raise exception 'MATCH_NONPLAYED_HAS_SCORE' using errcode='22023'; end if;
   if v_h is not null and (v_homewins>v_h or v_awaywins>v_a or
      jsonb_array_length(v_sets)>v_h+v_a or
      (jsonb_array_length(v_sets)=v_h+v_a and (v_homewins<>v_h or v_awaywins<>v_a)))
@@ -133,6 +138,9 @@ declare
  v_patch jsonb;v_new_version integer;v_effective jsonb;
 begin
  v_actor:=private.cc_manager_require_v1('competition.matches','edit',null);
+ if p_expected_version is null or p_patch is null or jsonb_typeof(p_patch)<>'object'
+    or p_patch='{}'::jsonb
+ then raise exception 'MATCH_PATCH_INVALID' using errcode='22023'; end if;
  if coalesce(length(p_source_key),0)<1 or coalesce(length(p_source_key),0)>250
    or coalesce(length(p_season),0)<4 or coalesce(length(p_season),0)>20
    or p_expected_version<0
@@ -168,6 +176,7 @@ create or replace function public.cc_manager_competition_match_override_reset_v1
 declare v_actor uuid;v_base jsonb;v_old public.cc_competition_match_overrides_v1%rowtype;
 begin
  v_actor:=private.cc_manager_require_v1('competition.matches','edit',null);
+ if p_expected_version is null or p_expected_version<1 then raise exception 'MATCH_VERSION_CONFLICT' using errcode='40001'; end if;
  v_base:=private.cc_competition_match_source_v1(p_source_system,p_season,p_source_key);
  select * into v_old from public.cc_competition_match_overrides_v1
  where source_system=p_source_system and season=p_season and source_key=p_source_key for update;
