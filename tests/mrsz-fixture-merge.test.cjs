@@ -305,3 +305,37 @@ test('manual correction schema is source preserving, manager-gated and auditable
  assert.ok(!migration.includes('update public.competition_source_matches set'));
  assert.ok(!migration.includes('update public.cc_competition_mrsz_screenshot_v1 set'));
 });
+
+test('Admin match editor has a lazy, protected history read and a reversible audit trail',()=>{
+ const history=fs.readFileSync('sql/competition_manual_match_history_v1.sql','utf8');
+ assert.ok(history.includes("private.cc_manager_require_v1('competition.matches','edit',null)"));
+ assert.ok(history.includes("private.cc_competition_match_source_v1(p_source_system,p_season,p_source_key)"));
+ assert.ok(history.includes("a.source_system=p_source_system and a.season=p_season"));
+ assert.ok(history.includes('limit 30'));
+ assert.ok(history.includes('from public,anon,authenticated'));
+ assert.ok(js.includes('cc_manager_competition_match_override_history_v1'));
+ assert.ok(js.includes("$('#ccMHistory')?.addEventListener('toggle'"));
+ assert.ok(js.includes('ccSourceMatchHistoryHtml_(items)'));
+});
+test('Manual league match history safely escapes display names and edits',()=>{
+ const begin=js.indexOf('  function ccSourceMatchHistoryHtml_(');
+ const end=js.indexOf('  function ccOpenSourceMatchEditor_(',begin);
+ assert.ok(begin>0&&end>begin);
+ const escaping=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const runner=new Function('esc','ccMrszLocalKickoff_',js.slice(begin,end)+';return ccSourceMatchHistoryHtml_;')(
+   escaping,x=>({date:String(x||'').slice(0,10),time:String(x||'').slice(11,16)}));
+ const rendered=runner([{
+  action:'save',happenedAt:'2026-10-18T10:30:00Z',
+  actor:'<img src=x onerror=alert(1)>',
+  oldPatch:{venue:'Régi csarnok'},
+  newPatch:{venue:'<script>alert(1)</script>'}
+ }]);
+ assert.ok(rendered.includes('&lt;img'));
+ assert.ok(rendered.includes('&lt;script&gt;'));
+ assert.ok(!rendered.includes('<img'));
+ assert.ok(!rendered.includes('<script>'));
+ assert.ok(rendered.includes('Kézi módosítás'));
+ const restored=runner([{action:'reset',newPatch:{},oldPatch:{venue:'Valami'},actor:'Admin'}]);
+ assert.ok(restored.includes('Forrás visszaállítása'));
+ assert.ok(runner([]).includes('még nincs kézi módosítás'));
+});
