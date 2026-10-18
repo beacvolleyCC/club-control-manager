@@ -297,7 +297,7 @@ test('manual correction schema is source preserving, manager-gated and auditable
  const migration=fs.readFileSync('sql/competition_manual_match_overrides_v1.sql','utf8');
  assert.ok(migration.includes('public.cc_competition_match_overrides_v1'));
  assert.ok(migration.includes('public.cc_competition_match_override_audit_v1'));
- assert.ok(migration.includes("private.cc_manager_require_any_v1('competition.matches','edit')"));
+ assert.ok(migration.includes("private.cc_manager_require_v1('competition.matches','edit',null)"));
  assert.ok(migration.includes('MATCH_VERSION_CONFLICT'));
  assert.ok(migration.includes("patch='{}'::jsonb"));
  assert.ok(migration.includes('enable row level security'));
