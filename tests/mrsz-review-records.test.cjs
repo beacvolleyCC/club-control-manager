@@ -13,7 +13,7 @@ const fullTable={competitionLabel:league,partial:false,rows:[{teamName:'MTK kék
 const text=x=>String(x??'');
 const esc=x=>text(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const data={fixtures:[],matches:[],tables:[]};
-const context={text,esc,num:x=>Number(x)||0,msLogoHtml_:()=>'',ccMrszPhotoState_:data};
+const context={text,esc,num:x=>Number(x)||0,msLogoHtml_:()=>'',ccMrszPhotoState_:data,ccBrszEffectiveMatches_:[],canAnyAction:()=>false};
 vm.createContext(context);
 vm.runInContext(app.slice(start,end)+'\nthis.qa={html:ccMrszLeagueFixturePanelHtml_,scope:x=>{ccLeagueMatchScope_=x}};',context);
 const display=(matches,tables,fixtures=[])=>{
