@@ -54,7 +54,7 @@ test('Snapshot stats are wired to the existing league selector, not a second tab
  const from=app.indexOf('  function renderManagerStandings_()'),to=app.indexOf('  function msPositionDelta_(',from);
  const snippet=app.slice(from,to>from?to:from+8000);
  assert.ok(snippet.includes('ccLeagueContextSelectHtml_(group)'));
- assert.ok(snippet.includes('showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo,group,ccMrszPhotoState_.matches)'));
+ assert.ok(snippet.includes('showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo,group,ccMrszMergedLeagueMatches_(group))'));
  assert.ok(snippet.includes("ccMrszLeagueFixturePanelHtml_(group"));
  assert.ok(!snippet.includes('Legnagyobb feljövő'));
 });
