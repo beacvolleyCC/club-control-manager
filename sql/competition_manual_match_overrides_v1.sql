@@ -173,13 +173,16 @@ begin
  where source_system=p_source_system and season=p_season and source_key=p_source_key for update;
  if v_old.version is null or v_old.version<>p_expected_version
  then raise exception 'MATCH_VERSION_CONFLICT' using errcode='40001'; end if;
- delete from public.cc_competition_match_overrides_v1
+ -- Keep a versioned empty override tombstone: stale clients cannot resurrect old values.
+ update public.cc_competition_match_overrides_v1
+ set patch='{}'::jsonb,version=p_expected_version+1,updated_by=v_actor,updated_at=now()
  where source_system=p_source_system and season=p_season and source_key=p_source_key;
  insert into public.cc_competition_match_override_audit_v1
  (source_system,season,source_key,action,old_patch,new_patch,old_version,new_version,actor_manager_id)
- values(p_source_system,p_season,p_source_key,'reset',v_old.patch,null,p_expected_version,0,v_actor);
+ values(p_source_system,p_season,p_source_key,'reset',v_old.patch,'{}'::jsonb,
+ p_expected_version,p_expected_version+1,v_actor);
  return v_base||jsonb_build_object('_ccSourceSystem',p_source_system,'_ccSourceKey',p_source_key,
-  '_ccOverrideVersion',0,'_ccManualOverride',false);
+  '_ccOverrideVersion',p_expected_version+1,'_ccManualOverride',false);
 end;
 $function$;
 
@@ -189,7 +192,7 @@ select coalesce(jsonb_agg(
  s.data || coalesce(o.patch,'{}'::jsonb) ||
  jsonb_build_object('_ccSourceSystem','snapshot','_ccSourceKey',s.source_key,
   '_ccSourceKind',s.record_kind,'_ccOverrideVersion',coalesce(o.version,0),
-  '_ccManualOverride',o.version is not null)
+  '_ccManualOverride',coalesce(o.patch<>'{}'::jsonb,false))
  order by s.data->>'startsAt',s.source_key),'[]'::jsonb)
 from public.cc_competition_mrsz_screenshot_v1 s
 left join public.cc_competition_match_overrides_v1 o on
@@ -234,7 +237,7 @@ begin
    'setScores',coalesce(s.set_scores,'[]'::jsonb),'status',s.source_status,'sourceUrl',s.source_url)
   ||coalesce(o.patch,'{}'::jsonb)||
    jsonb_build_object('_ccSourceSystem','brsz','_ccSourceKey',s.source_match_key,
-   '_ccOverrideVersion',coalesce(o.version,0),'_ccManualOverride',o.version is not null)
+   '_ccOverrideVersion',coalesce(o.version,0),'_ccManualOverride',coalesce(o.patch<>'{}'::jsonb,false))
   order by s.starts_at,s.source_match_key),'[]'::jsonb) into v_rows
  from public.competition_source_matches s
  left join public.competition_source_team_maps m on
