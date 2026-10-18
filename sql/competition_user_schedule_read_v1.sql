@@ -77,6 +77,14 @@ select coalesce(jsonb_agg(
     '_ccManualOverride',coalesce(o.patch<>'{}'::jsonb,false),
     '_ccImportedDate','2026-10-18','_ccUserSupplied',true
   ) || coalesce(o.patch,'{}'::jsonb)
+    || private.cc_competition_match_arrangement_defaults_v1(
+      'user',s.season,s.source_key,s.starts_at,s.home_name,s.away_name,s.venue,
+      case s.league_key
+        when 'menA' then 'Férfi Budapest I. osztály – A csoport'
+        when 'menB' then 'Férfi Budapest I. osztály – B csoport'
+        when 'womenI' then 'Női Budapest I. osztály'
+        when 'womenIIA' then 'Női Budapest II. osztály – A csoport'
+        when 'womenIIB' then 'Női Budapest II. osztály – B csoport' end)
   order by s.match_date nulls last,s.starts_at nulls last,s.source_key
 ),'[]'::jsonb)
 from public.cc_competition_user_schedule_v1 s
