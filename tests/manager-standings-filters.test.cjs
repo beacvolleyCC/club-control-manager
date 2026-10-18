@@ -53,7 +53,7 @@ test('overview fetch updates itself when standings snapshot arrives',()=>{
 });
 test('standalone standings shows all teams after removing hidden filter and never invents alphabetic ranks',()=>{
  const view=slice('  function renderManagerStandings_(){','  function eventPlace(');
- assert.ok(view.includes('const selected=null;'));
+ assert.ok(view.includes('const selected=msSelectedRow_(rows);'), 'selected overview team reveals focused statistics while retaining the full league table');
  assert.ok(view.includes('const displayRows=rows;'));
  assert.ok(view.includes('!r.provisionalAlphabetical'));
  const other=slice('  function ccMrszMenGroupTableHtml_(){','  function ccMrszMenGroupSwitcherHtml_');
