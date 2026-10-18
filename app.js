@@ -593,11 +593,19 @@
         :(a,b)=>(num(a.position)||9999)-(num(b.position)||9999));
       return {rows,group,source:ccMrszCoverageLabel_(snapshot),snapshot,verified:true};
     }
-    const rows=standingsForContext_(id).filter(r=>{
+    const baseRows=standingsForContext_(id);
+    const ranked=baseRows.filter(r=>{
       const rank=Number(r.position),played=Number(r.played||0),points=Number(r.tablePoints||0);
       return Number.isFinite(rank)&&rank>0&&(played>0||points>0);
     });
-    return {rows,group,source:rows.length?'BRSZ · mentett állás · forrásdátum nem igazolt · nem élő adat':ccMrszCoverageLabel_(null),snapshot:null,verified:rows.length>0};
+    // Federation import can include team membership without a verified ranking.
+    // Show those teams, but never promote an alphabetical fallback to a league table.
+    const rows=ranked.length?ranked:baseRows.map(r=>({...r,position:null,played:null,
+      wins:null,losses:null,tablePoints:null,setsFor:null,setsAgainst:null,
+      pointsFor:null,pointsAgainst:null,_ccUnranked:true})).sort((a,b)=>text(a.teamName).localeCompare(text(b.teamName),'hu'));
+    return {rows,group,source:ranked.length?'BRSZ · mentett állás · forrásdátum nem igazolt · nem élő adat'
+      :rows.length?'BRSZ · mentett csapatlista · hiteles helyezés és mérleg nincs'
+      :ccMrszCoverageLabel_(null),snapshot:null,verified:ranked.length>0};
   }
   function standingsLogo_(r){const html=ccTeamLogoHtml_(r?.teamName,r?.logoUrl,'standing-logo-asset',text(r?.teamName).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()||'').join('')||'•');return html.replace(/^<img class="ms-team-logo standing-logo-asset"/,'<img class="standing-logo-img"').replace(/^<span class="ms-team-logo ms-monogram standing-logo-asset"/,'<span class="standing-logo-text"')}
   function standingsCard_(contextTeamId){
@@ -970,12 +978,19 @@
     if(li.key!==text(team.id)||(!li.loaded&&!li.loading))msEnsureInsights_();
     const loading=!externalSelection&&!showPhoto&&(li.key!==text(team.id)||li.loading||(!li.loaded&&!li.error));
     const d=li.key===text(team.id)?li.data:null;
-    const rows=showPhoto?ccStandingsPhotoTeamRows_(photo):externalSelection?[]:(d?msRows_().filter(r=>!r.provisionalAlphabetical&&Number(r.position)>0):[]);
+    const rawRows=showPhoto?ccStandingsPhotoTeamRows_(photo):externalSelection?[]:
+      (d?msRows_():standingsForContext_(team.id));
+    const hasRealRank=rawRows.some(r=>Number(r.position)>0&&
+      (Number(r.played)>0||Number(r.tablePoints)>0));
+    const rows=showPhoto||hasRealRank?rawRows:
+      rawRows.map(r=>({...r,position:null,played:null,wins:null,losses:null,
+        tablePoints:null,setsFor:null,setsAgainst:null,pointsFor:null,pointsAgainst:null,
+        _ccUnranked:true}));
     // The standings page has only a league picker; never apply a stale hidden
     // per-team selection to hide rows from the full competition table.
     const selected=msSelectedRow_(rows);
     const displayRows=rows;
-    const meta=showPhoto?[group,ccMrszCoverageLabel_(photo)].join(' · '):externalSelection?group:(d?[d.competitionLabel,d.source].filter(Boolean).join(' · '):'');
+    const meta=showPhoto?[group,ccMrszCoverageLabel_(photo)].join(' · '):externalSelection?group:!hasRealRank&&rows.length?'Mentett csapatlista · nincs hiteles tabellaállás':(d?[d.competitionLabel,d.source].filter(Boolean).join(' · '):'');
     const updated=showPhoto?null:rows.map(r=>safeDate(r?.updatedAt)).filter(Boolean).sort((a,b)=>b-a)[0];
     $('#viewContent').innerHTML=`<div class="page-intro ms-page-intro cc-page-header-panel"><div><h2>Tabella</h2><p>Bajnoki adatok · mérkőzések · statisztikák.</p></div><div class="page-actions cc-icon-toolbar"><button class="matrix-filter-toggle icon-only cc-toolbar-icon ${standingsFiltersOpen?'open':''}" id="standingsFiltersToggle" aria-expanded="${standingsFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button></div></div><div class="filter-panel ms-context-filter-panel" id="standingsFiltersPanel" ${standingsFiltersOpen?'':'hidden'}><div class="ms-context-controls">${ccLeagueContextSelectHtml_(group)}</div></div>${loading?`<article class="panel"><div class="ms-empty"><b>Tabella betöltése…</b><span>A bajnoki adatok és statisztikák frissítése folyamatban van.</span></div></article>`:(!externalSelection&&!showPhoto&&li.error)?`<article class="panel"><div class="ms-empty error"><b>A tabella most nem érhető el</b><span>${esc(li.error)}</span></div></article>`:!rows.length?`<article class="panel"><div class="ms-empty"><b>Még nincs tabellaadat</b><span>Jelenleg nincs megjeleníthető tabella. ${esc(ccMrszCoverageLabel_(null))}</span></div></article>`:`<article class="panel ms-standings-card"><div class="ms-title"><div><h3>${esc(showPhoto?group:team.name)}</h3><p>${esc(meta||'Bajnoki tabella')}${updated?` · Frissítve: ${esc(fmtDate(updated))} ${esc(fmtTime(updated))}`:''}</p></div></div><div class="ms-table-scroll"><table class="ms-table"><thead><tr><th>#</th><th class="team">Csapat</th><th>M</th><th>GY</th><th>V</th><th class="group-end">P</th><th>SZ</th><th>SZA</th><th>P</th><th>PA</th></tr></thead><tbody>${displayRows.map(r=>`<tr class="${r.focus?'focus':''}"><td><b>${esc(ccMrszStatPosition_(r.position,showPhoto?photo:null))}</b></td><td class="team"><button type="button" data-ms-team="${esc(r.sourceTeamId)}">${msLogoHtml_(r.sourceTeamId,r.teamName)}<strong>${esc(r.teamName)}</strong>${ccMrszRecordNoticeHtml_(r)}</button></td><td>${ccMrszStatNumber_(r.played)}</td><td>${ccMrszRecordNumber_(r,'wins')}</td><td>${ccMrszRecordNumber_(r,'losses')}</td><td class="group-end"><b>${ccMrszStatNumber_(r.tablePoints)}</b></td><td>${esc(ccMrszStatPair_(r.setsFor,r.setsAgainst))}</td><td >${esc(showPhoto?ccMrszStatRatio_(r.setsFor,r.setsAgainst):msRatio_(r.setRatio,r.setsFor,r.setsAgainst))}</td><td>${esc(ccMrszStatPair_(r.pointsFor,r.pointsAgainst))}</td><td >${esc(showPhoto?ccMrszStatRatio_(r.pointsFor,r.pointsAgainst):msRatio_(r.pointRatio,r.pointsFor,r.pointsAgainst))}</td></tr>`).join('')}</tbody></table></div></article>${showPhoto?'':msMatchesHtml_(rows,selected)}${showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo,group,ccMrszMergedLeagueMatches_(group)):selected?msTeamStatsHtml_(selected):msLeagueStatsHtml_(rows)}`}`;
     const standingsToggle=$('#standingsFiltersToggle'),standingsPanel=$('#standingsFiltersPanel');standingsToggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.standings',standingsPanel?.hidden!==true?false:true);standingsToggle.classList.toggle('open',open);standingsToggle.setAttribute('aria-expanded',String(open));if(standingsPanel)standingsPanel.hidden=!open;ccBlurPointerControl_(standingsToggle)});
