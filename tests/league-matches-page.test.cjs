@@ -108,7 +108,7 @@ test('protocol binds via multiple-element selector, not a single-element query',
 
 test('full standings never narrow to a hidden persisted player selection',()=>{
  const st=source.slice(source.indexOf('  function renderManagerStandings_()'),source.indexOf('  function eventPlace('));
- assert.ok(st.includes('const selected=null;'));
+ assert.ok(st.includes('const selected=msSelectedRow_(rows);'), 'clicked overview team row can focus statistics without hiding league rows');
  assert.ok(st.includes('const displayRows=rows;'));
  assert.ok(!st.includes('const selected=rows.length?msSelectedRow_'));
 });
