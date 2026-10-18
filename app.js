@@ -2537,7 +2537,7 @@
       +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span>'
       +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')+'</span>'
       +'<span class="cc-scoreboard-bottom"><span class="cc-scoreboard-location">'+esc(venue||'Helyszín nincs megadva')+'</span>'
-      +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source
+      +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source+(options.editHtml||'')
 
       +'</span></'+tag+'>';
   }
@@ -2903,11 +2903,12 @@
       +'<button type="button" data-league-match-scope="beac" aria-pressed="'+(scope==='beac')+'" class="'+(scope==='beac'?'active':'')+'">BEAC meccsek</button>'
       +'<button type="button" data-league-match-scope="all" aria-pressed="'+(scope==='all')+'" class="'+(scope==='all'?'active':'')+'">Összes bajnoki meccs</button></div>':'';
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    const items=visible.map(m=>'<div class="cc-league-manual-match">'+ccMatchScoreboardHtml_(m,{league:group,
+    const items=visible.map(m=>ccMatchScoreboardHtml_(m,{league:group,
       badge:'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
       meta:'',
-      past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today
-    })+ccMatchEditAction_(m)+'</div>').join('');
+      past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today,
+      editHtml:ccMatchEditAction_(m)
+    })).join('');
     const noTableNote='';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
     return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
