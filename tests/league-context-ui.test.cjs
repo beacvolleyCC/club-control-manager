@@ -53,7 +53,9 @@ test('Manager selection updates context and resets stale selected league team',(
  assert.equal(funcs.ccCurrentLeague_(women),women);
 });
 test('Manager protects missing league standings from unrelated canonical rows',()=>{
- assert.match(app,/const rows=showPhoto\?ccStandingsPhotoTeamRows_\(photo\):externalSelection\?\[\]:/);
+ assert.match(app,/const rawRows=showPhoto\?ccStandingsPhotoTeamRows_\(photo\):externalSelection\?\[\]:/);
+ assert.ok(app.includes('const hasRealRank='));
+ assert.ok(app.includes('_ccUnranked:true'), 'source-less standings must not invent ranking numbers');
  assert.match(app,/!externalSelection&&Array\.isArray\(msData_\(\)\?\.matches\)/);
  assert.match(app,/ccLeagueContextSelectHtml_\(group\)/);
 });

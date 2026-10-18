@@ -68,7 +68,7 @@ test('main standings render does not create a second table',()=>{
  const st=js.indexOf('  function renderManagerStandings_()');
  const end=js.indexOf('\n  function ',st+10);
  const render=js.slice(st,end);
- assert.ok(render.includes('const rows=showPhoto?ccStandingsPhotoTeamRows_'));
+ assert.ok(render.includes('const rawRows=showPhoto?ccStandingsPhotoTeamRows_'));
  assert.ok(!render.includes('ccMrszMainPhotoTableHtml_('));
  assert.ok(!render.includes('.outerHTML=html'));
  assert.ok(render.includes('ccMrszLeagueFixturePanelHtml_'));
@@ -87,9 +87,9 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261018-match-history-v53'));
- assert.ok(html.includes('app.js?v=20261018-match-history-v53'));
- assert.ok(sw.includes("cc-manager-20261018-match-history-v53"));
+ assert.ok(html.includes('styles.css?v=20261018-manager-ux-fixes-v54'));
+ assert.ok(html.includes('app.js?v=20261018-manager-ux-fixes-v54'));
+ assert.ok(sw.includes("cc-manager-20261018-manager-ux-fixes-v54"));
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{

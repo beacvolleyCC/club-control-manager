@@ -53,9 +53,9 @@ test('overview fetch updates itself when standings snapshot arrives',()=>{
 });
 test('standalone standings shows all teams after removing hidden filter and never invents alphabetic ranks',()=>{
  const view=slice('  function renderManagerStandings_(){','  function eventPlace(');
- assert.ok(view.includes('const selected=null;'));
+ assert.ok(view.includes('const selected=msSelectedRow_(rows);'), 'selected overview team reveals focused statistics while retaining the full league table');
  assert.ok(view.includes('const displayRows=rows;'));
- assert.ok(view.includes('!r.provisionalAlphabetical'));
+ assert.ok(view.includes('_ccUnranked:true'), 'unranked roster stays visible with no invented standings counters');
  const other=slice('  function ccMrszMenGroupTableHtml_(){','  function ccMrszMenGroupSwitcherHtml_');
  assert.ok(other.includes("Number(r.position)>0&&Number(r.played)>0"));
 });
@@ -73,7 +73,11 @@ test('snapshot choice shows actual known rows and discloses missing male B group
  vm.runInContext(functions+'\nthis.get=ccOverviewStandingsModel_;',ctx);
  assert.equal(ctx.get('10000000-0000-4000-8000-000000000003').rows.length,1);
  ctx.ccMrszMenGroup_='B';
- assert.equal(ctx.get('10000000-0000-4000-8000-000000000003').rows.length,0);
+ const fallback=ctx.get('10000000-0000-4000-8000-000000000003');
+ assert.equal(fallback.rows.length,1);
+ assert.equal(fallback.rows[0].position,null);
+ assert.equal(fallback.rows[0].played,null);
+ assert.match(fallback.source,/nincs/);
 });
 test('match screen binds one selected league table, preserves BEAC event details and overview A/B controls',()=>{
  const match=slice('  function renderCompetitionMatchCards_(){','  function renderEventList(');
