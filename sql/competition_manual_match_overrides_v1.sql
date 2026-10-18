@@ -249,6 +249,37 @@ begin
 end;
 $function$;
 
+
+-- Player may read effective league matches but never the overrides/audit tables directly.
+-- Reuse the existing signed-in active team-member gate before accessing source records.
+create or replace function public.cc_player_competition_source_matches_effective_v1()
+returns jsonb language plpgsql stable security definer set search_path='' as $function$
+declare v_dummy jsonb;v_rows jsonb;
+begin
+ v_dummy:=public.cc_player_competition_mrsz_snapshot_v1();
+ select coalesce(jsonb_agg(
+  jsonb_build_object('source',s.source,'season',s.season,'sourceMatchKey',s.source_match_key,
+   'competitionLabel',m.competition_label,'homeName',s.home_name,'awayName',s.away_name,
+   'startsAt',s.starts_at,'venue',s.venue,'homeSets',s.home_sets,'awaySets',s.away_sets,
+   'setScores',coalesce(s.set_scores,'[]'::jsonb),'status',s.source_status,'sourceUrl',s.source_url)
+  ||coalesce(o.patch,'{}'::jsonb)||
+   jsonb_build_object('_ccSourceSystem','brsz','_ccSourceKey',s.source_match_key,
+   '_ccOverrideVersion',coalesce(o.version,0),
+   '_ccManualOverride',coalesce(o.patch<>'{}'::jsonb,false))
+  order by s.starts_at,s.source_match_key),'[]'::jsonb) into v_rows
+ from public.competition_source_matches s
+ left join public.competition_source_team_maps m on
+  m.source=s.source and m.season=s.season and m.internal_team_id=s.internal_team_id and m.enabled=true
+ left join public.cc_competition_match_overrides_v1 o on
+  o.source_system='brsz' and o.season=s.season and o.source_key=s.source_match_key
+ where s.source='brsz';
+ return v_rows;
+end;
+$function$;
+revoke all on function public.cc_player_competition_source_matches_effective_v1()
+ from public, anon, authenticated;
+grant execute on function public.cc_player_competition_source_matches_effective_v1() to authenticated;
+
 revoke all on function public.cc_manager_competition_match_override_save_v1(text,text,text,jsonb,integer)
  from public, anon, authenticated;
 revoke all on function public.cc_manager_competition_match_override_reset_v1(text,text,text,integer)
