@@ -7,6 +7,21 @@
 
 > **KRITIKUS / EZT OLVASD EL ELŐSZÖR:** A felhasználó teljes 2026/27-es kiírásából **292 menetrendi meccs és 8 végeredmény (összesen 300 sor) már az éles Supabase külön forrástáblájában van**. A **Manager és Player megjelenítő kódja viszont még csak fejlesztési ágakon található, NINCS merge-elve a LIVE alkalmazásokba**. A meglévő csapateseményeket és játékosjelenléteket NEM szabad automatikusan módosítani. A felhasználó kifejezett kérése: **„a jelenlét ne változzon; ha valami más időpontra került, szólj”**. Player-értesítés NEM ment ki.
 
+## 0/A. 2026-10-19 – ellenőrzött BEAC meccs-áthelyezések (read-only)
+
+Az élő Supabase régi BRSZ-menetrendjét és a 300 soros új importját 2026. október 19-én csak olvasással összevetettük. Egy bajnokságon belüli, azonos irányú hazai–vendég párok egy-egy egyedi, biztos eltéréséből **kettő** van:
+
+- **Férfi I/B BEAC–PDSE:** 2026.10.12. 19:30 → **2026.10.19. 19:30**. Régi Player-esemény: `c7d5c6f3-7f05-41ce-9a03-c8a429002ccb`, **cancelled**, 9 jelenléti sor.
+- **Női II/B BEAC II.–UTE U-20 Pink:** 2026.10.13. 19:30 → **2026.10.20. 19:30**. Régi Player-esemény: `b99c5397-8b51-40d0-a03c-e399c011bd3e`, **cancelled**, 14 jelenléti sor.
+
+**A 23 jelenléti rekord változatlan**, és a két lemondott eseményt nem reaktiváltuk. A menetrend továbbra is külön importforrás; Player-re még nem szinkronizáltuk és játékosértesítés nem ment ki. A régi/új forrásokban továbbra is vannak anomáliák (BEAC–BEAC stb.), tehát a két eltérés nem tekinthető teljes rendszerbeli source-ID egyeztetésnek.
+
+Új dokumentáció a **Manager fejlesztési ágán**, a `main` kódjának megváltoztatása nélkül:
+- `docs/competition/VERIFIED_FIXTURE_CHANGES_20261019.md`
+- `sql/competition_user_schedule_diff_readonly_20261019.sql`
+
+A teljes meccsmentő RPC még nincs élesítve, és a Manager/Player fejlesztési ágakon a régi kézi javítások közelítő párosítása kiadási blokk. Ezt javítsd a release előtt, ne merge-eld vakon a két ágat.
+
 ## 1. Azonnali állapot – valóban LIVE vs. branch
 
 | Terület | Igazolt állapot |
