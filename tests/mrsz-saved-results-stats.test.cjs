@@ -80,7 +80,7 @@ test('Result list encodes untrusted opponent names and uses neutral result label
 });
 test('Full table stats and recorded results share the selected league and its saved match input',()=>{
  const standings=src.slice(src.indexOf('  function renderManagerStandings_()'),src.indexOf('  function msSetTeam_',src.indexOf('  function renderManagerStandings_()'))>0?src.indexOf('  function msSetTeam_',src.indexOf('  function renderManagerStandings_()')):undefined);
- assert.ok(standings.includes('showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo,group,ccMrszPhotoState_.matches)'));
+ assert.ok(standings.includes('showPhoto?ccVerifiedSnapshotStatsHtml_(rows,selected,photo,group,ccMrszMergedLeagueMatches_(group))'));
  assert.ok(!standings.includes('ccSavedLeagueResults_(row,group,ccMrszMergedLeagueMatches_'));
 });
 
