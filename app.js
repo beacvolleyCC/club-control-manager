@@ -2349,6 +2349,7 @@
 
   // Isolated Hunvolley screenshots: not the automatic BRSZ schedule or league source.
   let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[]};
+  let ccBrszEffectiveMatches_=[];
   // Snapshot-based league selection is independent from BEAC team permissions.
   // Empty value means follow the existing BEAC team context.
   let ccLeagueContextSelection_=(()=>{try{return text(localStorage.getItem('cc-manager-league-context-v1'))}catch(_){return''}})();
@@ -2386,9 +2387,10 @@
     if(ccMrszPhotoState_.loaded||ccMrszPhotoState_.loading)return;
     ccMrszPhotoState_.loading=true;
     try{
-      const data=await rpc('cc_manager_competition_mrsz_snapshot_v1');
+      const [data,sourceMatches]=await Promise.all([rpc('cc_manager_competition_mrsz_snapshot_v2'),rpc('cc_manager_competition_source_matches_effective_v1')]);
+      ccBrszEffectiveMatches_=Array.isArray(sourceMatches)?sourceMatches:[];
       ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[]};
-    }catch(err){ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
+    }catch(err){ccBrszEffectiveMatches_=[];ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
     else if(ccRouteIs_('competition','standings'))renderManagerStandings_();
     else if(ccRouteIs_('competition','overview'))renderOverview();
@@ -2637,11 +2639,22 @@
 
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
+    const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
+    const brsz=(ccBrszEffectiveMatches_||[]).filter(m=>text(m.competitionLabel)===group);
     const key=m=>ccMrszLocalKickoff_(m.startsAt).date+'|'+ccMrszNormPairName_(m.homeName)+'|'+ccMrszNormPairName_(m.awayName);
     const unique=new Map();
-    for(const m of (ccMrszPhotoState_.fixtures||[]).filter(x=>text(x.competitionLabel)===group))unique.set(key(m),{...m,isFixture:true});
-    for(const m of canonicalMatches)unique.set(key(m),{...m,isPhoto:false});
-    for(const m of photo)unique.set(key(m),m); // prefer uploaded score when same fixture
+    const take=(match,priority)=>{
+      const k=key(match),prior=unique.get(k);
+      const annotated={...match,__sourcePriority:priority};
+      // Explicit admin corrections win over unchanged snapshots even after a sync.
+      if(!prior||(!prior._ccManualOverride&&annotated._ccManualOverride)
+        ||(!!prior._ccManualOverride===!!annotated._ccManualOverride&&priority>=prior.__sourcePriority))
+        unique.set(k,annotated);
+    };
+    fixtures.forEach(m=>take(m,1));
+    canonicalMatches.forEach(m=>take(m,2));
+    brsz.forEach(m=>take(m,2));
+    photo.forEach(m=>take(m,3));
     const localSort=m=>{const t=ccMrszLocalKickoff_(m.startsAt);return t.date+'T'+t.time};
     return [...unique.values()].sort((a,b)=>localSort(a).localeCompare(localSort(b))||text(a.homeName).localeCompare(text(b.homeName),'hu'));
   }
@@ -2941,12 +2954,12 @@
       +'</select></label>';
   }
   function ccLeagueMatchesContextHtml_(){
-    const group=ccMatchesDefaultLeague_(),snapshot=ccMrszPhotoState_;
+    const group=ccCurrentLeague_(ccMatchesDefaultLeague_()),snapshot=ccMrszPhotoState_;
     if(!snapshot.loaded)return '<section class="cc-match-league-context"><article class="panel"><p class="ms-empty">Mentett bajnokságok betöltése…</p></article></section>';
     if(snapshot.error)return '<section class="cc-match-league-context"><article class="panel"><p class="ms-empty error">A bajnoki adatok nem tölthetők be: '+esc(snapshot.error)+'</p></article></section>';
     // No parallel league selector or standings table in Meccsek. League results
     // follow the selected BEAC team; the full table lives under Tabella.
-    return '<section class="cc-match-league-context">'+ccMrszLeagueFixturePanelHtml_(group)+'</section>';
+    return '<section class="cc-match-league-context"><div class="cc-matches-league-picker">'+ccLeagueContextSelectHtml_(group)+'</div>'+ccMrszLeagueFixturePanelHtml_(group)+'</section>';
   }
 
   function renderCompetitionMatchCards_(){if(!ccRouteIs_('competition','matches'))return;
@@ -2992,6 +3005,7 @@
       ccClearLeagueContext_();
       renderCompetitionMatchCards_();
     });
+    $('#ccLeagueContextSelect')?.addEventListener('change',event=>ccSetLeagueContext_(event.target.value));
     $('#ccMatchesOpenStandings')?.addEventListener('click',()=>{
       if(!canRoute('competition','standings'))return;
       const teamId=teamFilterIds_('events').length===1?teamFilterIds_('events')[0]:'';
