@@ -1,113 +1,131 @@
 # Club Control – HANDOVER_CURRENT
 
-**Dátum:** 2026-10-18 (Europe/Budapest)  
-**Folytatási kulcs:** `CC-FOLYTATÁS`  
-**Projekt:** BEAC Röplabda / Club Control / Manager és Player  
-**Munkastátusz:** jelenlegi Manager–Player LIVE; a két új kérés **még NINCS implementálva**.
+**Állapot:** 2026-10-19 (Europe/Budapest)  
+**Folytatási kulcs:** \`CC-FOLYTATÁS\`  
+**Projekt:** BEAC Röplabda / Club Control Manager és Player  
+**Aktuális munkafolyamat:** teljes 2026/27-es BRSZ meccskiírás importja, csapatesemény/logisztika, Player-megjelenítés és értesítés.
 
-## 0. Első feladat a folytatáskor – a felhasználó legutóbbi kérései
+> **KRITIKUS / EZT OLVASD EL ELŐSZÖR:** A felhasználó teljes 2026/27-es kiírásából **292 menetrendi meccs és 8 végeredmény (összesen 300 sor) már az éles Supabase külön forrástáblájában van**. A **Manager és Player megjelenítő kódja viszont még csak fejlesztési ágakon található, NINCS merge-elve a LIVE alkalmazásokba**. A meglévő csapateseményeket és játékosjelenléteket NEM szabad automatikusan módosítani. A felhasználó kifejezett kérése: **„a jelenlét ne változzon; ha valami más időpontra került, szólj”**. Player-értesítés NEM ment ki.
 
-### A) VISSZA A RÉGI EDZÉSKIÍRÓ FELÜLETHEZ (magas prioritás)
+## 1. Azonnali állapot – valóban LIVE vs. branch
 
-A felhasználó 2026-10-18-i üzenetében képernyőképet adott az általa **lényegesen jobbnak tartott régi felületről**. Ez a beszélgetéshez mellékelt kép; a kép nincs automatikusan a GitHub repóban.
+| Terület | Igazolt állapot |
+|---|---|
+| Manager főág | \`beacvolleyCC/club-control-manager\` \`main\`, utolsó alkalmazás-commit \`770b846a\` (PR #59: magyar dátum és tekerhető, 24 órás időválasztó), PWA cache \`20261018-hu-match-time-v55\` |
+| Player főág | \`beacvolleyCC/player_application\` \`main\`, utolsó alkalmazás-commit \`4bb9ec3e\` (PR #14: korábbi kézi javítások), PWA cache \`20261018-match-overrides-v20\` |
+| Aktuális Manager fejlesztés | \`feat/fixture-meeting-notes-20261018\` – a főág előtt **23 commit**; NINCS merge-elve |
+| Aktuális Player fejlesztés | \`feat/player-imported-202627-fixtures-20261018\` – a főág előtt **6 commit**; NINCS merge-elve |
+| Supabase projekt | \`snqsxlyhontaepembaic\` |
+| Importtábla | \`public.cc_competition_user_schedule_v1\` – **300 rekord**, már telepítve |
+| Importált tartalom | **292** \`fixture\`, **8** \`result\`, **5** \`postponed\` |
+| Logisztikai tábla | \`public.cc_competition_match_arrangements_v1\` – éles DB-ben létezik, **0 sor** |
+| Olvasó RPC-k | \`cc_manager_competition_user_schedule_v1()\`, \`cc_player_competition_user_schedule_v1()\` – éles DB-ben léteznek, authenticated: igen, anon: nem |
+| Külön logisztikai mentés | \`cc_manager_competition_match_arrangement_save_v1\` – éles DB-ben létezik |
+| Atomikus teljes mentés | \`cc_manager_competition_match_full_save_v1\` – **csak SQL fájl a fejlesztési ágon**, a DB-ben MÉG NEM létezik |
+| Meglévő kézi javítás | \`cc_competition_match_overrides_v1\`: **1 sor**, érintetlen |
+| Jelenlegi esemény / jelenlét | \`public.events\`: **277**, \`public.availability\`: **619**, az import során nem módosultak |
 
-A visszahozandó kezelési modell / látvány:
-- **Tömegsport → Edzések**, kiemelt, széles sárga `+ ÚJ EDZÉS LÉTREHOZÁSA` gomb.
-- A lista közelében, **oldalon belül megjelenő nagy, világos, kéthasábos űrlapkártya**, cím: `Új edzés létrehozása`. A referencia nem egy apró, szűk modal.
-- Mezők és sorrend: **Edzés típusa** (Tömegsport / a támogatott más típusok), **Dátum**, **Szint** (pl. Piros – Középhaladó), **Kezdés**, **Befejezés**, **Pálya**, **Teljes limit**, **Lemondási határidő (óra)**, **Edzés színe** (alapértelmezett és színjelölő), **Ismétlődés**; alul **Edzés létrehozása** és **Mégse**.
-- A screenshot példája: 2026. október 19., Középhaladó, 20:00–22:00, 2-es pálya, 24 fős limit, 6 óra lemondás, alapértelmezett szín, nincs ismétlődés – ezek **csak illusztratív értékek, nem új kötelező defaultok**.
-- Megtartandó: EU/HU dátum, **24 órás HH:mm**, hétfői hétkezdés ahol naptár van, mobilon értelmes töréspontok, edzésszint színei, visszajelzés, jogosultságok és az aktuális biztonságos mentési API.
-- A referenciaképen vannak apró, szürke magyarázó szövegek; a projekt korábbi UX-döntése szerint **ne hozzuk vissza az összes fölösleges kis szürke segédmagyarázatot**. Az újrahasznosítandó elem elsősorban a mezők áttekinthető elrendezése és a közvetlen, nagy űrlap.
-- **Kritikus:** ne állítsuk vissza a korábbi backend-validációkat, ha közben újabb, biztonságosabb mentési megoldás készült. Csak UX/felület + szükséges funkcionális paritás.
+**Fontos:** GitHub \`main\` és az éles GitHub Pages tényleges terjesztése nem ugyanaz; a Pages publikálás sikerét külön kell igazolni, mielőtt bármit a felhasználó felé „látható LIVE”-ként jelölnénk.
 
-Aktuális technikai hely (Manager `app.js`):
-- `renderMassTrainings()` kb. **1517. sor** – Tömegsport edzéslista és `#massTrainingAdd`.
-- `openMassEventEditor_(eventId)` kb. **1773. sor** – jelenlegi dialógusos Tömegsport editor, meDate/meStart/meEnd/meLevel/meCourt/meCapacity/meCancelHours/meSession/meColor/meRepeat; jelenleg `cc_manager_mass_event_save_safe_v2` (szerkesztés), `cc_manager_mass_event_save_v1` (új), `cc_manager_mass_event_series_create_v1` (ismétlődő) és kapcsolódó aktív/törlés RPC-k.
-- Másik, **külön** versenysport edzés-/meccs-editor: `ccEventFormHtml_` kb. 1027. sor, `openCompetitionEventEditor` kb. 1142. sor. Nem szabad véletlenül összekeverni a Tömegsport és Versenysport eseménytípusokat.
-- QA: új létrehozás, ismétlődés, szerkesztés, törlés/leállítás, résztvevőkkel és várólistával rendelkező meglévő események, időzóna és iOS HH:mm.
+## 2. Kiírás – összesen 5 csoport (2026/27)
 
-### B) AZ ÖSSZES BAJNOKI MECCS KÉZI SZERKESZTÉSE (magas prioritás)
+| Forráscsoport | Menetrendi meccs | Eredmény |
+|---|---:|---:|
+| \`menA\`: Férfi Budapest I/A | 40 | 2 |
+| \`menB\`: Férfi Budapest I/B | 41 | 1 |
+| \`womenI\`: Női Budapest I. | 126 | 5 |
+| \`womenIIA\`: Női Budapest II/A | 42 | 0 |
+| \`womenIIB\`: Női Budapest II/B | 43 | 0 |
+| **Összesen** | **292** | **8** |
 
-A felhasználó szó szerint: „a BEAC meccseket kéne tudnom szerkeszteni igazából az összes meccset kéne tudnom szerkeszteni manuálisan is ha úgy van”.
+Öt halasztás dátum nélkül; ne kapjanak kitalált kezdési időpontot. A **férfi B csoportba újonnan bekerült a Mozdulj SE**. Dátumértelmezés: 2026. október–december, 2027. január–május; Budapest 24 órás időzóna. A kiírást a felhasználó adta meg a beszélgetésben; újraszinkron előtt a BRSZ legfrissebb forrásával is egyeztetni kell.
 
-**Elvárt funkció:** a Manager **Versenysport → Meccsek**, illetve ahol a Tabella mérkőzései megjelennek, minden listázott mérkőzésnél jogosult admin számára legyen szerkesztési lehetőség:
-- **BEAC saját bajnoki találkozók** (nem csak belső eseményrekord),
-- **ellenfél–ellenfél** meccsek azokban a bajnokságokban/csoportokban, ahol a liga összes mérkőzését látjuk,
-- mentett és forrásból importált/kiolvasott mérkőzések, tervezett és lejátszott alkalmak.
-- Szükség esetén dátum, kezdés, hazai/vendég, csapatpárosítás, helyszín, eredmény, játszmaeredmények és állapot kézi módosítása; pontos végső mezők a meglévő adatmodell szerint.
-- Az eddig ismert **Kandó SC / Óbudai Egyetem–Kandó** csapatszinonimákat következetesen, azonosító alapon kell kezelni; kerülendő a csapatok hamis összevonása.
-- **Nem szabad** a hivatalos MRSZ/BRSZ-forrásadatot felülírni vagy a következő szinkronnal csendben elveszíteni a manuális javítást. Javasolt architektúra: hivatalos forrásérték + szerkeszthető **admin override**, forrásazonosítóval (`season / competition / source match code`), szerzővel, időbélyeggel, auditnaplóval, visszaállítási lehetőséggel. A javaslat nem implementációs döntés; a meglévő Supabase struktúrát előbb ellenőrizni kell.
-- Különböztesse meg a **hivatalos forrás szerinti** és a **kézzel korrigált** értéket; BEAC/Player megjelenítésből, tabellából és statisztikából egyetlen következetes, felülírásbiztos számítási út vezessen. A javítás ne generáljon kétszeres meccset, ne számoljon lejátsszottnak eredmény nélküli alkalmat.
-- Jogkör: `competition.matches` edit / megfelelő admin engedély; az összes liga meccseinek szerkesztése ne adjon jogosultságot véletlenül sportolói vagy más adatok szerkesztésére.
-- **Fontos meglévő funkció:** `openCompetitionEventEditor()` (Manager app.js ~1142) tudja kezelni a **belső competition event rekordokat**, a `cc_manager_competition_event_save_v1` RPC-vel. A bajnoki lista viszont részben külön MRSZ snapshot/szinkron-forrásból származik, tehát ez az editor **nem garantálja**, hogy tetszőleges külső meccs szerkeszthető.
-- Bajnoki UI kulcspontok: `ccMrszMergedLeagueMatches_` ~2638; `ccMrszLeagueFixturePanelHtml_` ~2708; `renderCompetitionMatchCards_` ~2952; forrásállapot `ccMrszPhotoState_`. Itt kell integrálni az új szerkesztési akciót és az írásból visszaolvasott, ellenőrzött eredményt.
-- QA-mátrix: BEAC meccs, BEAC nélküli bajnoki meccs, férfi A/B, női I és II csoportok; eredmény nélküli → eredményes és fordítva; szettek összege; forrás szinkron után is megmaradó manuális override; tabella / Player / Manager konzisztencia; megfelelő audit; visszaállítás; mobil.
+**Fájlok a Manager fejlesztési ágán:**
+- \`data/competition/2026-27/men-a-fixtures.psv\`
+- \`data/competition/2026-27/men-b-fixtures.psv\`
+- \`data/competition/2026-27/women-i-fixtures.psv\`
+- \`data/competition/2026-27/women-ii-a-fixtures.psv\`
+- \`data/competition/2026-27/women-ii-b-fixtures.psv\`
+- \`data/competition/2026-27/verified-results.psv\`
+- \`sql/competition_user_schedule_import_20261018.sql\` (éles DB-ben **alkalmazva**)
+- \`sql/competition_user_schedule_read_v1.sql\` (érintett DB-funkciók már léteznek)
+- \`sql/competition_match_arrangements_v1.sql\` (érintett tábla / mentő függvény már létezik)
+- \`sql/competition_match_full_save_v1.sql\` (**még nem alkalmazott** SQL)
+- \`docs/competition/FIXTURE_IMPORT_HANDOFF_20261018.md\`
 
-**A két funkciót a felhasználó még csak kérte, nem lett kifejlesztve; ennek megvalósításával kell legközelebb kezdeni.**
+A hivatalos eredeti táblákat (\`competition_source_matches\`, \`cc_competition_mrsz_screenshot_v1\`) és a korábbi módosításokat nem töröltük / nem írtuk felül. A teljes import jelenleg **forrásadat**, nem kész, minden felületen szinkronizált csapatesemény.
 
-## 1. LIVE rendszer – ellenőrzött GitHub-állapot
+## 3. Kiemelt konfliktus – BEAC II. – UTE U-20 Pink
 
-| Komponens | GitHub repo | main commit | LIVE |
-|---|---|---|---|
-| Manager | `beacvolleyCC/club-control-manager` | `2b7ec0a7ce4ebdb561d217e06afc138cb7d391dd` (PR #53) | GitHub Pages build+deploy sikeres |
-| Player | `beacvolleyCC/player_application` | `fbe879b1506ab42bd086cceb06d4acda9499b4ae` (PR #12) | GitHub Pages build+deploy sikeres |
+- A korábbi pillanatkép eredetileg **2026. 10. 13. 19:30** (Budapest).
+- Egy korábbi felhasználói kézi javítás a \`cc_competition_match_overrides_v1\` táblában \`source_system='snapshot'\`, \`source_key='20261001:fixture:1'\` alatt: **2026. 10. 20. 19:30** (UTC-ben \`2026-10-20T17:30:00.000Z\`).
+- A felhasználótól kapott új női II/B kiírás is **2026. 10. 20. 19:30**-at tartalmaz.
+- A hozzá tartozó **Player csapatesemény még régi és lemondott**: \`events.id='b99c5397-8b51-40d0-a03c-e399c011bd3e'\`, \`team_id='10000000-0000-4000-8000-000000000002'\`, \`status='cancelled'\`, kezdés **2026. 10. 13. 19:30**, találkozási mezők nullák.
+- **TILOS** automatikusan reaktiválni a lemondott eseményt, átírni a jelenléti rekordokat vagy úgy tenni, mintha a Player már értesítést kapott volna. Előbb kifejezett egyeztetés / biztonságos eseménykapcsolás kell.
 
-A fenti commitok a handover előtti **alkalmazásverziók**; a handover önmagában dokumentációs commitot tesz majd a Manager main-re.
+### Más lehetséges időpontütközések
 
-### Player, 2026-10-18: #12 már LIVE
+Egy **egyszerű név+párosítás alapú** összevetés kilenc eltérést is mutatott (például férfi B: BEAC–PDSE október 12. → 19.; Semmelweis–BEAC november 24. vs. október 27.; női I: Semmelweis–BEAC október 27. vs. november 24.; női II/B: BEAC II–UTE október 13. → 20.). **A puszta névpár nem elegendő azonosítónak:** a visszavágók és korábbi importváltozatok hamis áthelyezéseket eredményezhetnek. Kötelező új összehasonlítás stabil forrásazonosító, idény/csoport, hazai/vendég páros és mérkőzésforduló alapján; a valóban áthelyezett BEAC-meccseket jelenteni kell a felhasználónak. A jelenlétet közben változatlanul kell hagyni.
 
-A `Tabella → Statisztikák` panelek sorrendje: **Áttekintés → Csapatok → Játékosok → Összehasonlítás**. A **Játékosok** fül visszakerült, csapatszűrővel, mobilon görgethető táblával és MRSZ-játékosprofil-linkkel.
+## 4. Logisztikai / Player megjelenítési követelmények
 
-A mutatók: `Nevezés`, `Győzelem`, `Vereség`, `Kezdő` (`K`), `Csere` (`CS`), `Jelölés nélkül`. A W/L a nevezett játékos **csapatának** mérlege az adott mentett jegyzőkönyvekben. A `CS` nem bizonyít tényleges pályára lépést, és a `jelölés nélkül` **nem** jelent automatikusan `nem játszott` státuszt. Azonosítóütközés és csapatoldal keveredése ellen tesztelt. Cache-busted PWA `20261018-player-wl-v18`, a Player QA/Pages sikeres.
+A bajnoki mérkőzés szerkesztőjében lehessen:
+- kezdést, pályát/helyszínt és eredményt módosítani;
+- külön **találkozási időt** és **találkozási helyet** megadni;
+- **opcionális Player-megjegyzést** felvenni, amely csak akkor látszik a Playerben, ha ténylegesen nem üres;
+- egy majdani **explicit, jogosultságkezelt értesítésküldést** indítani még le nem játszott és módosított BEAC-meccs esetén.
 
-### Manager, jelenleg LIVE
+**Alapértékek:**
+- BEAC **hazai** találkozó: **18:30** (ha a meccskezdés ezt megelőzi, kérjen külön ellenőrzést).
+- BEAC **idegenbeli** találkozó: **60 perccel a meccskezdés előtt**.
+- Női BB2 hazai: **2-es pálya**; Női BB1 és férfiak hazai: **3-as pálya**.
+- A BRSZ által közölt helyszín (pl. \`Bogdánfy u.10/B.\` vagy \`Bogdánfy u.12.\`) maradjon külön a BEAC-csapat találkozási helyétől; ne írjuk felül automatikusan az eltérő utcacímet.
+- Minden találkozási mező manuálisan felülírható.
+- Dátum **magyar**, idő **24 órás, tekerhető óra+perc** (a Manager főágban PR #59 / v55 már javította a liga meccsszerkesztőjének óraválasztóját).
 
-Versenysport → Meccsek / Tabella: 2026/27-es MRSZ/BRSZ adatforrások, meccslisták, csoportok, eredmények, részleges jegyzőkönyvek, csapatstatisztikák és figyelmeztetések. Tömegsport szervezés, részvétel/jelenlét, bérletek, várólista a meglévő Manager folyamatokkal. **Az összes, forrásból listázott meccs kézi szerkesztése még NINCS kész.**
+**Állapot a fejlesztési ágakon:** a Manager belső csapatesemény-űrlapján néhány alapérték és a liga-összeolvasó megvan; az új \`arrangements\` tábla és az alapértékek olvasása backend oldalon elkészült. A **liga meccsszerkesztője még nem lett teljesen rákapcsolva** a logisztikai mezők atomikus mentésére. A Player új meccskártyáiban már van találkozó-/megjegyzés megjelenítő kód a Player fejlesztési ágán, **de nincs még élesítve**. Player-értesítés nincs implementálva ebben a körben.
 
-## 2. Történeti MRSZ kutatás: a kód és az adat a Managerben van, de még NEM LIVE számítás
+## 5. Azonosítás és csapatnevek
 
-2024/25 női Budapest I. (`p_evad_kod=2024`, `p_verseny_al_kod=72`):
-- **13 csapat**, 157 forrásmeccskód, **155 eredménnyel szereplő**, 2 eredmény nélküli (ebből egy duplikált párosítás).
-- BEAC: 5. hely, **13–11**, **24/24** kiolvasható BEAC-jegyzőkönyv, **16** különböző hivatalos játékoskód, **280** nevezési sor.
+- Taksony / BTDSE / BDTSE / Bóczik–Brózik Tibor-féle elnevezés: **egy csapat egy adott bajnokságon belül**, de eltérő női/férfi BRSZ csapatazonosítókat **ne olvasszunk össze** (férfi A: \`831\`, női II/A: \`899\`).
+- Kandó / Óbudai Egyetem-Kandó SC: azonos klubnév-változat megfelelő csoportban; férfi A BRSZ ID \`44\`, női I ID \`1159\`.
+- PDSE a férfi B-ben BRSZ ID-k \`1214\` és \`1091\` alatt is előfordul – forrásazonosságot ellenőrizni kell.
+- **MAFC-Schönherz != MAFC-Vásárhelyi != MAFC-Kármán != MAFC-BME != MAFC-ÉPK**; ezeket TILOS névhasonlósággal összevonni.
+- Hosszú nevek Player-megjelenítésben rövidíthetők (pl. Semmelweis, Dág, BTDSE), de az eredeti forrásnév és azonosító maradjon érintetlen.
+- Női I forráslistában szerepel **2026. 11. 10., BEAC–BEAC**. Ezt hibagyanús sorral / manuális ellenőrzéssel kell kezelni, nem automatikusan létrehozni egy valódi BEAC–BEAC meccset.
 
-2025/26 női Budapest I. (`p_evad_kod=2025`, `p_verseny_al_kod=93`):
-- **12 csapat**, 132 forrásmeccskód, **129 eredménnyel szereplő**, 3 eredmény nélküli.
-- BEAC: 1. hely, **20–2**, **22/22** kiolvasható BEAC-jegyzőkönyv, **15** különböző MRSZ-kód, **225** nevezési sor.
-- A rugalmas parser hét korábbi hiányos jegyzőkönyvi játékoslistát helyreállított; **128/129** eredményes bajnoki mérkőzéshez van valamilyen igazolt játékosnévsor, egy ténylegesen üres: MRSZ `4071`. A `2443` jegyzőkönyvi eredménye továbbra is üres, az MRSZ bajnoki listában van eredmény.
-- A két BEAC idényben **5 azonos, névben is egyező MRSZ-játékoskód:** `21243` Kovács Nóra, `23656` Papp Laura Dorottya, `27101` Uhri Sára, `32910` Iglói Nóra, `37523` Szalontai Rebeka.
-- Összesen **284 eredménnyel szereplő hivatalos találkozó** a két évadból.
+## 6. Jelenlegi technikai kockázatok / QA-gátak
 
-A Manager `data/competition-history/` és `scripts/history/` fájlokban vannak a forráshivatkozásos eredménylisták, játékosjegyzőkönyvek, parser és tesztek. A legfrissebb részletes riport: `docs/statistics/MRSZ_HISTORY_WOMEN1_STAGE10_2026-10-17.md`.
+1. A két fejlesztési ág **nem merge-elhető vakon**. A Manager \`ccMrszMergedLeagueMatches_\` és a Player \`ccMrszPlayerAllLeagueMatches_\` egyesítője a korábbi kézi snapshot-javításokat **közelítő (csapatnév + időablak)** illesztéssel keresi. Ez félrepárosíthat visszavágókat; stabil azonosítós egyeztetést kell készíteni.
+2. A teljes kiírást **ne alakítsuk át automatikusan meglévő \`events\` rekordokká**; az RSVP/jelenléti adatokat, várólistát, lemondásokat, lejátszott meccseket meg kell őrizni. Egyes BEAC-rekordokhoz már van csapatesemény.
+3. Az \`cc_manager_competition_match_full_save_v1\` SQL **még nem telepített**; előbb jogosultságok, atomikus mentés, validáció, rollback, mentés–visszaolvasás–visszaállítás teszt.
+4. A megjelenítőket, statisztikákat és a tabellákat egységes **effective match** adatokkal kell hajtani, és ki kell szűrni az ismétlődő menetrendi / eredmény rekordokat; a hiányzó hiteles tabella helyezése nem pótolható kitalált adatokkal.
+5. A Player fejlesztési ágán a PWA cache verziót és regressziós teszteket újra kell igazítani a merge előtt. Mobil QA: PWA cache, 24h, iOS, menetrend, csak nem üres megjegyzés, találkozási idő/HU, eseményből deep link.
+6. Felhasználói változásértesítés: **külön engedélyezett/szándékos** művelet, csak még le nem játszott meccsnél; címzett az érintett csapat játékosai. Ugyanazon változást ne küldje ki többször; ne állítsa, hogy elküldte, amíg tényleges kimenet nincs.
+7. Még nem készült kész, kivétel nélkül ellenőrzött **előző vs. új kiírás változáslista**, ezt a felhasználó külön kérte.
+8. Felület és adatbázis jogok: globális \`competition.matches\` edit kell a bajnoki kézi szerkesztéshez; Player csak olvashatja az érintett csapatlogisztikát. A BRSZ eredeti import/snapshot/audit közvetlen módosítását ne engedjük.
+9. A fejlesztési ágak és \`main\` csak akkor mozgathatók együtt, ha minden CI, DB-adatvédelem és Player/Manager integráció ellenőrzött.
 
-**Nem történt történeti adatok importálása az éles Supabase-be, és a többidényes erősorrend / Elo-szerű modell / meccsesély / keretmegtartási arány NINCS élesítve.** A tényleges játszott szetteket és egyéni eredményességet a K/CS jelölések alapján nem szabad kitalálni.
+## 7. Folytatás ajánlott sorrendben
 
-## 3. Aktuális LIVE adattartalom és fontos korlátok
+1. Vizsgálni a még hibás vagy összevonandó meccsazonosítókat: **PDSE két BRSZ ID**, Taksony aliasok, visszavágók, \`BEAC–BEAC\`, új \`Mozdulj SE\`, lemondott BEAC II–UTE, és a 8 eredmény egyeztetése.
+2. Készíteni **biztos időpontváltozás-jelentést** a régi és az új, egyértelműen egyeztetett BEAC-meccsekre; **jelenteni a felhasználónak**, jelenlétet nem írni át.
+3. Befejezni a Manager \`ccOpenSourceMatchEditor_\` találkozó és megjegyzés mezőit; atomikus RPC telepítése és tesztje.
+4. Egyeztetni a bajnoki fixture ↔ belső \`events\` kapcsolatot; lemondott eseményt csak külön, tudatos adminművelettel aktiválni; jelenlét változatlan.
+5. Player és Manager listák adatainak, rövid neveknek, ütközéseknek, talalkozónak, üres/nem üres megjegyzésnek és statisztikáknak részletes QA-ja.
+6. Értesítési lehetőség kialakítása, explicit admin-küldés és állapotkövetés.
+7. PWA cache-bump, rollback ágak, CI, közös Player + Manager release; valódi Pages megjelenítés visszaigazolása.
 
-- Éles Supabase projekt: `snqsxlyhontaepembaic`.
-- A legutóbbi **csak olvasó** ellenőrzéskor a `competition_source_matches`, `competition_source_standings_history` és `cc_competition_mrsz_screenshot_v1` adatai a **2026/27-es** idényhez tartoztak, nem a 2024/25–2025/26 kutatási évadokhoz.
-- Nem szabad a kutatási JSON fájlokat az MRSZ éles, pillanatképes adataival összemosni; külön adatforrásként, forrásazonosítóval kezelendők.
-- MRSZ/BRSZ szinkron közben több meccsen hiányos hivatalos forrás, eltérő elnevezés vagy duplikált csapatnév fordulhat elő. Különösen a Kandó / Óbudai Egyetem–Kandó és MTK névváltozataival óvatosan.
-- A tabella és a mérkőzéslista nem szabad hogy elszinkronizálódjon a Player és a Manager között a tervezett kézi szerkesztés miatt.
-- Minden admin írás: jogosultságellenőrzés, auditálható változás, mentés-visszaolvasás, QA, csak sikeres CI után PR merge/deploy.
-- Felületi preferenciák: Onest, visszafogott fekete/fehér + BEAC arany akcentus; **ne töltsük tele az új paneleket apró szürke magyarázó címkékkel**. EU 24h; hétfői hétkezdés; mobil/iOS ellenőrzés.
+## 8. Előzmények és további fejlesztések
 
-## 4. Megvalósítási sorrend és elfogadási kritériumok
+A korábbi részletes handover (régi, jobbnak tartott Tömegsport edzéskiíró UX visszahozása; minden bajnoki meccs kézi szerkesztése, régebbi UI/működés) itt archiválva:  
+\`docs/handovers/HANDOVER_PREVIOUS_2026-10-18.md\`.
 
-**1. Tömegsport edzéskiírás UX visszaállítása:**
-- A mellékelt régi screenshot alapján oldalon belüli kétoszlopos szerkesztő és sárga fő CTA.
-- A meglévő Tömegsport mezők, típusok, szintek, pályák, alapértékek és ismétlődési logika működjenek.
-- Új / módosítás / ismétlés / jogosultság / betelt-várólistás / meglévő foglalásos edzések ne sérüljenek.
-- Manager GitHub PR + UI QA + sikeres Pages deploy.
+Ne veszítsük el a régi felületre vonatkozó igényt. Fontos korábbi PR-ek:
+- Manager PR #56: bajnoki forráskorrekció, jogosultság, audit
+- Manager PR #57: meccsmódosítási előzmények
+- Manager PR #58: szerkesztőgombok, Áttekintés csapatok, Díjak/Bérletek kereső, desktop szűrők
+- Manager PR #59: HU dátum és tekerhető 24 órás időválasztó
+- Player PR #14: forráskorrekciók Player-oldali olvasása
 
-**2. Teljes bajnoki meccslista admin szerkesztése:**
-- Source rekord és belső event rekord kapcsolatát feltérképezni.
-- Admin-only edit minden látható bajnoki mérkőzésen, beleértve a BEAC nélküli csoportokat.
-- Forrásmegőrző kézi módosítási adatmodell (override) + audit + visszaállítás, duplikációvédelem, következő szinkron túlélése.
-- Manager és Player egységes eredményhasználata; hiteles eredmény- és szettvalidáció; jogosultságok; regresszió és deploy.
-- Mindkét részfunkció elkészültét valóban ellenőrizni; ne csak UI gombot tegyünk ki.
-
-**3. Ezután** 2024/25 további **131 nem BEAC-os eredményes jegyzőkönyvének** feldolgozása; többidényes csapatazonosságok, backtestelt statisztikai modell, csak megalapozott játékosstatisztika.
-
-## 5. Handover működési szabály
-
-A következő beszélgetés indítása: **`CC-FOLYTATÁS`**. Először a Manager `HANDOVER_CURRENT.md` fájlját és a két aktuális `main` állapotot olvasd vissza; a felhasználót ne kérd ismét a már megadott képernyőkép vagy követelmények szóbeli megismétlésére. Az első konkrét fejlesztés a régi edzéskiíró felület; közvetlenül utána az összes bajnoki meccs kézi szerkesztése. A kérés nem jelent automatikus, jóváhagyás nélküli éles adatátírást.
+**Folytatás indítása:** \`CC-FOLYTATÁS\` – nyisd meg a Manager \`HANDOVER_CURRENT.md\` fájlt, a két fenti fejlesztési ágat és az éles Supabase projektet. **Ne kérd újra az egész meccskiírást**: mind az öt TSV/PSV forrásfájl és a nyolc eredmény ott van a Manager fejlesztési ágán.
