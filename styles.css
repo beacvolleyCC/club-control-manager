@@ -6860,3 +6860,25 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 .cc-league-manual-edit:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 .cc-mrsz-review-fixtures .cc-league-manual-edit{display:inline-block;margin:5px 0 1px 10px}
 @media(max-width:580px){.cc-league-manual-edit{padding:8px 9px;margin-right:6px}}
+
+/* Manual league match audit — narrow phones and desktop dialogs. */
+.cc-source-history{margin-top:12px;border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}
+.cc-source-history>summary{font-size:12px;font-weight:700;cursor:pointer;list-style-position:inside;padding:12px}
+.cc-source-history>summary:focus-visible{outline:2px solid currentColor;outline-offset:-3px}
+.cc-source-history[open]>summary{border-bottom:1px solid var(--line)}
+.cc-source-history-body{padding:11px;max-height:280px;overflow-y:auto;overscroll-behavior:contain}
+.cc-source-history-empty{margin:0;font-size:12px;color:var(--muted)}
+.cc-source-history-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.cc-source-history-list>li{border:1px solid var(--line);border-radius:9px;padding:10px;display:grid;gap:8px;min-width:0}
+.cc-source-history-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+.cc-source-history-head>b{font-size:12px}
+.cc-source-history-head>small{font-size:11px;color:var(--muted)}
+.cc-source-history-fields{display:grid;gap:5px;font-size:11px}
+.cc-source-history-fields>div{display:grid;grid-template-columns:minmax(70px,95px) minmax(0,1fr);gap:9px}
+.cc-source-history-fields>div>span:last-child{overflow-wrap:anywhere}
+@media(max-width:580px){
+ #ccSourceMatchForm .dialog-action-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ #ccSourceMatchForm .dialog-action-row .button{min-width:0;white-space:normal;min-height:42px}
+ #ccSourceMatchForm #ccMSave{grid-column:1/-1}
+ .cc-source-history-body{padding:8px}
+}
