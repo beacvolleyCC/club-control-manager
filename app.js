@@ -3032,6 +3032,7 @@
 
   // The match page and the standalone standings page use one selected
   // federation competition, without altering the internal BEAC event filters.
+  let ccMatchesSelectedGroup_='';
   function ccMatchesDefaultLeague_(){
     const selected=teamFilterIds_('events');
     const teamId=selected.length===1?text(selected[0]):text(state.managerStandingsContext||'');
@@ -3049,7 +3050,7 @@
       +'</select></label>';
   }
   function ccLeagueMatchesContextHtml_(){
-    const group=ccCurrentLeague_(ccMatchesDefaultLeague_()),snapshot=ccMrszPhotoState_;
+    const group=ccMatchesSelectedGroup_||ccMatchesDefaultLeague_(),snapshot=ccMrszPhotoState_;
     if(!snapshot.loaded)return '<section class="cc-match-league-context"><article class="panel"><p class="ms-empty">Mentett bajnokságok betöltése…</p></article></section>';
     if(snapshot.error)return '<section class="cc-match-league-context"><article class="panel"><p class="ms-empty error">A bajnoki adatok nem tölthetők be: '+esc(snapshot.error)+'</p></article></section>';
     // No parallel league selector or standings table in Meccsek. League results
@@ -3097,10 +3098,10 @@
       const teamId=text(event.target.value);
       state.teamFilters.events=teamId?[teamId]:[];
       ccLeagueMatchScope_=teamId==='10000000-0000-4000-8000-000000000003'&&ccMrszMenGroup_==='A'?'all':'beac';
-      ccClearLeagueContext_();
+      ccClearLeagueContext_();ccMatchesSelectedGroup_='';
       renderCompetitionMatchCards_();
     });
-    $('#ccLeagueContextSelect')?.addEventListener('change',event=>ccSetLeagueContext_(event.target.value));
+    $('#ccLeagueContextSelect')?.addEventListener('change',event=>{ccMatchesSelectedGroup_=text(event.target.value);ccLeagueMatchScope_='all';renderCompetitionMatchCards_()});
     $('#ccMatchesOpenStandings')?.addEventListener('click',()=>{
       if(!canRoute('competition','standings'))return;
       const teamId=teamFilterIds_('events').length===1?teamFilterIds_('events')[0]:'';
