@@ -2735,7 +2735,7 @@
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
-    const brsz=(ccBrszEffectiveMatches_||[]).filter(m=>text(m.competitionLabel)===group);
+    const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
     const key=m=>ccMrszLocalKickoff_(m._ccOriginalStartsAt||m.startsAt).date+'|'+ccMrszNormPairName_(m._ccOriginalHomeName||m.homeName)+'|'+ccMrszNormPairName_(m._ccOriginalAwayName||m.awayName);
     const unique=new Map();
     const take=(match,priority)=>{
