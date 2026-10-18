@@ -1040,7 +1040,7 @@
   function ccMatchKindFromEvent_(e){const raw=text(e?.matchKind||e?.match_kind||e?.metadata?.matchKind||e?.meta?.matchKind).toLowerCase();return raw==='friendly'?'friendly':'official'}
   function ccSyncMatchKindUi_(){const kind=text($('#ceMatchKind')?.value)||'official',wrap=$('#ceEndWrap');if(wrap)wrap.hidden=kind!=='friendly';if(kind!=='friendly'&&$('#ceEnd'))$('#ceEnd').value=''}
   function ccEventFormHtml_(e,kind){
-    const editing=!!e,s=editing?eventStart(e):new Date(),en=editing?eventEnd(e):new Date(s.getTime()+2*3600000),teamId=editing?eventTeamId(e):(teamFilterIds_('events')[0]||state.eventTeam||state.selectedTeam||state.teams[0]?.id||''),isMatch=kind==='match',matchKind=isMatch?ccMatchKindFromEvent_(e):'',baseTeam=teamById(teamId),baseDefaults=ccTeamBaseDefaults_(teamId),defaultCourt=!editing&&!isMatch?(baseDefaults?.defaultCourt||baseTeam?.defaultCourt||'').replace(/\. pálya$/,''):'',defaultVenue=!editing&&!isMatch?'BEAC csarnok':'',defaultAddress=!editing&&!isMatch?'1117 Budapest, Bogdánfy u. 10/B.':'';
+    const editing=!!e,s=editing?eventStart(e):new Date(),en=editing?eventEnd(e):new Date(s.getTime()+2*3600000),teamId=editing?eventTeamId(e):(teamFilterIds_('events')[0]||state.eventTeam||state.selectedTeam||state.teams[0]?.id||''),isMatch=kind==='match',matchKind=isMatch?ccMatchKindFromEvent_(e):'',baseTeam=teamById(teamId),baseDefaults=ccTeamBaseDefaults_(teamId),defaultCourt=!editing&&!isMatch?(baseDefaults?.defaultCourt||baseTeam?.defaultCourt||'').replace(/\. pálya$/,''):!editing&&isMatch?(text(teamId)==='10000000-0000-4000-8000-000000000002'?'2':'3'):'',defaultVenue=!editing?'BEAC csarnok':'',defaultAddress=!editing&&!isMatch?'1117 Budapest, Bogdánfy u. 10/B.':'';
     return `<form id="competitionEventForm" class="action-form"><div class="action-form-grid">${isMatch?`<label class="field"><span>Meccstípus</span><select id="ceMatchKind"><option value="official" ${matchKind==='official'?'selected':''}>Sima meccs</option><option value="friendly" ${matchKind==='friendly'?'selected':''}>Edzőmeccs</option></select></label>`:''}<label class="field"><span>Csapat</span><select id="ceTeam" required>${ccEventFormTeamOptions_(teamId,kind)}</select></label><label class="field ${isMatch?'span-2':''}"><span>${isMatch?'Meccs neve / ellenfél':'Megnevezés'}</span><input id="ceTitle" maxlength="160" value="${esc(editing?(e.title||''):(isMatch?'Meccs':'Edzés'))}" required></label><label class="field"><span>Dátum</span><input id="ceDate" type="date" value="${esc(ccDateInputValue_(s))}" required></label>${ccTimeField_('ceStart','Kezdés',ccTimeInputValue_(s),{required:true})}${ccTimeField_('ceEnd','Befejezés',ccTimeInputValue_(en),{wrapId:'ceEndWrap'})}<label class="field"><span>Pálya</span><input id="ceCourt" value="${esc(editing?e.court:defaultCourt)}"></label><label class="field"><span>Helyszín</span><input id="ceVenue" value="${esc(editing?e.venue:defaultVenue)}"></label><label class="field span-2"><span>Cím</span><input id="ceAddress" value="${esc(editing?e.address:defaultAddress)}"></label>${isMatch?`<label class="field"><span>Hazai / idegen</span><select id="ceHomeAway"><option value="">–</option><option value="home" ${text(e?.homeAway||e?.home_away)==='home'?'selected':''}>Hazai</option><option value="away" ${text(e?.homeAway||e?.home_away)==='away'?'selected':''}>Idegen</option></select></label>${ccTimeField_('ceMeetingTime','Találkozó időpont',ccTimeInputValue_(e?.meetingAt||e?.meeting_at))}<label class="field span-2"><span>Találkozó helye</span><input id="ceMeetingPlace" value="${esc(e?.meetingPlace||e?.meeting_place||'')}"></label>`:''}</div>${!editing&&!isMatch?`<div class="action-form-repeat"><label><input id="ceRepeat" type="checkbox"> Hetente ismétlődjön</label><label class="field compact"><span>Ismétlés vége</span><input id="ceRepeatEnd" type="date"></label></div>`:''}<label class="action-checkbox"><input id="ceNotify" type="checkbox"> <span>Értesítés küldése a játékosoknak a változásról</span></label><div class="dialog-action-row"><button type="button" class="button quiet" id="ceCancel">Mégse</button>${editing&&!isEventPast(e)?'<button type="button" class="button danger" id="ceDelete">Esemény lemondása</button>':''}<button type="submit" class="button primary" id="ceSave">Mentés</button></div></form>`
   }
 
@@ -1154,6 +1154,12 @@
     });
   }
 
+  function ccMatchDefaultMeeting_(homeAway,start){
+    if(homeAway==='home')return '18:30';
+    if(homeAway!=='away'||!/^\\d{2}:\\d{2}$/.test(start))return '';
+    const [h,m]=start.split(':').map(Number),minutes=h*60+m-60;
+    return String((Math.floor(minutes/60)+24)%24).padStart(2,'0')+':'+String((minutes%60+60)%60).padStart(2,'0');
+  }
   function openCompetitionEventEditor(eventId=null,kind='training'){
     const e=eventId?findEventById(eventId):null,actualKind=e?eventType(e):kind,module=actualKind==='match'?'competition.matches':'competition.trainings',preferred=teamFilterIds_('events')[0]||state.eventTeam||state.selectedTeam||'',teamId=e?eventTeamId(e):(state.teams.find(t=>text(t.id)===text(preferred)&&canAction(module,'edit',t.id))?.id||state.teams.find(t=>canAction(module,'edit',t.id))?.id||null);
     if(!teamId||!canAction(module,'edit',teamId)){status('Nincs szerkesztési jogosultságod ehhez az eseménytípushoz.','error');return}
@@ -1161,6 +1167,19 @@
     if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent=`VERSENYSPORT · ${actualKind==='match'?'MECCS':'EDZÉS'} · SZERKESZTÉS`;
     title.textContent=e?'Esemény szerkesztése':(actualKind==='match'?'Új meccs':'Új edzés');body.innerHTML=ccEventFormHtml_(e,actualKind);ccOpenDialogStable_(d);
     $('#ceCancel')?.addEventListener('click',ccCloseEntityDialog_);
+    if(actualKind==='match'&&!e){
+      const applyDefaults=()=>{
+        const mode=text($('#ceHomeAway')?.value),start=text($('#ceStart')?.value);
+        const meeting=ccMatchDefaultMeeting_(mode,start),field=$('#ceMeetingTime');
+        if(field&&meeting)field.value=meeting;
+        const court=$('#ceCourt'),team=text($('#ceTeam')?.value);
+        if(mode==='home'&&court)court.value=team==='10000000-0000-4000-8000-000000000002'?'2':'3';
+      };
+      $('#ceHomeAway')?.addEventListener('change',applyDefaults);
+      $('#ceStart')?.addEventListener('change',applyDefaults);
+      $('#ceTeam')?.addEventListener('change',applyDefaults);
+    }
+
     $('#ceRepeat')?.addEventListener('change',ev=>{const x=$('#ceRepeatEnd');if(x)x.disabled=!ev.target.checked});if($('#ceRepeatEnd'))$('#ceRepeatEnd').disabled=true;
     if(actualKind==='match'){
       ccSyncMatchKindUi_();
