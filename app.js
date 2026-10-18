@@ -2864,7 +2864,7 @@
           const coverage=ccMrszSetCoverageLabel_(m);
           return '<li><b>'+esc(kick.date+' '+kick.time)+'</b> · '+esc(m.homeName)+' – '+esc(m.awayName)
             +(score?' · '+esc(score):'')+'<small> · '+esc(reason)+'</small>'
-            +(coverage?'<small> · '+esc(coverage)+'</small>':'')+'</li>'}).join('')
+            +(coverage?'<small> · '+esc(coverage)+'</small>':'')+ccMatchEditAction_(m)+'</li>'}).join('')
         +'</ul><p>Ellenőrzendő forrásrekordok; nem kerülnek a megerősített mérkőzések és statisztikák közé. Az eredeti adatok változatlanul megmaradnak.</p></details>':'')+'</section>';
   }
 
