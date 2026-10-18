@@ -2675,6 +2675,28 @@
       +'" data-match-system="'+esc(id.system)+'" data-match-season="'+esc(id.season)+'">'
       +(m._ccManualOverride?'Kézi módosítás · Szerkesztés':'Szerkesztés')+'</button>';
   }
+  function ccMatchDateFromHu_(raw){
+    const m=String(raw||'').trim().match(/^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.$/);
+    if(!m)throw Error('Magyar dátumformátum szükséges: 2026. 10. 20.');
+    const yyyy=m[1],mm=m[2].padStart(2,'0'),dd=m[3].padStart(2,'0');
+    const date=new Date(yyyy+'-'+mm+'-'+dd+'T12:00:00Z');
+    if(!Number.isFinite(date.valueOf())||date.toISOString().slice(0,10)!==yyyy+'-'+mm+'-'+dd)
+      throw Error('Nem létező dátum.');
+    return yyyy+'-'+mm+'-'+dd;
+  }
+  function ccMatchBindTimeWheels_(){
+    // Native selects permit touch spinning; desktop wheels move 1 hour/minute per tick.
+    for(const id of ['ccMHour','ccMMinute']){
+      const select=$('#'+id);
+      select?.addEventListener('wheel',event=>{
+        if(!event.deltaY||document.activeElement!==select)return;
+        event.preventDefault();
+        const dir=event.deltaY>0?1:-1;
+        select.selectedIndex=(select.selectedIndex+dir+select.options.length)%select.options.length;
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+      },{passive:false});
+    }
+  }
   function ccMatchEditorDateIso_(day,time){
     if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time))throw Error('Hibás dátum vagy időpont.');
     const utc=Date.parse(day+'T'+time+':00Z');
@@ -2726,7 +2748,8 @@
     const field=(label,key,value,type='text')=>'<label class="field"><span>'+label+'</span><input id="'+key+'" type="'+type+'" value="'+esc(value||'')+'" required></label>';
     body.innerHTML='<form class="action-form" id="ccSourceMatchForm"><div class="action-form-grid">'
       +field('Hazai csapat','ccMHome',m.homeName)+field('Vendégcsapat','ccMAway',m.awayName)
-      +field('Dátum','ccMDate',dt.date,'date')+field('Kezdés (HH:MM)','ccMTime',dt.time)
+      +'<label class="field"><span>Dátum (ÉÉÉÉ. HH. NN.)</span><input id="ccMDate" type="text" inputmode="numeric" maxlength="12" pattern="[0-9]{4}\\. ?[0-9]{1,2}\\. ?[0-9]{1,2}\\." placeholder="2026. 10. 20." value="'+esc(dt.date.replace(/^(\\d{4})-(\\d{2})-(\\d{2})$/,'$1. $2. $3.'))+'" required></label>'
+      +'<label class="field"><span>Kezdés (24 órás)</span><span class="cc-match-time-wheel"><select id="ccMHour" aria-label="Kezdés órája">'+Array.from({length:24},(_,h)=>'<option value="'+String(h).padStart(2,'0')+'"'+(dt.time.slice(0,2)===String(h).padStart(2,'0')?' selected':'')+'>'+String(h).padStart(2,'0')+'</option>').join('')+'</select><b>:</b><select id="ccMMinute" aria-label="Kezdés perce">'+Array.from({length:60},(_,m)=>'<option value="'+String(m).padStart(2,'0')+'"'+(dt.time.slice(3,5)===String(m).padStart(2,'0')?' selected':'')+'>'+String(m).padStart(2,'0')+'</option>').join('')+'</select></span></label>'
       +'<label class="field span-2"><span>Helyszín</span><input id="ccMVenue" maxlength="300" value="'+esc(m.venue||'')+'"></label>'
       +'<label class="field"><span>Állapot</span><select id="ccMStatus">'
       +[['scheduled','Tervezett'],['played','Lejátszott'],['postponed','Elhalasztva'],['cancelled','Törölve']].map(([code,label])=>'<option value="'+code+'"'+((text(m.status||m.sourceStatus||(hadScore?'played':'scheduled'))===code)?' selected':'')+'>'+label+'</option>').join('')
@@ -2742,6 +2765,7 @@
       +'<details id="ccMHistory" class="cc-source-history"><summary>Módosítási előzmények</summary>'
       +'<div id="ccMHistoryBody" class="cc-source-history-body">Megnyitáskor betöltés…</div></details>';
     ccOpenDialogStable_($('#entityDialog'));
+    ccMatchBindTimeWheels_();
     $('#ccMCancel')?.addEventListener('click',ccCloseEntityDialog_);
     // History is queried on demand; never block a save because an audit read failed.
     let historyLoaded=false;
@@ -2774,7 +2798,7 @@
           return {home:Number(parts[1]),away:Number(parts[2])};
         }):[];
         const patch={homeName:text($('#ccMHome').value),awayName:text($('#ccMAway').value),
-          startsAt:ccMatchEditorDateIso_(text($('#ccMDate').value),text($('#ccMTime').value)),
+          startsAt:ccMatchEditorDateIso_(ccMatchDateFromHu_(text($('#ccMDate').value)),text($('#ccMHour').value)+':'+text($('#ccMMinute').value)),
           venue:text($('#ccMVenue').value),homeSets:h===''?null:Number(h),
           awaySets:a===''?null:Number(a),setScores,status:$('#ccMStatus').value};
         if((patch.status==='played')!==(h!==''))throw Error('A lejátszott állapothoz eredmény kell; a többi állapot eredmény nélküli.');
