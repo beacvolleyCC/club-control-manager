@@ -2879,7 +2879,7 @@
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
     const brsz=(ccBrszEffectiveMatches_||[]).filter(m=>text(m.competitionLabel)===group);
-    const user=(ccUserEffectiveMatches_||[]).filter(m=>text(m.competitionLabel)===group);
+    const user=(typeof ccUserEffectiveMatches_!=='undefined'&&Array.isArray(ccUserEffectiveMatches_)?ccUserEffectiveMatches_:[]).filter(m=>text(m.competitionLabel)===group);
     const norm=m=>ccMrszNormPairName_(m),pair=m=>norm(m._ccOriginalHomeName||m.homeName)+'|'+norm(m._ccOriginalAwayName||m.awayName);
     const localSort=m=>{const d=ccMrszLocalKickoff_(m.startsAt);return d.date+'T'+d.time};
     if(user.length){
