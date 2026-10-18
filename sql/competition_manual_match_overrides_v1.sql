@@ -132,7 +132,7 @@ declare
  v_actor uuid;v_base jsonb;v_old public.cc_competition_match_overrides_v1%rowtype;
  v_patch jsonb;v_new_version integer;v_effective jsonb;
 begin
- v_actor:=private.cc_manager_require_any_v1('competition.matches','edit');
+ v_actor:=private.cc_manager_require_v1('competition.matches','edit',null);
  if coalesce(length(p_source_key),0)<1 or coalesce(length(p_source_key),0)>250
    or coalesce(length(p_season),0)<4 or coalesce(length(p_season),0)>20
    or p_expected_version<0
@@ -167,7 +167,7 @@ create or replace function public.cc_manager_competition_match_override_reset_v1
 ) returns jsonb language plpgsql security definer set search_path='' as $function$
 declare v_actor uuid;v_base jsonb;v_old public.cc_competition_match_overrides_v1%rowtype;
 begin
- v_actor:=private.cc_manager_require_any_v1('competition.matches','edit');
+ v_actor:=private.cc_manager_require_v1('competition.matches','edit',null);
  v_base:=private.cc_competition_match_source_v1(p_source_system,p_season,p_source_key);
  select * into v_old from public.cc_competition_match_overrides_v1
  where source_system=p_source_system and season=p_season and source_key=p_source_key for update;
