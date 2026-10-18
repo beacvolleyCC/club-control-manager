@@ -13,8 +13,8 @@
 |---|---|
 | Manager főág | `beacvolleyCC/club-control-manager` `main`, utolsó alkalmazás-commit `770b846a` (PR #59: magyar dátum és tekerhető, 24 órás időválasztó), PWA cache `20261018-hu-match-time-v55` |
 | Player főág | `beacvolleyCC/player_application` `main`, utolsó alkalmazás-commit `4bb9ec3e` (PR #14: korábbi kézi javítások), PWA cache `20261018-match-overrides-v20` |
-| Aktuális Manager fejlesztés | `feat/fixture-meeting-notes-20261018` – a főág előtt **23 commit**; NINCS merge-elve |
-| Aktuális Player fejlesztés | `feat/player-imported-202627-fixtures-20261018` – a főág előtt **6 commit**; NINCS merge-elve |
+| Aktuális Manager fejlesztés | `feat/fixture-meeting-notes-20261018` – nem merge-elt fejlesztési ág (a főágon külön dokumentációs commitok is vannak) |
+| Aktuális Player fejlesztés | `feat/player-imported-202627-fixtures-20261018` – nem merge-elt fejlesztési ág, a korábbi főágon 6 saját commitból áll |
 | Supabase projekt | `snqsxlyhontaepembaic` |
 | Importtábla | `public.cc_competition_user_schedule_v1` – **300 rekord**, már telepítve |
 | Importált tartalom | **292** `fixture`, **8** `result`, **5** `postponed` |
