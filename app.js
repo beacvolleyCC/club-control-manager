@@ -2969,7 +2969,7 @@
     return null;
   }
   function ccMatchSourceFind_(id){
-    return [...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_]
+    return [...(ccMrszPhotoState_.userMatches||[]),...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_]
       .find(m=>{const x=ccMatchSourceId_(m);return x&&x.system===id.system&&x.key===id.key&&x.season===id.season});
   }
   function ccCanEditLeagueSource_(){
@@ -3167,6 +3167,8 @@
     return diff?(pastA?-diff:diff):text(a?.homeName).localeCompare(text(b?.homeName),'hu');
   }
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
+    if(ccManagerCompleteUserSchedule_(ccMrszPhotoState_.userMatches))
+      return ccManagerMergedUserSchedule_(group,canonicalMatches);
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
     const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
@@ -3197,6 +3199,79 @@
     return [...unique.values()].sort((a,b)=>ccManagerMatchVisualSort_(a,b));
   }
 
+  // Full 2026/27 schedule gate. It must cover every league before replacing
+  // the obsolete BRSZ fixtures; archived, scored results remain independently
+  // visible, and matching protocols are never discarded.
+  const CC_MANAGER_IMPORTED_MIN_COUNTS_=Object.freeze({
+    'Férfi Budapest I. osztály – A csoport':40,
+    'Férfi Budapest I. osztály – B csoport':40,
+    'Női Budapest I. osztály':125,
+    'Női Budapest II. osztály – A csoport':40,
+    'Női Budapest II. osztály – B csoport':40
+  });
+  function ccManagerCompletedResult_(m){
+    if(m?.homeSets==null||m?.awaySets==null)return false;
+    const h=Number(m.homeSets),a=Number(m.awaySets);
+    return Number.isInteger(h)&&Number.isInteger(a)&&Math.max(h,a)===3&&Math.min(h,a)>=0&&Math.min(h,a)<=2;
+  }
+  function ccManagerCompleteUserSchedule_(all){
+    if(!Array.isArray(all)||all.length<292)return false;
+    const keys=new Set(),groups=new Map(),leagues=Object.keys(CC_MANAGER_IMPORTED_MIN_COUNTS_);
+    let results=0;
+    for(const m of all){
+      const league=text(m?.competitionLabel),key=text(m?.sourceMatchKey||m?._ccSourceKey);
+      const kind=text(m?._ccSourceKind),date=ccMrszLocalKickoff_(m?.startsAt).date;
+      if(!leagues.includes(league)||m?._ccUserSupplied!==true||m?._ccSourceSystem!=='user'
+        ||text(m?.season)!=='2026/27'||!key.startsWith('ui20261018:')||keys.has(key)
+        ||!['fixture','result'].includes(kind)||!/^202[67]-\d\d-\d\d$/.test(date)
+        ||!ccMrszNormPairName_(m?.homeName)||!ccMrszNormPairName_(m?.awayName))return false;
+      keys.add(key);groups.set(league,(groups.get(league)||0)+1);
+      if(kind==='result'){
+        if(!ccManagerCompletedResult_(m))return false;
+        results++;
+      }
+    }
+    return results>=8&&leagues.every(g=>(groups.get(g)||0)>=CC_MANAGER_IMPORTED_MIN_COUNTS_[g]);
+  }
+  function ccManagerUserPairKey_(m){
+    return ccMrszLocalKickoff_(m?.startsAt).date+'|'
+      +ccMrszNormPairName_(m?.homeName)+'|'+ccMrszNormPairName_(m?.awayName);
+  }
+  function ccManagerMergedUserSchedule_(group,canonicalMatches=[]){
+    const data=(ccMrszPhotoState_.userMatches||[]).filter(m=>text(m?.competitionLabel)===group);
+    const stored=[
+      ...canonicalMatches.filter(m=>text(m?.competitionLabel)===group),
+      ...ccBrszEffectiveMatches_.filter(m=>text(m?.competitionLabel)===group),
+      ...(ccMrszPhotoState_.matches||[]).filter(m=>text(m?.competitionLabel)===group)
+    ].filter(ccManagerCompletedResult_);
+    const scored=new Map(),conflicts=new Set();
+    const record=(m,priority)=>{
+      const key=ccManagerUserPairKey_(m),prev=scored.get(key);
+      if(prev){
+        if(Number(m.homeSets)!==Number(prev.m.homeSets)||Number(m.awaySets)!==Number(prev.m.awaySets))
+          conflicts.add(key);
+        if(priority>prev.priority)scored.set(key,{m,priority});
+      }else scored.set(key,{m,priority});
+    };
+    stored.forEach(m=>record(m,1));
+    data.filter(ccManagerCompletedResult_).forEach(m=>record(m,2));
+    // A protocol-backed official match is preferred when identical pair/day is found.
+    (ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group&&ccManagerCompletedResult_(m))
+      .forEach(m=>record({...m,isPhoto:true},3));
+    const results=[];
+    for(const m of data){
+      const key=ccManagerUserPairKey_(m);
+      if(scored.has(key)){
+        if(ccManagerCompletedResult_(m)&&conflicts.has(key))
+          results.push({...m,__ccResultConflict:true});
+        continue;
+      }
+      results.push(m);
+    }
+    for(const [key,{m}] of scored)results.push(conflicts.has(key)?{...m,__ccResultConflict:true}:m);
+    return results.sort((a,b)=>ccManagerMatchVisualSort_(a,b));
+  }
+
   // An unscored BEAC–BEAC record is a source anomaly, not a confirmed fixture.
   function ccMrszUnverifiedSelfFixture_(m){
     if(m.homeSets!=null||m.awaySets!=null)return false;
@@ -3208,6 +3283,7 @@
   // Missing league tables are disclosed separately; their saved scores are not discarded.
   function ccMrszMatchReviewReason_(match,leagueRows,hasTable,conflicts){
     if(ccMrszUnverifiedSelfFixture_(match))return 'Nem megerősített BEAC–BEAC menetrendi rekord';
+    if(match?.__ccResultConflict)return 'Eltérő mentett eredmények – ellenőrizendő, statisztikába nem számítható';
     if(!match?.isPhoto)return '';
     const home=ccMrszNormPairName_(match.homeName),away=ccMrszNormPairName_(match.awayName);
     if(!home||!away||home===away)return 'A két csapat nem azonosítható egyértelműen';
