@@ -36,7 +36,7 @@ test('playoff table carrying results from preliminary is not silently accepted',
 });
 test('missing, changed, or duplicated phase fails closed',()=>{
  const d=archive();d.phases.pop();
- assert.throws(()=>validateArchivedCompetition(d),/Missing required competition phase/);
+ assert.throws(()=>validateArchivedCompetition(d),/Phase coverage must be explicitly complete|Missing required competition phase/);
  const e=archive();e.phases[1].matches[0].matchCode=e.phases[0].matches[0].matchCode;
  assert.throws(()=>validateArchivedCompetition(e),/Same match reused|Repeated match code/);
  const f=archive();f.phases[1].phaseKey='group-A';
