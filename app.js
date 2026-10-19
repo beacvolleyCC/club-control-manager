@@ -12,7 +12,7 @@
       ['trainings','Edzések','◇'],['athletes','Sportolók','○'],['passes','BEAC import','▤'],['calendar','Naptár','□'],['archive','Archívum','⌁']
     ]},
     competition:{label:'Versenysport',glyph:'◇',modules:[
-      ['overview','Áttekintés','△'],['trainings','Edzések','◇'],['matches','Meccsek','◆'],['standings','Tabella','≡'],['teams','Csapatok','▱'],['players','Játékosok','○'],['calendar','Naptár','□'],['notifications','Értesítések','◉']
+      ['overview','Áttekintés','△'],['trainings','Edzések','◇'],['matches','Meccsek','◆'],['courts','Pályák','▦'],['standings','Tabella','≡'],['teams','Csapatok','▱'],['players','Játékosok','○'],['calendar','Naptár','□'],['notifications','Értesítések','◉']
     ]}
   };
 
@@ -191,7 +191,7 @@
   function canRoute(area,module){
     if(module==='planning')return can('competition.trainings')||can('mass.trainings');
     if(area==='competition'&&module==='notifications') return canAnyAction('competition.players','notify');
-    if(area==='competition'&&module==='standings') return can('competition.matches');
+    if(area==='competition'&&(module==='standings'||module==='courts')) return can('competition.matches');
     if(area==='mass'&&module==='archive')return can('mass.trainings')||can('mass.calendar');
     return can(`${area}.${module}`);
   }
@@ -281,7 +281,7 @@
     try{
       const b=await rpc('cc_manager_bootstrap_v1');
       if(!b?.manager)throw new Error('A Manager bootstrap nem adott érvényes fiókot.');
-      state.manager=b.manager;state.permissions=Array.isArray(b.permissions)?b.permissions:[];state.teams=Array.isArray(b.teams)?b.teams:[];state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};state.financeData=null;state.financePassCatalog=[];state.financePassCatalogLoaded=false;state.financeLoading=false;state.equipmentByTeam.clear();applyManager();ensureAuthorizedRoute_();
+      state.manager=b.manager;state.permissions=Array.isArray(b.permissions)?b.permissions:[];ccCourtImpactState_.data=null;ccCourtImpactState_.error='';state.teams=Array.isArray(b.teams)?b.teams:[];state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};state.financeData=null;state.financePassCatalog=[];state.financePassCatalogLoaded=false;state.financeLoading=false;state.equipmentByTeam.clear();applyManager();ensureAuthorizedRoute_();
       const jobs=[];
       if(can('competition.overview'))jobs.push(loadOverview(),loadRsvpMatrix());else{state.overview={};state.rsvpMatrix={events:[],players:[],responses:[]}}
       if(can('competition.trainings')||can('competition.matches'))jobs.push(loadCardRsvpMatrix().catch(err=>{console.warn('Competition card RSVP matrix unavailable',err);state.cardRsvpMatrix=state.rsvpMatrix||{events:[],players:[],responses:[]}}),loadCoachAvailability().catch(()=>{}));else{state.cardRsvpMatrix={events:[],players:[],responses:[]};state.coachAvailability=[]}
@@ -1474,6 +1474,109 @@
   async function sendManualNotification(){
     if(state.notificationBusy)return;const player=notificationRecipientById(state.notificationSelectedPlayerId);if(!player){status('Válassz címzettet.','error');return}const title=text($('#notificationTitle')?.value),body=text($('#notificationBody')?.value),eventId=text($('#notificationEventId')?.value)||null;if(!title){status('Az értesítés címe kötelező.','error');return}if(!body){status('Az üzenet szövege kötelező.','error');return}if(!window.confirm(`Biztosan elküldöd az értesítést?\n\nCímzett: ${player.displayName||player.email}\nCím: ${title}\n\nJelenlegi csatorna: in-app + elérhető push eszközök.`))return;state.notificationBusy=true;renderNotifications();try{const result=await rpc('cc_manager_notification_send_v1',{p_player_id:player.playerId,p_title:title,p_body:body,p_event_id:eventId});await loadNotificationHistory();const push=num(result?.activeDevices)>0?'Push sorba állítva.':'Nincs aktív push eszköz, az in-app értesítés ettől még létrejött.';status(`Értesítés elküldve: ${player.email}. ${push}`,'success');renderNotifications()}catch(err){console.error(err);status(err.message||'Az értesítés küldése sikertelen.','error');state.notificationBusy=false;renderNotifications();return}state.notificationBusy=false;renderNotifications()}
 
+
+  // A read-only operational view of BEAC training/match intersections. Meeting time
+  // is intentionally never considered. The RPC is Manager-authorization guarded.
+  const ccCourtImpactState_={loading:false,data:null,error:'',loaded:false,token:0};
+  const ccCourtImpactFilters_={team:'all',type:'all'};
+  const CC_COURT_IMPACT_TYPES_=Object.freeze({
+    home_match_occupied:'Hazai meccs · foglalt pálya',
+    away_potential_free:'Idegenbeli meccs · felszabaduló sáv',
+    away_potential_free_unconfirmed:'Idegenbeli meccs · feltételesen szabad',
+    away_court_not_free:'Idegenbeli meccs · másik foglalás',
+    training_match_conflict:'Ütközés · edzés még aktív',
+    cancellation_unmatched:'Lemondott edzés · meccs nem azonosított'
+  });
+  async function ccLoadCourtImpact_({force=false}={}){
+    if(ccCourtImpactState_.loading||(!force&&ccCourtImpactState_.loaded))return;
+    ccCourtImpactState_.loading=true;
+    const token=++ccCourtImpactState_.token;
+    try{
+      const data=await rpc('cc_manager_court_impact_v1',{p_from:'2026-10-19',p_to:'2027-06-01'});
+      if(token!==ccCourtImpactState_.token)return;
+      ccCourtImpactState_.data=data&&Array.isArray(data.rows)?data:{rows:[]};
+      ccCourtImpactState_.error='';ccCourtImpactState_.loaded=true;
+    }catch(err){
+      if(token!==ccCourtImpactState_.token)return;
+      ccCourtImpactState_.error=text(err?.message||'A teremtervezési kimutatás nem érhető el.');
+      ccCourtImpactState_.loaded=true;ccCourtImpactState_.data=null;
+    }finally{
+      if(token===ccCourtImpactState_.token){
+        ccCourtImpactState_.loading=false;
+        if(ccRouteIs_('competition','courts'))ccRenderCourtImpact_();
+      }
+    }
+  }
+  function ccCourtImpactTime_(value){
+    return value&&safeDate(value)?fmtTime(value):'–';
+  }
+  function ccCourtImpactWeek_(iso){
+    const dt=new Date(String(iso)+'T12:00:00+02:00');
+    if(Number.isNaN(dt.getTime()))return text(iso);
+    return new Intl.DateTimeFormat('hu-HU',{month:'long',day:'numeric',timeZone:'Europe/Budapest'}).format(dt);
+  }
+  function ccRenderCourtImpact_(){
+    if(!ccRouteIs_('competition','courts'))return;
+    if(!ccCourtImpactState_.loaded&&!ccCourtImpactState_.loading){
+      Promise.resolve().then(()=>ccLoadCourtImpact_());
+    }
+    const all=Array.isArray(ccCourtImpactState_.data?.rows)?ccCourtImpactState_.data.rows:[];
+    const nowDay=localDateKey(new Date());
+    const rows=all.filter(r=>{
+      if(text(r.date)<nowDay)return false;
+      if(ccCourtImpactFilters_.team!=='all'&&text(r.teamId)!==ccCourtImpactFilters_.team)return false;
+      if(ccCourtImpactFilters_.type==='home'&&text(r.matchSide)!=='home')return false;
+      if(ccCourtImpactFilters_.type==='away'&&text(r.matchSide)!=='away')return false;
+      if(ccCourtImpactFilters_.type==='conflict'&&text(r.courtImpact)!=='training_match_conflict')return false;
+      return true;
+    }).sort((a,b)=>text(a.date).localeCompare(text(b.date))||text(a.teamName).localeCompare(text(b.teamName),'hu'));
+    const weeks=new Map();
+    rows.forEach(row=>{const week=text(row.weekStart)||text(row.date);if(!weeks.has(week))weeks.set(week,[]);weeks.get(week).push(row)});
+    const options=state.teams.filter(t=>t.active!==false).map(t=>'<option value="'+esc(t.id)+'" '+(ccCourtImpactFilters_.team===text(t.id)?'selected':'')+'>'+esc(t.name)+'</option>').join('');
+    const legend=(row)=>{
+      const impact=text(row.courtImpact),label=CC_COURT_IMPACT_TYPES_[impact]||impact;
+      const extra=row.matchSide==='away'&&impact==='away_potential_free_unconfirmed'
+        ?' · tömegsport-beosztás még nem teljes'
+        :row.massOverlap?' · tömegsport foglalja'
+          :row.otherTrainingOverlap?' · másik csapatedzés foglalja'
+          :row.otherHomeMatchOverlap&&row.matchSide==='away'?' · hazai meccs foglalja':'';
+      return label+extra;
+    };
+    const line=(r)=>{
+      const risk=['training_match_conflict','cancellation_unmatched','away_court_not_free'].includes(text(r.courtImpact));
+      return '<tr><td><b>'+esc(fmtDay(r.trainingStart))+'</b><div>'+esc(ccCourtImpactTime_(r.trainingStart))+'–'+esc(ccCourtImpactTime_(r.trainingEnd))+'</div></td>'+
+        '<td>'+esc(r.teamName)+'</td>'+
+        '<td><b>'+esc(r.trainingCourt||'–')+'</b></td>'+
+        '<td>'+esc(r.matchTitle||'–')+'<div>'+esc(r.matchStart?ccCourtImpactTime_(r.matchStart):'')+'</div></td>'+
+        '<td><span class="status-pill '+(risk?'warn':r.matchSide==='away'?'muted':'ok')+'">'+esc(legend(r))+'</span>'+(r.trainingGoing?'<div>'+esc(r.trainingGoing)+' korábbi igen jelentkezés</div>':'')+'</td></tr>';
+    };
+    const table=[...weeks.entries()].map(([week,weekRows])=>
+      '<section class="panel" style="margin-top:12px"><div class="panel-head"><h3>'+esc(ccCourtImpactWeek_(week))+'-i hét</h3><span>'+weekRows.length+' érintett edzés</span></div>'+
+      '<div class="ms-table-scroll" style="overflow-x:auto"><table class="ms-table"><thead><tr><th>Edzés</th><th>Csapat</th><th>Pálya</th><th>Meccs</th><th>Teremhelyzet</th></tr></thead><tbody>'+
+      weekRows.map(line).join('')+'</tbody></table></div></section>'
+    ).join('');
+    const refresh=ccCourtImpactState_.loading?'Betöltés…':'↻ Frissítés';
+    const horizon=text(ccCourtImpactState_.data?.massCalendarCoveredThrough);
+    $('#viewContent').innerHTML=
+      '<div class="page-intro cc-page-header-panel"><div><h2>Teremtervezés</h2><p>Elmaradó versenysport-edzések és a pályák várható kihasználtsága, heti bontásban.</p></div>'+
+      '<div class="page-actions"><button id="ccCourtRefresh" type="button" class="button quiet">'+refresh+'</button></div></div>'+
+      '<article class="panel"><div class="filter-panel" style="display:flex;gap:12px;flex-wrap:wrap">'+
+      '<label class="field compact"><span>Csapat</span><select id="ccCourtTeam"><option value="all">Összes csapat</option>'+options+'</select></label>'+
+      '<label class="field compact"><span>Típus</span><select id="ccCourtType"><option value="all">Minden érintett edzés</option>'+
+      '<option value="home" '+(ccCourtImpactFilters_.type==='home'?'selected':'')+'>Hazai meccs</option>'+
+      '<option value="away" '+(ccCourtImpactFilters_.type==='away'?'selected':'')+'>Idegenbeli meccs</option>'+
+      '<option value="conflict" '+(ccCourtImpactFilters_.type==='conflict'?'selected':'')+'>Aktív ütközés</option></select></label></div>'+
+      '<p style="margin:12px 0 0">Az idegenbeli meccsnél felszabadulhat a csapat edzéssávja. Ez csak akkor ténylegesen szabad, ha nincs másik foglalás. A találkozó időpontja nem számít pályahasználatnak.</p>'+
+      (horizon?'<p style="margin:8px 0 0">Jelenleg rögzített tömegsport-események utolsó napja: '+esc(horizon)+'. Későbbi időpontokra a szabad jelzés feltételes.</p>':'')+
+      '</article>'+
+      (ccCourtImpactState_.error?'<article class="panel"><div class="ms-empty error">'+esc(ccCourtImpactState_.error)+'</div></article>':
+      ccCourtImpactState_.loading?'<article class="panel"><div class="ms-empty">Teremtervezési adatok betöltése…</div></article>':
+      table||'<article class="panel"><div class="ms-empty">Nincs a szűrőnek megfelelő ütközés vagy elmaradó edzés.</div></article>');
+    $('#ccCourtTeam')?.addEventListener('change',e=>{ccCourtImpactFilters_.team=e.target.value;ccRenderCourtImpact_()});
+    $('#ccCourtType')?.addEventListener('change',e=>{ccCourtImpactFilters_.type=e.target.value;ccRenderCourtImpact_()});
+    $('#ccCourtRefresh')?.addEventListener('click',()=>{ccCourtImpactState_.loaded=false;ccCourtImpactState_.error='';ccLoadCourtImpact_({force:true})});
+  }
+
   function renderModule(){
     const m=state.module;
     if(m==='settings'){if(!can('settings')){renderPermissionDenied();return}renderSettings();return}
@@ -1488,6 +1591,7 @@
     if(state.area==='competition'&&m==='trainings'){renderCompetitionTrainingCards_();return}
     if(state.area==='competition'&&m==='matches'){renderCompetitionMatchCards_();return}
     if(state.area==='competition'&&m==='standings'){renderManagerStandings_();return}
+    if(state.area==='competition'&&m==='courts'){ccRenderCourtImpact_();return}
     if(state.area==='competition'&&m==='fees'){renderPlaceholder('Díjak','A jelenlegi havi díj-/fizetési mátrix production parityje ide kerül.',['Játékosonkénti havi státusz','Edzői díj','Bérlet','Audit / felülírás']);return}
     if(state.area==='competition'&&m==='competition'){renderPlaceholder('Versenyadatok','Competition Core: tabella, teljes meccslista, BRSZ/MRSZ források és konfliktusok.',['054 Competition Core backend előtt nincs production adat','Saját csapatok meccsei az events bridge-en keresztül','Külső liga-meccsek nem kerülnek az events táblába']);return}
     if(state.area==='mass'&&m==='trainings'){renderMassTrainings();return}
