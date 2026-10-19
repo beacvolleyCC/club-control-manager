@@ -1,0 +1,37 @@
+name: Women I historical lookback QA
+on:
+  push:
+    paths:
+      - 'scripts/history/build-women1-*.cjs'
+      - 'tests/women1-*.test.cjs'
+      - 'data/competition-history/women1_*_official_league_snapshot.json'
+      - 'data/competition-strength/women1_*.json'
+      - 'data/brsz_group_fixtures_2026_27_source.json'
+      - '.github/workflows/women1-historical-lookback-qa.yml'
+  pull_request:
+    paths:
+      - 'scripts/history/build-women1-*.cjs'
+      - 'tests/women1-*.test.cjs'
+      - 'data/competition-history/women1_*_official_league_snapshot.json'
+      - 'data/competition-strength/women1_*.json'
+      - 'data/brsz_group_fixtures_2026_27_source.json'
+      - '.github/workflows/women1-historical-lookback-qa.yml'
+  workflow_dispatch:
+jobs:
+  historical-lookback:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate competition identity and strength integrity
+        run: |
+          node --test tests/women1-historical-strength.test.cjs tests/women1-current-lookback.test.cjs
+      - name: Ensure exact archived MRSZ output reproducibility
+        run: |
+          node scripts/history/build-women1-elo.cjs
+          node scripts/history/build-women1-current-lookback.cjs
+          git diff --exit-code -- data/competition-strength/women1_2024_2026_elo_experimental.json data/competition-strength/women1_2026_27_historical_lookback.json
