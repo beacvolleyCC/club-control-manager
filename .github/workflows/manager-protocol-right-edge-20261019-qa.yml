@@ -1,0 +1,33 @@
+name: Manager protocol right-edge QA
+on:
+  push:
+    paths:
+      - 'app.js'
+      - 'styles.css'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/manager-protocol-right-edge-20261019.test.cjs'
+      - '.github/workflows/manager-protocol-right-edge-20261019-qa.yml'
+  pull_request:
+    paths:
+      - 'app.js'
+      - 'styles.css'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/manager-protocol-right-edge-20261019.test.cjs'
+      - '.github/workflows/manager-protocol-right-edge-20261019-qa.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JS syntax
+        run: node --check app.js
+      - name: Protocol icon order regression
+        run: node --test tests/manager-protocol-right-edge-20261019.test.cjs
