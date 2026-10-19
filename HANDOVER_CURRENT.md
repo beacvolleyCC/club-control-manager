@@ -1,5 +1,28 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/F. 2026-10-19 – gyors jegyzőkönyv, mai meccs és statisztikai UI-javítás
+
+Felhasználói kérés: **mindkét app** jegyzőkönyvénél a csereikon legyen a legszélső jobb oldali jel; ettől balra kapitány, liberó; a 2026.10.19-i BEAC–PDSE a 12. helyett a listában megfelelő helyre kerüljön; a statisztikai elemek ne tűnjenek el.
+
+**GitHub main (mindkét repo, squash merge ténylegesen megtörtént):**
+- Player `beacvolleyCC/player_application` PR [#16](https://github.com/beacvolleyCC/player_application/pull/16), main commit `b7eb864997f86bc1b0bebfd66b39eb39ef09779b`. PWA token `20261019-protocol-match-v21`.
+- Manager `beacvolleyCC/club-control-manager` PR [#66](https://github.com/beacvolleyCC/club-control-manager/pull/66), main commit `285786a07f7a9faab798c964e957435159f718fb` (jegyzőkönyv ikonok).
+- Manager PR [#67](https://github.com/beacvolleyCC/club-control-manager/pull/67), main commit `36cdbd95e794572000d69089e1653197ff5710b9` (friss mérkőzés sorrend és dátum), PWA token `20261019-protocol-match-v62`.
+
+**Módosítás:**
+1. MRSZ-jegyzőkönyv játékosjelölések: kapitány (C), liberó (L), csere (CS, kétirányú ikon) **balról jobbra**, jelölésoszlop jobb szélén; hiányzó pályára lépési jel `–` nem azonos cserejelöléssel.
+2. Mindkét bajnoki meccslista: **mai és későbbi meccsek először időrendben**, elmúltak alul fordított időrendben. Éles DB és import alapján azonosított felhasználói kulcsok:
+   - Férfi I/B BEAC–PDSE `ui20261018:menB:beac:pdse:1` 2026.10.19. 19:30; a korábbi 2026.10.12. 19:30-as *le nem játszott* sor csak akkor szűrhető ki, ha a javított rekord betöltődött;
+   - Női II/B BEAC II.–UTE U20 Pink `ui20261018:womenIIB:beacii:uteu20pink:1` 2026.10.20. 19:30; korábbi kiírás 2026.10.13.
+   - A forráskulcson kívül ellenőrzött pontos csapatpár, liga, idény, kezdési dátum és `_ccUserSupplied` kell. **Régebbi eredményes meccs soha nem törölhető/nyomható el**. A teljes 300 soros import UI-ját ettől még NEM olvasztottuk be, kizárólag a két igazolt dátumáthelyezést.
+3. Player `Statisztikák`: mind a **négy fül** mobilon is látható (Áttekintés, Csapatok, Játékosok, Összehasonlítás); még üres bajnoki forrásnál sem tűnik el a statisztika panel; mutatja a **rögzített végeredmények** és a **tényleges jegyzőkönyvek** számát. A nem ellenőrzött bajnokságszintű forma/rang `–` marad; nem generál kitalált eredményeket vagy játékos-perceket.
+4. **Semelyik javítás nem módosít Supabase `events`, `availability`, meccsvégeredmény, találkozó vagy pályafoglalás adatot**, nincs automatikus értesítés.
+
+**Ellenőrzés:** célzott JS syntax, ikon HTML sorrend, Player és Manager alapszintű dátum-/deduplikációs futtatási próba sikeres; új Node CI workflow-k és regressziós tesztek a repoágakban. A PR merge pillanatában GitHub Actions több helyen még **queued/in_progress** volt: **nem szabad zöld CI-ként bejelenteni**. Ugyanígy a GitHub main merge **nem bizonyít önmagában éles Pages/Cloudflare deployt vagy a bejelentkezett UI megjelenését**. A konkrét deployment ellenőrzés és az új CI-k végállapota nyitott.
+
+---
+
+
 ## 0/E. 2026-10-19 – 2025/26 BB2 és férfi történeti, fázisonként auditált adatforrások
 
 **GitHub Manager `main` frissítés:** [PR #65](https://github.com/beacvolleyCC/club-control-manager/pull/65) beolvasztva, commit `1eaf354e481196c42d4249eafb3ccb6cedfdf6fe`. **5/5 GitHub CI sikeres**, a korábbi történeti QA-k is. A Manager PWA JS verzió és service-worker cache `20261019-history-phases-v60`. **Cloudflare/Pages tényleges, böngészőben elérhető deploy nincs önállóan hitelesítve**.
