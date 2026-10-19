@@ -1581,6 +1581,8 @@
   // Historical comparison only. 2026/27 has no current-season Elo and cannot
   // inherit 2025/26 roster strength. Do not couple this screen to active matches.
   const ccWomenHistoryState_={loaded:false,loading:false,error:'',rows:[],scope:'all'};
+  const ccClubHistoryState_={selected:'womenI',loaded:false,loading:false,error:'',teams:[]};
+  const CC_CLUB_HISTORY_OPTIONS_=[['womenI','Női BB1'],['womenIIB','Női BB2'],['menB','Férfi']];
   const CC_WOMEN_HISTORY_STATES_=Object.freeze({
     supported_exact:'Névegyezés',
     supported_alias:'Hivatalos rövid név',
@@ -1625,6 +1627,7 @@
   }
   function ccRenderWomenHistory_(){
     if(!ccRouteIs_('competition','history'))return;
+    if(ccClubHistoryState_.selected!=='womenI'){ccRenderOtherHistory_();return;}
     if(!ccWomenHistoryState_.loaded&&!ccWomenHistoryState_.loading)
       Promise.resolve().then(ccLoadWomenHistory_);
     const rows=ccWomenHistoryRows_();
@@ -1653,7 +1656,7 @@
       .map(([v,t])=>'<option value="'+v+'" '+(ccWomenHistoryState_.scope===v?'selected':'')+'>'+t+'</option>').join('');
     const loading=ccWomenHistoryState_.loading||!ccWomenHistoryState_.loaded;
     $('#viewContent').innerHTML=
-      '<div class="page-intro cc-page-header-panel"><div><h2>Előző idény · női Budapest I.</h2>'+
+      ccClubHistoryNav_()+'<div class="page-intro cc-page-header-panel"><div><h2>Előző idény · női Budapest I.</h2>'+
       '<p>A 2026/27-es ellenfelek 2025/26-os teljesítménye. Nem a jelenlegi erősorrend.</p></div>'+
       '<div class="page-actions"><button type="button" class="button quiet" id="ccWomenHistoryRefresh">↻ Frissítés</button></div></div>'+
       '<article class="panel"><div class="panel-head"><h3>2025/26-os bajnoki mérleg</h3>'+
@@ -1666,12 +1669,97 @@
       '<th>Utolsó 5 győzelem</th><th>Kísérleti Elo</th></tr></thead><tbody>'+table+'</tbody></table></div>')+
       '<details style="margin-top:16px"><summary>Az adatok értelmezése</summary><p>A 2025/26-os 129 eredményes női I. osztályú mérkőzésen alapulnak. Az Elo minden csapatnál 1500-ról indul, K=24 értékkel, és nincs előrejelzésre kalibrálva. Az MTK és a Mozdulj névkapcsolata külön ellenőrzést igényel. A Kandó és a Semmelweis nem szerepelt az előző női I. tabellában; más osztály eredményeit nem kevertük ide. Keretfolytonosságot nem igazoltunk.</p></details>'+
       '</article>';
+    ccClubHistoryBindNav_();
     $('#ccWomenHistoryScope')?.addEventListener('change',e=>{
       ccWomenHistoryState_.scope=e.target.value;ccRenderWomenHistory_();
     });
     $('#ccWomenHistoryRefresh')?.addEventListener('click',()=>{
       ccWomenHistoryState_.loaded=false;ccWomenHistoryState_.error='';ccWomenHistoryState_.rows=[];
       ccLoadWomenHistory_();
+    });
+  }
+
+
+  // BB2 and men's archive audit. Only documented partial secondary-source sample
+  // records are shown. These panels intentionally have no Elo and no season totals.
+  function ccClubHistoryNav_(){
+    return '<div class="segmented" style="margin:0 0 18px;display:flex;flex-wrap:wrap;gap:6px">'+
+      CC_CLUB_HISTORY_OPTIONS_.map(([key,label])=>
+      '<button type="button" class="button '+(ccClubHistoryState_.selected===key?'primary':'quiet')+'" data-cc-history-team="'+key+'">'+esc(label)+'</button>').join('')+'</div>';
+  }
+  function ccClubHistoryBindNav_(){
+    $('[data-cc-history-team]').forEach(btn=>btn.addEventListener('click',()=>{
+      const key=text(btn.dataset.ccHistoryTeam);
+      if(!CC_CLUB_HISTORY_OPTIONS_.some(opt=>opt[0]===key)||ccClubHistoryState_.selected===key)return;
+      ccClubHistoryState_.selected=key;
+      if(key==='womenI')ccRenderWomenHistory_();else ccRenderOtherHistory_();
+    }));
+  }
+  async function ccLoadOtherHistory_(){
+    if(ccClubHistoryState_.loaded||ccClubHistoryState_.loading)return;
+    ccClubHistoryState_.loading=true;
+    try{
+      const response=await fetch('./data/competition-strength/men-bb2_202627_historical_coverage.json',{cache:'no-store'});
+      if(!response.ok)throw Error('A történeti adatlefedettség nem érhető el.');
+      const d=await response.json();
+      if(d?.schemaVersion!==1||d?.currentSeason!=='2026/27'||d?.historicalSeason!=='2025/26'||
+          !Array.isArray(d.teams)||d.teams.length!==2||d.allCompetitionsChecked!==false||
+          d.teams.some(x=>x.currentStrengthRating!==null||x.historicalElo!==null||
+            x.historicalStanding!==null||x.historicalTotalPlayed!==null||
+            !Array.isArray(x.currentOpponents)||x.currentOpponents.length!==7)||
+          new Set(d.teams.map(x=>x.key)).size!==2||
+          !d.teams.some(x=>x.key==='menB')||!d.teams.some(x=>x.key==='womenIIB'))
+        throw Error('A részleges történeti adatok ellenőrzése sikertelen.');
+      ccClubHistoryState_.teams=d.teams;
+      ccClubHistoryState_.error='';
+    }catch(err){
+      ccClubHistoryState_.error=text(err?.message||'A történeti adatok nem érhetők el.');
+      ccClubHistoryState_.teams=[];
+    }finally{
+      ccClubHistoryState_.loaded=true;ccClubHistoryState_.loading=false;
+      if(ccRouteIs_('competition','history')&&ccClubHistoryState_.selected!=='womenI')ccRenderOtherHistory_();
+    }
+  }
+  function ccRenderOtherHistory_(){
+    if(!ccRouteIs_('competition','history'))return;
+    if(ccClubHistoryState_.selected==='womenI'){ccRenderWomenHistory_();return;}
+    if(!ccClubHistoryState_.loaded&&!ccClubHistoryState_.loading)Promise.resolve().then(ccLoadOtherHistory_);
+    const row=ccClubHistoryState_.teams.find(x=>x.key===ccClubHistoryState_.selected);
+    const isWomen=ccClubHistoryState_.selected==='womenIIB';
+    const title=isWomen?'Női BB2':'Férfi';
+    const stateLabel=isWomen?'Részleges 2025/26-os eredményadatok':'Korábbi idény – ellenőrzés alatt';
+    const sample=row?.candidateHistoricalResults||[];
+    const date=s=>/^\\d{4}-\\d{2}-\\d{2}$/.test(text(s))?text(s).replace(/-/g,'. ')+'.':'–';
+    const matches=sample.map(x=>'<tr>'+
+      '<td>'+esc(date(x.date))+'</td><td>'+esc(x.home)+'</td>'+
+      '<td style="text-align:center"><b>'+esc(x.homeSets)+'–'+esc(x.awaySets)+'</b></td>'+
+      '<td>'+esc(x.away)+'</td></tr>').join('');
+    const warnings=(row?.warnings||[]).map(x=>'<p style="margin:8px 0">'+esc(x)+'</p>').join('');
+    const identities=(row?.currentOpponents||[]).map(x=>'<tr><td>'+esc(x.team)+'</td>'+
+      '<td>'+esc(x.brszId??'–')+'</td>'+
+      '<td>'+esc(x.identity==='verified_archive_id'?'Archív BRSZ azonosító':
+        x.identity==='two_possible_archive_ids'?'Ütköző azonosítók: '+(x.candidateBrszIds||[]).join(', '):
+        'Még nem igazolt azonosító')+'</td></tr>').join('');
+    $('#viewContent').innerHTML=
+      ccClubHistoryNav_()+
+      '<div class="page-intro cc-page-header-panel"><div><h2>Előző idény · '+title+'</h2>'+
+      '<p>'+stateLabel+'. Nem jelenlegi csapaterősség, és nem teljes bajnoki statisztika.</p></div>'+
+      '<div class="page-actions"><button class="button quiet" type="button" id="ccOtherHistoryRefresh">↻ Frissítés</button></div></div>'+
+      (!row?(ccClubHistoryState_.error?'<article class="panel"><p>'+esc(ccClubHistoryState_.error)+'</p></article>':
+        '<article class="panel"><p>Korábbi idény adatainak betöltése…</p></article>'):
+      '<article class="panel"><div class="panel-head"><h3>Forráslefedettség · 2025/26</h3></div>'+
+        '<p>Jelenlegi bajnokság: <b>'+esc(row.currentLeague)+'</b>.</p>'+
+        (row.historicalGroupCandidate?'<p>Korábbi bajnokság a talált mintában: <b>'+esc(row.historicalGroupCandidate)+'</b>.</p>':'')+
+        '<p><b>A teljes 2025/26-os tabella és meccslista még nincs hitelesítve. Ezért nincs becsült Elo, teljes mérleg vagy helyezés.</b></p>'+warnings+'</article>'+
+      (matches?'<article class="panel" style="margin-top:14px"><div class="panel-head"><h3>Talált mérkőzések · részleges, másodlagos forrás</h3><span>'+sample.length+' mérkőzés</span></div>'+
+        '<div class="ms-table-scroll" style="overflow-x:auto"><table class="ms-table"><thead><tr><th>Időpont</th><th>Hazai</th><th>Eredmény</th><th>Vendég</th></tr></thead><tbody>'+matches+'</tbody></table></div>'+
+        '<p style="margin-top:12px"><a href="https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation" target="_blank" rel="noopener noreferrer">Forrás: másodlagos eseménylista</a> · az eredmények további szövetségi ellenőrzést igényelnek.</p></article>':'')+
+      '<article class="panel" style="margin-top:14px"><div class="panel-head"><h3>2026/27 csapatok · forrásazonosítás</h3></div>'+
+      '<div class="ms-table-scroll" style="overflow-x:auto"><table class="ms-table"><thead><tr><th>Csapat</th><th>BRSZ ID</th><th>Állapot</th></tr></thead><tbody>'+identities+'</tbody></table></div></article>');
+    ccClubHistoryBindNav_();
+    $('#ccOtherHistoryRefresh')?.addEventListener('click',()=>{
+      ccClubHistoryState_.loaded=false;ccClubHistoryState_.teams=[];ccClubHistoryState_.error='';
+      ccLoadOtherHistory_();
     });
   }
 
