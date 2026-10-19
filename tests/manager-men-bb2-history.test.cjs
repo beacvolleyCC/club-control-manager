@@ -70,3 +70,33 @@ test('Invalid current rating is rejected and has no way to write events or atten
  assert.ok(!source.includes('insert('));
  assert.ok(!source.includes('update('));
 });
+
+test('official phase sources match the separate audited 2025/26 discovery manifest',()=>{
+ const manifest=JSON.parse(fs.readFileSync('data/competition-history/2025_26_men_womenII_source_manifest.json','utf8'));
+ for(const t of data.teams){
+  const scope=t.key==='womenIIB'?'womenII':'menI';
+  const phases=manifest.competitions.find(x=>x.scope===scope).phases;
+  assert.equal(t.officialPhaseSources.length,phases.length);
+  for(const phase of phases){
+   const displayed=t.officialPhaseSources.find(x=>x.phaseKey===phase.phaseKey);
+   assert.ok(displayed);
+   assert.equal(displayed.competitionSubId,phase.competitionSubId);
+   assert.equal(displayed.officialEvidenceURL,phase.officialEvidenceURL);
+   assert.equal(displayed.fullStandingsVerified,false);
+   assert.equal(displayed.fullFixtureListVerified,false);
+  }
+ }
+});
+test('BB2 and men historical UI shows verified phase IDs but never calls them complete standings',async()=>{
+ for(const team of ['womenIIB','menB']){
+  const r=runner(data,team);await r.load();
+  assert.ok(r.host.innerHTML.includes('Hivatalos források'));
+  assert.ok(r.host.innerHTML.includes('Teljes kiírás és tabella hiányzik'));
+  assert.ok(r.host.innerHTML.includes('egyedi jegyzőkönyv'));
+ }
+ const women=runner(data,'womenIIB');await women.load();
+ for(const id of ['97','350','351'])assert.ok(women.host.innerHTML.includes('>'+id+'</td>'));
+ assert.ok(women.host.innerHTML.includes('MRSZ jegyzőkönyv'));
+ const men=runner(data,'menB');await men.load();
+ assert.ok(!men.host.innerHTML.includes('MRSZ jegyzőkönyv'));
+});
