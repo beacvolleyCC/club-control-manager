@@ -1,0 +1,31 @@
+name: Manager women I historical comparison QA
+on:
+  pull_request:
+    paths:
+      - 'app.js'
+      - 'tests/manager-women1-history-view.test.cjs'
+      - 'data/competition-strength/women1_2026_27_historical_lookback.json'
+      - '.github/workflows/manager-women1-history-view-qa.yml'
+  push:
+    paths:
+      - 'app.js'
+      - 'tests/manager-women1-history-view.test.cjs'
+      - 'data/competition-strength/women1_2026_27_historical_lookback.json'
+      - '.github/workflows/manager-women1-history-view-qa.yml'
+  workflow_dispatch:
+jobs:
+  history-view-qa:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Manager code
+        run: node --check app.js
+      - name: Historical women I data integrity
+        run: node --test tests/women1-historical-strength.test.cjs tests/women1-current-lookback.test.cjs
+      - name: Read-only history view regression
+        run: node --test tests/manager-women1-history-view.test.cjs

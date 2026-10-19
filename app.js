@@ -12,7 +12,7 @@
       ['trainings','Edzések','◇'],['athletes','Sportolók','○'],['passes','BEAC import','▤'],['calendar','Naptár','□'],['archive','Archívum','⌁']
     ]},
     competition:{label:'Versenysport',glyph:'◇',modules:[
-      ['overview','Áttekintés','△'],['trainings','Edzések','◇'],['matches','Meccsek','◆'],['courts','Pályák','▦'],['standings','Tabella','≡'],['teams','Csapatok','▱'],['players','Játékosok','○'],['calendar','Naptár','□'],['notifications','Értesítések','◉']
+      ['overview','Áttekintés','△'],['trainings','Edzések','◇'],['matches','Meccsek','◆'],['courts','Pályák','▦'],['standings','Tabella','≡'],['history','Előző idény','↗'],['teams','Csapatok','▱'],['players','Játékosok','○'],['calendar','Naptár','□'],['notifications','Értesítések','◉']
     ]}
   };
 
@@ -191,7 +191,7 @@
   function canRoute(area,module){
     if(module==='planning')return can('competition.trainings')||can('mass.trainings');
     if(area==='competition'&&module==='notifications') return canAnyAction('competition.players','notify');
-    if(area==='competition'&&(module==='standings'||module==='courts')) return can('competition.matches');
+    if(area==='competition'&&(module==='standings'||module==='courts'||module==='history')) return can('competition.matches');
     if(area==='mass'&&module==='archive')return can('mass.trainings')||can('mass.calendar');
     return can(`${area}.${module}`);
   }
@@ -1577,6 +1577,104 @@
     $('#ccCourtRefresh')?.addEventListener('click',()=>{ccCourtImpactState_.loaded=false;ccCourtImpactState_.error='';ccLoadCourtImpact_({force:true})});
   }
 
+
+  // Historical comparison only. 2026/27 has no current-season Elo and cannot
+  // inherit 2025/26 roster strength. Do not couple this screen to active matches.
+  const ccWomenHistoryState_={loaded:false,loading:false,error:'',rows:[],scope:'all'};
+  const CC_WOMEN_HISTORY_STATES_=Object.freeze({
+    supported_exact:'Névegyezés',
+    supported_alias:'Hivatalos rövid név',
+    supported_case:'Névegyezés',
+    review_alias:'Névkapcsolat ellenőrzendő',
+    no_women_i_history:'Nincs előző I. osztályú adat'
+  });
+  async function ccLoadWomenHistory_(){
+    if(ccWomenHistoryState_.loading||ccWomenHistoryState_.loaded)return;
+    ccWomenHistoryState_.loading=true;
+    try{
+      const response=await fetch('./data/competition-strength/women1_2026_27_historical_lookback.json',{cache:'no-store'});
+      if(!response.ok)throw new Error('A történeti adatállomány nem érhető el.');
+      const data=await response.json();
+      if(data?.schemaVersion!==1||data?.currentSeason!=='2026/27'||data?.historicalSeason!=='2025/26'||
+          !Array.isArray(data?.teams)||data.teams.length!==12||
+          data?.noPredictiveOrCurrentStrength!==true||
+          data.teams.some(t=>t.currentStrengthRating!=null||t.continuityConfirmed!==false))
+        throw new Error('A történeti összehasonlítás adatainak ellenőrzése sikertelen.');
+      const ids=new Set(data.teams.map(t=>String(t.currentBrszTeamId)));
+      if(ids.size!==12)throw new Error('Duplikált csapatazonosító a történeti adatokban.');
+      ccWomenHistoryState_.rows=data.teams;
+      ccWomenHistoryState_.error='';
+    }catch(err){
+      ccWomenHistoryState_.error=text(err?.message||'A korábbi idény adatai nem elérhetők.');
+      ccWomenHistoryState_.rows=[];
+    }finally{
+      ccWomenHistoryState_.loading=false;
+      ccWomenHistoryState_.loaded=true;
+      if(ccRouteIs_('competition','history'))ccRenderWomenHistory_();
+    }
+  }
+  function ccWomenHistoryRows_(){
+    const rows=ccWomenHistoryState_.rows.filter(row=>{
+      if(ccWomenHistoryState_.scope==='supported')return row.identityStatus.startsWith('supported_');
+      if(ccWomenHistoryState_.scope==='review')return row.identityStatus==='review_alias';
+      if(ccWomenHistoryState_.scope==='missing')return row.identityStatus==='no_women_i_history';
+      return true;
+    });
+    return rows.sort((a,b)=>(a.historicalOfficialPlace??999)-(b.historicalOfficialPlace??999)
+      ||text(a.currentTeam).localeCompare(text(b.currentTeam),'hu'));
+  }
+  function ccRenderWomenHistory_(){
+    if(!ccRouteIs_('competition','history'))return;
+    if(!ccWomenHistoryState_.loaded&&!ccWomenHistoryState_.loading)
+      Promise.resolve().then(ccLoadWomenHistory_);
+    const rows=ccWomenHistoryRows_();
+    const fmtNumber=(n,d=0)=>Number.isFinite(Number(n))&&n!==null
+      ?Number(n).toLocaleString('hu-HU',{minimumFractionDigits:d,maximumFractionDigits:d}):'–';
+    const official=(row)=>row.historicalOfficialPlace==null?'–':fmtNumber(row.historicalOfficialPlace)+'.';
+    const score=(row)=>row.historicalWins==null||row.historicalLosses==null?'–'
+      :fmtNumber(row.historicalWins)+'–'+fmtNumber(row.historicalLosses);
+    const sets=(row)=>row.historicalSetsFor==null?'–'
+      :fmtNumber(row.historicalSetsFor)+'–'+fmtNumber(row.historicalSetsAgainst);
+    const tag=(row)=>CC_WOMEN_HISTORY_STATES_[row.identityStatus]||'Ellenőrzendő';
+    const table=rows.map(row=>
+      '<tr>'+
+      '<td><b>'+esc(row.currentTeam)+'</b>'+
+        '<div style="font-size:12px;opacity:.74">'+esc(tag(row))+'</div>'+
+        (row.identityStatus==='review_alias'?'<div style="font-size:12px;opacity:.74">Korábbi név: '+esc(row.historicalTeam||'–')+'</div>':'')+'</td>'+
+      '<td style="text-align:right">'+esc(official(row))+'</td>'+
+      '<td style="text-align:right">'+esc(score(row))+'</td>'+
+      '<td style="text-align:right">'+esc(sets(row))+'</td>'+
+      '<td style="text-align:right">'+esc(row.historicalLast5Wins===null?'–':fmtNumber(row.historicalLast5Wins)+'/5')+'</td>'+
+      '<td style="text-align:right">'+esc(fmtNumber(row.historicalExperimentalElo,1))+'</td>'+
+      '</tr>'
+    ).join('');
+    const opts=[['all','Minden csapat'],['supported','Alátámasztott névegyezések'],
+      ['review','Ellenőrzendő névkapcsolatok'],['missing','I. osztályú előzmény nélkül']]
+      .map(([v,t])=>'<option value="'+v+'" '+(ccWomenHistoryState_.scope===v?'selected':'')+'>'+t+'</option>').join('');
+    const loading=ccWomenHistoryState_.loading||!ccWomenHistoryState_.loaded;
+    $('#viewContent').innerHTML=
+      '<div class="page-intro cc-page-header-panel"><div><h2>Előző idény · női Budapest I.</h2>'+
+      '<p>A 2026/27-es ellenfelek 2025/26-os teljesítménye. Nem a jelenlegi erősorrend.</p></div>'+
+      '<div class="page-actions"><button type="button" class="button quiet" id="ccWomenHistoryRefresh">↻ Frissítés</button></div></div>'+
+      '<article class="panel"><div class="panel-head"><h3>2025/26-os bajnoki mérleg</h3>'+
+      '<label class="field compact"><span>Csapatok</span><select id="ccWomenHistoryScope">'+opts+'</select></label></div>'+
+      '<div style="margin-bottom:12px">Helyezés, mérleg és szettek: hivatalos MRSZ-adatok. Az Elo külön, kísérleti számítás; nem hivatalos és nem győzelmi esély.</div>'+
+      (ccWomenHistoryState_.error?'<div class="ms-empty error">'+esc(ccWomenHistoryState_.error)+'</div>':
+      loading?'<div class="ms-empty">Korábbi idény adatainak betöltése…</div>':
+      '<div class="ms-table-scroll" style="overflow-x:auto"><table class="ms-table"><thead><tr>'+
+      '<th>2026/27 csapat</th><th>2025/26 hely</th><th>Gy–V</th><th>Szettek</th>'+
+      '<th>Utolsó 5 győzelem</th><th>Kísérleti Elo</th></tr></thead><tbody>'+table+'</tbody></table></div>')+
+      '<details style="margin-top:16px"><summary>Az adatok értelmezése</summary><p>A 2025/26-os 129 eredményes női I. osztályú mérkőzésen alapulnak. Az Elo minden csapatnál 1500-ról indul, K=24 értékkel, és nincs előrejelzésre kalibrálva. Az MTK és a Mozdulj névkapcsolata külön ellenőrzést igényel. A Kandó és a Semmelweis nem szerepelt az előző női I. tabellában; más osztály eredményeit nem kevertük ide. Keretfolytonosságot nem igazoltunk.</p></details>'+
+      '</article>';
+    $('#ccWomenHistoryScope')?.addEventListener('change',e=>{
+      ccWomenHistoryState_.scope=e.target.value;ccRenderWomenHistory_();
+    });
+    $('#ccWomenHistoryRefresh')?.addEventListener('click',()=>{
+      ccWomenHistoryState_.loaded=false;ccWomenHistoryState_.error='';ccWomenHistoryState_.rows=[];
+      ccLoadWomenHistory_();
+    });
+  }
+
   function renderModule(){
     const m=state.module;
     if(m==='settings'){if(!can('settings')){renderPermissionDenied();return}renderSettings();return}
@@ -1591,6 +1689,7 @@
     if(state.area==='competition'&&m==='trainings'){renderCompetitionTrainingCards_();return}
     if(state.area==='competition'&&m==='matches'){renderCompetitionMatchCards_();return}
     if(state.area==='competition'&&m==='standings'){renderManagerStandings_();return}
+    if(state.area==='competition'&&m==='history'){ccRenderWomenHistory_();return}
     if(state.area==='competition'&&m==='courts'){ccRenderCourtImpact_();return}
     if(state.area==='competition'&&m==='fees'){renderPlaceholder('Díjak','A jelenlegi havi díj-/fizetési mátrix production parityje ide kerül.',['Játékosonkénti havi státusz','Edzői díj','Bérlet','Audit / felülírás']);return}
     if(state.area==='competition'&&m==='competition'){renderPlaceholder('Versenyadatok','Competition Core: tabella, teljes meccslista, BRSZ/MRSZ források és konfliktusok.',['054 Competition Core backend előtt nincs production adat','Saját csapatok meccsei az events bridge-en keresztül','Külső liga-meccsek nem kerülnek az events táblába']);return}
