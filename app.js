@@ -2671,7 +2671,7 @@
 
 
   // Isolated Hunvolley screenshots: not the automatic BRSZ schedule or league source.
-  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[]};
+  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[],userMatches:[]};
   let ccBrszEffectiveMatches_=[];
   // Snapshot-based league selection is independent from BEAC team permissions.
   // Empty value means follow the existing BEAC team context.
@@ -2710,9 +2710,9 @@
     if(ccMrszPhotoState_.loaded||ccMrszPhotoState_.loading)return;
     ccMrszPhotoState_.loading=true;
     try{
-      const [data,sourceMatches]=await Promise.all([rpc('cc_manager_competition_mrsz_snapshot_v2'),rpc('cc_manager_competition_source_matches_effective_v1')]);
+      const [data,sourceMatches,userMatches]=await Promise.all([rpc('cc_manager_competition_mrsz_snapshot_v2'),rpc('cc_manager_competition_source_matches_effective_v1'),rpc('cc_manager_competition_user_schedule_v1').catch(()=>[])]);
       ccBrszEffectiveMatches_=Array.isArray(sourceMatches)?sourceMatches:[];
-      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[]};
+      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[],userMatches:Array.isArray(userMatches)?userMatches:[]};
     }catch(err){ccBrszEffectiveMatches_=[];ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
     else if(ccRouteIs_('competition','standings'))renderManagerStandings_();
@@ -3134,16 +3134,57 @@
       if(match)ccOpenSourceMatchEditor_(match);else status('A forrásrekord nem található.','error');
     }));
   }
+  // Strict source-key link for already verified moved 2026/27 BEAC fixtures.
+// Do not erase genuine completed results, merge unidentified opponents or edit attendance.
+  const CC_MANAGER_KNOWN_DATE_MOVES_=Object.freeze([
+    {league:'Férfi Budapest I. osztály – B csoport',
+      home:'beac',away:'pdse',oldDay:'2026-10-12',newDay:'2026-10-19',
+      key:'ui20261018:menB:beac:pdse:1'},
+    {league:'Női Budapest II. osztály – B csoport',
+      home:'beacii',away:'uteu20pink',oldDay:'2026-10-13',newDay:'2026-10-20',
+      key:'ui20261018:womenIIB:beacii:uteu20pink:1'}
+  ]);
+  function ccManagerKnownMovedFixture_(m,group){
+    return CC_MANAGER_KNOWN_DATE_MOVES_.find(r=>r.league===group
+      &&text(m?.sourceMatchKey||m?._ccSourceKey)===r.key
+      &&m?._ccUserSupplied===true
+      &&text(m?.season)==='2026/27'
+      &&ccMrszNormPairName_(m?.homeName)===r.home
+      &&ccMrszNormPairName_(m?.awayName)===r.away
+      &&ccMrszLocalKickoff_(m?.startsAt).date===r.newDay
+      &&m?.homeSets==null&&m?.awaySets==null)||null;
+  }
+  function ccManagerMatchToday_(){
+    const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const v=k=>parts.find(p=>p.type===k)?.value||'';
+    return v('year')+'-'+v('month')+'-'+v('day');
+  }
+  function ccManagerMatchVisualSort_(a,b,day=ccManagerMatchToday_()){
+    const key=m=>{const p=ccMrszLocalKickoff_(m?.startsAt);return p.date+'T'+p.time};
+    const aa=key(a),bb=key(b),pastA=aa.slice(0,10)<day,pastB=bb.slice(0,10)<day;
+    if(pastA!==pastB)return pastA?1:-1;
+    const diff=aa.localeCompare(bb);
+    return diff?(pastA?-diff:diff):text(a?.homeName).localeCompare(text(b?.homeName),'hu');
+  }
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
     const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
-    const key=m=>ccMrszLocalKickoff_(m._ccOriginalStartsAt||m.startsAt).date+'|'+ccMrszNormPairName_(m._ccOriginalHomeName||m.homeName)+'|'+ccMrszNormPairName_(m._ccOriginalAwayName||m.awayName);
+    const updated=(ccMrszPhotoState_.userMatches||[]).filter(m=>ccManagerKnownMovedFixture_(m,group));
+    const superseded=m=>m?.homeSets==null&&m?.awaySets==null&&updated.some(u=>{
+      const r=ccManagerKnownMovedFixture_(u,group);
+      return r&&ccMrszLocalKickoff_(m?.startsAt).date===r.oldDay
+        &&ccMrszNormPairName_(m?.homeName)===r.home
+        &&ccMrszNormPairName_(m?.awayName)===r.away;
+    });
+    const key=m=>ccMrszLocalKickoff_(m._ccOriginalStartsAt||m.startsAt).date+'|'
+      +ccMrszNormPairName_(m._ccOriginalHomeName||m.homeName)+'|'
+      +ccMrszNormPairName_(m._ccOriginalAwayName||m.awayName);
     const unique=new Map();
     const take=(match,priority)=>{
+      if(superseded(match))return;
       const k=key(match),prior=unique.get(k);
       const annotated={...match,__sourcePriority:priority};
-      // Explicit admin corrections win over unchanged snapshots even after a sync.
       if(!prior||(!prior._ccManualOverride&&annotated._ccManualOverride)
         ||(!!prior._ccManualOverride===!!annotated._ccManualOverride&&priority>=prior.__sourcePriority))
         unique.set(k,annotated);
@@ -3152,8 +3193,8 @@
     canonicalMatches.forEach(m=>take(m,2));
     brsz.forEach(m=>take(m,2));
     photo.forEach(m=>take(m,3));
-    const localSort=m=>{const t=ccMrszLocalKickoff_(m.startsAt);return t.date+'T'+t.time};
-    return [...unique.values()].sort((a,b)=>localSort(a).localeCompare(localSort(b))||text(a.homeName).localeCompare(text(b.homeName),'hu'));
+    updated.forEach(m=>take(m,4));
+    return [...unique.values()].sort((a,b)=>ccManagerMatchVisualSort_(a,b));
   }
 
   // An unscored BEAC–BEAC record is a source anomaly, not a confirmed fixture.
