@@ -87,9 +87,11 @@ test('mobile layout keeps set scores readable beneath the match row',()=>{
 test('PWA cache and HTML assets are versioned for the mobile match-row fix',()=>{
  const html=fs.readFileSync('index.html','utf8');
  const sw=fs.readFileSync('sw.js','utf8');
- assert.ok(html.includes('styles.css?v=20261018-hu-match-time-v55'));
- assert.ok(html.includes('app.js?v=20261018-hu-match-time-v55'));
- assert.ok(sw.includes("cc-manager-20261018-hu-match-time-v55"));
+ assert.match(html,/styles[.]css[?]v=[a-z0-9-]+/i);
+ const appVersion=html.match(/app[.]js[?]v=([a-z0-9-]+)/i)?.[1];
+ const swVersion=sw.match(/const CACHE='cc-manager-([a-z0-9-]+)'/i)?.[1];
+ assert.ok(appVersion,'Manager JS must be cache-versioned');
+ assert.equal(swVersion,appVersion,'PWA shell and JS cache revisions must match');
 });
 
 test('official UTC kickoff is shown in Budapest time and merged into local-day fixture',()=>{
