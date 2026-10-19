@@ -1,6 +1,20 @@
 # Club Control – HANDOVER_CURRENT
 
 
+## 0/D. 2026-10-19 – Férfi / BB2 történeti lefedettség a Managerben
+
+- A következő fejlesztés sikeresen beolvadt a Manager `main` ágba: [PR #64](https://github.com/beacvolleyCC/club-control-manager/pull/64), commit `0cee77e102953a5f770aa457d7a6ffc4bd0ce6f9`. A Manager **Versenysport → Előző idény** most **Női BB1 / Női BB2 / Férfi** választót tartalmaz.
+- BB1: 2025/26-os 129 hivatalos női I. eredmény és korábban validált kísérleti Elo (változatlan).
+- Női BB2: a 2025/26-os **női II. A csoportban** játszott, a 2026/27-es B csoportban szerepel. A másodlagos nyilvános aggregátor 8 eredményét csak *nem teljes, szövetségileg még nem ellenőrzött mintaként* jelenítjük meg. **Nem** számít teljes tavalyi mérleg, tabella vagy Elo. Minta forrása: `https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation`.
+- Férfi: nem sikerült a teljes 2025/26-os hitelesített eredménysort megszerezni; nem állítunk róla Elo-t, korábbi helyezést vagy győzelmi arányt.
+- Jelenlegi 2026/27-es mindkét osztálycsoport 7–7 csapatát azonosítottuk. Férfi **PDSE** a régi forrásban két BRSZ-ID-val (1091 és 1214) található, automatikusan nem összevonható. Új **Mozdulj SE férfi** 2026/10/18-as javított kiírásban szerepel, de férfi ID-ja a régi 2026/10/01-es archívumból nem ismert. Női Mozdulj ID-t férfihoz csatolni TILOS.
+- Research dataset: `data/competition-strength/men-bb2_202627_historical_coverage.json`; dokumentáció: `docs/statistics/MEN_BB2_HISTORICAL_COVERAGE_20261019.md`; QA: `tests/manager-men-bb2-history.test.cjs`.
+- **QA 3/3 GitHub workflow zöld** a PR #64 legutolsó commitján; PWA HTML/worker cache egyaránt `20261019-history-coverage-v59`. `main` ellenőrizve. A tényleges Cloudflare/Pages/webes deployment sikerét továbbra sem tudjuk megerősíteni; a főág merge nem egyenlő automatikusan a felhasználó eszközén látható LIVE UI-val.
+- **Nincs Supabase adatmutáció ebben a fejlesztésben**. Játékosok jelenléte, események, találkozó/pálya adatok, automatikus üzenetek változatlanok.
+- **Következő valódi függőség:** előző idény hivatalos MRSZ/BRSZ `womenIIA` és férfi liga (pontos alcsoport és versenykód) teljes eredmény- és tabellafájlja. Egyező helyezés/mérleg/szett-szám visszaellenőrzése után készíthető a BB2 és férfi történeti Elo a női BB1 mintájára. A teljes 2026/27-es `cc_competition_user_schedule_v1` Player/Manager megjelenítő ágai ettől függetlenül továbbra is kiadásra várnak (forráskulcs/preservation QA).
+
+---
+
 ## 0/C. 2026-10-19 – 2026/27 női I. ellenfelek történeti erősség-összekapcsolása
 
 A `0/B` fejezetben leírt „PR #62 draft” **már nem aktuális**: PR #62 kutatási adat + keresztazonosító a `main`-ben, commit `566dd76b7cac91f6664f3dd9c83bf04ef7f54d57`. 2026/27 női I. 12 BRSZ csapat:
