@@ -1,5 +1,20 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/E. 2026-10-19 – 2025/26 BB2 és férfi történeti, fázisonként auditált adatforrások
+
+**GitHub Manager `main` frissítés:** [PR #65](https://github.com/beacvolleyCC/club-control-manager/pull/65) beolvasztva, commit `1eaf354e481196c42d4249eafb3ccb6cedfdf6fe`. **5/5 GitHub CI sikeres**, a korábbi történeti QA-k is. A Manager PWA JS verzió és service-worker cache `20261019-history-phases-v60`. **Cloudflare/Pages tényleges, böngészőben elérhető deploy nincs önállóan hitelesítve**.
+
+- **MRSZ 2025/26 Női Budapest II.**: az A alapszakasz `p_verseny_al_kod=97` (egy [hivatalos 6189-es jegyzőkönyv](https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_merkozes_kod=6189&p_verseny_al_kod=97) megerősíti a csoportot), a felső, 1–8. rájátszás `350` ([9033-as jegyzőkönyv](https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_fo_cim=NoiBudapestII.osztalyRajatszas1-8.helyert&p_merkozes_kod=9033&p_verseny_al_kod=350)), az alsó, 9–16. rájátszás `351` ([8460-as jegyzőkönyv](https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_fo_cim=NoiBudapestII.osztalyRajatszas9-16.helyert&p_merkozes_kod=8460&p_verseny_al_kod=351)). A B alapszakasz pontos MRSZ-kódja és a **teljes hivatalos tabellák + összes eredmény** még nincsenek ellenőrizve. A BB2 felső/alsó rájátszási szereplését sem szabad ebből feltételezni.
+- **Férfi I. 2025/26**: a teljes hivatalos versenyazonosító + tabella és mérkőzéslista még hiányzik. A [BRSZ PDSE 1091-es profil](https://brsz.hu/m/csapatok.php?csapat_id=1091) **férfi II. osztályt** mutat, nem tekinthető automatikusan az idei férfi I/B PDSE megfelelőjének. Az idei 1214-es, valamint az új Mozdulj SE férfi csapat továbbra is identitás-QA alatt.
+- Kutatási (még **nem teljes**) MRSZ-forrásmanifeszt: `data/competition-history/2025_26_men_womenII_source_manifest.json`. Tartalma 2 verseny, 4 női II. és 1 férfi I. fázis, de **egyikhez sincs teljes visszaszámolt hivatalos tabella és eredménylista**.
+- Új, írásmentes, fail-closed ellenőrző: `scripts/history/validate-official-competition.cjs`, teszt: `tests/historical-2025-phase-validation.test.cjs`. **Csak akkor fogad el** egy valódi MRSZ-archív adatcsomagot, ha a teljes fázislista, hivatalos csapatok, egyedi mérkőzéskódok és eredmények megvannak, és a W/L + szettadat a tabellával pontosan egyezik. A rájátszás **áthozott adatait jelenleg szándékosan blokkolja**, amíg dokumentáltan nincsenek külön számításként kezelve (nem dupláz).
+- Manager UI: `Versenysport → Előző idény → Női BB2 / Férfi` panelen a meglévő részleges forrás státuszon túl **„Hivatalos források · 2025/26”** táblázat jelenik meg: versenyszakasz, MRSZ azonosító (ha igazolt), az adatok teljessége és a hivatalos jegyzőkönyvre mutató link. Forrásadat: `data/competition-strength/men-bb2_202627_historical_coverage.json`, új mező `officialPhaseSources`.
+- **TILOS most Elo-t, bajnoki teljes mérleget, személyi/keretfolytonosságot vagy győzelmi valószínűséget képezni** a részleges férfi/BB2 forrásokból. A jelenlegi időpont- és jelenlét adatbázis **nem módosult**, push nem ment ki.
+- Következő feladat: a hivatalos 2025/26-os női II. alapszakasz + rájátszás, illetve férfi I. teljes fázis-adatcsomagjának beszerzése; a rájátszásos pontáthozatal explicit szabályainak kezelése; csak teljes matematikai egyezés után történeti Elo. A korábban felhasználó által beküldött **2026/27-es teljes menetrend külön UI merge/Player megjelenítő fejlesztési ágai továbbra is nyitottak**, és fontosabbak, ha a felhasználó újra a meccsek kezelésére tér vissza.
+
+---
+
+
 
 ## 0/D. 2026-10-19 – Férfi / BB2 történeti lefedettség a Managerben
 
