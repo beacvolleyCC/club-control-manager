@@ -1,0 +1,33 @@
+name: Manager full imported fixtures QA
+on:
+  pull_request:
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/manager-full-imported-fixture-20261019.test.cjs'
+      - '.github/workflows/manager-full-imported-schedule-qa.yml'
+  push:
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/manager-full-imported-fixture-20261019.test.cjs'
+      - '.github/workflows/manager-full-imported-schedule-qa.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JS syntax
+        run: node --check app.js
+      - name: Complete 2026/27 schedule regression
+        run: |
+          node --test tests/manager-full-imported-fixture-20261019.test.cjs
+          node --test tests/manager-current-match-date-20261019.test.cjs
