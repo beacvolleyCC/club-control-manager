@@ -1688,7 +1688,7 @@
       '<button type="button" class="button '+(ccClubHistoryState_.selected===key?'primary':'quiet')+'" data-cc-history-team="'+key+'">'+esc(label)+'</button>').join('')+'</div>';
   }
   function ccClubHistoryBindNav_(){
-    $('[data-cc-history-team]').forEach(btn=>btn.addEventListener('click',()=>{
+    Array.from(document?.querySelectorAll?.('[data-cc-history-team]')||[]).forEach(btn=>btn.addEventListener('click',()=>{
       const key=text(btn.dataset.ccHistoryTeam);
       if(!CC_CLUB_HISTORY_OPTIONS_.some(opt=>opt[0]===key)||ccClubHistoryState_.selected===key)return;
       ccClubHistoryState_.selected=key;
