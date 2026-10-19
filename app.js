@@ -281,7 +281,7 @@
     try{
       const b=await rpc('cc_manager_bootstrap_v1');
       if(!b?.manager)throw new Error('A Manager bootstrap nem adott érvényes fiókot.');
-      state.manager=b.manager;state.permissions=Array.isArray(b.permissions)?b.permissions:[];ccCourtImpactState_.data=null;ccCourtImpactState_.error='';state.teams=Array.isArray(b.teams)?b.teams:[];state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};state.financeData=null;state.financePassCatalog=[];state.financePassCatalogLoaded=false;state.financeLoading=false;state.equipmentByTeam.clear();applyManager();ensureAuthorizedRoute_();
+      state.manager=b.manager;state.permissions=Array.isArray(b.permissions)?b.permissions:[];ccCourtImpactState_.data=null;ccCourtImpactState_.error='';ccCourtImpactState_.loaded=false;ccCourtImpactState_.token++;state.teams=Array.isArray(b.teams)?b.teams:[];state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};state.financeData=null;state.financePassCatalog=[];state.financePassCatalogLoaded=false;state.financeLoading=false;state.equipmentByTeam.clear();applyManager();ensureAuthorizedRoute_();
       const jobs=[];
       if(can('competition.overview'))jobs.push(loadOverview(),loadRsvpMatrix());else{state.overview={};state.rsvpMatrix={events:[],players:[],responses:[]}}
       if(can('competition.trainings')||can('competition.matches'))jobs.push(loadCardRsvpMatrix().catch(err=>{console.warn('Competition card RSVP matrix unavailable',err);state.cardRsvpMatrix=state.rsvpMatrix||{events:[],players:[],responses:[]}}),loadCoachAvailability().catch(()=>{}));else{state.cardRsvpMatrix={events:[],players:[],responses:[]};state.coachAvailability=[]}
