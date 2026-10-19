@@ -3215,7 +3215,7 @@
     return Number.isInteger(h)&&Number.isInteger(a)&&Math.max(h,a)===3&&Math.min(h,a)>=0&&Math.min(h,a)<=2;
   }
   function ccManagerCompleteUserSchedule_(all){
-    if(!Array.isArray(all)||all.length<292)return false;
+    if(!Array.isArray(all)||all.length!==300)return false;
     const keys=new Set(),groups=new Map(),leagues=Object.keys(CC_MANAGER_IMPORTED_MIN_COUNTS_);
     let results=0;
     for(const m of all){
@@ -3231,7 +3231,7 @@
         results++;
       }
     }
-    return results>=8&&leagues.every(g=>(groups.get(g)||0)>=CC_MANAGER_IMPORTED_MIN_COUNTS_[g]);
+    return results===8&&leagues.every(g=>(groups.get(g)||0)==={'Férfi Budapest I. osztály – A csoport':42,'Férfi Budapest I. osztály – B csoport':42,'Női Budapest I. osztály':131,'Női Budapest II. osztály – A csoport':42,'Női Budapest II. osztály – B csoport':43}[g]);
   }
   function ccManagerUserPairKey_(m){
     return ccMrszLocalKickoff_(m?.startsAt).date+'|'
@@ -3261,11 +3261,7 @@
     const results=[];
     for(const m of data){
       const key=ccManagerUserPairKey_(m);
-      if(scored.has(key)){
-        if(ccManagerCompletedResult_(m)&&conflicts.has(key))
-          results.push({...m,__ccResultConflict:true});
-        continue;
-      }
+      if(scored.has(key))continue; // conflict flagged on one preserved scored source row
       results.push(m);
     }
     for(const [key,{m}] of scored)results.push(conflicts.has(key)?{...m,__ccResultConflict:true}:m);
