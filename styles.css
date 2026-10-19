@@ -6829,7 +6829,7 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
   width:95px;
   white-space:nowrap;
 }
-.cc-protocol-markers{display:inline-flex;gap:5px;align-items:center;justify-content:flex-end;min-height:21px}
+.cc-protocol-markers{display:flex;width:100%;gap:5px;align-items:center;justify-content:flex-end;min-height:21px}
 .cc-protocol-marker{display:inline-grid;align-items:center;justify-items:center;color:var(--text);font-weight:750;font-size:11px;line-height:1;flex:0 0 auto}
 .cc-protocol-marker.is-captain,.cc-protocol-marker.is-libero{height:20px;min-width:20px;padding:0 3px;border:1px solid currentColor;border-radius:5px;font-variant-numeric:tabular-nums}
 .cc-protocol-marker.is-libero{font-size:10px}
@@ -6968,3 +6968,9 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 #ccSourceMatchForm .cc-match-time-wheel b{flex:0 0 auto;font-size:18px}
 #ccSourceMatchForm #ccMDate{min-height:44px;box-sizing:border-box;font:inherit;font-size:15px;font-variant-numeric:tabular-nums}
 @media(max-width:550px){#ccSourceMatchForm .cc-match-time-wheel select{max-width:none;min-height:48px}}
+
+/* 2026-10-19: stable right-aligned protocol badge order: captain, libero, substitute. */
+.cc-protocol-markers .cc-protocol-marker.is-subs{margin-left:3px;order:99}
+.cc-protocol-markers .cc-protocol-marker.is-captain{order:1}
+.cc-protocol-markers .cc-protocol-marker.is-libero{order:2}
+.cc-protocol-markers .cc-protocol-marker.is-no-entry{order:98}
