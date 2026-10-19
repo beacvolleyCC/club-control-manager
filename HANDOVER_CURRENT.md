@@ -1,5 +1,25 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/B. 2026-10-19 – ténylegesen végrehajtott LIVE és Manager főág (aktuálisabb, mint a 0/A történeti állapot)
+
+Az alábbi rész **felülírja** a korábbi, kizárólag olvasási / érintetlen jelenlétről szóló 0/A előzményt a most megjelölt eseményekre. Utolsó ellenőrzés: 2026-10-19 Budapest.
+
+**LIVE Supabase `snqsxlyhontaepembaic`**:
+- **2026-10-20 19:30**, Női BB2 **BEAC II.–UTE U20 Pink**, Player `events.id=b99c5397-8b51-40d0-a03c-e399c011bd3e`, eredeti UUID megtartva és `active`. Találkozó **18:30**, Bogdánfy csarnok, **2-es pálya**. A 20:00-s BB2 edzés `9c7b7af9-034a-4a2a-bde7-8c21a9d23cfa` `cancelled`.
+- A 12 edzésre `going` játékosból **mind a 12 eleve benne volt a régi meccs 13 `going` sorában**; ezért nem készült duplikáció, `availability` nem módosult. Meccsen 13 `going`, 1 `not_going`; 1 korábbi `going` személynek a friss dátumra külön megerősítés indokolt.
+- Még **16 igazolt dátumazonos, aktív csapatedzés** kapott `cancelled` státuszt a rögzített meccsek miatt (11 hazai, 5 idegenbeli); **egyiken sem volt `going` jelentkezés**. Audit: `cc_fixture_training_collision_cancel_20261019`.
+- Hiányzó **Mozdulj SE** férfimeccsek létrehozva: **2026-11-18 20:00 idegenbeli** (`e4491cea-89cc-4933-9107-07271235fe0f`) és **2027-02-08 19:30 hazai** (`c7d533f3-6e85-47f0-a1f0-542ffa1302d6`). Mindkét ütköző edzés `cancelled`; az idegenbelivel ütköző edzés **1 `going` jelentkezése érintetlen**, nem minősül automatikusan meccses `going`-nak.
+- Fontos felhasználói szabály: **a találkozó időpontja semmilyen módon nem szabja meg a pálya foglaltságát**. A korábban tévesen hozzáadott „előtér / 19:00 után” megjegyzés vissza lett vonva. A meccs 18:30-as találkozója 19:30-as kezdéssel marad. Csak tényleges edzés/meccs időablak + pályaszám alapján szabad teremkihasználást számítani.
+- Az események száma **279**, a jelenléti bejegyzések száma **619**, importkiírás továbbra is **300** sor. Minden esemény/jelenlét-módosítást auditáltunk, az automatikus push-t letiltottuk; **nem állítható, hogy játékosértesítés ment ki**.
+- Új **`cc_manager_court_impact_v1(p_from,p_to)`** read-only RPC LIVE, Manager jogosultságellenőrzéssel, authenticated EXECUTE igen, anon EXECUTE nem. Forrás: `sql/competition_weekly_court_impact_v1.sql`. A teljes idényben **34** aktuális ütköző vagy lemondott edzést azonosít (22 hazai meccs, 11 idegenbeli meccs, 1 még nem azonosított lemondás); a tömegsport-naptár 2026-10-25-ig tartalmaz rögzített eseményt, ezért az utáni szabad sávokat feltételesnek minősítjük.
+
+**Manager főág:** A heti teremtervező UI **Versenysport → Pályák** elkészült és `main`-be squash-merge történt: PR #61, commit `f8d547543b4c9f82d3cbd9b6cd099b0b46cec131`. A kód JavasScript szintaxisa és izolált UI renderje ellenőrzött, mindkét GitHub PR CI zöld (a korábban verziószámot hardcode-oló két regressziós teszt korrigálva). **A GitHub main merge nem igazolja önmagában a publikus Pages/Cloudflare tényleges publikálását; ezt külön ellenőrizni kell.**
+
+**Csapaterősség kutatás:** Két hivatalos női Budapest I. idény, **155+129=284 eredményes meccs**, minden csapat mérlegével és szettjeivel pontosan egyező feldolgozás. K=24, minden idény külön 1500 kezdő Elo. Kód/adat/dokumentáció **PR #62 (draft), nem LIVE**: `feat/historical-women1-team-strength-20261019`; fájl `data/competition-strength/women1_2024_2026_elo_experimental.json`. Az eredmények történeti, kísérleti modellek, nem a jelenlegi 2026/27-es csapaterősség és nem meccsesély-százalék.
+
+**Még nyitott:** a 300 soros 2026/27 kiírás Manager/Player megjelenítő fejlesztési ágai változatlanul különállnak. Stabil forrásazonosítós párosítás, atomikus teljes mentés, ütköző forrásadatok ellenőrzése, CI és tényleges kétoldali webes közzététel szükséges az összevont kiadáshoz. BEAC–BEAC placeholder és más bizonytalan meccsek továbbra is ellenőrzendők.
+
+---
 **Állapot:** 2026-10-19 (Europe/Budapest)  
 **Folytatási kulcs:** `CC-FOLYTATÁS`  
 **Projekt:** BEAC Röplabda / Club Control Manager és Player  
