@@ -1,5 +1,19 @@
 # Club Control – HANDOVER_CURRENT
 
+
+## 0/C. 2026-10-19 – 2026/27 női I. ellenfelek történeti erősség-összekapcsolása
+
+A `0/B` fejezetben leírt „PR #62 draft” **már nem aktuális**: PR #62 kutatási adat + keresztazonosító a `main`-ben, commit `566dd76b7cac91f6664f3dd9c83bf04ef7f54d57`. 2026/27 női I. 12 BRSZ csapat:
+- **8** korábbi (2025/26) női I. csapatnévhez erős / MRSZ-meccslistában alátámasztott azonosság;
+- **2** `review_alias`: **Mozdulj SE → Mozdulj**, **MTK → MTK Budapest** (az előző idény adata ismert, de a szezonközi csapatazonosság további kontrollt igényel);
+- **2** `no_women_i_history`: **Óbudai Egyetem–Kandó SC**, **Semmelweis Egyetem** (másik, női II. osztályú tavalyi előzmény; az I. osztály Elo-ja **NULL**, nem becsült).
+- A 2024/25 és 2025/26 MRSZ összesen **155+129=284** eredménye minden csapatnál egyezik a hivatalos tabella W/L és szettmérlegével. Minden idény Elo-ja külön 1500-ról indul, K=24, **kísérleti, nem a 2026/27-es aktuális csapaterősség, és nem meccsesély**.
+- Reprodukálható állomány: `data/competition-strength/women1_2026_27_historical_lookback.json`, előállító: `scripts/history/build-women1-current-lookback.cjs`. Dokumentum: `docs/statistics/WOMEN1_202627_HISTORICAL_TEAM_CROSSWALK_20261019.md`.
+- Az új **Versenysport → Előző idény** Manager nézet PR **#63** sikeresen `main`-be lett olvasztva (commit `aaa8eedc06e29b981bb8f404f64f952a59d1c713`); **mindhárom GitHub CI workflow sikeres**, beleértve a nézet specifikus QA tesztjét. Olvasható, 12 csapatos, 2025/26-os adat. 2026/27-es Elo a JSON-ban szándékosan mindenhol `null`.
+- **Kiadási státusz:** `main` frissült, PWA cache `20261019-women-history-v58`, de a tényleges Pages/Cloudflare éles megjelenés továbbra sincs külön hitelesítve. Ne állítsuk, hogy a felhasználó biztosan látja. A 300-as user-fixture ágrendszer még nincs összevonva a Manager/Player megjelenítőkkel; source-key illesztés továbbra is kritikus.
+- A személyes jelenlét és események **nem módosultak ebben a fejlesztési körben**, új player notification/push nincs. A teremfoglaltságot továbbra sem befolyásolhatja a találkozó időpontja.
+
+---
 ## 0/B. 2026-10-19 – ténylegesen végrehajtott LIVE és Manager főág (aktuálisabb, mint a 0/A történeti állapot)
 
 Az alábbi rész **felülírja** a korábbi, kizárólag olvasási / érintetlen jelenlétről szóló 0/A előzményt a most megjelölt eseményekre. Utolsó ellenőrzés: 2026-10-19 Budapest.
