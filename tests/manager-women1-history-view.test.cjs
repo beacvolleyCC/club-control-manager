@@ -15,6 +15,7 @@ function fakeRender(data=payload){
    esc:v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])),
    ccRouteIs_:()=>true,
    $:key=>key==='#viewContent'?host:null,
+   $:()=>[],
    fetch:async()=>({ok:true,json:async()=>data})
  };
  vm.createContext(ctx);
