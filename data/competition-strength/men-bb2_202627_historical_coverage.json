@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "generatedOn": "2026-10-19",
+  "sourceStatus": "partial_secondary_sources",
+  "currentSeason": "2026/27",
+  "historicalSeason": "2025/26",
+  "allCompetitionsChecked": false,
+  "notes": [
+    "No 2025/26 historical full standings and fixtures dataset has been validated for these two teams.",
+    "No Elo, season record, team-strength prediction or match-probability is to be inferred from sampled results.",
+    "Women BEAC II. played in women's Budapest II A 2025/26, while the 2026/27 registration is in II B; groups are not directly interchangeable.",
+    "The 2026/27 men's B source IDs include an unresolved PDSE identity (1091 vs 1214), and Mozdulj SE's men's team numeric ID is missing from the 2026-10-01 archive.",
+    "Archived team names do not establish identity or continuity of player rosters."
+  ],
+  "teams": [
+    {
+      "key": "womenIIB",
+      "clubTeam": "BEAC Női II.",
+      "currentLeague": "Női Budapest II. osztály B csoport",
+      "currentTeamSourceName": "BEAC II.",
+      "currentBRSZTeamId": 959,
+      "historicalGroupCandidate": "Női Budapest II. osztály A csoport",
+      "historicalDivisionConfirmedBySample": true,
+      "completeness": "partial_results_secondary",
+      "historicalStanding": null,
+      "historicalTotalPlayed": null,
+      "historicalTotalWins": null,
+      "historicalTotalLosses": null,
+      "historicalElo": null,
+      "currentStrengthRating": null,
+      "candidateHistoricalResults": [
+        {
+          "date": "2025-11-11",
+          "home": "BEAC II.",
+          "away": "KEAC",
+          "homeSets": 3,
+          "awaySets": 0,
+          "sourceURL": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+          "sourceReliability": "secondary_aggregation_unverified",
+          "historicalGroup": "Női Budapest II. osztály A csoport"
+        },
+        {
+          "date": "2026-01-12",
+          "home": "MAFC-BME",
+          "away": "BEAC II.",
+          "homeSets": 0,
+          "awaySets": 3,
+          "sourceURL": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+          "sourceReliability": "secondary_aggregation_unverified",
+          "historicalGroup": "Női Budapest II. osztály A csoport"
+        },
+        {
+          "date": "2026-01-20",
+          "home": "BEAC II.",
+          "away": "BUDAI XI. C",
+          "homeSets": 3,
+          "awaySets": 1,
+          "sourceURL": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+          "sourceReliability": "secondary_aggregation_unverified",
+          "historicalGroup": "Női Budapest II. osztály A csoport"
+        },
+        {
+          "date": "2026-02-03",
+          "home": "ÓE - Kandó SC",
+          "away": "BEAC II.",
+          "homeSets": 3,
+          "awaySets": 0,
+          "sourceURL": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+          "sourceReliability": "secondary_aggregation_unverified",
+          "historicalGroup": "Női Budapest II. osztály A csoport"
+        },
+        {
+          "date": "2026-02-10",
+          "home": "Corvinus női",
+          "away": "BEAC II.",
+          "homeSets": 0,
+          "awaySets": 3,
+          "sourceURL": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+          "sourceReliability": "secondary_aggregation_unverified",
+          "historicalGroup": "Női Budapest II. osztály A csoport"
+        },
+        {
+          "date": "2026-02-17",
+          "home": "BEAC II.",
+          "away": "HZSE",
+          "homeSets": 3,
+          "awaySets": 0,
+          "sourceURL": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+          "sourceReliability": "secondary_aggregation_unverified",
+          "historicalGroup": "Női Budapest II. osztály A csoport"
+        },
+        {
+          "date": "2026-03-03",
+          "home": "BEAC II.",
+          "away": "MAFC-BME",
+          "homeSets": 3,
+          "awaySets": 0,
+          "sourceURL": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+          "sourceReliability": "secondary_aggregation_unverified",
+          "historicalGroup": "Női Budapest II. osztály A csoport"
+        },
+        {
+          "date": "2026-03-04",
+          "home": "KEAC",
+          "away": "BEAC II.",
+          "homeSets": 1,
+          "awaySets": 3,
+          "sourceURL": "https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation",
+          "sourceReliability": "secondary_aggregation_unverified",
+          "historicalGroup": "Női Budapest II. osztály A csoport"
+        }
+      ],
+      "warnings": [
+        "A fenti 8 eredmény a nyilvános, másodlagos eseménylistában megjelent részhalmaz, NEM teljes idény; mérlegképzésre és Elo-ra nem használható.",
+        "A korábbi A és jelenlegi B csoport összehasonlításához külön bajnoki forrásazonosítás szükséges."
+      ],
+      "currentOpponents": [
+        {
+          "team": "BEAC II.",
+          "brszId": 959,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "Corvinus",
+          "brszId": 866,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "MAFC-BME",
+          "brszId": 1099,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "MTK kék",
+          "brszId": 1165,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "Radzeer SE",
+          "brszId": 1031,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "RKSK felnőtt női",
+          "brszId": 1215,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "UTE U-20 Pink",
+          "brszId": 1223,
+          "identity": "verified_archive_id"
+        }
+      ]
+    },
+    {
+      "key": "menB",
+      "clubTeam": "BEAC Férfi",
+      "currentLeague": "Férfi Budapest I. osztály B csoport",
+      "currentTeamSourceName": "BEAC",
+      "currentBRSZTeamId": 709,
+      "historicalGroupCandidate": null,
+      "historicalDivisionConfirmedBySample": false,
+      "completeness": "historical_dataset_missing",
+      "historicalStanding": null,
+      "historicalTotalPlayed": null,
+      "historicalTotalWins": null,
+      "historicalTotalLosses": null,
+      "historicalElo": null,
+      "currentStrengthRating": null,
+      "candidateHistoricalResults": [],
+      "warnings": [
+        "A 2025/26-os férfibajnokság teljes, ellenőrzött hivatalos eredménysora még hiányzik.",
+        "PDSE a régebbi 2026/27 archívumban két külön BRSZ ID-val szerepel (1214 és 1091), nem lehet őket egy csapatként felülírni.",
+        "Mozdulj SE új férfi I/B csapatként szerepel az október 18-i javított kiírásban, de nem szerepel a 2026.10.01-es archív férfi B kiírásban. A női Mozdulj 863-as azonosítója nem használható hozzá."
+      ],
+      "currentOpponents": [
+        {
+          "team": "BEAC",
+          "brszId": 709,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "Corvinus",
+          "brszId": 865,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "MAFC-Schönherz",
+          "brszId": 640,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "MAFC-Vásárhelyi",
+          "brszId": 45,
+          "identity": "verified_archive_id"
+        },
+        {
+          "team": "Mozdulj SE",
+          "brszId": null,
+          "identity": "new_entrant_unverified_id"
+        },
+        {
+          "team": "PDSE",
+          "brszId": null,
+          "identity": "two_possible_archive_ids",
+          "candidateBrszIds": [
+            1091,
+            1214
+          ]
+        },
+        {
+          "team": "Semmelweis Egyetem",
+          "brszId": 957,
+          "identity": "verified_archive_id"
+        }
+      ]
+    }
+  ]
+}
