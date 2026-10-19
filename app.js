@@ -2677,9 +2677,13 @@
   // Empty value means follow the existing BEAC team context.
   let ccLeagueContextSelection_=(()=>{try{return text(localStorage.getItem('cc-manager-league-context-v1'))}catch(_){return''}})();
   function ccLeagueCatalog_(){
+    const full=ccManagerCompleteUserSchedule_(ccMrszPhotoState_.userMatches);
+    const records=full?ccMrszPhotoState_.userMatches:[];
     return window.CCCompetitionContextCatalog?.build({
-      season:'2026/27',fixtures:ccMrszPhotoState_.fixtures,
-      matches:ccMrszPhotoState_.matches,tables:ccMrszPhotoState_.tables
+      season:'2026/27',
+      fixtures:full?records.filter(x=>x._ccSourceKind==='fixture'):ccMrszPhotoState_.fixtures,
+      matches:full?records.filter(x=>x._ccSourceKind==='result'):ccMrszPhotoState_.matches,
+      tables:ccMrszPhotoState_.tables
     })||[];
   }
   function ccCurrentLeague_(fallback){
