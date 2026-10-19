@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "generatedOn": "2026-10-19",
+  "season": "2025/26",
+  "officialResultsComplete": false,
+  "metricsPermitted": false,
+  "sourceAccess": "The official MRSZ protocol pages and archived BRSZ tables are partly indexed, but full auditable standings and fixtures could not be retrieved in this session. This is a discovery manifest only.",
+  "competitions": [
+    {
+      "scope": "womenII",
+      "league": "Női Budapest II. osztály",
+      "clubTeam": "BEAC II.",
+      "clubHistoricalInitialGroup": "A",
+      "phases": [
+        {
+          "phaseKey": "women-II-A",
+          "phaseType": "preliminary",
+          "competitionSubId": 97,
+          "officialEvidenceURL": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_merkozes_kod=6189&p_verseny_al_kod=97",
+          "evidenceKind": "official_match_protocol_confirms_group",
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false,
+          "beacParticipationInSpecificMatch": false
+        },
+        {
+          "phaseKey": "women-II-B",
+          "phaseType": "preliminary",
+          "competitionSubId": null,
+          "officialEvidenceURL": null,
+          "evidenceKind": "expected_parallel_group_unresolved",
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false,
+          "beacParticipationInSpecificMatch": false
+        },
+        {
+          "phaseKey": "women-II-playoff-top",
+          "phaseType": "playoff",
+          "competitionSubId": 350,
+          "officialEvidenceURL": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_fo_cim=NoiBudapestII.osztalyRajatszas1-8.helyert&p_merkozes_kod=9033&p_verseny_al_kod=350",
+          "evidenceKind": "official_match_protocol_confirms_playoff",
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false,
+          "beacParticipationInSpecificMatch": false
+        },
+        {
+          "phaseKey": "women-II-playoff-bottom",
+          "phaseType": "playoff",
+          "competitionSubId": 351,
+          "officialEvidenceURL": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_fo_cim=NoiBudapestII.osztalyRajatszas9-16.helyert&p_merkozes_kod=8460&p_verseny_al_kod=351",
+          "evidenceKind": "official_match_protocol_confirms_playoff",
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false,
+          "beacParticipationInSpecificMatch": false
+        }
+      ],
+      "notes": [
+        "Whether a playoff standings table carries preliminary points and games must be verified from official rules.",
+        "The historical BEAC II. specific playoff placement and group standings have not been independently verified.",
+        "A scoreless or empty official protocol does not establish a match result."
+      ]
+    },
+    {
+      "scope": "menI",
+      "league": "Férfi Budapest I. osztály",
+      "clubTeam": "BEAC",
+      "clubHistoricalInitialGroup": null,
+      "phases": [
+        {
+          "phaseKey": "men-I-regular",
+          "phaseType": "regular_season",
+          "competitionSubId": null,
+          "officialEvidenceURL": null,
+          "evidenceKind": "archived_BRSZ_team_results_are_partly_search_indexed",
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false,
+          "beacParticipationInSpecificMatch": null
+        }
+      ],
+      "notes": [
+        "Archived BRSZ team page of Óbudai Egyetem-Kandó SC records two 2025/26 BEAC pairings, but not the season's complete fixture and table archive.",
+        "PDSE source identifier 1091 is associated with a Férfi II. osztály team page; do not conflate it with 2026/27 Férfi I/B PDSE 1214 without verified federation identity."
+      ]
+    }
+  ]
+}

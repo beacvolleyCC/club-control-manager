@@ -1,0 +1,45 @@
+name: 2025/26 official phase archive integrity QA
+on:
+  pull_request:
+    paths:
+      - 'scripts/history/validate-official-competition.cjs'
+      - 'app.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/manager-men-bb2-history.test.cjs'
+      - 'data/competition-strength/men-bb2_202627_historical_coverage.json'
+      - 'tests/historical-2025-phase-validation.test.cjs'
+      - 'data/competition-history/2025_26_men_womenII_source_manifest.json'
+      - '.github/workflows/historical-2025-phase-qa.yml'
+  push:
+    paths:
+      - 'scripts/history/validate-official-competition.cjs'
+      - 'app.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/manager-men-bb2-history.test.cjs'
+      - 'data/competition-strength/men-bb2_202627_historical_coverage.json'
+      - 'tests/historical-2025-phase-validation.test.cjs'
+      - 'data/competition-history/2025_26_men_womenII_source_manifest.json'
+      - '.github/workflows/historical-2025-phase-qa.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check scripts/history/validate-official-competition.cjs
+          node --check tests/historical-2025-phase-validation.test.cjs
+      - name: Detect missing historical phases and invalid official stats
+        run: node --test tests/historical-2025-phase-validation.test.cjs
+      - name: Manager historical source evidence UI
+        run: |
+          node --check app.js
+          node --test tests/manager-men-bb2-history.test.cjs tests/manager-women1-history-view.test.cjs

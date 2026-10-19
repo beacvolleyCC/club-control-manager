@@ -1740,6 +1740,23 @@
       '<td>'+esc(x.identity==='verified_archive_id'?'Archív BRSZ azonosító':
         x.identity==='two_possible_archive_ids'?'Ütköző azonosítók: '+(x.candidateBrszIds||[]).join(', '):
         'Még nem igazolt azonosító')+'</td></tr>').join('');
+    const officialPhases=(row?.officialPhaseSources||[]).map(p=>{
+      const source=text(p.officialEvidenceURL);
+      const url=source.startsWith('https://www.hunvolley.info/')
+        ?'<a target="_blank" rel="noopener noreferrer" href="'+esc(source)+'">MRSZ jegyzőkönyv</a>'
+        :'–';
+      const checked=p.fullStandingsVerified===true&&p.fullFixtureListVerified===true;
+      return '<tr><td>'+esc(p.phaseLabel||p.phaseKey)+'</td>'+
+        '<td>'+esc(p.competitionSubId??'–')+'</td>'+
+        '<td>'+esc(checked?'Ellenőrizve':'Teljes kiírás és tabella hiányzik')+'</td>'+
+        '<td>'+url+'</td></tr>';
+    }).join('');
+    const phaseSection=officialPhases?
+      '<article class="panel" style="margin-top:14px"><div class="panel-head"><h3>Hivatalos források · 2025/26</h3></div>'+
+      '<div class="ms-table-scroll" style="overflow-x:auto"><table class="ms-table">'+
+      '<thead><tr><th>Versenyszakasz</th><th>MRSZ kód</th><th>Adatlefedettség</th><th>Bizonyíték</th></tr></thead>'+
+      '<tbody>'+officialPhases+'</tbody></table></div>'+
+      '<p style="margin-top:10px">Az egyedi jegyzőkönyv nem helyettesíti a teljes kiírást és tabellát. Az áthozott eredményt nem számítjuk kétszer.</p></article>':'';
     $('#viewContent').innerHTML=
       ccClubHistoryNav_()+
       '<div class="page-intro cc-page-header-panel"><div><h2>Előző idény · '+title+'</h2>'+
@@ -1755,7 +1772,7 @@
         '<div class="ms-table-scroll" style="overflow-x:auto"><table class="ms-table"><thead><tr><th>Időpont</th><th>Hazai</th><th>Eredmény</th><th>Vendég</th></tr></thead><tbody>'+matches+'</tbody></table></div>'+
         '<p style="margin-top:12px"><a href="https://sportsevents24.com/federation/90/volleyball-hungary-hungarian-volleyball-federation" target="_blank" rel="noopener noreferrer">Forrás: másodlagos eseménylista</a> · az eredmények további szövetségi ellenőrzést igényelnek.</p></article>':'')+
       '<article class="panel" style="margin-top:14px"><div class="panel-head"><h3>2026/27 csapatok · forrásazonosítás</h3></div>'+
-      '<div class="ms-table-scroll" style="overflow-x:auto"><table class="ms-table"><thead><tr><th>Csapat</th><th>BRSZ ID</th><th>Állapot</th></tr></thead><tbody>'+identities+'</tbody></table></div></article>');
+      '<div class="ms-table-scroll" style="overflow-x:auto"><table class="ms-table"><thead><tr><th>Csapat</th><th>BRSZ ID</th><th>Állapot</th></tr></thead><tbody>'+identities+'</tbody></table></div></article>'+phaseSection);
     ccClubHistoryBindNav_();
     $('#ccOtherHistoryRefresh')?.addEventListener('click',()=>{
       ccClubHistoryState_.loaded=false;ccClubHistoryState_.teams=[];ccClubHistoryState_.error='';

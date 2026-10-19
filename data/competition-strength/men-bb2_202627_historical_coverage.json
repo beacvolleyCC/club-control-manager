@@ -150,6 +150,40 @@
           "brszId": 1223,
           "identity": "verified_archive_id"
         }
+      ],
+      "officialPhaseSources": [
+        {
+          "phaseKey": "women-II-A",
+          "phaseLabel": "A csoport alapszakasz",
+          "competitionSubId": 97,
+          "officialEvidenceURL": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_merkozes_kod=6189&p_verseny_al_kod=97",
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false
+        },
+        {
+          "phaseKey": "women-II-B",
+          "phaseLabel": "B csoport alapszakasz",
+          "competitionSubId": null,
+          "officialEvidenceURL": null,
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false
+        },
+        {
+          "phaseKey": "women-II-playoff-top",
+          "phaseLabel": "Rájátszás 1–8.",
+          "competitionSubId": 350,
+          "officialEvidenceURL": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_fo_cim=NoiBudapestII.osztalyRajatszas1-8.helyert&p_merkozes_kod=9033&p_verseny_al_kod=350",
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false
+        },
+        {
+          "phaseKey": "women-II-playoff-bottom",
+          "phaseLabel": "Rájátszás 9–16.",
+          "competitionSubId": 351,
+          "officialEvidenceURL": "https://www.hunvolley.info/pr_a/010/009/p_009.asp?p_evad_kod=2025&p_fo_cim=NoiBudapestII.osztalyRajatszas9-16.helyert&p_merkozes_kod=8460&p_verseny_al_kod=351",
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false
+        }
       ]
     },
     {
@@ -212,6 +246,16 @@
           "team": "Semmelweis Egyetem",
           "brszId": 957,
           "identity": "verified_archive_id"
+        }
+      ],
+      "officialPhaseSources": [
+        {
+          "phaseKey": "men-I-regular",
+          "phaseLabel": "Férfi I. osztály",
+          "competitionSubId": null,
+          "officialEvidenceURL": null,
+          "fullStandingsVerified": false,
+          "fullFixtureListVerified": false
         }
       ]
     }
