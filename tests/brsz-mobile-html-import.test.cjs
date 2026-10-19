@@ -52,7 +52,7 @@ test('the two paths use the same existing Edge Function and preserve event links
 });
 test('HTML/JS/PWA cache is updated for touch device rollout',()=>{
  const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8'),css=fs.readFileSync('styles.css','utf8');
- const htmlAppVersion=html.match(/app\\.js\\?v=([a-z0-9-]+)/i)?.[1];
+ const htmlAppVersion=html.match(/app[.]js[?]v=([a-z0-9-]+)/i)?.[1];
  const workerCacheVersion=sw.match(/const CACHE='cc-manager-([a-z0-9-]+)'/i)?.[1];
  assert.ok(htmlAppVersion,'app.js must use an explicit version');
  assert.equal(workerCacheVersion,htmlAppVersion,'PWA shell and app versions must match');
