@@ -1,5 +1,27 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/G. 2026-10-19 – teljes 2026/27-es kiírás: forráskapcsolás PR-ok QA alatt
+
+**Kizárólag fejlesztési ágakon, még NEM a mainen, és a webes LIVE sem igazolt:**
+- Player [PR #17](https://github.com/beacvolleyCC/player_application/pull/17), branch `feat/20261019-full202627-readonly-schedule`.
+- Manager [PR #68](https://github.com/beacvolleyCC/club-control-manager/pull/68), branch `feat/20261019-full202627-readonly-schedule`.
+
+Mindkettő:
+1. A már éles Supabase `cc_player_competition_user_schedule_v1` / `cc_manager_competition_user_schedule_v1` RPC-jét csak **teljes és ellenőrzött** `300` soros csomagként fogadja el. A megadott 2026/27-es 5 csoport egzakt darabszáma: Férfi A 42, Férfi B 42, Női I 131, Női II/A 42, Női II/B 43; összesen 292 menetrend + 8 eredmény.
+2. A forrás által adott `_ccSourceSystem='user'`, `_ccUserSupplied=true`, `_ccSourceKey`, idény, liga, dátum, `fixture`/`result` különválasztás és érvényes eredmény ellenőrzött. Hiányos/módosult csomagnál **az előző biztonságos kijelzés marad**, nincs részleges felülírás.
+3. Megjelenítő meccslista és csoportkatalógus csak validált teljes forrásból táplálkozik. Régi, nem lejátszott BRSZ-kiírások nem duplikálódnak; régi eredményes MRSZ-jegyzőkönyvek és szereplési adatok külön megmaradnak. A befejezett végeredmények egymásnak ellentmondó változata **egy ellenőrzendő rekordot** eredményez, a Player statisztikájában ilyenkor nem számít.
+4. A Managerben az importforrás `sourceKey` alapján feloldható a korábbi kézi override-szerkesztővel (létező `cc_manager_competition_match_override_save_v1` RPC). **Találkozóhely, találkozóidő és játékos-megjegyzés atomikus összementése még nincs összevonva**, ezt csak a külön szerkesztő/RPC QA után szabad kiadni.
+5. **Nincs új Supabase DML/DDL, nincs jelenlét, events, availability, pályafoglalás vagy push értesítés megváltoztatva.**
+
+**DB audit:** a `private.cc_competition_user_effective_rows_v1()` forrás 2026.10.19-én ténylegesen **300 sor / 300 külön kulcs / 292 fixture / 8 érvényes result / 0 hibás alaprekord**. **1 önmérkőzésgyanús BEAC–BEAC** adat megmaradt ellenőrzésre; a Player nem mutatja megerősített eseményként, a Manager review-ba kerül.
+
+**QA:** az első fejlesztési futásban az új Manager import tesztje 6/6 sikeres, de régi CJS-tesztben szöveges idézőjelhiba volt; a Player import tesztje 4/5 sikeres, a maradék a már elfogadott október 19-i fallback időpontra várt hibásan. A teszteket kijavítottuk. A Manager korábbi jegyzőkönyv-QA fix verzióra kötött ellenőrzését is dinamikusabbra javítottuk. **Az új teljes GitHub CI-futások végleges státusza még függőben van; tilos zöldként jelenteni vagy pusztán merge-ből éles deployt állítani.** A PR-okat csak sikeres CI és source-identity QA után szabad mainbe olvasztani.
+
+**Nyitott következő feladatok:** meccs-atomi szerkesztő/RPC, külön találkozóhely/idő és opcionális játékosmegjegyzés, játékosok számára megjelenő logisztika, határozott meccs vs edzés és teremhatás QA, tényleges Cloudflare/Pages megjelenés ellenőrzése, 2025/26 BB2/férfi teljes hivatalos forrás és történeti Elo. Pályafoglaltság **nem függ** a meeting időpontjától.
+
+---
+
+
 ## 0/F. 2026-10-19 – gyors jegyzőkönyv, mai meccs és statisztikai UI-javítás
 
 Felhasználói kérés: **mindkét app** jegyzőkönyvénél a csereikon legyen a legszélső jobb oldali jel; ettől balra kapitány, liberó; a 2026.10.19-i BEAC–PDSE a 12. helyett a listában megfelelő helyre kerüljön; a statisztikai elemek ne tűnjenek el.
