@@ -1,0 +1,31 @@
+name: Manager current match chronology QA
+on:
+  push:
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/manager-current-match-date-20261019.test.cjs'
+      - '.github/workflows/manager-current-match-20261019-qa.yml'
+  pull_request:
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/manager-current-match-date-20261019.test.cjs'
+      - '.github/workflows/manager-current-match-20261019-qa.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: node --check app.js
+      - name: Today-first chronology and preservation
+        run: node --test tests/manager-current-match-date-20261019.test.cjs
