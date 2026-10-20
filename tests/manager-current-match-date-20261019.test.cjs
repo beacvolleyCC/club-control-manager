@@ -35,7 +35,7 @@ test('Old results are never silently discarded by a later date move',()=>{
  assert.equal(out.length,2);
  assert.ok(out.some(m=>m.homeSets===3));
 });
-test('Today's fixture sorts ahead of both future and past match rows',()=>{
+test("Today's fixture sorts ahead of both future and past match rows",()=>{
  const entries=['2026-10-11T19:30:00','2026-10-21T19:30:00','2026-10-19T19:30:00']
   .map(startsAt=>({startsAt,homeName:'X'}));
  const days=entries.sort((a,b)=>ctx.ccManagerMatchVisualSort_(a,b,'2026-10-19'))
