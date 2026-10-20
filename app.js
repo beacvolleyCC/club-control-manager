@@ -624,8 +624,8 @@
       men=text(contextTeamId)==='10000000-0000-4000-8000-000000000003';
     const controls=men?'<span class="cc-overview-men-groups" role="group" aria-label="Férfi bajnoki csoport">'
       +['B','A'].map(g=>'<button type="button" data-overview-men-group="'+g+'" aria-pressed="'+(ccMrszMenGroup_===g)+'" class="'+(ccMrszMenGroup_===g?'active':'')+'">'+g+'</button>').join('')+'</span>':'';
-    const body=rows.length?'<div class="ms-table-scroll"><table class="ms-table"><thead><tr><th>#</th><th class="team">Csapat</th><th>M</th><th>GY</th><th>V</th><th class="group-end">P</th><th>SZ</th><th>SZA</th><th>P</th><th>PA</th></tr></thead><tbody>'
-      +rows.map(r=>'<tr class="'+(r.focus?'focus':'')+'"><td><b>'+esc(ccMrszStatPosition_(r.position,data.snapshot))+'</b></td><td class="team"><button type="button" data-overview-standings-team="'+esc(r.sourceTeamId||'')+'" data-overview-standings-context="'+esc(contextTeamId)+'">'
+    const body=rows.length?'<div class="ms-table-scroll"><table class="ms-table"><thead><tr><th title="A lista sorrendje, nem hiteles helyezés">Sor</th><th class="team">Csapat</th><th>M</th><th>GY</th><th>V</th><th class="group-end">P</th><th>SZ</th><th>SZA</th><th>P</th><th>PA</th></tr></thead><tbody>'
+      +rows.map((r,i)=>'<tr class="'+(r.focus?'focus':'')+'"><td title="'+(ccMrszStatPosition_(r.position,data.snapshot)==='–'?'Listasorszám, nem helyezés':'Hiteles helyezés')+'"><b>'+esc(ccMrszStatPosition_(r.position,data.snapshot)==='–'?String(i+1):ccMrszStatPosition_(r.position,data.snapshot))+'</b></td><td class="team"><button type="button" data-overview-standings-team="'+esc(r.sourceTeamId||'')+'" data-overview-standings-context="'+esc(contextTeamId)+'">'
         +msLogoHtml_(r.sourceTeamId,r.teamName)+'<strong>'+esc(r.teamName)+'</strong>'+ccMrszRecordNoticeHtml_(r)+'</button></td><td>'+ccMrszStatNumber_(r.played)+'</td><td>'+ccMrszRecordNumber_(r,'wins')+'</td><td>'+ccMrszRecordNumber_(r,'losses')+'</td><td class="group-end"><b>'+ccMrszStatNumber_(r.tablePoints)+'</b></td><td>'+esc(ccMrszStatPair_(r.setsFor,r.setsAgainst))+'</td><td>'+esc(ccMrszStatRatio_(r.setsFor,r.setsAgainst))+'</td><td>'+esc(ccMrszStatPair_(r.pointsFor,r.pointsAgainst))+'</td><td>'+esc(ccMrszStatRatio_(r.pointsFor,r.pointsAgainst))+'</td></tr>').join('')+'</tbody></table></div>'
       :'<p class="cc-standings-notice">'+(ccMrszPhotoState_.loading?'Mentett tabella betöltése…':ccMrszPhotoState_.error?'A mentett tabella nem tölthető be.':'Ehhez a bajnoksághoz még nincs hiteles, helyezésekkel rendelkező mentett tabella.')+'</p>';
     return '<article class="panel standings-card ms-standings-card overview-ms-standings" style="--team-color:'+esc(team?.color||'#f7b700')+'"><div class="panel-head cc-overview-standings-head"><div><h3>'+esc(team?.name||'Tabella')+'</h3><p>'+esc(data.group)+' · '+esc(data.source)+'</p></div>'+controls
@@ -1672,7 +1672,7 @@
       .map(([v,t])=>'<option value="'+v+'" '+(ccWomenHistoryState_.scope===v?'selected':'')+'>'+t+'</option>').join('');
     const loading=ccWomenHistoryState_.loading||!ccWomenHistoryState_.loaded;
     $('#viewContent').innerHTML=
-      ccClubHistoryNav_()+'<div class="page-intro cc-page-header-panel"><div><h2>Előző idény · női Budapest I.</h2>'+
+      ccClubHistoryNav_()+'<div class="page-intro cc-page-header-panel"><div><h2>Statisztika · női Budapest I.</h2>'+
       '<p>A 2026/27-es ellenfelek 2025/26-os teljesítménye. Nem a jelenlegi erősorrend.</p></div>'+
       '<div class="page-actions"><button type="button" class="button quiet" id="ccWomenHistoryRefresh">↻ Frissítés</button></div></div>'+
       '<article class="panel"><div class="panel-head"><h3>2025/26-os bajnoki mérleg</h3>'+
@@ -1775,7 +1775,7 @@
       '<p style="margin-top:10px">Az egyedi jegyzőkönyv nem helyettesíti a teljes kiírást és tabellát. Az áthozott eredményt nem számítjuk kétszer.</p></article>':'';
     $('#viewContent').innerHTML=
       ccClubHistoryNav_()+
-      '<div class="page-intro cc-page-header-panel"><div><h2>Előző idény · '+title+'</h2>'+
+      '<div class="page-intro cc-page-header-panel"><div><h2>Statisztika · '+title+'</h2>'+
       '<p>'+stateLabel+'. Nem jelenlegi csapaterősség, és nem teljes bajnoki statisztika.</p></div>'+
       '<div class="page-actions"><button class="button quiet" type="button" id="ccOtherHistoryRefresh">↻ Frissítés</button></div></div>'+
       (!row?(ccClubHistoryState_.error?'<article class="panel"><p>'+esc(ccClubHistoryState_.error)+'</p></article>':
