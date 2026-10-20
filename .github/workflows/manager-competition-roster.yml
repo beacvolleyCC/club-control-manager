@@ -36,6 +36,7 @@ on:
       - supabase/migrations/20261014135156_cc_sync_identity_ambiguous_pair_preserve_v2.sql
       - supabase/migrations/20261014125538_cc_preserve_competition_match_identity_v1.sql
       - tests/competition-league-fixture-reference.test.cjs
+      - tests/manager-verified-official-results-20261020.test.cjs
       - tests/mrsz-screenshot-finance.test.cjs
       - tests/mrsz-fixture-merge.test.cjs
       - .github/workflows/manager-competition-roster.yml
@@ -74,6 +75,7 @@ on:
       - supabase/migrations/20261014135156_cc_sync_identity_ambiguous_pair_preserve_v2.sql
       - supabase/migrations/20261014125538_cc_preserve_competition_match_identity_v1.sql
       - tests/competition-league-fixture-reference.test.cjs
+      - tests/manager-verified-official-results-20261020.test.cjs
       - tests/mrsz-screenshot-finance.test.cjs
       - tests/mrsz-fixture-merge.test.cjs
       - .github/workflows/manager-competition-roster.yml
@@ -119,6 +121,7 @@ jobs:
           node --test tests/mrsz-results-crosscheck.test.cjs
           node --test tests/competition-source-identity.test.cjs
           node --test tests/competition-league-fixture-reference.test.cjs
+          node --test tests/manager-verified-official-results-20261020.test.cjs
           node --test tests/mrsz-screenshot-finance.test.cjs
           node --test tests/mrsz-fixture-merge.test.cjs
           node --test tests/scoreboard-match-cards.test.cjs
