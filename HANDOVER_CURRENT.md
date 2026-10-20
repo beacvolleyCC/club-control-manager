@@ -1,5 +1,17 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/L. 2026-10-20 – Player mobil tabella és Manager BEAC-meccsnévsor
+
+- User screenshot: Player Tabella, férfi Budapest I/B, 7 csapat/2026–27: a `.standings-state` általános 180px minimum magassága miatt indokolatlan nagy üres hely volt a tabella előtt; az állás oszlopai 6–8px mérettel alig olvashatók. Az eredményadatok nem feltétlenül hibásak.
+- **Player [PR #23](https://github.com/beacvolleyCC/player_application/pull/23) merged**: `main` `6e4bc12763b56c60aa008f8c2fcce15fa696f32a`, cache `20261020-compact-standings-v23d`. Kizárólag a 7 csapatos férfi A/B részleges táblához scoped CSS, 0 minimum info-magasság, balra igazított rövid szakmai megjegyzés, 9/11px stat-fejléc/adat, ~138–164px fix névrész és vízszintesen scrollozható statisztika. **Három Player CI és GitHub Pages build/deploy sikeres**. Események, eredmények, jegyzőkönyvek és DB nem módosult.
+- Managerben eddig az összes szövetségi meccs a saját BEAC-meccsesemények előtt jelent meg. A névsor már létezett a saját eseményekhez, csak a megjelenés/hozzáférés nehézkes volt.
+- **Manager [PR #69](https://github.com/beacvolleyCC/club-control-manager/pull/69) merged**: `main` `7a33ebd6251a5eab7d035139a9df2f7128ad0526`, app+SW `20261020-match-roster-v64`. `Versenysport → Meccsek`: saját BEAC eseménykártyák legfelül, bajnoki külső referencia alattuk. Minden saját meccskártya az eredeti `eventId` alapján ugyanazzal az on-demand `cc_manager_event_roster_v1` RPC-vel nyitja a névsort, mint az edzés. Kinyitóban `Jövök / Nem jövök / Nincs válasz` counts; név/mezszám mellett külön RSVP címkék; semmilyen találgatott kapcsolat a federációs meccsekkel. Jelenlétcsúszka működése és jogosultsága nem módosult, RSVP nem egyenlő rögzített jelenléttel.
+- Manager PR #69 ág 6/6 releváns CI zöld; `main` roster, protokoll, időrend, archív és történeti QA zöld, Github Pages deploy **build és deploy job sikeres**. A bejelentkezett böngészős és iPhone PWA UI manuális ellenőrzése még hiányzik.
+- Supabase adatbázist nem írtuk; `events`, `availability`, találkozó-idő/hely, jelenlét, notifications és UUID-k változatlanok. A régi nyitott **Manager #68** és **Player draft #19** teljes ötligás PR-ok fejlesztési alapja most elavult: a két fenti új főági javítás megőrzése nélkül **NEM merge-elhetők**.
+- Manuális QA: Player v23d férfi A/B nyitás, nincs üres tér, számok görgethetők; Manager v64 saját BEAC meccsek előre rendezve, a meccsnévsorban valódi `going/not_going/unknown`, belépett felületen ellenőrizendő. Bejelentkezett LIVE képernyőigazolást nem állítottunk.
+
+---
+
 ## 0/K. 2026-10-20 – Player férfi A+B adatbetöltési sürgős javítás
 
 Felhasználói hiba: **„az A csoport továbbra se megy; `ccSupabase.rpc(...).catch is not a function`”**. Megtaláltuk, hogy `ccLoadMrszPlayerPhoto_` a `cc_player_competition_user_schedule_v1` PostgrestBuilderén közvetlen `.catch()`-et hívott, holott ez **PromiseLike**, nem natív Promise. Emiatt az A/B és összes többi ligához tartozó snapshot/forrás betöltése TypeError-ral megszakadhatott.
