@@ -3306,6 +3306,9 @@
       return 'Nem ellenőrizhető mérkőzésidőpont';
     const key=ccMrszLocalKickoff_(stamp).date+'|'+home+'|'+away;
     if(conflicts.has(key))return 'Eltérő mentett végeredmények';
+    // An MRSZ protocol is primary evidence of a played match. A stale/partial
+    // standings snapshot may flag inconsistent team names, but must not hide it.
+    if(text(match.source)==='mrsz_official_protocol_pdf')return '';
     if(!hasTable)return '';
     const homeCount=leagueRows.filter(r=>ccMrszNormPairName_(r?.teamName)===home).length;
     const awayCount=leagueRows.filter(r=>ccMrszNormPairName_(r?.teamName)===away).length;
@@ -3314,7 +3317,7 @@
     return '';
   }
 
-  let ccLeagueMatchScope_='beac';
+  let ccLeagueMatchScope_='all';
   let ccMatchesAuditOpen_=false;
   let ccMrszAuditType_='all';
   let ccMrszAuditQuery_='';
@@ -3650,7 +3653,7 @@
       const teamId=teamFilterIds_('events').length===1?teamFilterIds_('events')[0]:'';
       if(teamId)state.managerStandingsContext=teamId;
       ccLeagueContextSelection_=ccMatchesDefaultLeague_();
-      ccLeagueMatchScope_='beac';
+      ccLeagueMatchScope_='all';
       setRoute('competition','standings');
     });
     document.querySelectorAll('[data-league-match-scope]').forEach(button=>button.addEventListener('click',()=>{
