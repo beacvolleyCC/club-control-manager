@@ -3225,9 +3225,12 @@
     for(const m of all){
       const league=text(m?.competitionLabel),key=text(m?.sourceMatchKey||m?._ccSourceKey);
       const kind=text(m?._ccSourceKind),date=ccMrszLocalKickoff_(m?.startsAt).date;
+      // Postponed fixtures may legitimately have no date in the official user import.
+      const hasDate=/^202[67]-\d\d-\d\d$/.test(date);
+      const undatedPostponed=kind==='fixture'&&text(m?.status)==='postponed'&&!text(m?.startsAt);
       if(!leagues.includes(league)||m?._ccUserSupplied!==true||m?._ccSourceSystem!=='user'
         ||text(m?.season)!=='2026/27'||!key.startsWith('ui20261018:')||keys.has(key)
-        ||!['fixture','result'].includes(kind)||!/^202[67]-\d\d-\d\d$/.test(date)
+        ||!['fixture','result'].includes(kind)||(!hasDate&&!undatedPostponed)
         ||!ccMrszNormPairName_(m?.homeName)||!ccMrszNormPairName_(m?.awayName))return false;
       keys.add(key);groups.set(league,(groups.get(league)||0)+1);
       if(kind==='result'){
