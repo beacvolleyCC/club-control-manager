@@ -1,5 +1,15 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/I. 2026-10-20 – új chat handover / legfrissebb kezdőpont
+
+**Új beszélgetés indító üzenete:** `CC-FOLYTATÁS`. **A teljes, naprakész, rövid, feladatra kész handover itt:** [`docs/handover/HANDOVER_20261020_PLAYER_MENB_NEXT_CHAT.md`](docs/handover/HANDOVER_20261020_PLAYER_MENB_NEXT_CHAT.md).
+
+**Fő tény:** a férfi Player B csoport 6-csapatos régi tabella/11 BEAC-régi meccs vs **7-csapatos, 42 soros éles új import** hibáját a **Player PR #18 már javította a `main`-en**, PWA v23. Ez a **kódkiadás, nem bejelentkezett LIVE/Cloudflare/telefonos UI igazolás**. A korábbi 0/H fejezet részletes auditja igazolt. Új chatben első feladat: a Player v23 megjelenését visszaigazolni; utána a nyitott Player PR #17 és Manager PR #68 teljes ötligás menetrendfejlesztését **nem szabad automatikusan merge-elni**, mert a Player PR #17 diverged (11 ahead / 1 behind) az új #18 fix után, Manager PR #68 diverged (9 ahead / 2 behind). A megőrzendő szabályok: 300/292+8 teljes import, férfi B 42 sor / 7 csapat / 12 BEAC / 1 eredmény / 1 halasztott; jegyzőkönyv és jelenlét változatlan; a találkozó ideje nem teremfoglaltság.
+
+**A `0/H` és `0/G` fejezetek részletesebbek és korábbi állapotokat is tartalmaznak; a jelen 0/I és az új önálló handover a folytatás kiindulópontja.**
+
+---
+
 ## 0/H. 2026-10-20 – Player férfi B csoport azonnali javítása (PR #18)
 
 **Hibajelzés:** „Playerben most elbaszódott a B csoport a férfiaknál”. Pontos ok, ellenőrizve az éles Supabase-ben és a Player kódban:
