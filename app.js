@@ -3248,7 +3248,13 @@
     const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
     const updated=(ccMrszPhotoState_.userMatches||[]).filter(m=>
       ccManagerKnownMovedFixture_(m,group)||text(m.competitionLabel)===group&&!!ccManagerVerifiedOfficialReport_(m));
-    const superseded=m=>m?.homeSets==null&&m?.awaySets==null&&updated.some(u=>{
+    const superseded=m=>m?.homeSets==null&&m?.awaySets==null&&(
+      photo.some(p=>text(p.source)==='mrsz_official_protocol_pdf'
+        &&text(p.competitionLabel)===text(m.competitionLabel)
+        &&ccMrszNormPairName_(p.homeName)===ccMrszNormPairName_(m.homeName)
+        &&ccMrszNormPairName_(p.awayName)===ccMrszNormPairName_(m.awayName)
+        &&Math.abs(Date.parse(p.startsAt)-Date.parse(m.startsAt))<=14*86400000)
+      ||updated.some(u=>{
       // Supersede the outdated Oct 12 BRSZ placeholder only after the Oct 19
       // original report has been verified; never delete any result or event.
       if(ccManagerVerifiedOfficialReport_(u)?.matchCode==='2699'
@@ -3259,7 +3265,7 @@
       return r&&ccMrszLocalKickoff_(m?.startsAt).date===r.oldDay
         &&ccMrszNormPairName_(m?.homeName)===r.home
         &&ccMrszNormPairName_(m?.awayName)===r.away;
-    });
+    }));
     const key=m=>ccMrszLocalKickoff_(m._ccOriginalStartsAt||m.startsAt).date+'|'
       +ccMrszNormPairName_(m._ccOriginalHomeName||m.homeName)+'|'
       +ccMrszNormPairName_(m._ccOriginalAwayName||m.awayName);
@@ -3381,8 +3387,8 @@
       badge:'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
       meta:'',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today,
-      editHtml:ccMatchEditAction_(m),sourceUrl:ccManagerVerifiedOfficialReport_(m)?.url||'',
-      sourceKind:ccManagerVerifiedOfficialReport_(m)?'protocol':''
+      editHtml:ccMatchEditAction_(m),sourceUrl:ccManagerVerifiedOfficialReport_(m)?.url||(text(m.source)==='mrsz_official_protocol_pdf'?text(m.protocolUrl):''),
+      sourceKind:ccManagerVerifiedOfficialReport_(m)||text(m.source)==='mrsz_official_protocol_pdf'?'protocol':''
     })).join('');
     const noTableNote='';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
