@@ -67,7 +67,7 @@ test('linked match retains its event ID and live RSVP count',()=>{
  assert.ok(html.includes('data-event-id="match-id"'));
  assert.ok(html.includes('12 jövök / 14 kerettag'));
  assert.ok(js.includes("kind==='match'?ccManagerScoreboardCard_(e):ccEventCardHtml_(e,kind)"));
- assert.ok(js.includes('ccTrainingInlinePreviewHtml_(cached,id,editable,attendanceEditable)'));
+ assert.ok(js.includes("ccTrainingInlinePreviewHtml_(cached,id,editable,attendanceEditable,kind==='match')"));
 });
 test('league-only cards escape source names and disallow unsafe URLs',()=>{
  const html=ctx.scoreboard({...fixture,homeName:'<script>alert(1)</script>',homeSets:3,awaySets:1},{sourceUrl:'javascript:alert(1)'});
