@@ -39,7 +39,7 @@ test('Manager overview, main standings and matches route use one snapshot covera
  const matchTable=section('  function ccMrszMainPhotoTableHtml_(','  // League fixture cards');
  const matchPage=section('  function ccLeagueMatchesContextHtml_(','  function renderCompetitionMatchCards_(');
  assert.ok(overview.includes('source:ccMrszCoverageLabel_(snapshot)'));
- assert.ok(standings.includes('ccMrszCoverageLabel_(photo)'));
+ assert.ok(standings.includes("const meta=showPhoto?[group,'Frissítve: 2026.10.14.']"));
  assert.ok(standings.includes('ccMrszCoverageLabel_(null)'));
  assert.ok(matchTable.includes('ccMrszCoverageLabel_(table)'));
  assert.ok(!matchPage.includes('ccMrszCoverageLabel_(null)'),'the Meccsek view no longer renders a second standings table');
