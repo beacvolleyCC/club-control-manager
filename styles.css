@@ -6988,3 +6988,43 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
  .cc-match-rsvp-summary{font-size:9px;text-align:left}
  .cc-match-card-panel .cc-training-roster-toggle{flex-wrap:wrap}
 }
+
+
+/* Manager v65: stable multi-team dropdown in header; no overlay across next panels. */
+.cc-overview-page-header{position:relative;z-index:25;overflow:visible!important}
+.cc-overview-team-toolbar{min-width:min(250px,100%);width:min(100%,290px);position:relative;z-index:30}
+.cc-overview-team-picker{position:relative;min-width:0;width:100%}
+.cc-overview-team-picker>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:10px;cursor:pointer;box-sizing:border-box}
+.cc-overview-team-picker>summary::-webkit-details-marker{display:none}
+.cc-overview-team-picker>summary>span:first-child{font-size:10px;color:var(--muted);font-weight:700}
+.cc-overview-team-picker>summary>b{font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-overview-empty-triangle{display:block;flex:0 0 auto;width:12px;height:12px;transition:transform .17s ease}
+.cc-overview-empty-triangle:before{content:'';display:block;width:10px;height:10px;transform:rotate(45deg);border:2px solid currentColor;border-left:0;border-top:0}
+.cc-overview-team-picker[open] .cc-overview-empty-triangle{transform:rotate(180deg)}
+.cc-overview-team-options{box-sizing:border-box;position:absolute;z-index:80;top:calc(100% + 3px);left:0;right:0;min-width:190px;max-height:260px;overflow-y:auto;border:1px solid var(--line);background:var(--card);border-radius:10px;box-shadow:0 12px 24px rgba(0,0,0,.15);padding:5px}
+.cc-overview-team-options>label{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;font-size:12px;cursor:pointer}
+.cc-overview-team-options>label:hover{background:var(--soft)}
+.cc-overview-team-options input{width:16px;height:16px;accent-color:var(--text)}
+/* The three overview filters must fit and remain inside the right boundary. */
+.parity-matrix .matrix-filter-panel{box-sizing:border-box!important;min-width:0!important;max-width:100%!important;padding:10px 12px!important;gap:10px!important}
+.parity-matrix .matrix-filter-panel>label{box-sizing:border-box!important;min-width:0!important;max-width:100%!important;margin-inline:0!important}
+.parity-matrix .matrix-filter-panel select{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important}
+.manager-overview-main,.parity-overview-grid,.parity-matrix-card{min-width:0}
+.matrix-player-profile-open{display:block;width:100%;background:transparent;color:inherit;border:0;padding:1px;cursor:pointer}
+.matrix-player-profile-open:focus-visible{outline:2px solid var(--yellow-dark);outline-offset:-2px}
+.matrix-coach-avatar{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--soft);font-size:10px;border:1px solid var(--line)}
+.matrix-coach-head .grid-player-label{white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.cc-event-coach-roster{display:grid;gap:6px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-bottom:12px}
+.cc-event-coach-roster h5{font-size:12px;margin:0 0 3px}
+.cc-event-coach-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}
+.cc-event-coach-row .coach-matrix-control{flex:0 0 auto}
+/* Details: labels and values stay inside three compact, right-aligned columns. */
+.event-detail-primary-grid>div{box-sizing:border-box!important;min-width:0!important;min-height:0!important;padding:8px 12px!important}
+.event-detail-primary-grid>div>*{max-width:100%!important;overflow-wrap:anywhere}
+.event-detail-primary-grid>div>:first-child{text-align:left!important}
+.event-detail-primary-grid>div>:last-child{text-align:right!important;font-size:14px!important}
+.rsvp-detail.compact-three>div{min-height:0!important;padding:7px 11px!important}
+.rsvp-detail.compact-three b{font-size:18px!important}
+.rsvp-subhead{margin-bottom:5px!important}
+.event-roster-detail .cc-compact-roster-open .triangle-icon,.cc-inline-player .cc-compact-roster-open .triangle-icon{width:12px!important;height:12px!important}
+@media(max-width:700px){.cc-overview-team-toolbar{width:100%;max-width:100%}.cc-overview-team-options{right:0;left:0}.event-detail-primary-grid>div>:last-child{font-size:12px!important}}
