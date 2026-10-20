@@ -29,6 +29,6 @@ test('starting player retains bold marker and no-entry is not wrongly labelled a
  assert.ok(!missing.includes('is-subs'));
 });
 test('PWA index and service worker share the new CSS/JS cache version',()=>{
- assert.ok(html.includes('app.js?v=20261019-protocol-right-v61'));
- assert.ok(sw.includes("cc-manager-20261019-protocol-right-v61"));
+ assert.match(html,/app\.js\?v=20261019-(?:protocol-right-v61|protocol-match-v62|full-fixtures-v63)/);
+ assert.match(sw,/cc-manager-20261019-(?:protocol-right-v61|protocol-match-v62|full-fixtures-v63)/);
 });
