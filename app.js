@@ -593,6 +593,32 @@
   function competitionResultByEvent_(eventId){return (state.competitionResults||[]).find(r=>text(r.eventId)===text(eventId))||null}
   function matchResultOrRsvp_(e){const r=competitionResultByEvent_(e.eventId||e.id);if(!r||r.homeSets==null||r.awaySets==null)return rsvpPills(e);const sets=Array.isArray(r.setScores)?r.setScores:[];return `<div class="match-result-compact"><strong>${num(r.homeSets)} : ${num(r.awaySets)}</strong>${sets.length?`<small>${sets.map(x=>`${num(x.home)}:${num(x.away)}`).join(' · ')}</small>`:''}</div>`}
   function standingsForContext_(teamId){return (state.competitionStandings||[]).filter(r=>text(r.contextTeamId)===text(teamId)).sort((a,b)=>(Number(a.position)||9999)-(Number(b.position)||9999)||text(a.teamName).localeCompare(text(b.teamName),'hu'))}
+  const ccOverviewLeagueInsights_=Object.create(null);
+  async function ccEnsureOverviewLeagueInsight_(teamId){
+    const id=text(teamId);
+    if(!id||!configured()||ccOverviewLeagueInsights_[id])return;
+    ccOverviewLeagueInsights_[id]={loading:true,loaded:false,error:'',data:null};
+    try{
+      const data=await rpc('cc_manager_competition_league_insights_v1',{p_context_team_id:id});
+      ccOverviewLeagueInsights_[id]={loading:false,loaded:true,error:'',data:data||{}};
+    }catch(err){
+      ccOverviewLeagueInsights_[id]={loading:false,loaded:true,error:text(err?.message||err),data:null};
+    }
+    if(ccRouteIs_('competition','overview'))renderOverview();
+  }
+  function ccLeagueInsightRows_(data){
+    const list=(Array.isArray(data?.teams)?data.teams:[]).map(t=>({
+      ...(t?.current||{}),sourceTeamId:text(t?.sourceTeamId),
+      teamName:text(t?.teamName),focus:t?.focus===true,
+      history:Array.isArray(t?.history)?t.history:[]
+    }));
+    if(!list.length)return list;
+    const hasPoints=list.some(r=>{const n=Number(String(r?.tablePoints??'').replace(',','.'));return Number.isFinite(n)&&n!==0});
+    if(hasPoints||list.some(r=>Number(r.played)>0))
+      return list.sort((a,b)=>(Number(a.position)||9999)-(Number(b.position)||9999)||text(a.teamName).localeCompare(text(b.teamName),'hu'));
+    return list.sort((a,b)=>text(a.teamName).localeCompare(text(b.teamName),'hu',{sensitivity:'base'}))
+      .map(r=>({...r,position:null,provisionalAlphabetical:true}));
+  }
   function ccOverviewStandingsModel_(teamId){
     const id=text(teamId),men=id==='10000000-0000-4000-8000-000000000003',
       group=men?(ccMrszMenGroup_==='A'?'Férfi Budapest I. osztály – A csoport':'Férfi Budapest I. osztály – B csoport')
@@ -604,7 +630,13 @@
         :(a,b)=>(num(a.position)||9999)-(num(b.position)||9999));
       return {rows,group,source:ccMrszCoverageLabel_(snapshot),snapshot,verified:true};
     }
-    const baseRows=standingsForContext_(id);
+    // Share the Tabella view's canonical league-insights rows for this context.
+    // Unlike the old overview-only RPC fallback, this retains complete league
+    // rankings even when the MRSZ snapshot table is not available.
+    const insight=ccOverviewLeagueInsights_[id];
+    if(!insight)void ccEnsureOverviewLeagueInsight_(id);
+    const insightRows=insight?.loaded&&!insight.error?ccLeagueInsightRows_(insight.data):[];
+    const baseRows=insightRows.length?insightRows:standingsForContext_(id);
     const ranked=baseRows.filter(r=>{
       const rank=Number(r.position),played=Number(r.played||0),points=Number(r.tablePoints||0);
       return Number.isFinite(rank)&&rank>0&&(played>0||points>0);
@@ -716,16 +748,7 @@
     return state.teams.find(t=>text(t.id)===id)||null;
   }
   function msData_(){return state.managerLeagueInsights?.data||null}
-  function msRows_(){
-    const d=msData_();
-    const list=(Array.isArray(d?.teams)?d.teams:[]).map(t=>({
-      ...(t?.current||{}),sourceTeamId:text(t?.sourceTeamId),teamName:text(t?.teamName),focus:t?.focus===true,history:Array.isArray(t?.history)?t.history:[]
-    }));
-    if(!list.length)return list;
-    const hasPoints=list.some(r=>{const n=Number(String(r?.tablePoints??'').replace(',','.'));return Number.isFinite(n)&&n!==0});
-    if(hasPoints||list.some(r=>Number(r.played)>0))return list.sort((a,b)=>(Number(a.position)||9999)-(Number(b.position)||9999)||text(a.teamName).localeCompare(text(b.teamName),'hu'));
-    return list.sort((a,b)=>text(a.teamName).localeCompare(text(b.teamName),'hu',{sensitivity:'base'})).map(r=>({...r,position:null,provisionalAlphabetical:true}));
-  }
+  function msRows_(){return ccLeagueInsightRows_(msData_())}
   function msStandingSourceRow_(sourceTeamId,name){
     const ctx=text(msContextTeam_()?.id),sid=text(sourceTeamId),nk=msNorm_(name);
     return (state.competitionStandings||[]).find(r=>text(r.contextTeamId)===ctx&&((sid&&text(r.sourceTeamId)===sid)||(nk&&msNorm_(r.teamName)===nk)))||null;
