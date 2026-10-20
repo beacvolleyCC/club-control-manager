@@ -29,10 +29,10 @@ function buildManager(){
  const storage=memory(),state={managerStandingsTeam:'old'};
  let renders=0;
  const win={CCCompetitionContextCatalog:catalog};
- const funcs=new Function('window','localStorage','text','esc','ccMrszPhotoState_','state','renderManagerStandings_','ccRouteIs_','renderCompetitionMatchCards_',
+ const funcs=new Function('window','localStorage','text','esc','ccMrszPhotoState_','state','renderManagerStandings_','ccRouteIs_','renderCompetitionMatchCards_','ccManagerCompleteUserSchedule_',
   "let ccLeagueMatchScope_='beac';"+body+
   ';return {ccLeagueCatalog_,ccCurrentLeague_,ccLeagueContextSelectHtml_,ccSetLeagueContext_,ccClearLeagueContext_};')(
-  win,storage,x=>String(x??''),x=>String(x??''),snapshot,state,()=>renders++,()=>false,()=>renders++
+  win,storage,x=>String(x??''),x=>String(x??''),snapshot,state,()=>renders++,()=>false,()=>renders++,()=>false
  );
  return {funcs,state,storage,renders:()=>renders};
 }
