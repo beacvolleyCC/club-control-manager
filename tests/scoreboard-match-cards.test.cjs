@@ -82,13 +82,13 @@ test('league rank appears only from an actual nonpartial standings snapshot',()=
  ctx.ccMrszPhotoState_.tables[0].partial=true;
  assert.ok(!ctx.scoreboard({...fixture,homeSets:3,awaySets:1}).includes('2. helyen áll'));
 });
-test('Manager Meccsek has one selected-league table above the preserved BEAC roster',()=>{
+test('Manager Meccsek shows BEAC match roster before secondary federation fixtures',()=>{
  const start=js.indexOf('  function renderCompetitionMatchCards_()'),end=js.indexOf('  function renderEventList(',start);
  const section=js.slice(start,end);
  assert.equal(section.split('ccLeagueMatchesContextHtml_()').length-1,1);
  assert.ok(!section.includes("standingsSection_('events')"));
  assert.ok(!section.includes('${ccMrszPhotoPanelHtml_()}'));
- assert.ok(section.indexOf('ccLeagueMatchesContextHtml_()')<section.indexOf('ccCompetitionEventWithRosterHtml_'));
+ assert.ok(section.indexOf('ccCompetitionEventWithRosterHtml_')<section.indexOf('ccLeagueMatchesContextHtml_()'));
  assert.ok(!section.includes('ccLeagueFixturePanelHtml_()'));
 });
 test('desktop and phone scoreboard styling remains responsive',()=>{
