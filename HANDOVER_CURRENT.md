@@ -1,5 +1,13 @@
 # Club Control – HANDOVER_CURRENT
 
+## AKTUÁLIS ÁTADÁS – 2026-10-21 (elsőként ezt olvasd)
+
+**Folytatás: [docs/handover/HANDOVER_20261021_CC_CURRENT.md](docs/handover/HANDOVER_20261021_CC_CURRENT.md)** · jelszó: `CC-FOLYTATÁS`.
+
+A 2026-10-20-i korábbi #71/#24 teszthiba **már nem nyitott**: **Manager PR #71 és Player PR #24 beolvasztva**; főági CI és Pages telepítési workflow zöld. Manager főág `7e6004346`, Player főág `d5c49b8e` a 2026-10-21-i ellenőrzéskor. **Viszont a két hivatalos 2026-10-19-i eredmény LIVE Supabase-forrásrekordja továbbra is `scheduled` / `fixture`, végeredmény nélkül:** BEAC–PDSE 3–0 és Panoráma SE–KRE SC-A 0–3. Eredmények SQL-frissítése és visszaolvasás **külön következő feladat**, nem történt most adatírás. A Manager #68 és Player draft #19 ötligás PR-ok továbbra is nyitottak/konfliktusosak, **nem összevonandók automatikusan**. A részletes UX-kívánságok, jogosultságok, coach RSVP, tabellasorszám, menüátnevezések, tesztállapotok és folytatási terv a fenti új handoverben.
+
+---
+
 ## 0/L. 2026-10-20 – Player mobil tabella és Manager BEAC-meccsnévsor
 
 - User screenshot: Player Tabella, férfi Budapest I/B, 7 csapat/2026–27: a `.standings-state` általános 180px minimum magassága miatt indokolatlan nagy üres hely volt a tabella előtt; az állás oszlopai 6–8px mérettel alig olvashatók. Az eredményadatok nem feltétlenül hibásak.
