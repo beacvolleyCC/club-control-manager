@@ -2307,6 +2307,35 @@
     return `<div class="cc-compact-roster-list" aria-label="Játékosok rendezve: jövök, nem jövök, nincs válasz"><div class="cc-compact-roster-players">${players.map(p=>ccCompactRosterRowHtml_(p,eventId,editable,attendanceEditable)).join('')||'<span class="roster-empty">Nincs játékos a névsorban.</span>'}</div></div>`;
   }
   // BEAC event card opens the original event detail; roster/RSVP UUID is preserved.
+  // Verified directly against user-provided MRSZ Back Office sheets, 20 Oct 2026.
+  // Exact source key, league, date, both teams, final score AND all set scores are required.
+  const CC_MANAGER_OFFICIAL_RESULT_REPORTS_=Object.freeze({
+    'ui20261018:menB:beac:pdse:1':{league:'Férfi Budapest I. osztály – B csoport',date:'2026-10-19',home:'beac',away:'pdse',hs:3,as:0,sets:[[25,18],[25,23],[25,20]],code:'2699'},
+    'ui20261018:womenI:panoramase:kresc:1':{league:'Női Budapest I. osztály',date:'2026-10-19',home:'panoramase',away:'kresc',hs:0,as:3,sets:[[17,25],[10,25],[12,25]],code:'2677'}
+  });
+  function ccManagerVerifiedOfficialReport_(m){
+    const key=text(m?.sourceMatchKey||m?._ccSourceKey),
+      proof=CC_MANAGER_OFFICIAL_RESULT_REPORTS_[key],sets=m?.setScores;
+    if(!proof||m?._ccSourceSystem!=='user'||m?._ccSourceKind!=='result'
+      ||text(m?.season)!=='2026/27'||text(m?.status)!=='played'
+      ||text(m?.competitionLabel)!==proof.league
+      ||ccMrszLocalKickoff_(m.startsAt).date!==proof.date
+      ||ccMrszNormPairName_(m?.homeName)!==proof.home
+      ||ccMrszNormPairName_(m?.awayName)!==proof.away
+      ||Number(m?.homeSets)!==proof.hs||Number(m?.awaySets)!==proof.as
+      ||!Array.isArray(sets)||sets.length!==proof.sets.length)return null;
+    if(!sets.every((set,i)=>Number(set?.home)===proof.sets[i][0]&&Number(set?.away)===proof.sets[i][1]))return null;
+    return {matchCode:proof.code,url:'https://www.hunvolley.info/pr_00/_jegyzokonyv_terem/v01/jegyzokonyv_nyomtat.asp?p_merkozes_kod='+proof.code+'&p_evad_kod=2026'};
+  }
+  function ccManagerOfficialResultForEvent_(e){
+    if(eventType(e)!=='match')return null;
+    const eventDay=ccMrszLocalKickoff_(e?.startsAt||e?.starts_at).date;
+    const title=ccMrszNormPairName_(e?.title),men=eventTeamId(e)==='10000000-0000-4000-8000-000000000003';
+    if(!men||!title.includes('pdse')||eventDay!=='2026-10-19')return null;
+    const matches=(ccMrszPhotoState_.userMatches||[]).filter(m=>
+      text(m.sourceMatchKey)==='ui20261018:menB:beac:pdse:1'&&!!ccManagerVerifiedOfficialReport_(m));
+    return matches.length===1?matches[0]:null;
+  }
   function ccManagerScoreboardCard_(e){
     const id=text(e.eventId||e.id),teamId=eventTeamId(e),
       teamName=text(e.teamName||teamById(teamId)?.name||'BEAC'),
@@ -2314,7 +2343,8 @@
       segments=text(e.title).split(/\s+[–—-]\s+/).map(text).filter(Boolean),
       home=segments.length>=2?segments[0]:(ha==='away'?opponent:teamName),
       away=segments.length>=2?segments.slice(1).join(' – '):(ha==='away'?teamName:opponent),
-      result=competitionResultByEvent_(id),
+      recorded=competitionResultByEvent_(id),verified=ccManagerOfficialResultForEvent_(e),
+      result=recorded?.homeSets!=null&&recorded?.awaySets!=null?recorded:(verified||recorded),
       league=teamId==='10000000-0000-4000-8000-000000000001'?'Női Budapest I. osztály'
         :teamId==='10000000-0000-4000-8000-000000000002'?'Női Budapest II. osztály – B csoport'
         :'Férfi Budapest I. osztály – B csoport',
@@ -2329,7 +2359,7 @@
   function ccCompetitionEventWithRosterHtml_(e,kind){
     const id=text(e.eventId||e.id),expanded=ccTrainingRosterOpenIds_.has(id),cached=state.eventRosterCache.get(id);
     const editable=ccEventCanEdit_(e),started=!!eventStart(e)&&eventStart(e)<=new Date(),attendanceEditable=editable&&started&&text(e.status||'active')!=='cancelled';
-    return `<div class="cc-training-roster-item">${kind==='match'?ccManagerScoreboardCard_(e):ccEventCardHtml_(e,kind)}<button type="button" class="cc-training-roster-toggle legacy-mass-chevron ${expanded?'open':''}" data-training-roster-toggle="${esc(id)}" aria-expanded="${expanded?'true':'false'}" aria-label="Névsor ${expanded?'bezárása':'megnyitása'}"><span>Névsor</span>${kind==='match'?`<small class="cc-match-rsvp-summary">Jövök: ${num(e.yesCount)} · Nem jövök: ${num(e.noCount)} · Nincs válasz: ${num(e.unknownCount)}</small>`:''}<span class="triangle-icon" aria-hidden="true"></span></button><div class="cc-training-inline-roster" data-training-roster-holder="${esc(id)}" ${expanded?'':'hidden'}>${expanded?(cached?ccTrainingInlinePreviewHtml_(cached,id,editable,attendanceEditable,kind==='match'):'<span class="roster-loading">Névsor betöltése…</span>'):''}</div></div>`;
+    return `<div class="cc-training-roster-item">${kind==='match'?ccManagerScoreboardCard_(e):ccEventCardHtml_(e,kind)}${kind==='match'&&ccManagerOfficialResultForEvent_(e)?'<a class="cc-event-official-protocol" href="'+esc(ccManagerVerifiedOfficialReport_(ccManagerOfficialResultForEvent_(e)).url)+'" target="_blank" rel="noopener noreferrer">MRSZ jegyzőkönyv ↗</a>':''}<button type="button" class="cc-training-roster-toggle legacy-mass-chevron ${expanded?'open':''}" data-training-roster-toggle="${esc(id)}" aria-expanded="${expanded?'true':'false'}" aria-label="Névsor ${expanded?'bezárása':'megnyitása'}"><span>Névsor</span>${kind==='match'?`<small class="cc-match-rsvp-summary">Jövök: ${num(e.yesCount)} · Nem jövök: ${num(e.noCount)} · Nincs válasz: ${num(e.unknownCount)}</small>`:''}<span class="triangle-icon" aria-hidden="true"></span></button><div class="cc-training-inline-roster" data-training-roster-holder="${esc(id)}" ${expanded?'':'hidden'}>${expanded?(cached?ccTrainingInlinePreviewHtml_(cached,id,editable,attendanceEditable,kind==='match'):'<span class="roster-loading">Névsor betöltése…</span>'):''}</div></div>`;
   }
   function ccCompetitionTrainingWithRosterHtml_(e){return ccCompetitionEventWithRosterHtml_(e,'training')}
   async function ccToggleTrainingInlineRoster_(id,button){
@@ -2863,7 +2893,7 @@
       venue=text(m.venue||m.court||league||''),badge=text(options.badge||'Bajnoki mérkőzés'),
       dateInsteadOfBadge=options.dateInsteadOfBadge===true,
       meta=text(options.meta||''),url=text(options.sourceUrl||m.sourceUrl||m.matchUrl||m.reportUrl),
-      source=!linked&&/^https:\/\//i.test(url)?'<a class="cc-scoreboard-source" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Forrás ↗</a>':'',
+      source=!linked&&/^https:\/\//i.test(url)?'<a class="cc-scoreboard-source" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(options.sourceKind==='protocol'?'Jegyzőkönyv ↗':'Forrás ↗')+'</a>':'',
       protocolAvailable=!linked&&text(m.matchCode)&&m.protocol&&Array.isArray(m.protocol.teams)&&m.protocol.teams.length===2,
       tag=linked?'button':'article';
     return '<'+tag+(linked?' type="button" data-event-id="'+esc(id)+'"':'')
@@ -3193,8 +3223,15 @@
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
     const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
-    const updated=(ccMrszPhotoState_.userMatches||[]).filter(m=>ccManagerKnownMovedFixture_(m,group));
+    const updated=(ccMrszPhotoState_.userMatches||[]).filter(m=>
+      ccManagerKnownMovedFixture_(m,group)||text(m.competitionLabel)===group&&!!ccManagerVerifiedOfficialReport_(m));
     const superseded=m=>m?.homeSets==null&&m?.awaySets==null&&updated.some(u=>{
+      // Supersede the outdated Oct 12 BRSZ placeholder only after the Oct 19
+      // original report has been verified; never delete any result or event.
+      if(ccManagerVerifiedOfficialReport_(u)?.matchCode==='2699'
+        &&ccMrszLocalKickoff_(m.startsAt).date==='2026-10-12'
+        &&ccMrszNormPairName_(m.homeName)==='beac'
+        &&ccMrszNormPairName_(m.awayName)==='pdse')return true;
       const r=ccManagerKnownMovedFixture_(u,group);
       return r&&ccMrszLocalKickoff_(m?.startsAt).date===r.oldDay
         &&ccMrszNormPairName_(m?.homeName)===r.home
@@ -3318,7 +3355,8 @@
       badge:'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
       meta:'',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today,
-      editHtml:ccMatchEditAction_(m)
+      editHtml:ccMatchEditAction_(m),sourceUrl:ccManagerVerifiedOfficialReport_(m)?.url||'',
+      sourceKind:ccManagerVerifiedOfficialReport_(m)?'protocol':''
     })).join('');
     const noTableNote='';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
