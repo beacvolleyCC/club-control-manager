@@ -3583,7 +3583,22 @@
     if(snapshot.error)return '<section class="cc-match-league-context"><article class="panel"><p class="ms-empty error">A bajnoki adatok nem tölthetők be: '+esc(snapshot.error)+'</p></article></section>';
     // No parallel league selector or standings table in Meccsek. League results
     // follow the selected BEAC team; the full table lives under Tabella.
-    return '<section class="cc-match-league-context"><div class="cc-matches-league-picker">'+ccLeagueContextSelectHtml_(group)+'</div>'+ccMrszLeagueFixturePanelHtml_(group)+'</section>';
+    // One canonical snapshot is shared by all competition screens. With "all
+    // teams" selected, display every BEAC league rather than silently showing
+    // only Női I. The league picker remains available for explicit drill-down.
+    const selectedTeamIds=teamFilterIds_('events');
+    const allTeams=selectedTeamIds.length===0&&!ccMatchesSelectedGroup_;
+    const groups=allTeams
+      ?['Női Budapest I. osztály','Női Budapest II. osztály – B csoport','Férfi Budapest I. osztály – B csoport','Férfi Budapest I. osztály – A csoport']
+      :[group];
+    const oldScope=ccLeagueMatchScope_;
+    if(allTeams)ccLeagueMatchScope_='all';
+    try{
+      return '<section class="cc-match-league-context">'
+        +(allTeams?'':('<div class="cc-matches-league-picker">'+ccLeagueContextSelectHtml_(group)+'</div>'))
+        +groups.map(league=>ccMrszLeagueFixturePanelHtml_(league)).join('')
+        +'</section>';
+    }finally{ccLeagueMatchScope_=oldScope}
   }
 
   function renderCompetitionMatchCards_(){if(!ccRouteIs_('competition','matches'))return;
