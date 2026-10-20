@@ -1,5 +1,18 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/K. 2026-10-20 – Player férfi A+B adatbetöltési sürgős javítás
+
+Felhasználói hiba: **„az A csoport továbbra se megy; `ccSupabase.rpc(...).catch is not a function`”**. Megtaláltuk, hogy `ccLoadMrszPlayerPhoto_` a `cc_player_competition_user_schedule_v1` PostgrestBuilderén közvetlen `.catch()`-et hívott, holott ez **PromiseLike**, nem natív Promise. Emiatt az A/B és összes többi ligához tartozó snapshot/forrás betöltése TypeError-ral megszakadhatott.
+- **Player [PR #21](https://github.com/beacvolleyCC/player_application/pull/21)** squash-merge `762e7ec8d3015399790eb692107cfd64382f3d28`, PWA **v23b**. Javítás: `Promise.resolve(ccSupabase.rpc('cc_player_competition_user_schedule_v1')).catch(...)`. Valódi thenable-nek megfelelő mockkal sikeres, dobott és `{error}` válasz tesztelve; három fő CI és GitHub Pages workflow **zöld**. Nem volt DB-írás.
+- A hibamentes betöltés **még nem volt önmagában elegendő férfi A-hoz**, mert az éles `competition_source_standings` **nem tartalmaz férfi I/A tabellát**. Ezzel szemben a `cc_competition_user_schedule_v1` **42 férfi A sorát** tartalmazza: 7 csapat, 2 tényleges eredmény, 40 további meccs, 0 halasztott, BEAC nem tagja ennek a csoportnak.
+- **Player [PR #22](https://github.com/beacvolleyCC/player_application/pull/22)** squash-merge **`4552a3c1182e6ca67f129f505ffe512363882c0b`**, PWA **`20261020-men-a-import-v23c`**. A férfi A 42 külön forrásazonosítós meccsét, hét valós csapatát, két ellenőrzött eredményét külön megjeleníti a Playerben, **rangsor és bajnoki pont kitalálása nélkül**, részleges, nem hivatalos táblával. A 7-csapatos férfi B fixet változatlanul védi. A 3 célzott CI és **GitHub Pages build/deploy sikeres**. A valódi bejelentkezett Player UI/telefonos cache megjelenés **külön nincs hitelesítve**.
+- **Player teljes ötligás [draft PR #19](https://github.com/beacvolleyCC/player_application/pull/19)** újra a legújabb főágra építve: `feat/20261020-all-fixtures-player-v24`, commit **`125d62ae7415012c27662d2ed6d5c0df79c20424`**, PWA v24a, megőrzi férfi A+B célzott javításokat, thenable RPC-t, és a teljes 300 soros ötligás forrást. **4/4 CI zöld**, de **draft, nem main, nem Player LIVE**. A régi Player PR #17-re továbbra is tilos automatikusan merge-elni.
+- A bemutatott kódjavításokhoz **nem történt Supabase DML/DDL**, tehát `events`, `availability`, meccs-UUID, jelenlét, találkozó, teremfoglalás és értesítési státusz változatlan. A találkozó időpontja továbbra sem jelent pályafoglaltságot.
+
+**Következő:** bejelentkezett Player v23c ellenőrzése férfi A: 7 csapat + teljes 42 meccs + két rögzített eredmény; férfi B: 7 csapat / 42 meccs / egy halasztott. Amennyiben régi `.catch` hibát jelez a böngésző, cache/service-worker refresh szükséges. A PR #19 teljes ötligás kiadása csak előzetes UI/eredmény/jegyzőkönyv QA után menjen élesbe.
+
+---
+
 ## 0/J. 2026-10-20 – null-dátumos halasztások, Player v23a és ötligás QA
 
 - LIVE Supabase `cc_competition_user_schedule_v1`: **300 rekord / 5 liga**, köztük **5 valóban dátum nélküli halasztott meccs** (`startsAt:null`): 1 férfi B, 4 női II/A. Dátumot kitalálni tilos. A korábbi teljes import validátor tévesen minden soron dátumot követelt, így a valós teljes adatot elutasíthatta.
