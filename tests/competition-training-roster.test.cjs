@@ -28,7 +28,7 @@ const ctx={
   ccEventCardHtml_:()=>'<button data-event-id="test">Esemény</button>',
   eventTeamId:()=> 'team',teamById:()=>({name:'BEAC'}),
   ccEventOpponent_:()=> 'UTE',competitionResultByEvent_:()=>null,
-  ccTeamRosterSize_:()=>14,isEventPast:()=>false,
+  ccTeamRosterSize_:()=>14,isEventPast:()=>false,eventType:()=> 'training',
   ccMatchScoreboardHtml_:(_m,o)=>'<button class="cc-match-scoreboard" data-event-id="'+o.eventId+'">Meccs</button>',
   ccEventCanEdit_:()=>true,eventStart:()=>new Date('2026-01-01T00:00:00Z'),
   findEventById:id=>({id,status:'active'}),configured:()=>true,
@@ -91,14 +91,19 @@ test('pre-event attendance sliders never persist from RSVP; actual attendance ta
   assert.ok(html.includes('data-slider-unconfirmed="1"'));
   assert.ok(source.includes("p_status:dbStatus??'clear'"));
 });
-test('both training and match cards show only Névsor in folded header',()=>{
+test('match foldout identifies yes/no/unanswered counts, unlike training header',()=>{
   for(const kind of ['training','match']){
     const html=ctx.qa.item({id:'event-1'},kind);
     assert.ok(html.includes(kind==='match'?'data-event-id="event-1"':'data-event-id="test"'));
     if(kind==='match')assert.ok(html.includes('cc-match-scoreboard'),'match card uses scoreboard');
     assert.ok(html.includes('data-training-roster-toggle="event-1"'));
     assert.ok(html.includes('>Névsor</span>'));
-    assert.ok(!html.includes('Névsor ·'));
+    if(kind==='match'){
+      assert.ok(html.includes('Jövök: 0 · Nem jövök: 0 · Nincs válasz: 0'));
+      assert.ok(html.includes('cc-match-rsvp-summary'));
+    }else{
+      assert.ok(!html.includes('cc-match-rsvp-summary'));
+    }
   }
 });
 test('foldout loads current roster from service, on close does not write anything',async()=>{
@@ -185,4 +190,14 @@ test('decline messages are escaped',()=>{
   const html=ctx.qa.small([{...players[2],note:'<img src=x onerror=alert(1)>'}],'ev',true,true);
   assert.ok(html.includes('&lt;img'));
   assert.ok(!html.includes('<img'));
+});
+
+test('match-only preview gives each real RSVP a visible label; training preview is unchanged',()=>{
+  const match=ctx.qa.small(players,'ev',false,false,true);
+  for(const v of ['Jövök','Nem jövök','Nincs válasz'])assert.ok(match.includes('>'+v+'</small>'));
+  assert.ok(match.includes('data-slider-disabled="1"'));
+  const training=ctx.qa.small(players,'ev',false,false);
+  assert.ok(!training.includes('cc-match-rsvp-status'));
+  assert.ok(source.includes("eventType(e)==='match'"));
+  assert.ok(source.includes('loadEventRoster(id)'),'never infer roster from opponent or league fixture');
 });

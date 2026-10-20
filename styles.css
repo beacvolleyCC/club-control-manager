@@ -6974,3 +6974,17 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 .cc-protocol-markers .cc-protocol-marker.is-captain{order:1}
 .cc-protocol-markers .cc-protocol-marker.is-libero{order:2}
 .cc-protocol-markers .cc-protocol-marker.is-no-entry{order:98}
+
+/* BEAC match list: explicit RSVP summary and status on read-only, event-ID roster. */
+.cc-match-card-panel .cc-training-roster-toggle{
+  gap:8px!important;
+}
+.cc-match-rsvp-summary{flex:1;min-width:0;text-align:right;font-size:10px;font-weight:650;color:var(--muted);line-height:1.35}
+.cc-match-rsvp-status{display:block;font-size:10px;font-weight:700;line-height:1.25;margin-top:2px}
+.cc-match-rsvp-status.going{color:#267445}
+.cc-match-rsvp-status.not-going{color:#b3424b}
+.cc-match-rsvp-status.none{color:var(--muted)}
+@media(max-width:600px){
+ .cc-match-rsvp-summary{font-size:9px;text-align:left}
+ .cc-match-card-panel .cc-training-roster-toggle{flex-wrap:wrap}
+}

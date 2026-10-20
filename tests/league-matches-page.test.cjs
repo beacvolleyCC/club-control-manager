@@ -112,3 +112,11 @@ test('full standings never narrow to a hidden persisted player selection',()=>{
  assert.ok(st.includes('const displayRows=rows;'));
  assert.ok(!st.includes('const selected=rows.length?msSelectedRow_'));
 });
+
+test('BEAC event-id roster precedes read-only federation fixtures on match page',()=>{
+ const section=source.slice(source.indexOf('  function renderCompetitionMatchCards_()'),source.indexOf('  function renderEventList('));
+ assert.ok(section.indexOf("ccCompetitionEventWithRosterHtml_(e,'match')")<section.indexOf('ccLeagueMatchesContextHtml_()'));
+ assert.ok(section.includes('ccBindTrainingRosterToggles_()'));
+ assert.ok(source.includes("await loadEventRoster(id)"));
+ assert.ok(source.includes('data-training-roster-toggle='));
+});
