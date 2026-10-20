@@ -549,34 +549,45 @@
     if(x.includes('ferfi'))return'Férfi';
     return n.replace(/^BEAC\s+/i,'')||'Csapat';
   }
+
+  function ccOverviewSelectableTeams_(){
+    const all=overviewContextTeams_(),known=new Set((matrixSource_().events||[]).map(eventTeamId).map(text).filter(Boolean));
+    return known.size?all.filter(t=>known.has(text(t.id))):all;
+  }
   function syncOverviewTeamContext_(){
-    const valid=new Set(overviewContextTeams_().map(t=>text(t.id)));
-    if(state.overviewTeam&&!valid.has(text(state.overviewTeam)))state.overviewTeam='';
-    state.teamFilters.overview=state.overviewTeam?[text(state.overviewTeam)]:[];
+    const eligible=new Set(ccOverviewSelectableTeams_().map(t=>text(t.id)));
+    let selected=teamFilterIds_('overview').filter(id=>eligible.has(id));
+    if(selected.length===eligible.size)selected=[];
+    state.teamFilters.overview=selected;
+    state.overviewTeam=selected.length===1?selected[0]:'';
   }
   function overviewTeamSwitchHtml_(){
-    const current=text(state.overviewTeam),teams=overviewContextTeams_();
-    return `<label class="overview-team-select"><span>Csapat</span><select id="overviewTeamSelect" aria-label="Áttekintés csapat"><option value="" ${current?'':'selected'}>Mind</option>${teams.map(t=>`<option value="${esc(t.id)}" ${current===text(t.id)?'selected':''}>${esc(overviewTeamChipLabel_(t))}</option>`).join('')}</select></label>`
+    const teams=ccOverviewSelectableTeams_(),selected=new Set(teamFilterIds_('overview'));
+    const allChecked=!selected.size||selected.size===teams.length;
+    const caption=allChecked?'Összes csapat':selected.size===1?(teams.find(t=>selected.has(text(t.id)))?.name||'1 csapat'):selected.size+' csapat';
+    const opened=state.teamFilterOpen?.overviewSelect===true;
+    return '<details id="overviewTeamPicker" class="cc-overview-team-picker" '+(opened?'open':'')+'>'
+      +'<summary><span>Csapat</span><b>'+esc(caption)+'</b><span class="cc-overview-empty-triangle" aria-hidden="true"></span></summary>'
+      +'<div class="cc-overview-team-options">'
+      +'<label><input type="checkbox" data-overview-team-all '+(allChecked?'checked':'')+'>Összes csapat</label>'
+      +teams.map(t=>'<label><input type="checkbox" data-overview-team-item value="'+esc(t.id)+'" '+(allChecked||selected.has(text(t.id))?'checked':'')+'>'+esc(t.name)+'</label>').join('')
+      +'</div></details>';
   }
   function bindOverviewTeamSwitch_(){
-    $('#overviewTeamSelect')?.addEventListener('change',e=>{
-      state.overviewTeam=text(e.target.value);
-      syncOverviewTeamContext_();
+    const holder=$('#overviewTeamPicker'),teams=ccOverviewSelectableTeams_(),valid=teams.map(t=>text(t.id));
+    holder?.addEventListener('toggle',()=>{if(holder.isConnected)state.teamFilterOpen.overviewSelect=holder.open});
+    const update=ids=>{
+      const selected=[...new Set(ids)].filter(id=>valid.includes(id));
+      state.teamFilters.overview=selected.length===valid.length?[]:selected;
+      state.overviewTeam=selected.length===1?selected[0]:'';
+      state.teamFilterOpen.overviewSelect=true;
       renderOverview();
-    });
-    const toggle=$('#overviewFiltersToggle'),panel=$('#overviewFiltersPanel');
-    toggle?.addEventListener('click',()=>{
-      const open=setFilterOpen_('competition.overview',toggle.getAttribute('aria-expanded')!=='true');
-      toggle.setAttribute('aria-expanded',String(open));
-      toggle.classList.toggle('open',open);
-      if(panel)panel.hidden=!open;
-      ccBlurPointerControl_(toggle);
-    });
-    $('#overviewFilterReset')?.addEventListener('click',()=>{
-      state.overviewTeam='';
-      syncOverviewTeamContext_();
-      renderOverview();
-    });
+    };
+    holder?.querySelector('[data-overview-team-all]')?.addEventListener('change',()=>update(valid));
+    holder?.querySelectorAll('[data-overview-team-item]').forEach(el=>el.addEventListener('change',()=>{
+      const picked=[...holder.querySelectorAll('[data-overview-team-item]:checked')].map(item=>item.value);
+      update(picked.length?picked:valid);
+    }));
   }
   function rsvpPills(e){return `<div class="rsvp-plain" aria-label="Jövök: ${num(e.yesCount)}, nem jövök: ${num(e.noCount)}, nincs jelzés: ${num(e.unknownCount)}"><span class="yes"><b>${num(e.yesCount)}</b></span><span class="no"><b>${num(e.noCount)}</b></span><span class="unknown"><b>${num(e.unknownCount)}</b></span></div>`}
   function competitionResultByEvent_(eventId){return (state.competitionResults||[]).find(r=>text(r.eventId)===text(eventId))||null}
@@ -1434,10 +1445,10 @@
     }
     syncOverviewTeamContext_();
     if(!ccMrszPhotoState_.loaded&&!ccMrszPhotoState_.loading)void ccLoadMrszPhotoSnapshot_();
-    const overviewFiltersOpen=filterOpen_('competition.overview',false),overviewFilterActive=!!text(state.overviewTeam);
+    const overviewFilterActive=teamFilterIds_('overview').length>0;
     const now=Date.now(),matchUntil=now+31*864e5,overviewFallback=Array.isArray(state.overview?.nextEvents)?state.overview.nextEvents:[],events=effectiveCompetitionEvents(state.activityEvents.length?state.activityEvents:overviewFallback).filter(e=>!isEventPast(e)&&teamFilterMatch_('overview',eventTeamId(e))),matches=events.filter(e=>eventType(e)==='match'&&(eventStart(e)?.getTime()||0)<matchUntil);
-    $('#viewContent').innerHTML=`<div class="page-intro overview-player-intro overview-context-intro cc-page-header-panel cc-overview-page-header"><div><h2>Versenysport áttekintés</h2><p>Jelenlét, következő meccsek és aktuális bajnoki állás.</p></div><div class="page-actions cc-icon-toolbar">${overviewFilterActive?'<button class="filter-reset cc-toolbar-reset" id="overviewFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${overviewFiltersOpen?'open':''} ${overviewFilterActive?'has-filter':''}" id="overviewFiltersToggle" aria-expanded="${overviewFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button></div></div><div class="filter-panel overview-filter-panel" id="overviewFiltersPanel" ${overviewFiltersOpen?'':'hidden'}>${overviewTeamSwitchHtml_()}</div><div class="parity-overview-grid manager-overview-main" style="--overview-matrix-w:${overviewMatrixWidth_()}px"><article class="panel parity-matrix-card">${renderMatrix()}</article><article class="panel next-matches-card"><div class="panel-head"><div><h3>Következő meccsek</h3><p>${state.overviewTeam?esc(teamById(state.overviewTeam)?.name||'Kiválasztott csapat'):'Összes csapat'} · következő 1 hónap</p></div><button class="button quiet small" id="allMatchesBtn" type="button">Összes</button></div><div class="cc-event-card-list overview-event-card-list">${matches.slice(0,8).map(e=>ccEventCardHtml_(e,'match')).join('')||emptyInline('Nincs közelgő meccs.')}</div></article></div><section class="overview-standings-section"><div class="overview-section-title"><h3>Tabella</h3><p>${state.overviewTeam?esc(teamById(state.overviewTeam)?.name||'Kiválasztott csapat'):'Összes csapat'} · legutóbbi rögzített állás</p></div>${standingsSection_('overview')}</section>`;
-    $('#allMatchesBtn')?.addEventListener('click',()=>{state.eventTeam=text(state.overviewTeam);state.teamFilters.events=state.overviewTeam?[text(state.overviewTeam)]:[];setRoute('competition','matches')});bindOverviewTeamSwitch_();bindMatrix();bindEventDetailActions();bindOverviewStandings_();
+    $('#viewContent').innerHTML=`<div class="page-intro overview-player-intro overview-context-intro cc-page-header-panel cc-overview-page-header"><div><h2>Versenysport áttekintés</h2><p>Jelenlét, következő meccsek és aktuális bajnoki állás.</p></div><div class="page-actions cc-overview-team-toolbar">${overviewTeamSwitchHtml_()}</div></div><div class="parity-overview-grid manager-overview-main" style="--overview-matrix-w:${overviewMatrixWidth_()}px"><article class="panel parity-matrix-card">${renderMatrix()}</article><article class="panel next-matches-card"><div class="panel-head"><div><h3>Következő meccsek</h3><p>${state.overviewTeam?esc(teamById(state.overviewTeam)?.name||'Kiválasztott csapat'):'Összes csapat'} · következő 1 hónap</p></div><button class="button quiet small" id="allMatchesBtn" type="button">Összes</button></div><div class="cc-event-card-list overview-event-card-list">${matches.slice(0,8).map(e=>ccEventCardHtml_(e,'match')).join('')||emptyInline('Nincs közelgő meccs.')}</div></article></div><section class="overview-standings-section"><div class="overview-section-title"><h3>Tabella</h3><p>${state.overviewTeam?esc(teamById(state.overviewTeam)?.name||'Kiválasztott csapat'):'Összes csapat'} · legutóbbi rögzített állás</p></div>${standingsSection_('overview')}</section>`;
+    $('#allMatchesBtn')?.addEventListener('click',()=>{state.eventTeam=text(state.overviewTeam);state.teamFilters.events=[...teamFilterIds_('overview')];setRoute('competition','matches')});bindOverviewTeamSwitch_();bindMatrix();bindEventDetailActions();bindOverviewStandings_();
   }
 
   function notificationRecipientById(id){return (state.notificationRecipients||[]).find(p=>text(p.playerId)===text(id))||null}
