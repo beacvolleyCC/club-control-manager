@@ -13,7 +13,7 @@ const cut=(start,end)=>{
 };
 const ctx=vm.createContext({Intl,Date,Map,Object,Number,String,Array,
  text:value=>String(value??'').trim(),
- ccBrszEffectiveMatches_:[],
+ ccBrszEffectiveMatches_:[],ccManagerVerifiedOfficialReport_:()=>null,
  ccMrszPhotoState_:{matches:[],fixtures:[],tables:[],userMatches:[]}});
 vm.runInContext(cut('function ccMrszNormPairName_(', 'function ccMrszLocalKickoff_('),ctx);
 vm.runInContext(cut('function ccMrszLocalKickoff_(', '// One display for linked Manager events'),ctx);
