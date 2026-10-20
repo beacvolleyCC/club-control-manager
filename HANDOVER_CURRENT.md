@@ -1,5 +1,21 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/H. 2026-10-20 – Player férfi B csoport azonnali javítása (PR #18)
+
+**Hibajelzés:** „Playerben most elbaszódott a B csoport a férfiaknál”. Pontos ok, ellenőrizve az éles Supabase-ben és a Player kódban:
+
+- A `competition_source_standings` korábbi 2026/27-es férfi B mentése **6** csapatot és **0** lejátszott meccset tartalmaz, **Mozdulj SE hiányzik**. Az új `cc_competition_user_schedule_v1` férfi B rekordjai **42** darabot alkotnak: **40 scheduled fixture, 1 postponed fixture, 1 played result**, **7** csapat, **12** BEAC-részvétel.
+- A régi `competition_source_matches` csak **11** férfi BEAC-részvételű korábbi BRSZ meccset tartalmazott; a Player a két forrás helyett előbb csak két kézi dátumkorrekciót illesztett, és ha az állástábla hiányzott, egyes esetekben **a meccslistát is elrejtette**.
+- **Javítva** kizárólag a Player férfi B nézetében: a `cc_player_competition_user_schedule_v1` authenticated read-only RPC 42 B-csoportos sorát használja, 42 külön `ui20261018:` forráskulccsal, 7 önálló csapattal, 12 BEAC-érintettségű meccsel, 1 jegyzett eredménnyel és 1 halasztással. Adathiba vagy csonka import esetén a korábbi nézet érintetlenül marad. A régi október 12-i BEAC–PDSE le nem játszott sor nem duplikálódik, a MRSZ hivatalos eredmény/jegyzőkönyv pontos nap+irányú egyezéssel megmarad; konfliktusnál ellenőrzendő jelölés.
+- A részleges eredményadatok hét csapatsorral láthatók, de **minden hivatalosan nem ellenőrzött helyezés és bajnoki pont „–”**, nem hamis 1–7. rangsor. Halasztott meccs „Halasztva”, végeredmény-konfliktus „Ellenőrzendő”.
+- **Player [PR #18](https://github.com/beacvolleyCC/player_application/pull/18) squash-merge `main`-be sikeres**, commit `66af726a3a790ee2bed9f184f2f27325aeab02e6`, PWA cache `20261020-men-b-seven-team-v23`, önálló 8 részes célzott QA + korábbi Player-protokoll és MRSZ tabella workflow **3/3 sikeres** (`19d7545c1206846363820bcb7491537fc4e54a1c` PR head). A `main` tényleges fájljai + app JS szintaxisa és a cache-azonosítók ellenőrizve.
+- **Nem érintett:** Manager, női B/II és férfi A, meglévő események, edzések, `availability`, találkozók, Player jelenlétek, player push. **Supabase DML/DDL nem történt**.
+- **Éles publikus URL / Cloudflare Pages deploy és valós bejelentkezett iOS megjelenés külön nincs hitelesítve**; a main merge önmagában nem jelent teljes körű éles QA-t.
+- **Fontos kiadáskezelés:** a régi, nyitott Player **PR #17** (`feat/20261019-full202627-readonly-schedule`) ugyanazt a meccslista-felületet általánosan is módosítja, de `main`-ről már eltér. Nem szabad vakon merge-elni a #18 utáni állapotba; előbb a B-specifikus 7-csapatos részleges eredménytáblát és 42-meccses védelmet integrálni, majd valamennyi liga QA-ját újrafuttatni.
+
+---
+
+
 ## 0/G. 2026-10-19 – teljes 2026/27-es kiírás: forráskapcsolás PR-ok QA alatt
 
 **Kizárólag fejlesztési ágakon, még NEM a mainen, és a webes LIVE sem igazolt:**
