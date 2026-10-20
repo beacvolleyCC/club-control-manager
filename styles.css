@@ -7028,3 +7028,7 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 .rsvp-subhead{margin-bottom:5px!important}
 .event-roster-detail .cc-compact-roster-open .triangle-icon,.cc-inline-player .cc-compact-roster-open .triangle-icon{width:12px!important;height:12px!important}
 @media(max-width:700px){.cc-overview-team-toolbar{width:100%;max-width:100%}.cc-overview-team-options{right:0;left:0}.event-detail-primary-grid>div>:last-child{font-size:12px!important}}
+
+/* Verified MRSZ report link is separate from the event button and roster toggle. */
+.cc-event-official-protocol{display:block;width:max-content;max-width:100%;margin:5px 12px 6px auto;padding:6px 10px;font-size:11px;font-weight:750;color:var(--text);text-decoration:underline;text-underline-offset:3px}
+.cc-event-official-protocol:focus-visible{outline:2px solid var(--yellow-dark)}

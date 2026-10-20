@@ -19,7 +19,7 @@ const matches=[
 ];
 const text=x=>String(x??''),esc=x=>text(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const ctx={URL,text,esc,num:x=>Number(x)||0,msLogoHtml_:()=>'<span class="standing-logo-text">TEAM</span>',
-  ccMrszPhotoState_:{matches,fixtures}};
+  ccMrszPhotoState_:{matches,fixtures},ccManagerVerifiedOfficialReport_:()=>null};
 vm.createContext(ctx);
 vm.runInContext(js.slice(start,end)+'\nthis.qa={merge:ccMrszMergedLeagueMatches_,html:ccMrszLeagueFixturePanelHtml_,setScope:(x)=>{ccLeagueMatchScope_=x}}',ctx);
 test('merge BRSZ fixture and MRSZ outcome without double counting 2026-10-13 matches',()=>{
