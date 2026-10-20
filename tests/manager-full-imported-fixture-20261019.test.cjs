@@ -26,6 +26,10 @@ function imported(){
  const match=rows.find(x=>x.competitionLabel===labels[1][0]&&x._ccSourceKind==='fixture');
  match.sourceMatchKey='ui20261018:menB:beac:pdse:1';match._ccSourceKey=match.sourceMatchKey;
  match.homeName='BEAC';match.awayName='PDSE';match.startsAt='2026-10-19T19:30:00';
+ // Mirror LIVE RPC: one men B and four women II/A postponed fixtures have null startsAt.
+ const undated=[...rows.filter(r=>r.competitionLabel===labels[1][0]&&r._ccSourceKind==='fixture').slice(-1),
+  ...rows.filter(r=>r.competitionLabel===labels[3][0]&&r._ccSourceKind==='fixture').slice(-4)];
+ for(const r of undated){r.startsAt=null;r.status='postponed';}
  return rows;
 }
 function cut(start,end){
@@ -49,6 +53,9 @@ test('All 300 source rows in 5 leagues pass the complete-season gate',()=>{
  assert.equal(ctx.ccManagerCompleteUserSchedule_(rows.slice(0,140)),false);
  const old=imported();old[2]._ccSourceSystem='brsz';
  assert.equal(ctx.ccManagerCompleteUserSchedule_(old),false);
+ const invalid=imported();const postponed=invalid.find(x=>x.status==='postponed');
+ assert.ok(postponed);postponed.status='scheduled';
+ assert.equal(ctx.ccManagerCompleteUserSchedule_(invalid),false,'Undated scheduled match must fail closed');
 });
 test('The entire men B group shows 42 fixtures/results, not the old duplicate PDSE',()=>{
  const rows=imported(),legacy={competitionLabel:group,homeName:'BEAC',awayName:'PDSE',
