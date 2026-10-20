@@ -1,5 +1,16 @@
 # Club Control – HANDOVER_CURRENT
 
+## 0/J. 2026-10-20 – null-dátumos halasztások, Player v23a és ötligás QA
+
+- LIVE Supabase `cc_competition_user_schedule_v1`: **300 rekord / 5 liga**, köztük **5 valóban dátum nélküli halasztott meccs** (`startsAt:null`): 1 férfi B, 4 női II/A. Dátumot kitalálni tilos. A korábbi teljes import validátor tévesen minden soron dátumot követelt, így a valós teljes adatot elutasíthatta.
+- Player [PR #20](https://github.com/beacvolleyCC/player_application/pull/20) **mainbe merge-elve**: `cf1d849fe3086f3b4c10aff70eaf57b6a3f5e9b2`. PWA `20261020-men-b-seven-team-v23a`. A dátum nélküli `postponed` engedélyezett, a dátum nélküli `scheduled` továbbra is tiltott. Férfi B 42 sor/7 csapat/12 BEAC/1 eredmény/1 halasztás, ellenőrizetlen helyezés nélkül. Három GitHub CI és a főági Pages build/deploy sikeres, **bejelentkezett LIVE/iOS megjelenés még nem igazolt**.
+- Player új [draft PR #19](https://github.com/beacvolleyCC/player_application/pull/19): `feat/20261020-all-fixtures-player-v24`, legfrissebb `270e50bc0ee1a835cca2d784eb7d80854702bc73`. Teljes ötligás import, megőrzött férfi B speciális fix és null-dátumos validálás. **4/4 CI zöld**, de nem main és nem LIVE; a régi PR #17 eltérő/konfliktusos, ne merge-eld.
+- Manager [PR #68](https://github.com/beacvolleyCC/club-control-manager/pull/68), `feat/20261019-full202627-readonly-schedule`, `accbbaf1acbf7f9364a58edf1b190fdbc13039d1`: teljes import + dátum nélküli halasztások, két tesztkörnyezeti hiba javítva. **7/7 CI zöld**, de **nem main/LIVE**.
+- **Semmilyen Supabase DML/DDL nem történt ebben a körben**; `events`, `availability`, jelenlét, UUID, találkozó, pályafoglaltság és push változatlan. A találkozó ideje **nem** befolyásolja a pályafoglaltságot.
+- Következő lépés: Player v23a belépett LIVE megjelenés és cache ellenőrzése, majd a két ötligás PR közös eredmény/jegyzőkönyv/forrásazonosító + iOS/desktop regressziója; atomikus találkozó/megjegyzés mentés és értesítés csak későbbi, külön felülvizsgált release-ben. BEAC–BEAC önmérkőzés és PDSE-identitás QA nyitott.
+
+---
+
 ## 0/I. 2026-10-20 – új chat handover / legfrissebb kezdőpont
 
 **Új beszélgetés indító üzenete:** `CC-FOLYTATÁS`. **A teljes, naprakész, rövid, feladatra kész handover itt:** [`docs/handover/HANDOVER_20261020_PLAYER_MENB_NEXT_CHAT.md`](docs/handover/HANDOVER_20261020_PLAYER_MENB_NEXT_CHAT.md).
