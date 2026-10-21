@@ -1034,11 +1034,16 @@
     // Keep the original ms-standings-card as the single table. Put the match list directly beneath.
     const main=$('#viewContent .ms-standings-card');
     if(ccMrszPhotoState_.loaded){
-      const matches=ccMrszLeagueFixturePanelHtml_(group,!externalSelection&&Array.isArray(msData_()?.matches)&&ccMrszMenGroup_!=='A'?msData_().matches:[]);
+      const filterRow=selected;
+      const matches=ccMrszLeagueFixturePanelHtml_(group,!externalSelection&&Array.isArray(msData_()?.matches)&&ccMrszMenGroup_!=='A'?msData_().matches:[],{
+        forceAll:true,teamName:filterRow?.teamName||'',teamId:filterRow?.sourceTeamId||'',sort:ccStandingsMatchSort_
+      });
+      const sortControls='<div class="ms-context-controls cc-match-order-controls"><label class="field compact"><span>Mérkőzések sorrendje</span><select id="ccStandingsMatchOrder"><option value="oldest" '+(ccStandingsMatchSort_==='oldest'?'selected':'')+'>Időrend · legrégebbi elöl</option><option value="newest" '+(ccStandingsMatchSort_==='newest'?'selected':'')+'>Időrend · legújabb elöl</option><option value="team" '+(ccStandingsMatchSort_==='team'?'selected':'')+'>Hazai csapat szerint</option></select></label></div>';
       const existing=$('#viewContent .ms-match-panel');
-      if(existing)existing.outerHTML=matches;
-      else if(main)main.insertAdjacentHTML('afterend',matches);
-      else $('#viewContent').insertAdjacentHTML('beforeend',matches);
+      if(existing)existing.outerHTML=sortControls+matches;
+      else if(main)main.insertAdjacentHTML('afterend',sortControls+matches);
+      else $('#viewContent').insertAdjacentHTML('beforeend',sortControls+matches);
+      $('#ccStandingsMatchOrder')?.addEventListener('change',e=>{ccStandingsMatchSort_=e.target.value;renderManagerStandings_()});
     }
     msBind_();
     ccBindMrszProtocol_();
@@ -3348,7 +3353,9 @@
     });
   }
 
-  function ccMrszLeagueFixturePanelHtml_(group,canonicalMatches=[]){
+  let ccStandingsMatchSort_='oldest';
+  let ccStandingsMatchTeamFilter_='all';
+  function ccMrszLeagueFixturePanelHtml_(group,canonicalMatches=[],options={}){
     const merged=ccMrszMergedLeagueMatches_(group,canonicalMatches);
     const table=(ccMrszPhotoState_.tables||[]).find(t=>text(t.competitionLabel)===group);
     const tableRows=Array.isArray(table?.rows)?table.rows:[];
@@ -3377,9 +3384,19 @@
     }
     const hasBeac=matches.some(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName))
       ||tableRows.some(r=>ccIsBeacLeagueTeam_(r.teamName));
-    const scope=hasBeac?ccLeagueMatchScope_:'all';
-    const visible=scope==='all'?matches:matches.filter(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName));
-    const controls=hasBeac?'<div class="cc-league-match-scope" role="group" aria-label="Bajnoki mérkőzések szűrése">'
+    const scope=options.forceAll?'all':hasBeac?ccLeagueMatchScope_:'all';
+    const teamName=text(options.teamName);
+    const teamId=text(options.teamId);
+    const matchesInScope=scope==='all'?matches:matches.filter(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName));
+    const visible=matchesInScope.filter(m=>!teamName||
+      (teamId&&[m.homeSourceTeamId,m.awaySourceTeamId].some(id=>text(id)===teamId))||
+      [m.homeName,m.awayName].some(name=>ccMrszNormPairName_(name)===ccMrszNormPairName_(teamName)))
+      .sort((a,b)=>options.sort==='newest'
+        ?Date.parse(b.startsAt)-Date.parse(a.startsAt)
+        :options.sort==='team'
+          ?text(a.homeName).localeCompare(text(b.homeName),'hu')||Date.parse(a.startsAt)-Date.parse(b.startsAt)
+          :Date.parse(a.startsAt)-Date.parse(b.startsAt));
+    const controls=hasBeac&&!options.forceAll?'<div class="cc-league-match-scope" role="group" aria-label="Bajnoki mérkőzések szűrése">'
       +'<button type="button" data-league-match-scope="beac" aria-pressed="'+(scope==='beac')+'" class="'+(scope==='beac'?'active':'')+'">BEAC meccsek</button>'
       +'<button type="button" data-league-match-scope="all" aria-pressed="'+(scope==='all')+'" class="'+(scope==='all'?'active':'')+'">Összes bajnoki meccs</button></div>':'';
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
