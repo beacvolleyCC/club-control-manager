@@ -2754,7 +2754,7 @@
 
 
   // Isolated Hunvolley screenshots: not the automatic BRSZ schedule or league source.
-  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[],userMatches:[]};
+  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[],userMatches:[],canonicalMatches:[]};
   let ccBrszEffectiveMatches_=[];
   // Snapshot-based league selection is independent from BEAC team permissions.
   // Empty value means follow the existing BEAC team context.
@@ -2795,7 +2795,7 @@
     try{
       const [data,sourceMatches,userMatches]=await Promise.all([rpc('cc_manager_competition_mrsz_snapshot_v2'),rpc('cc_manager_competition_source_matches_effective_v1'),rpc('cc_manager_competition_user_schedule_v1').catch(()=>[])]);
       ccBrszEffectiveMatches_=Array.isArray(sourceMatches)?sourceMatches:[];
-      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[],userMatches:Array.isArray(userMatches)?userMatches:[]};
+      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[],userMatches:Array.isArray(userMatches)?userMatches:[],canonicalMatches:Array.isArray(data?.canonicalMatches)?data.canonicalMatches:[]};
     }catch(err){ccBrszEffectiveMatches_=[];ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
     else if(ccRouteIs_('competition','standings'))renderManagerStandings_();
@@ -3250,6 +3250,20 @@
     return diff?(pastA?-diff:diff):text(a?.homeName).localeCompare(text(b?.homeName),'hu');
   }
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
+    // The shared canonical feed contains reconciled fixtures and reports.
+    // Keep the legacy merge as fallback for old RPC versions and editor/audit flows.
+    const shared=ccMrszPhotoState_.canonicalMatches;
+    if(Array.isArray(shared)&&shared.length){
+      const detail=new Map((ccMrszPhotoState_.matches||[]).filter(m=>m?.matchCode)
+        .map(m=>[text(m.competitionLabel)+'|'+text(m.matchCode),m]));
+      return shared.filter(m=>text(m.competitionLabel)===group)
+        .map(m=>{
+          const report=detail.get(group+'|'+text(m.matchCode));
+          const merged={...m,isFixture:m.status!=='played',isPhoto:m.status==='played',
+            ...(report?.protocol?{protocol:report.protocol}:{})};
+          return merged;
+        }).sort((a,b)=>text(a.status)==='postponed'?-1:text(b.status)==='postponed'?1:ccManagerMatchVisualSort_(a,b));
+    }
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
     const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
@@ -3407,7 +3421,7 @@
       badge:'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
       meta:'',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today,
-      editHtml:ccMatchEditAction_(m),sourceUrl:ccManagerVerifiedOfficialReport_(m)?.url||(text(m.source)==='mrsz_official_protocol_pdf'?text(m.protocolUrl):''),
+      editHtml:ccMatchEditAction_(m),sourceUrl:text(m.protocolUrl)||ccManagerVerifiedOfficialReport_(m)?.url||(text(m.source)==='mrsz_official_protocol_pdf'?text(m.protocolUrl):''),
       sourceKind:ccManagerVerifiedOfficialReport_(m)||text(m.source)==='mrsz_official_protocol_pdf'?'protocol':''
     })).join('');
     const noTableNote='';
