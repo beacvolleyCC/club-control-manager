@@ -2913,7 +2913,8 @@
       kickoff=ccMrszLocalKickoff_(m.startsAt),
       hasScore=m.homeSets!=null&&m.awaySets!=null&&Number.isFinite(Number(m.homeSets))&&Number.isFinite(Number(m.awaySets))
         &&(Number(m.homeSets)+Number(m.awaySets)>0),
-      score=hasScore?Number(m.homeSets)+'–'+Number(m.awaySets):'VS.',
+      postponed=text(m.status)==='postponed',
+      score=postponed?'Halasztva':hasScore?Number(m.homeSets)+'–'+Number(m.awaySets):'VS.',
       setIssue=hasScore?ccMrszSetScoreIssue_(m):'',
       setCoverage=hasScore?ccMrszSetCoverageLabel_(m):'',
       sets=hasScore&&!setIssue&&Array.isArray(m.setScores)?m.setScores.filter(x=>x?.home!=null&&x?.away!=null&&text(x.home)!==''&&text(x.away)!=='')
@@ -2928,16 +2929,16 @@
       protocolLink=!linked&&!protocolAvailable&&hasScore&&/^https:\/\/(?:www\.)?hunvolley\.info\//i.test(text(m.protocolUrl)),
       tag=linked?'button':'article';
     return '<'+tag+(linked?' type="button" data-event-id="'+esc(id)+'"':'')
-      +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+(protocolAvailable?' has-protocol':'')+'"'
+      +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+(protocolAvailable?' has-protocol':'')+(postponed?' is-postponed':'')+'"'
       +(protocolAvailable?' data-cc-mrsz-protocol="'+esc(m.matchCode)+'" data-cc-mrsz-protocol-league="'+esc(league)+'" role="button" tabindex="0"':protocolLink?' data-cc-mrsz-external="'+esc(m.protocolUrl)+'" role="link" tabindex="0"':'')
       +' aria-label="'+esc(home+' – '+away+' · '+score)+'">'
-      +'<span class="cc-scoreboard-top"><span class="cc-scoreboard-label">'+esc(dateInsteadOfBadge?(validDate?kickoff.date:'Időpont nélkül'):badge)+'</span>'
-      +'<span class="cc-scoreboard-kickoff">'+(dateInsteadOfBadge?(validTime?esc(kickoff.time):''):(esc(validDate?kickoff.date:'Időpont nélkül')+(validTime?' · '+esc(kickoff.time):'')))+'</span></span>'
+      +'<span class="cc-scoreboard-top"><span class="cc-scoreboard-label">'+esc(postponed?'Halasztva':dateInsteadOfBadge?(validDate?kickoff.date:'Időpont nélkül'):badge)+'</span>'
+      +'<span class="cc-scoreboard-kickoff">'+(postponed?'Időpont egyeztetés alatt':dateInsteadOfBadge?(validTime?esc(kickoff.time):''):(esc(validDate?kickoff.date:'Időpont nélkül')+(validTime?' · '+esc(kickoff.time):'')))+'</span></span>'
       +'<span class="cc-scoreboard-main"><span class="cc-scoreboard-team home">'
       +'<span class="cc-scoreboard-crest">'+msLogoHtml_('',home,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
       +(rankHome?'<small>'+rankHome+'. helyen áll</small>':'')+'</span></span>'
-      +'<span class="cc-scoreboard-score">'+(hasScore?'<strong>'+esc(score.replace('–',' – '))+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
+      +'<span class="cc-scoreboard-score">'+(hasScore||postponed?'<strong>'+esc(score.replace('–',' – '))+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
       +(setCoverage?'<small class="cc-scoreboard-set-coverage"'+(setIssue?' title="'+esc(setIssue)+'"':'')+'>'+esc(setCoverage)+'</small>':'')+'</span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
@@ -3369,6 +3370,10 @@
   }
 
   let ccLeaguePostponedFilter_='all';
+  function ccLeagueMatchStatus_(m){
+    return text(m?.status)==='postponed'?'postponed':
+      m?.homeSets!=null&&m?.awaySets!=null?'played':'scheduled';
+  }
   let ccStandingsMatchSort_='oldest';
   let ccStandingsMatchTeamFilter_='all';
   function ccMrszLeagueFixturePanelHtml_(group,canonicalMatches=[],options={}){
@@ -3404,10 +3409,10 @@
     const teamName=text(options.teamName);
     const teamId=text(options.teamId);
     const matchesInScope=scope==='all'?matches:matches.filter(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName));
-    const visible=matchesInScope.filter(m=>ccLeaguePostponedFilter_==='all'||(ccLeaguePostponedFilter_==='postponed')===(text(m.status)==='postponed')).filter(m=>!teamName||
+    const visible=matchesInScope.filter(m=>ccLeaguePostponedFilter_==='all'||ccLeagueMatchStatus_(m)===ccLeaguePostponedFilter_).filter(m=>!teamName||
       (teamId&&[m.homeSourceTeamId,m.awaySourceTeamId].some(id=>text(id)===teamId))||
       [m.homeName,m.awayName].some(name=>ccMrszNormPairName_(name)===ccMrszNormPairName_(teamName)))
-      .sort((a,b)=>{const ap=text(a.status)==='postponed',bp=text(b.status)==='postponed';if(ap!==bp)return ap?-1:1;return options.sort==='newest'
+      .sort((a,b)=>{const ap=ccLeagueMatchStatus_(a)==='postponed',bp=ccLeagueMatchStatus_(b)==='postponed';if(ap!==bp)return ap?-1:1;return options.sort==='newest'
         ?Date.parse(b.startsAt)-Date.parse(a.startsAt)
         :options.sort==='team'
           ?text(a.homeName).localeCompare(text(b.homeName),'hu')||Date.parse(a.startsAt)-Date.parse(b.startsAt)
@@ -3416,7 +3421,7 @@
       +'<button type="button" data-league-match-scope="beac" aria-pressed="'+(scope==='beac')+'" class="'+(scope==='beac'?'active':'')+'">BEAC meccsek</button>'
       +'<button type="button" data-league-match-scope="all" aria-pressed="'+(scope==='all')+'" class="'+(scope==='all'?'active':'')+'">Összes bajnoki meccs</button></div>':'';
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    const items=visible.map(m=>text(m.status)==='postponed'?'<div class="cc-postponed-match"><strong>Halasztva</strong> · '+esc(m.homeName)+' – '+esc(m.awayName)+(m.venue?' · '+esc(m.venue):'')+'</div>':ccMatchScoreboardHtml_(m,{league:group,
+    const items=visible.map(m=>ccMatchScoreboardHtml_(m,{league:group,
       badge:'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
       meta:'',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today,
@@ -3426,7 +3431,7 @@
     const noTableNote='';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
     return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
-      +visible.length+' / '+matches.length+' meccs · '+esc(group)+'</span></div>'+controls+'<label class="field compact"><span>Státusz</span><select class="cc-postponed-filter"><option value="all" '+(ccLeaguePostponedFilter_==='all'?'selected':'')+'>Összes</option><option value="postponed" '+(ccLeaguePostponedFilter_==='postponed'?'selected':'')+'>Halasztva</option><option value="scheduled" '+(ccLeaguePostponedFilter_==='scheduled'?'selected':'')+'>Nem halasztott</option></select></label></div>'+noTableNote+'<div class="ms-match-list">'
+      +visible.length+' / '+matches.length+' meccs · '+esc(group)+'</span></div>'+controls+'<label class="field compact"><span>Státusz</span><select class="cc-postponed-filter"><option value="all" '+(ccLeaguePostponedFilter_==='all'?'selected':'')+'>Összes</option><option value="postponed" '+(ccLeaguePostponedFilter_==='postponed'?'selected':'')+'>Halasztva</option><option value="scheduled" '+(ccLeaguePostponedFilter_==='scheduled'?'selected':'')+'>Kiírt</option><option value="played" '+(ccLeaguePostponedFilter_==='played'?'selected':'')+'>Lejátszott</option></select></label></div>'+noTableNote+'<div class="ms-match-list">'
       +(items||'<div class="ms-empty">'+(scope==='beac'?'Nincs megjeleníthető mérkőzés.':'Ebben a bajnoki csoportban nincs mentett mérkőzés.')+'</div>')+'</div>'
       +(review.length?'<details class="cc-mrsz-review-fixtures"><summary>'+review.length+(unverifiedOnly?' ellenőrzendő BRSZ-rekord':' ellenőrzendő rekord')+' · külön a meccslistától</summary><ul>'
         +review.map(({match:m,reason})=>{const kick=ccMrszLocalKickoff_(m.startsAt);
@@ -3695,6 +3700,9 @@
       ccLeagueMatchScope_='all';
       setRoute('competition','standings');
     });
+    document.querySelectorAll('.cc-postponed-filter').forEach(el=>el.addEventListener('change',e=>{
+      ccLeaguePostponedFilter_=e.target.value;renderCompetitionMatchCards_();
+    }));
     document.querySelectorAll('[data-league-match-scope]').forEach(button=>button.addEventListener('click',()=>{
       ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac';
       renderCompetitionMatchCards_();
