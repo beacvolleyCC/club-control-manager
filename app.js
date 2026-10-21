@@ -3064,7 +3064,7 @@
         }
       });
     });
-    $('#viewContent [data-cc-mrsz-external]').forEach(card=>{
+    $$('#viewContent [data-cc-mrsz-external]').forEach(card=>{
       const open=()=>window.open(card.dataset.ccMrszExternal,'_blank','noopener,noreferrer');
       card.addEventListener('click',e=>{if(!e.target.closest('a,button,select,input'))open()});
       card.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('a,button,select,input')){e.preventDefault();open()}});
