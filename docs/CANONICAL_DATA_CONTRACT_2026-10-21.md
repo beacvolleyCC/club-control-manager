@@ -42,3 +42,14 @@ E. A későbbi natív iOS/Android csak a közös read/write szerződésen keresz
 - Áttekintés következő BEAC, Meccsek csak BEAC, Tabella teljes bajnokság, mindháromban egyetlen közös domainrekordból olvasott eredmény.
 - Tabella eredménylista korábbi és jövőbeli rekordokkal, megfelelő hitelességi státusszal.
 - Bejelentkezés/jogosultság/RLS; Player nem láthat Manager-only személyes adatot.
+
+## 2026-10-21 – részleges bajnoki statisztika és közös UI
+
+- A Manager és Player `cc_*_competition_mrsz_snapshot_v2()` RPC-k további, nem törő szerződésmezői: `canonicalMatches`, `canonicalCoverage`, `canonicalTeamStats`. A korábbi `fixtures`, `matches`, `tables` változatlanul megmarad.
+- `private.cc_competition_canonical_coverage_v1()`: bajnokságonként `total`, `played`, `scheduled`, `postponed`, `protocolLinked`; `officialStandingsVerified:false`.
+- `private.cc_competition_canonical_team_stats_v1()`: idény+csoport+ellenőrzött teljes csapatnév-alias szerint csoportosított *részleges* mérleg. Egyetlen forrása a canonical mérkőzésnézet: nem számolja újra az eredménymásolatokat. A `position` és `tablePoints` minden sorban **null**, amíg nincs külön hiteles hivatalos tabella. Az M/GY/V és SZ/SZA/P/PA számolható; a hiányzó labdapont NULL.
+- `private.cc_competition_team_key_v1(name)`: kizárólag kifejezetten ismert teljes névvariánsok normalizálása. Az eredmények bajnoki csoportonként vannak csoportosítva; hasonló nevű külön nevezések nem vonhatók össze automatikusan.
+- Manager **Tabella** és Player **Tabella**: a canonical team stats az elsődleges, amennyiben elérhető; régi screenshot-sorrendből nem keletkezhet hiteles helyezés. A Manager és Player külön megjeleníti, hogy a feldolgozott eredmények csak az idény részhalmazát fedik.
+- Központi QA (2 futás): 5 csoport, 298 mérkőzés (13 lejátszott / 281 kiírt / 4 halasztott), 40 csapatsor (7/7/12/7/7), 13/13 jegyzőkönyvlink, csapatok megjelenése meccsszám szerint pontosan 2×13, nulla kitalált helyezés vagy bajnoki pont. Az alkalmazás-kód JS-szintaxis tesztje és a Player mind az öt csoportjára külön futtatott HTML-táblateszt sikeres.
+- Privát stats/coverage funkciókra `anon` és `authenticated` közvetlen EXECUTE: **false**. Az eddigi Manager/Player v2 RPC jogosultsági kapuja megmaradt.
+- **Hátralévő kötelező regresszió**: jogosult bejelentkezett felhasználóval élő RPC/böngészős felület, Manager/Player tabella és jegyzőkönyv-megnyitás, statisztikai modul többi nézete, hivatalos rangsor-forrás bekötése. A read-only stats integráció NEM jelenti az admin versenyeredmények vagy események write-path konszolidációját.
