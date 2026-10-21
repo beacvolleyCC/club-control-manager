@@ -7032,3 +7032,20 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 /* Verified MRSZ report link is separate from the event button and roster toggle. */
 .cc-event-official-protocol{display:block;width:max-content;max-width:100%;margin:5px 12px 6px auto;padding:6px 10px;font-size:11px;font-weight:750;color:var(--text);text-decoration:underline;text-underline-offset:3px}
 .cc-event-official-protocol:focus-visible{outline:2px solid var(--yellow-dark)}
+
+
+/* Reconciled league fixtures: postponements stay as complete match cards. */
+.cc-mrsz-league-matches .cc-match-scoreboard.is-postponed{
+  border-color:rgba(158,119,45,.42);background:linear-gradient(110deg,#fff8e9,#f9ead2 55%,#fff8e9);
+}
+.cc-mrsz-league-matches .cc-match-scoreboard.is-postponed .cc-scoreboard-label{color:#8a5d16;font-weight:900}
+.cc-mrsz-league-matches .cc-match-scoreboard.is-postponed .cc-scoreboard-score>strong{
+  font-size:clamp(16px,2vw,24px);letter-spacing:0;white-space:normal;overflow-wrap:anywhere;
+}
+.cc-match-scoreboard[data-cc-mrsz-protocol],
+.cc-match-scoreboard[data-cc-mrsz-external]{cursor:pointer}
+.cc-match-scoreboard[data-cc-mrsz-protocol]:focus-visible,
+.cc-match-scoreboard[data-cc-mrsz-external]:focus-visible{
+  outline:2px solid var(--yellow-dark,#b58217);outline-offset:3px;
+}
+.cc-mrsz-league-matches .cc-postponed-filter{min-height:35px}
