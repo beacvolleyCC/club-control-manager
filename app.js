@@ -3618,7 +3618,7 @@
       ?['Női Budapest I. osztály','Női Budapest II. osztály – B csoport','Férfi Budapest I. osztály – B csoport','Férfi Budapest I. osztály – A csoport']
       :[group];
     const oldScope=ccLeagueMatchScope_;
-    if(allTeams)ccLeagueMatchScope_='all';
+    if(allTeams)ccLeagueMatchScope_='beac';
     try{
       return '<section class="cc-match-league-context">'
         +(allTeams?'':('<div class="cc-matches-league-picker">'+ccLeagueContextSelectHtml_(group)+'</div>'))
