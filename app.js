@@ -2925,10 +2925,11 @@
       meta=text(options.meta||''),url=text(options.sourceUrl||m.sourceUrl||m.matchUrl||m.reportUrl),
       source=!linked&&/^https:\/\//i.test(url)?'<a class="cc-scoreboard-source" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(options.sourceKind==='protocol'?'Jegyzőkönyv ↗':'Forrás ↗')+'</a>':'',
       protocolAvailable=!linked&&text(m.matchCode)&&m.protocol&&Array.isArray(m.protocol.teams)&&m.protocol.teams.length===2,
+      protocolLink=!linked&&!protocolAvailable&&hasScore&&/^https:\/\/(?:www\.)?hunvolley\.info\//i.test(text(m.protocolUrl)),
       tag=linked?'button':'article';
     return '<'+tag+(linked?' type="button" data-event-id="'+esc(id)+'"':'')
       +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+(protocolAvailable?' has-protocol':'')+'"'
-      +(protocolAvailable?' data-cc-mrsz-protocol="'+esc(m.matchCode)+'" data-cc-mrsz-protocol-league="'+esc(league)+'" role="button" tabindex="0"':'')
+      +(protocolAvailable?' data-cc-mrsz-protocol="'+esc(m.matchCode)+'" data-cc-mrsz-protocol-league="'+esc(league)+'" role="button" tabindex="0"':protocolLink?' data-cc-mrsz-external="'+esc(m.protocolUrl)+'" role="link" tabindex="0"':'')
       +' aria-label="'+esc(home+' – '+away+' · '+score)+'">'
       +'<span class="cc-scoreboard-top"><span class="cc-scoreboard-label">'+esc(dateInsteadOfBadge?(validDate?kickoff.date:'Időpont nélkül'):badge)+'</span>'
       +'<span class="cc-scoreboard-kickoff">'+(dateInsteadOfBadge?(validTime?esc(kickoff.time):''):(esc(validDate?kickoff.date:'Időpont nélkül')+(validTime?' · '+esc(kickoff.time):'')))+'</span></span>'
@@ -3016,7 +3017,7 @@
       +'</div>';
   }
   function ccOpenMrszProtocol_(code,league){
-    const matches=Array.isArray(ccMrszPhotoState_?.matches)?ccMrszPhotoState_.matches:[];
+    const matches=Array.isArray(ccMrszPhotoState_?.canonicalMatches)&&ccMrszPhotoState_.canonicalMatches.length?ccMrszPhotoState_.canonicalMatches:(Array.isArray(ccMrszPhotoState_?.matches)?ccMrszPhotoState_.matches:[]);
     const found=matches.filter(m=>text(m?.matchCode)===text(code)&&text(m?.competitionLabel)===text(league)&&Array.isArray(m?.protocol?.teams));
     if(found.length!==1){status('A jegyzőkönyv nem azonosítható egyértelműen.','error');return}
     const d=$('#entityDialog'),body=$('#entityDialogBody'),title=$('#entityDialogTitle');
@@ -3040,6 +3041,11 @@
           event.preventDefault();open();
         }
       });
+    });
+    $('#viewContent [data-cc-mrsz-external]').forEach(card=>{
+      const open=()=>window.open(card.dataset.ccMrszExternal,'_blank','noopener,noreferrer');
+      card.addEventListener('click',e=>{if(!e.target.closest('a,button,select,input'))open()});
+      card.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('a,button,select,input')){e.preventDefault();open()}});
     });
     ccBindSourceMatchEdit_();
   }
@@ -3254,15 +3260,8 @@
     // Keep the legacy merge as fallback for old RPC versions and editor/audit flows.
     const shared=ccMrszPhotoState_.canonicalMatches;
     if(Array.isArray(shared)&&shared.length){
-      const detail=new Map((ccMrszPhotoState_.matches||[]).filter(m=>m?.matchCode)
-        .map(m=>[text(m.competitionLabel)+'|'+text(m.matchCode),m]));
       return shared.filter(m=>text(m.competitionLabel)===group)
-        .map(m=>{
-          const report=detail.get(group+'|'+text(m.matchCode));
-          const merged={...m,isFixture:m.status!=='played',isPhoto:m.status==='played',
-            ...(report?.protocol?{protocol:report.protocol}:{})};
-          return merged;
-        }).sort((a,b)=>text(a.status)==='postponed'?-1:text(b.status)==='postponed'?1:ccManagerMatchVisualSort_(a,b));
+        .map(m=>({...m,isFixture:m.status!=='played',isPhoto:m.status==='played'})).sort((a,b)=>text(a.status)==='postponed'?-1:text(b.status)==='postponed'?1:ccManagerMatchVisualSort_(a,b));
     }
     const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
     const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
