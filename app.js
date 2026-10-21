@@ -3384,7 +3384,7 @@
     }
     const hasBeac=matches.some(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName))
       ||tableRows.some(r=>ccIsBeacLeagueTeam_(r.teamName));
-    const scope=options.forceAll?'all':hasBeac?ccLeagueMatchScope_:'all';
+    const scope=options.onlyBeac?'beac':options.forceAll?'all':hasBeac?ccLeagueMatchScope_:'all';
     const teamName=text(options.teamName);
     const teamId=text(options.teamId);
     const matchesInScope=scope==='all'?matches:matches.filter(m=>ccIsBeacLeagueTeam_(m.homeName)||ccIsBeacLeagueTeam_(m.awayName));
@@ -3622,7 +3622,7 @@
     try{
       return '<section class="cc-match-league-context">'
         +(allTeams?'':('<div class="cc-matches-league-picker">'+ccLeagueContextSelectHtml_(group)+'</div>'))
-        +groups.map(league=>ccMrszLeagueFixturePanelHtml_(league)).join('')
+        +groups.map(league=>ccMrszLeagueFixturePanelHtml_(league,[],{onlyBeac:true})).join('')
         +'</section>';
     }finally{ccLeagueMatchScope_=oldScope}
   }
