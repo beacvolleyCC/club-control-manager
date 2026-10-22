@@ -1,4 +1,6 @@
-# CLUB CONTROL — AKTUÁLIS HANDOVER (2026-10-22)
+# CLUB CONTROL — AKTUÁLIS HANDOVER (2026-10-23)
+
+**2026-10-23 öt bajnokság read-only auditja:** [docs/competition/FIVE_LEAGUE_CANONICAL_SCHEDULE_AUDIT_20261023.md](docs/competition/FIVE_LEAGUE_CANONICAL_SCHEDULE_AUDIT_20261023.md). A jelenlegi régi 300 rekordból 281 kezdési időpont szerint egyezik a 298-as canonical menetrenddel, 8 korábbi eredmény dátum + végeredmény szerint egyezik (régi óramező hiányzik), 11 kivizsgálandó eltérés van (4 dátum, 4 közös halasztás, 1 újra kiírt halasztás, 1 ismételt párosítás, 1 BEAC–BEAC önmérkőzés). Ezen felül 5 régi `fixture` már lejátszott a canonical oldalon. A két feltöltött MRSZ #2686/#2700 jegyzőkönyv külön PR #74-ben, még NEM LIVE. A `main`, LIVE adatbázis és 300/298 meccsazonosítók nem módosultak. SQL + pillanatkép + CI csak tesztágon.
 
 **Régi menetrend PR #68/#19 ütközés és safe fix-ek:** [docs/handover/CC_20261022_LEGACY_SCHEDULE_CONFLICTS.md](docs/handover/CC_20261022_LEGACY_SCHEDULE_CONFLICTS.md). Canonical elsőbbség, Player statisztikai szettösszesítés és konfliktusszűrés, Manager forrásazonosító/év szerinti visszakeresés, PWA verzió-egyezés: integrációs tesztágakon, zöld CI. A régi két PR GitHub-merge-konfliktusa még nyitott; semmi LIVE.
 
