@@ -25,7 +25,10 @@ Structured extracted source: `data/competition/2026-27/official-protocols-202610
 - `tests/official-protocols-20261021.test.cjs` checks both 3-win scores, all complete set point pairs, 38 player rows, 4 captains, 3 liberos, unmarked roster statuses and source identity.
 - `sql/official_protocols_20261021_readonly_preflight.sql` checks fixture baseline before any potential release.
 - **No SQL INSERT/UPDATE/DELETE or Edge deployment in this PR.**
-- Before release: implement canonical nonduplicating supersession in a *separate* backward-compatible migration, test against 298/15 invariants and prior 13 protocols twice; preserve raw sources and all 666 bookings, no Manager `events` recreation, do not generate push from a historical protocol import.
+- Before release: implement canonical nonduplicating supersession in a *separate* backward-compatible migration, test against 298/15 invariants and prior 13 protocols twice; preserve raw sources and all existing bookings (read-only audit observed 667 at last count; earlier audit observed 666 — not changed by this PR), no Manager `events` recreation, do not generate push from a historical protocol import.
 
 ## Independent QA status
 The two attached official pages were checked once via PDF extracted text and a second time visually from the rendered originals. GitHub CI is a separate data-structure/consistency gate. These checks are not a LIVE app import claim.
+
+## Latest read-only baseline (two repeated queries)
+Events: 279; bookings: **667**; canonical matches: 298; played: 13; previously stored official protocols: 13; new matchCode 2686/2700 rows: **0**. Earlier audit saw 666 bookings; one additional row exists now, without any write by this staging PR. This count is dynamic and must be rechecked at migration time.
