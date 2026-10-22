@@ -23,7 +23,7 @@ test('two explicitly coded 2026/27 MRSZ protocols, unique source keys',()=>{
   assert.equal(m.homeSets,3);
   assert.ok(m.awaySets===1||m.awaySets===2);
   assert.ok(m.startsAt.includes('+02:00'));
-  const wins=m.setScores.reduce((a,v)=>(a[0]+(v.home>v.away),a[1]+(v.away>v.home),a),[0,0]);
+  const wins=m.setScores.reduce((a,v)=>{a[0]+=Number(v.home>v.away);a[1]+=Number(v.away>v.home);return a;},[0,0]);
   assert.deepEqual(wins,[m.homeSets,m.awaySets]);
   for(let j=0;j<m.setScores.length;j++){
    const v=m.setScores[j],last=j===4,winning=Math.max(v.home,v.away),losing=Math.min(v.home,v.away);
