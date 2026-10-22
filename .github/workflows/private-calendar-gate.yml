@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           grep -q 'revoke all on private.cc_calendar_feed_tokens_v1 from public,anon,authenticated' sql/cc_private_calendar_feed_tokens_v1.sql
           grep -q 'grant execute on function public.cc_calendar_feed_read_v1(text) to service_role' sql/cc_private_calendar_feed_read_v1.sql
-          grep -q 'a.status=\x27going\x27' sql/cc_private_calendar_feed_read_v1.sql
+          grep -Fq "a.status='going'" sql/cc_private_calendar_feed_read_v1.sql
           grep -q 't.revoked_at is null' sql/cc_private_calendar_feed_read_v1.sql
           grep -q 'member' sql/cc_private_calendar_feed_read_v1.sql
           grep -q 'no-store' supabase/functions/cc-calendar/index.ts
