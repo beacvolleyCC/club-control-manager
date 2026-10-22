@@ -2,6 +2,8 @@
 
 **Aktuális elsődleges átadás:** [docs/handover/HANDOVER_20261022_CC_CURRENT.md](docs/handover/HANDOVER_20261022_CC_CURRENT.md). **Folytatási kulcs:** `CC-FOLYTATÁS`.
 
+**Release-készenléti csomag, ÉLESÍTÉS NÉLKÜL (2026-10-22):** [docs/handover/CALENDAR_RELEASE_PACKAGE_20261022.md](docs/handover/CALENDAR_RELEASE_PACKAGE_20261022.md). A kész Player felület `CALENDAR_SUBSCRIPTION_ENABLED: false` flag mögött van. A `cc-calendar` HTTP végpont külön egységtesztelt, scoped `verify_jwt=false` konfigurációval, kizárólag tokenhitelesítéssel. A két draft PR (#72/#25) nem merge-elt, új adatbázis/funkció nincs LIVE. A későbbi bevezetés függ a korábbi Club Control adatbázis és modulok lezárásától, majd a bejelentkezett/Apple E2E-től.
+
 **2026-10-22 iOS/Apple Calendar fejlesztési checkpoint (csak draft PR-okon):** [docs/handover/HANDOVER_20261022_CALENDAR_QA_COMPLETE.md](docs/handover/HANDOVER_20261022_CALENDAR_QA_COMPLETE.md). Manager #72 + Player #25; két elkülönített PostgreSQL adatbázisos QA-pass, tesztelt push-meeting változás és tokenrotáció, CI zöld. **A LIVE ICS-végpont, adatbázis-migráció és a Player feliratkozás még NINCS élesítve; bejelentkezett iOS/HTTP E2E továbbra is nyitott.**
 
 A 2026-10-21-i alábbi átadás történeti előzmény; az új elsődleges dokumentum tartalmazza a canonical meccs-/statisztika-integrációkat, a Manager belépési `forEach` hiba javítását és a következő **privát, automatikusan frissülő iOS ICS feed + push értesítés** feladatot. Az iOS naptár-előfizetés **még nincs megvalósítva**. A bejelentkezett iPhone UX verifikáció továbbra is nyitott.
