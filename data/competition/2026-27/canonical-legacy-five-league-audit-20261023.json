@@ -1,0 +1,300 @@
+{
+  "capturedOn": "2026-10-23",
+  "source": "LIVE read-only comparison of public.cc_competition_user_schedule_v1 vs private.cc_canonical_competition_matches_v1",
+  "status": "audit_only_no_automatic_canonical_alias",
+  "legacyTotal": 300,
+  "canonicalTotal": 298,
+  "canonicalUnmatchedByDay": 9,
+  "leagueSummary": [
+    {
+      "same_day": 41,
+      "league_key": "menA",
+      "legacy_rows": 42,
+      "exact_kickoff": 39,
+      "result_without_time": 2,
+      "needs_categorization": 1
+    },
+    {
+      "same_day": 40,
+      "league_key": "menB",
+      "legacy_rows": 42,
+      "exact_kickoff": 39,
+      "result_without_time": 1,
+      "needs_categorization": 2
+    },
+    {
+      "same_day": 129,
+      "league_key": "womenI",
+      "legacy_rows": 131,
+      "exact_kickoff": 124,
+      "result_without_time": 5,
+      "needs_categorization": 2
+    },
+    {
+      "same_day": 37,
+      "league_key": "womenIIA",
+      "legacy_rows": 42,
+      "exact_kickoff": 37,
+      "result_without_time": 0,
+      "needs_categorization": 5
+    },
+    {
+      "same_day": 42,
+      "league_key": "womenIIB",
+      "legacy_rows": 43,
+      "exact_kickoff": 42,
+      "result_without_time": 0,
+      "needs_categorization": 1
+    }
+  ],
+  "classSummary": [
+    {
+      "n": 4,
+      "review_class": "DIFFERENT_DAY_REVIEW"
+    },
+    {
+      "n": 1,
+      "review_class": "EXTRA_LEGACY_PAIR_REVIEW"
+    },
+    {
+      "n": 281,
+      "review_class": "MATCHED_EXACT"
+    },
+    {
+      "n": 8,
+      "review_class": "MATCHED_RESULT_NO_TIME"
+    },
+    {
+      "n": 1,
+      "review_class": "POSTPONED_RESCHEDULED_REVIEW"
+    },
+    {
+      "n": 4,
+      "review_class": "POSTPONED_UNDATED_BOTH"
+    },
+    {
+      "n": 1,
+      "review_class": "UNVERIFIED_SELF_FIXTURE"
+    }
+  ],
+  "reviewRecords": [
+    {
+      "league": "menA",
+      "legacyKey": "ui20261018:menA:dagkse:kozgaz:1",
+      "home": "Dág KSE",
+      "away": "KÖZGÁZ",
+      "legacyDay": "2026-11-19",
+      "legacyStatus": "scheduled",
+      "classification": "DIFFERENT_DAY_REVIEW",
+      "candidateSource": "20261001:fixture:93",
+      "candidateMatchId": "30407d80-b696-58fc-d596-c7e8370515e8",
+      "candidateKickoffLocal": "2026-10-15T20:15:00",
+      "candidateStatus": "scheduled",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "menB",
+      "legacyKey": "ui20261018:menB:mozduljse:mafcschonherz:1",
+      "home": "Mozdulj SE",
+      "away": "MAFC-Schönherz",
+      "legacyDay": null,
+      "legacyStatus": "postponed",
+      "classification": "POSTPONED_RESCHEDULED_REVIEW",
+      "candidateSource": "brsz:2026/27:menB:userofficial:38",
+      "candidateMatchId": "d5f97408-5801-7442-fa59-a200a54abd9d",
+      "candidateKickoffLocal": "2027-03-03T20:00:00",
+      "candidateStatus": "scheduled",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "menB",
+      "legacyKey": "ui20261018:menB:mozduljse:mafcvasarhelyi:1",
+      "home": "Mozdulj SE",
+      "away": "MAFC-Vásárhelyi",
+      "legacyDay": "2026-10-28",
+      "legacyStatus": "scheduled",
+      "classification": "DIFFERENT_DAY_REVIEW",
+      "candidateSource": "brsz:2026/27:menB:userofficial:01",
+      "candidateMatchId": "25a14406-2887-62fc-086c-ad770d160a6b",
+      "candidateKickoffLocal": "2026-10-21T20:00:00",
+      "candidateStatus": "scheduled",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "womenI",
+      "legacyKey": "ui20261018:womenI:beac:beac:1",
+      "home": "BEAC",
+      "away": "BEAC",
+      "legacyDay": "2026-11-10",
+      "legacyStatus": "scheduled",
+      "classification": "UNVERIFIED_SELF_FIXTURE",
+      "candidateSource": null,
+      "candidateMatchId": null,
+      "candidateKickoffLocal": null,
+      "candidateStatus": null,
+      "pairCount": 0,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "womenI",
+      "legacyKey": "ui20261018:womenI:mtk:panoramase:1",
+      "home": "MTK",
+      "away": "Panoráma SE",
+      "legacyDay": "2026-10-28",
+      "legacyStatus": "scheduled",
+      "classification": "DIFFERENT_DAY_REVIEW",
+      "candidateSource": "20261001:fixture:39",
+      "candidateMatchId": "04eaceee-57e2-7563-a618-beb933c0ffc0",
+      "candidateKickoffLocal": "2026-10-21T21:00:00",
+      "candidateStatus": "scheduled",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "womenIIA",
+      "legacyKey": "ui20261018:womenIIA:bdg:bdtsetaksony:1",
+      "home": "BDG",
+      "away": "BDTSE Taksony",
+      "legacyDay": null,
+      "legacyStatus": "postponed",
+      "classification": "POSTPONED_UNDATED_BOTH",
+      "candidateSource": "brsz:2026/27:bb2a:official:04",
+      "candidateMatchId": "75fcda54-9b04-8c84-f559-3f7093170322",
+      "candidateKickoffLocal": null,
+      "candidateStatus": "postponed",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "womenIIA",
+      "legacyKey": "ui20261018:womenIIA:budaixic:budapestbunnies:1",
+      "home": "Budai XI. C",
+      "away": "Budapest Bunnies",
+      "legacyDay": null,
+      "legacyStatus": "postponed",
+      "classification": "POSTPONED_UNDATED_BOTH",
+      "candidateSource": "brsz:2026/27:bb2a:official:01",
+      "candidateMatchId": "689d0631-6c39-504a-f7bc-38520e770810",
+      "candidateKickoffLocal": null,
+      "candidateStatus": "postponed",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "womenIIA",
+      "legacyKey": "ui20261018:womenIIA:budapestbunnies:bdtsetaksony:1",
+      "home": "Budapest Bunnies",
+      "away": "BDTSE Taksony",
+      "legacyDay": null,
+      "legacyStatus": "postponed",
+      "classification": "POSTPONED_UNDATED_BOTH",
+      "candidateSource": "brsz:2026/27:bb2a:official:03",
+      "candidateMatchId": "3c5fe1bd-ce32-8c1f-aaf6-9ab6f48ee45e",
+      "candidateKickoffLocal": null,
+      "candidateStatus": "postponed",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "womenIIA",
+      "legacyKey": "ui20261018:womenIIA:budapestbunnies:budaixic:1",
+      "home": "Budapest Bunnies",
+      "away": "Budai XI. C",
+      "legacyDay": null,
+      "legacyStatus": "postponed",
+      "classification": "POSTPONED_UNDATED_BOTH",
+      "candidateSource": "brsz:2026/27:bb2a:official:02",
+      "candidateMatchId": "740f1aa3-c7b2-73f4-80e3-6975a25494fc",
+      "candidateKickoffLocal": null,
+      "candidateStatus": "postponed",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "womenIIA",
+      "legacyKey": "ui20261018:womenIIA:keac:kreb:1",
+      "home": "KEAC",
+      "away": "KRE-B",
+      "legacyDay": "2026-10-28",
+      "legacyStatus": "scheduled",
+      "classification": "DIFFERENT_DAY_REVIEW",
+      "candidateSource": "brsz:2026/27:bb2a:official:16",
+      "candidateMatchId": "acc575bd-a04e-5470-5cef-f29eb68b9a57",
+      "candidateKickoffLocal": "2026-11-28T11:30:00",
+      "candidateStatus": "scheduled",
+      "pairCount": 1,
+      "otherLegacySameDay": 0
+    },
+    {
+      "league": "womenIIB",
+      "legacyKey": "ui20261018:womenIIB:mtkkek:rkskfelnottnoi:2",
+      "home": "MTK kék",
+      "away": "RKSK felnőtt női",
+      "legacyDay": "2026-11-24",
+      "legacyStatus": "scheduled",
+      "classification": "EXTRA_LEGACY_PAIR_REVIEW",
+      "candidateSource": "mrsz:2026/27:protocol:2337",
+      "candidateMatchId": "7f8a8eaf-96c2-8d4a-bd8f-5492d526b2fc",
+      "candidateKickoffLocal": "2026-10-13T18:20:00",
+      "candidateStatus": "played",
+      "pairCount": 1,
+      "otherLegacySameDay": 1
+    }
+  ],
+  "staleLegacyFixtureStatus": [
+    {
+      "league": "menB",
+      "candidate": "mrsz:2026/27:protocol:2699",
+      "legacyKey": "ui20261018:menB:beac:pdse:1",
+      "canonicalScore": [
+        3,
+        0
+      ],
+      "canonicalStatus": "played"
+    },
+    {
+      "league": "womenI",
+      "candidate": "mrsz:2026/27:protocol:2331",
+      "legacyKey": "ui20261018:womenI:kse:mozduljse:1",
+      "canonicalScore": [
+        1,
+        3
+      ],
+      "canonicalStatus": "played"
+    },
+    {
+      "league": "womenI",
+      "candidate": "mrsz:2026/27:protocol:2677",
+      "legacyKey": "ui20261018:womenI:panoramase:kresc:1",
+      "canonicalScore": [
+        0,
+        3
+      ],
+      "canonicalStatus": "played"
+    },
+    {
+      "league": "womenIIB",
+      "candidate": "mrsz:2026/27:protocol:2348",
+      "legacyKey": "ui20261018:womenIIB:beacii:uteu20pink:1",
+      "canonicalScore": [
+        3,
+        0
+      ],
+      "canonicalStatus": "played"
+    },
+    {
+      "league": "womenIIB",
+      "candidate": "mrsz:2026/27:protocol:2337",
+      "legacyKey": "ui20261018:womenIIB:mtkkek:rkskfelnottnoi:1",
+      "canonicalScore": [
+        3,
+        0
+      ],
+      "canonicalStatus": "played"
+    }
+  ],
+  "legacyResultConflicts": []
+}
