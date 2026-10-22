@@ -41,3 +41,8 @@
 ## What must NOT happen yet
 
 No Github merge to `main`, no Supabase migrations or Edge deployment, no PWA release, no fabricated official ranking, no changing existing `public.events` / `public.availability` rows, no guessing an official MRSZ PDF URL.
+
+## 2026-10-22 késő esti read-only kontroll
+Két ismételt LIVE SELECT mérés: **279 esemény, 668 jelentkezés, 298 canonical mérkőzés, 13 lejátszott és 0 új #2686/#2700 LIVE protokollforrás**. A jelentkezésszám a korábbi 667-ről 668-ra változott más rendszertevékenység közben; ezen a tesztágon semmilyen LIVE DML nem futott. A `public.availability` darabszáma dinamikus, kiadás előtt újra mérendő.
+
+Zöld CI: Manager [kombinált 39862460668](https://github.com/beacvolleyCC/club-control-manager/actions/runs/39862460668), [aktuális meccs dátum 39862291638](https://github.com/beacvolleyCC/club-control-manager/actions/runs/39862291638), [jegyzőkönyvjelölések 39862267196](https://github.com/beacvolleyCC/club-control-manager/actions/runs/39862267196); Player [kombinált 39862532882](https://github.com/beacvolleyCC/player_application/actions/runs/39862532882). A tesztek a két integrációs fejlesztési ágon futottak; ezek nem LIVE E2E eredmények.
