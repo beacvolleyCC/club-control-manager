@@ -6,6 +6,7 @@ on:
     paths:
       - 'sql/official_protocols_20261021_identity_safe_migration.sql'
       - 'tests/official-protocols-20261021/**'
+      - 'sql/official_protocols_20261021_manual_rollback.sql'
       - 'data/competition/2026-27/official-protocols-20261021.json'
       - '.github/workflows/official-protocols-20261021-db.yml'
 jobs:
@@ -46,7 +47,11 @@ jobs:
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
             psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
-            echo "CC canonical independent pass ${pass}: 298/15 stable, rerun idempotent"
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_manual_rollback.sql
+            test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            echo "CC canonical independent pass ${pass}: 298/15 stable, rerun idempotent, reversible"
           done
       - name: Drift blocks atomic update, no result partially written
         shell: bash
