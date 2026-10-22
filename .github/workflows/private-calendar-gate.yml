@@ -34,5 +34,7 @@ jobs:
           grep -Fq "a.status='going'" sql/cc_private_calendar_feed_read_v1.sql
           grep -q 't.revoked_at is null' sql/cc_private_calendar_feed_read_v1.sql
           grep -q 'member' sql/cc_private_calendar_feed_read_v1.sql
-          grep -q 'no-store' supabase/functions/cc-calendar/index.ts
+          grep -q 'no-store' supabase/functions/cc-calendar/handler.mjs
+          grep -q 'verify_jwt = false' supabase/config.toml
+          grep -q 'createCalendarHandler(admin)' supabase/functions/cc-calendar/index.ts
           ! grep -q 'SUPABASE_SERVICE_ROLE_KEY' tests/calendar-ics.test.mjs
