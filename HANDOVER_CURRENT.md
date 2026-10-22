@@ -1,3 +1,11 @@
+# CLUB CONTROL — AKTUÁLIS HANDOVER (2026-10-22)
+
+**Aktuális elsődleges átadás:** [docs/handover/HANDOVER_20261022_CC_CURRENT.md](docs/handover/HANDOVER_20261022_CC_CURRENT.md). **Folytatási kulcs:** `CC-FOLYTATÁS`.
+
+A 2026-10-21-i alábbi átadás történeti előzmény; az új elsődleges dokumentum tartalmazza a canonical meccs-/statisztika-integrációkat, a Manager belépési `forEach` hiba javítását és a következő **privát, automatikusan frissülő iOS ICS feed + push értesítés** feladatot. Az iOS naptár-előfizetés **még nincs megvalósítva**. A bejelentkezett iPhone UX verifikáció továbbra is nyitott.
+
+---
+
 # Club Control – HANDOVER_CURRENT
 
 ## AKTUÁLIS ÁTADÁS – 2026-10-21 (elsőként ezt olvasd)
