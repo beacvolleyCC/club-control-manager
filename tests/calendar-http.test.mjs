@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createCalendarHandler } from '../supabase/functions/cc-calendar/handler.mjs';
 
-const secret='1'.repeat(64);
+const secret='a1'.repeat(32);
 const endpoint='https://example.supabase.co/functions/v1/cc-calendar';
 const event={id:'12345678-aaaa-4bbb-8ccc-123456789abc',
   title:'BEAC röplabda',type:'training',start:'2026-10-29T18:00:00+01:00',
