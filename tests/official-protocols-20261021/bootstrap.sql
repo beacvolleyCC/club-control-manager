@@ -28,7 +28,8 @@ SELECT
  'mrsz:2026/27:protocol:'||(90000+i),'2026/27','Synthetic QA','match',
  jsonb_build_object('homeName','Archived Home'||i,'awayName','Archived Away'||i,
   'startsAt','2026-10-01T18:00:00+02:00','homeSets',3,'awaySets',0,
-  'matchCode',90000+i,'setScores','[]'::jsonb)
+  'matchCode',90000+i,'setScores','[]'::jsonb,
+  'protocolUrl','https://example.invalid/synthetic-protocol/'||(90000+i))
 FROM generate_series(1,13) i;
 INSERT INTO public.cc_competition_mrsz_screenshot_v1
  (source_key,season,competition_label,record_kind,data)
