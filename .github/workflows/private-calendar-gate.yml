@@ -19,6 +19,11 @@ jobs:
           node-version: '22'
       - name: Validate ICS
         run: node --test tests/calendar-ics.test.mjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check Edge Function
+        run: deno check supabase/functions/cc-calendar/index.ts
       - name: Check bearer auth contracts
         shell: bash
         run: |
