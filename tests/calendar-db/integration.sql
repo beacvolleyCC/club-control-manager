@@ -24,25 +24,25 @@ BEGIN
   IF length(token)<>64 OR token !~ '^[0-9a-f]{64}$' THEN
     RAISE EXCEPTION 'QA: raw token is not 256 bits';
   END IF;
-  PERFORM set_config('cc.qa.hash1',encode(extensions.digest(token,'sha256'),'hex'),true);
+  PERFORM set_config('cc.qa.hash1',encode(sha256(convert_to(token,'UTF8')),'hex'),true);
   IF (public.cc_player_calendar_token_status_v1('mine')->>'active')::boolean IS DISTINCT FROM TRUE THEN
     RAISE EXCEPTION 'QA: status not active';
   END IF;
   BEGIN
-    PERFORM public.cc_calendar_feed_read_v1(encode(extensions.digest(token,'sha256'),'hex'));
+    PERFORM public.cc_calendar_feed_read_v1(encode(sha256(convert_to(token,'UTF8')),'hex'));
   EXCEPTION WHEN insufficient_privilege THEN denied:=true;
   END;
   IF NOT denied THEN RAISE EXCEPTION 'QA: authenticated role can call privileged read'; END IF;
   token2:=public.cc_player_calendar_token_rotate_v1('mine')->>'token';
   IF token2=token THEN RAISE EXCEPTION 'QA: rotation returned same token'; END IF;
-  PERFORM set_config('cc.qa.hash2',encode(extensions.digest(token2,'sha256'),'hex'),true);
+  PERFORM set_config('cc.qa.hash2',encode(sha256(convert_to(token2,'UTF8')),'hex'),true);
   IF public.cc_player_calendar_token_revoke_v1('mine') IS DISTINCT FROM TRUE THEN
     RAISE EXCEPTION 'QA: revoke did not revoke token'; END IF;
   token:=public.cc_player_calendar_token_rotate_v1('mine')->>'token';
-  PERFORM set_config('cc.qa.hash3',encode(extensions.digest(token,'sha256'),'hex'),true);
+  PERFORM set_config('cc.qa.hash3',encode(sha256(convert_to(token,'UTF8')),'hex'),true);
   -- Additional authorized team token, protected by current membership.
   token:=public.cc_player_calendar_token_rotate_v1('team','00000000-0000-4000-8000-000000000301')->>'token';
-  PERFORM set_config('cc.qa.teamhash',encode(extensions.digest(token,'sha256'),'hex'),true);
+  PERFORM set_config('cc.qa.teamhash',encode(sha256(convert_to(token,'UTF8')),'hex'),true);
   denied:=false;
   BEGIN
     PERFORM public.cc_player_calendar_token_rotate_v1('team','00000000-0000-4000-8000-000000000302');
