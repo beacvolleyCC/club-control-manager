@@ -3080,7 +3080,7 @@
     return null;
   }
   function ccMatchSourceFind_(id){
-    return [...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_]
+    return [...(ccMrszPhotoState_.userMatches||[]),...(ccMrszPhotoState_.fixtures||[]),...(ccMrszPhotoState_.matches||[]),...ccBrszEffectiveMatches_]
       .find(m=>{const x=ccMatchSourceId_(m);return x&&x.system===id.system&&x.key===id.key&&x.season===id.season});
   }
   function ccCanEditLeagueSource_(){
