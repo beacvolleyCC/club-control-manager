@@ -43,6 +43,9 @@ jobs:
             psql -X -v ON_ERROR_STOP=1 -f sql/cc_private_calendar_feed_tokens_v1.sql
             psql -X -v ON_ERROR_STOP=1 -f sql/cc_private_calendar_feed_read_v1.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/integration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/push-helpers.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_push_meeting_at_change_v1.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/push-assertions.sql
             active_before="$(psql -XAt -v ON_ERROR_STOP=1 -c 'select count(*) from private.cc_calendar_feed_tokens_v1')"
             test "${active_before}" = "0"
             echo "PostgreSQL fixture pass ${pass}: independent DB, authorization passed, rollback confirmed"
