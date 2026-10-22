@@ -1,6 +1,6 @@
 
 -- Disposable PostgreSQL 17 fixture. NEVER use on Club Control LIVE.
-DO $
+DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
     CREATE ROLE anon NOLOGIN;
@@ -12,7 +12,7 @@ BEGIN
     CREATE ROLE service_role NOLOGIN;
   END IF;
 END
-$;
+$$;
 CREATE SCHEMA auth;
 CREATE SCHEMA private;
 CREATE SCHEMA extensions;
