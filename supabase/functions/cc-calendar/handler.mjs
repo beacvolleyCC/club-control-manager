@@ -20,8 +20,10 @@ export function createCalendarHandler(serviceClient) {
     let tokens;
     try { tokens = new URL(req.url).searchParams.getAll('token'); }
     catch { return notFound(); }
-    // Reject multiple tokens, malformed secrets, and all unrecognized parameters.
+    // Reject multiple tokens, malformed secrets and unrecognized query parameters.
     if(tokens.length!==1 || !/^[a-f0-9]{64}$/.test(tokens[0]))return notFound();
+    const parsed=new URL(req.url);
+    if([...parsed.searchParams.keys()].some(k=>k!=='token'))return notFound();
     let hash;
     try {
       const digest=await crypto.subtle.digest('SHA-256',utf8.encode(tokens[0]));
