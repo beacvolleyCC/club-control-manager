@@ -5,6 +5,7 @@ on:
       - 'sql/cc_private_calendar_feed_*.sql'
       - 'supabase/functions/cc-calendar/**'
       - 'tests/calendar-ics.test.mjs'
+      - 'tests/calendar-http.test.mjs'
       - '.github/workflows/private-calendar-gate.yml'
   push:
     branches:
@@ -17,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate ICS
-        run: node --test tests/calendar-ics.test.mjs
+      - name: Validate ICS and private HTTP feed
+        run: node --test tests/calendar-ics.test.mjs tests/calendar-http.test.mjs
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
