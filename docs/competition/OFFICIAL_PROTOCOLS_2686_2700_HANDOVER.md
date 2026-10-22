@@ -32,3 +32,20 @@ The two attached official pages were checked once via PDF extracted text and a s
 
 ## Latest read-only baseline (two repeated queries)
 Events: 279; bookings: **667**; canonical matches: 298; played: 13; previously stored official protocols: 13; new matchCode 2686/2700 rows: **0**. Earlier audit saw 666 bookings; one additional row exists now, without any write by this staging PR. This count is dynamic and must be rechecked at migration time.
+
+## 2026-10-22 canonical integration code completed (not deployed)
+
+**Draft PR #74 now also contains:**
+- `sql/official_protocols_20261021_identity_safe_migration.sql`: a single transaction that enriches only the two already existing fixture source rows. It never adds a new match row or Manager event and never modifies RSVP/booking data.
+- `sourceFixtureSnapshot` stores the entire original fixture JSON for future guarded rollback; `officialProtocolEvidence` preserves the uploaded PDF-derived data including 38 player registrations, match codes, referees, officials and set scores.
+- `officialProtocolMatchCode` is deliberately a *separate top-level key* from `matchCode`. Adding the usual top-level `matchCode` to a fixture would **change the canonical UUID** in the current production view. The existing canonical payload function therefore reads `coalesce(matchCode,officialProtocolMatchCode)` without affecting the other fields.
+- The two linked fixture `source_key` values, kickoff times, team identity strings and resulting canonical match UUIDs remain unchanged. The original 13 official match records remain separate and untouched.
+- `sql/official_protocols_20261021_manual_rollback.sql` safely restores the original JSON only after checking both expected PDF hashes, old canonical IDs and a 298/15 baseline; it deliberately leaves the harmless backward-compatible matchCode fallback in place.
+- `tests/official-protocols-20261021/bootstrap.sql` + the exact captured current production canonical view + `verify.sql` emulate **298 distinct canonical matches (13 already played)** in PostgreSQL 17. The new `.github/workflows/official-protocols-20261021-db.yml` tests two independent clean databases, first import (298/15), repeated import, guarded rollback (298/13), reimport (298/15), all 38 player records and 13 earlier protocols, and strict rejection/atomic rollback on an intentionally mismatching fixture.
+- `tests/official-protocols-20261021-migration-coherence.test.cjs` checks that the SQL-embedded JSON evidence still exactly matches the reviewed source JSON. The regular 38-player and Manager sport-scoring QA workflows are independent.
+
+**Latest verified CI on commit `09bcbddfd0e03d880f14b62e8b3bd4435122064d`:** canonical PostgreSQL QA, source/staging QA and Manager Sport Scoring QA succeeded. Run IDs 39803824673, 39803824450, 39803824606 respectively. Logs prove two clean database passes (and rollback + reimport); no LIVE Supabase write occurred.
+
+**Release preconditions:** verify current production canonical schema against the captured test view, confirm the two sources are still in the expected `scheduled` state, take a backup, verify counts and booking baseline, run the staged SQL in the approved migration process, inspect canonical payload in Manager and Player, then run the full 11-point QA twice. If any other existing migration changes the canonical identity derivation, review/update this patch before release. Keep the PR draft until the user asks to integrate.
+
+**Known display limit:** a verified external online PDF URL has not been attached; the official score and rosters are embedded in canonical data, but an official clickable original-PDF endpoint needs separate verification. Do not invent links.
