@@ -44,9 +44,13 @@ export function buildIcs(events){
     if(end&&end>start)lines.push(`DTEND:${end}`);
     lines.push(`SUMMARY:${escapeText(e.title||(e.type==='match'?'Mérkőzés':'Edzés'))}`);
     if(location)lines.push(`LOCATION:${escapeText(location)}`);
-    if(e.meetingPlace){
-      lines.push(`DESCRIPTION:${escapeText('Találkozó helye: '+e.meetingPlace)}`);
-    }
+    const meetingDate=e.meetingAt?new Date(e.meetingAt):null;
+    const meetingTime=meetingDate && Number.isFinite(meetingDate.getTime())
+      ?new Intl.DateTimeFormat('hu-HU',{timeZone:'Europe/Budapest',
+        year:'numeric',month:'2-digit',day:'2-digit',
+        hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(meetingDate):'';
+    const meetingText=[meetingTime,e.meetingPlace].filter(Boolean).join(' · ');
+    if(meetingText)lines.push(`DESCRIPTION:${escapeText('Találkozó: '+meetingText)}`);
     lines.push(e.status==='cancelled'?'STATUS:CANCELLED':'STATUS:CONFIRMED');
     lines.push('END:VEVENT');
     rows.push(...lines);
