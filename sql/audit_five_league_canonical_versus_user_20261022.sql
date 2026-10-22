@@ -93,6 +93,16 @@ SELECT jsonb_build_object(
    ) ORDER BY league_key,source_key),'[]'::jsonb)
   FROM classified WHERE review_class NOT IN ('MATCHED_EXACT','MATCHED_RESULT_NO_TIME')
  ),
+ 'staleLegacyFixtureStatus',(
+  SELECT coalesce(jsonb_agg(jsonb_build_object(
+   'legacyKey',source_key,'league',league_key,'candidate',candidate_key,
+   'canonicalStatus',candidate_status,'canonicalScore',
+     jsonb_build_array(candidate_home_sets,candidate_away_sets)
+  ) ORDER BY league_key,source_key),'[]'::jsonb)
+  FROM classified
+  WHERE day_count=1 AND record_kind='fixture' AND candidate_status='played'
+   AND source_status<>'played'
+ ),
  'legacyResultConflicts',(
   SELECT coalesce(jsonb_agg(jsonb_build_object(
    'legacyKey',source_key,'candidate',candidate_key,
