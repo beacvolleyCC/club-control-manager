@@ -1,0 +1,84 @@
+name: Manager combined calendar protocol and crosswalk QA
+on:
+  push:
+    branches: [integration/20261022-manager-calendar-protocol-crosswalk-qa]
+jobs:
+  combined-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: RFC5545, private HTTP, official roster and migration consistency
+        run: |
+          node --test \
+            tests/calendar-ics.test.mjs \
+            tests/calendar-http.test.mjs \
+            tests/official-protocols-20261021.test.cjs \
+            tests/official-protocols-20261021-migration-coherence.test.cjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check Edge function and private bearer auth contract
+        run: |
+          deno check supabase/functions/cc-calendar/index.ts
+          grep -q 'verify_jwt = false' supabase/config.toml
+          grep -q 'no-store' supabase/functions/cc-calendar/handler.mjs
+          grep -q 'CALENDAR' docs/handover/CALENDAR_RELEASE_PACKAGE_20261022.md
+          grep -q 'UNLINKED' sql/audit_canonical_manager_event_crosswalk_20261022.sql
+          ! grep -q 'SUPABASE_SERVICE_ROLE_KEY' tests/calendar-ics.test.mjs
+  combined-database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable_cross_feature
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: disposable_cross_feature
+    steps:
+      - uses: actions/checkout@v4
+      - name: Two independent databases contain BOTH calendar and canonical schemas
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pass in 1 2; do
+            createdb "cc_cross_feature_${pass}"
+            export PGDATABASE="cc_cross_feature_${pass}"
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/bootstrap.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_private_calendar_feed_tokens_v1.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_private_calendar_feed_read_v1.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/integration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/push-helpers.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_push_meeting_at_change_v1.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/push-assertions.sql
+            sed '/^CREATE SCHEMA private;$/d' tests/official-protocols-20261021/bootstrap.sql | psql -X -v ON_ERROR_STOP=1
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-view.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-stats-functions.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            test "$(psql -XAt -c "select count(*) from private.cc_calendar_feed_tokens_v1")" = 0
+            test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1")" = 298
+            test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 15
+            test "$(psql -XAt -c "select count(*) from public.events")" = 5
+            test "$(psql -XAt -c "select count(*) from public.availability")" = 5
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_manual_rollback.sql
+            test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            echo "COMBINED_MANAGER_QA_PASS ${pass}: no cross-schema conflict, 298/15, no token or RSVP mutation"
+          done
