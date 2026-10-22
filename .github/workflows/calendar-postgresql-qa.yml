@@ -1,0 +1,67 @@
+name: Calendar isolated PostgreSQL QA
+on:
+  push:
+    branches:
+      - feat/20261022-private-ios-calendar-phase1
+  pull_request:
+    paths:
+      - 'sql/cc_private_calendar_feed_*.sql'
+      - 'tests/calendar-db/**'
+      - '.github/workflows/calendar-postgresql-qa.yml'
+jobs:
+  two-independent-databases:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: calendar_fixture_only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: calendar_fixture_only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Two clean, independent database passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pass in 1 2; do
+            database="cc_calendar_qa_${pass}"
+            createdb "${database}"
+            export PGDATABASE="${database}"
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/bootstrap.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_private_calendar_feed_tokens_v1.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_private_calendar_feed_read_v1.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/integration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/push-helpers.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_push_meeting_at_change_v1.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/calendar-db/push-assertions.sql
+            active_before="$(psql -XAt -v ON_ERROR_STOP=1 -c 'select count(*) from private.cc_calendar_feed_tokens_v1')"
+            test "${active_before}" = "0"
+            echo "PostgreSQL fixture pass ${pass}: independent DB, authorization passed, rollback confirmed"
+          done
+      - name: Concurrent rotation maintains a single active token
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PGDATABASE=cc_calendar_qa_2
+          query="BEGIN; SET LOCAL ROLE authenticated; SELECT set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000101',true); SELECT public.cc_player_calendar_token_rotate_v1('mine'); COMMIT;"
+          psql -X -v ON_ERROR_STOP=1 -c "${query}" > /dev/null &
+          first=$!
+          psql -X -v ON_ERROR_STOP=1 -c "${query}" > /dev/null &
+          second=$!
+          wait "${first}"
+          wait "${second}"
+          count="$(psql -XAt -v ON_ERROR_STOP=1 -c "select count(*) from private.cc_calendar_feed_tokens_v1 where scope='mine' and revoked_at is null")"
+          test "${count}" = "1"
+          echo "Simultaneous rotations: exactly one active token"

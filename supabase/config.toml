@@ -1,0 +1,5 @@
+# Apple Calendar subscriptions cannot send Supabase Auth JWTs.
+# The cc-calendar handler performs independent bearer-token verification on every request.
+# Do not disable JWT verification for any other function.
+[functions.cc-calendar]
+verify_jwt = false
