@@ -145,4 +145,40 @@ left join lateral (
  order by other.source_key limit 1
 ) pr on true;
 $function$;
+-- Verified in-app MRSZ protocols count even when an external PDF URL is absent.
+CREATE OR REPLACE FUNCTION private.cc_competition_canonical_coverage_v1()
+ RETURNS jsonb
+ LANGUAGE sql
+ STABLE
+ SET search_path TO ''
+AS $function$
+select coalesce(jsonb_agg(jsonb_build_object(
+  'competitionLabel',s.competition_label,'season','2026/27',
+  'total',s.total,'played',s.played,'scheduled',s.scheduled,'postponed',s.postponed,
+  'protocolLinked',s.protocol_linked,
+  'source','canonical_matches_2026_27',
+  'officialStandingsVerified',false
+) order by s.competition_label),'[]'::jsonb)
+from (
+ select m.competition_label,count(*) total,
+ count(*) filter(where match_status='played') played,
+ count(*) filter(where match_status='scheduled') scheduled,
+ count(*) filter(where match_status='postponed') postponed,
+ count(*) filter(where m.match_status='played' AND
+ (m.protocol_url IS NOT NULL OR
+  (s.data->>'officialProtocolMatchCode' = s.data->'officialProtocolEvidence'->>'matchCode'
+   AND coalesce(s.data->>'officialProtocolFileSha256','') ~ '^[0-9a-f]{64}
+ from private.cc_canonical_competition_matches_v1 m
+ left join public.cc_competition_mrsz_screenshot_v1 s on s.source_key=m.source_key
+ group by m.competition_label
+) s;
+$function$
+
+   AND jsonb_typeof(s.data->'officialProtocolEvidence'->'rosters'->'home')='array'
+   AND jsonb_typeof(s.data->'officialProtocolEvidence'->'rosters'->'away')='array'
+  ))) protocol_linked
+ from private.cc_canonical_competition_matches_v1 group by competition_label
+) s;
+$function$
+
 COMMIT;
