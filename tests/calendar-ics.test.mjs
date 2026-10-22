@@ -46,3 +46,13 @@ test('invalid timestamps and ids skipped, dates not invented',()=>{
  assert.equal((buildIcs([{...base,start:'invalid'}]).match(/BEGIN:VEVENT/g)||[]).length,0);
  assert.ok(!unfold(buildIcs([{...base,end:null}])).includes('DTEND:'));
 });
+
+test('meeting location and Hungarian daylight-saving conversion are safe',()=>{
+ const s=unfold(buildIcs([{...base,
+   meetingAt:'2026-10-25T17:30:00Z',meetingPlace:'Főbejárat, 2-es pálya'
+ }]));
+ assert.ok(s.includes('DESCRIPTION:Találkozó:'));
+ assert.ok(s.includes('18:30'));
+ assert.ok(s.includes('Főbejárat\\, 2-es pálya'));
+ assert.ok(!s.includes('medical'));
+});
