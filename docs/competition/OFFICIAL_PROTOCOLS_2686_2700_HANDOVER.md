@@ -98,3 +98,22 @@ the actual score or roster data.
 **Release order:** canonical Manager #74 migration after all usual 11 QA
 checks, then Player UI/protocol smoke test with an authenticated account.
 Do not merge or deploy either PR automatically.
+
+## 2026-10-22 — canonical coverage és négycsapatos statisztika QA
+
+A közös `private.cc_competition_canonical_coverage_v1()` korábban kizárólag a külső `protocol_url` hivatkozást tekintette jegyzőkönyv-kapcsolatnak. Az új `#2686` és `#2700` feltöltött, SHA-256 lenyomattal ellátott belső MRSZ-jegyzőkönyvei nem rendelkeznek ellenőrzött külső PDF-linkkel, ezért az eredeti számlálás tévesen 13-on maradt volna.
+
+A **nem élesített** #74 SQL most csak az ellenőrzött, teljes belső bizonyítékot ismeri el: azonos MRSZ-kód, 64 karakteres PDF-lenyomat, két `rosters` tömb, lejátszott állapot; a meglévő URL-es jegyzőkönyvek változatlanul beszámítanak. A már meglévő canonical ID-k, eredmények, tabellahelyezések, jogosultságok és jelentkezések nem módosulnak.
+
+Azonos éles adatbázis-sémából átvett `cc_competition_team_key_v1()` és `cc_competition_canonical_team_stats_v1()` SQL-függvényekkel, **két külön PostgreSQL 17 adatbázison** ellenőriztük:
+
+- canonical összes mérkőzés: **298 → 298**; lejátszott: **13 → 15**;
+- ellenőrzött jegyzőkönyv-kapcsolatok: **13 → 15**, külső link kitalálása nélkül;
+- #2686: MTK–Panoráma **3:1**, összpont **95:69**;
+- #2700: Mozdulj–MAFC-Vásárhelyi **3:2**, összpont **104:102**;
+- mind a négy csapat 1 rögzített győzelmet vagy vereséget és megfelelő szettarányt kap; **hivatalos helyezés vagy tabellapont továbbra sincs kitalálva**;
+- az import ismétlése, a kézi rollback és az újraimport is megőrzi az azonosítókat és a 13 korábbi hivatalos jegyzőkönyvet; ellenőrizetlen/módosult kiírás esetén a tranzakció megszakad.
+
+Teszt: `.github/workflows/official-protocols-20261021-db.yml`, `tests/official-protocols-20261021/verify.sql`, valamint a kizárólag szintetikus fixture-höz használt `current-canonical-stats-functions.sql`. Sikeres két DB-s integrációs futás: [Actions 39841598586](https://github.com/beacvolleyCC/club-control-manager/actions/runs/39841598586). A helyreállító és a statisztikai SQL **nincs LIVE telepítve**.
+
+Az éles Supabase-adatbázis csak **SELECT** lekérdezést kapott; két azonos lekérdezés szerint: **298 canonical meccs, 13 lejátszott, 279 esemény, 667 jelentkezés és 0 új jegyzőkönyvforrás**. A Manager és Player alkalmazások teljes bejelentkezett E2E tesztje későbbre marad.
