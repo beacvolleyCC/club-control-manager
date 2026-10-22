@@ -96,7 +96,7 @@ SELECT jsonb_build_object(
  'legacyResultConflicts',(
   SELECT coalesce(jsonb_agg(jsonb_build_object(
    'legacyKey',source_key,'candidate',candidate_key,
-   'score',[home_sets,away_sets],'canonicalScore',[candidate_home_sets,candidate_away_sets]
+   'score',jsonb_build_array(home_sets,away_sets),'canonicalScore',jsonb_build_array(candidate_home_sets,candidate_away_sets)
   ) ORDER BY source_key),'[]'::jsonb)
   FROM classified
   WHERE record_kind='result' AND
