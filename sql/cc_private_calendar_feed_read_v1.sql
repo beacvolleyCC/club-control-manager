@@ -17,11 +17,19 @@ begin
     select 1 from public.players p
     where p.id=v.player_id and p.auth_user_id=v.auth_user_id and p.active is true
   ) then return null; end if;
+  -- A deleted, anonymous or suspended account cannot keep using a leaked URL.
+  if not exists (
+    select 1 from auth.users u
+    where u.id=v.auth_user_id
+      and u.deleted_at is null
+      and u.is_anonymous is not true
+      and (u.banned_until is null or u.banned_until <= now())
+  ) then return null; end if;
   if v.scope='team' and not exists (
     select 1 from public.team_memberships m
     where m.player_id=v.player_id and m.team_id=v.team_id
-      and m.active is true and m.starts_on <= current_date
-      and (m.ends_on is null or m.ends_on >= current_date)
+      and m.active is true and m.starts_on <= (now() AT TIME ZONE 'Europe/Budapest')::date
+      and (m.ends_on is null or m.ends_on >= (now() AT TIME ZONE 'Europe/Budapest')::date)
   ) then return null; end if;
   select coalesce(jsonb_agg(jsonb_build_object(
     'id',e.id,'title',e.title,'type',e.event_type,
