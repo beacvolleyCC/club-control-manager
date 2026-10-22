@@ -38,7 +38,7 @@ declare
   v_token text;
 begin
   if v_uid is null then raise exception 'AUTH_REQUIRED'; end if;
-  if p_scope not in ('mine','team')
+  if p_scope is null or p_scope not in ('mine','team')
      or (p_scope = 'mine' and p_team_id is not null)
      or (p_scope = 'team' and p_team_id is null)
   then raise exception 'INVALID_SCOPE'; end if;
@@ -51,8 +51,8 @@ begin
     select 1 from public.team_memberships m
     where m.player_id = v_player_id and m.team_id = p_team_id
       and m.active is true
-      and m.starts_on <= current_date
-      and (m.ends_on is null or m.ends_on >= current_date)
+      and m.starts_on <= (now() at time zone 'Europe/Budapest')::date
+      and (m.ends_on is null or m.ends_on >= (now() at time zone 'Europe/Budapest')::date)
   ) then raise exception 'TEAM_MEMBERSHIP_REQUIRED'; end if;
   -- Serialize rotations for a player+scope+team, also across concurrent devices.
   perform pg_advisory_xact_lock(hashtextextended(v_player_id::text||':'||p_scope||':'||coalesce(p_team_id::text,''),0));
@@ -79,7 +79,7 @@ as $$
 declare v_uid uuid := (select auth.uid());
 begin
   if v_uid is null then raise exception 'AUTH_REQUIRED'; end if;
-  if p_scope not in ('mine','team')
+  if p_scope is null or p_scope not in ('mine','team')
      or (p_scope = 'mine' and p_team_id is not null)
      or (p_scope = 'team' and p_team_id is null)
   then raise exception 'INVALID_SCOPE'; end if;
@@ -92,4 +92,30 @@ end
 $$;
 revoke all on function public.cc_player_calendar_token_revoke_v1(text,uuid) from public,anon;
 grant execute on function public.cc_player_calendar_token_revoke_v1(text,uuid) to authenticated;
+-- Return subscription state only. A raw token is deliberately never retrievable.
+create or replace function public.cc_player_calendar_token_status_v1(
+  p_scope text, p_team_id uuid default null
+) returns jsonb language plpgsql security definer
+set search_path = ''
+as $$
+declare v_uid uuid := (select auth.uid()); v_player_id uuid;
+begin
+  if v_uid is null then raise exception 'AUTH_REQUIRED'; end if;
+  if p_scope is null or p_scope not in ('mine','team')
+    or (p_scope='mine' and p_team_id is not null)
+    or (p_scope='team' and p_team_id is null)
+  then raise exception 'INVALID_SCOPE'; end if;
+  select id into v_player_id from public.players
+    where auth_user_id=v_uid and active is true order by id limit 1;
+  if v_player_id is null then raise exception 'PLAYER_REQUIRED'; end if;
+  return jsonb_build_object('active',exists(
+    select 1 from private.cc_calendar_feed_tokens_v1
+    where player_id=v_player_id and auth_user_id=v_uid
+      and scope=p_scope and team_id is not distinct from p_team_id
+      and revoked_at is null
+  ));
+end
+$$;
+revoke all on function public.cc_player_calendar_token_status_v1(text,uuid) from public,anon;
+grant execute on function public.cc_player_calendar_token_status_v1(text,uuid) to authenticated;
 commit;
