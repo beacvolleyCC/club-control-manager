@@ -156,7 +156,7 @@ DO $$
 DECLARE new_token text; denied boolean:=false;
 BEGIN
   new_token:=public.cc_player_calendar_token_rotate_v1('mine')->>'token';
-  PERFORM set_config('cc.qa.userb',encode(extensions.digest(new_token,'sha256'),'hex'),true);
+  PERFORM set_config('cc.qa.userb',encode(sha256(convert_to(new_token,'UTF8')),'hex'),true);
   BEGIN
     PERFORM public.cc_player_calendar_token_rotate_v1('team','00000000-0000-4000-8000-000000000301');
   EXCEPTION WHEN others THEN denied:=sqlerrm='TEAM_MEMBERSHIP_REQUIRED';
