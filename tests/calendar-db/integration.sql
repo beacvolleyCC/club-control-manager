@@ -89,7 +89,7 @@ BEGIN
   END IF;
   IF EXISTS(SELECT 1 FROM jsonb_array_elements(team_feed->'events') v
     WHERE v->>'id'='00000000-0000-4000-8000-000000000402') THEN
-    RAISE EXCEPTION 'QA: other team's event leaked';
+    RAISE EXCEPTION 'QA: foreign team event leaked';
   END IF;
 END
 $$;
