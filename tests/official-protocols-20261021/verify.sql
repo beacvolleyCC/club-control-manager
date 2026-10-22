@@ -103,3 +103,50 @@ BEGIN
  IF count_value<>1 THEN RAISE EXCEPTION 'Libero/substitute mixed badge lost'; END IF;
  RAISE NOTICE 'CC_PROTOCOL_UI_QA_OK: all badges, 3 staff, 3 officials and 38 player IDs retained';
 END $cc_ui$;
+
+-- Coverage is a property of verified official evidence, not exclusively a URL.
+-- The 13 synthetic historical protocols use *.invalid fixture-only URLs.
+-- The two new official PDF-based reports carry full internal evidence with NO URL.
+DO $cc_coverage$
+DECLARE
+  coverage jsonb; totals int; played int; linked int;
+  w1 jsonb; menb jsonb; old jsonb;
+  scores jsonb; points_home int; points_away int;
+BEGIN
+  coverage:=private.cc_competition_canonical_coverage_v1();
+  SELECT sum((v->>'total')::int),
+         sum((v->>'played')::int),
+         sum((v->>'protocolLinked')::int)
+  INTO totals,played,linked FROM jsonb_array_elements(coverage) v;
+  IF totals<>298 OR played<>15 OR linked<>15
+  THEN RAISE EXCEPTION 'Canonical coverage totals incorrect: %/%/%',totals,played,linked; END IF;
+  SELECT v INTO STRICT w1 FROM jsonb_array_elements(coverage) v
+    WHERE v->>'competitionLabel'='Női Budapest I. osztály';
+  SELECT v INTO STRICT menb FROM jsonb_array_elements(coverage) v
+    WHERE v->>'competitionLabel'='Férfi Budapest I. osztály – B csoport';
+  SELECT v INTO STRICT old FROM jsonb_array_elements(coverage) v
+    WHERE v->>'competitionLabel'='Synthetic QA';
+  IF (w1->>'protocolLinked')::int<>1 OR (menb->>'protocolLinked')::int<>1
+    OR (old->>'protocolLinked')::int<>13
+  THEN RAISE EXCEPTION 'In-app report not counted or historical protocol lost'; END IF;
+  IF EXISTS (SELECT 1 FROM jsonb_array_elements(coverage) v
+    WHERE (v->>'officialStandingsVerified')::boolean IS DISTINCT FROM false)
+  THEN RAISE EXCEPTION 'Incomplete matches must not become verified league standings'; END IF;
+  FOR scores IN
+     SELECT jsonb_build_object('sourceKey',source_key,'setScores',set_scores,
+       'homeSets',home_sets,'awaySets',away_sets)
+     FROM private.cc_canonical_competition_matches_v1
+     WHERE source_key IN ('20261001:fixture:39','brsz:2026/27:menB:userofficial:01')
+  LOOP
+    SELECT sum((v->>'home')::int),sum((v->>'away')::int)
+    INTO points_home,points_away
+    FROM jsonb_array_elements(scores->'setScores') v;
+    IF scores->>'sourceKey'='20261001:fixture:39'
+      AND (points_home<>95 OR points_away<>69 OR (scores->>'homeSets')::int<>3 OR (scores->>'awaySets')::int<>1)
+    THEN RAISE EXCEPTION 'MRSZ 2686 final score/point totals wrong'; END IF;
+    IF scores->>'sourceKey'='brsz:2026/27:menB:userofficial:01'
+      AND (points_home<>104 OR points_away<>102 OR (scores->>'homeSets')::int<>3 OR (scores->>'awaySets')::int<>2)
+    THEN RAISE EXCEPTION 'MRSZ 2700 final score/point totals wrong'; END IF;
+  END LOOP;
+  RAISE NOTICE 'CC_PROTOCOL_COVERAGE_QA_OK: 298 matches, 15 played/linked, 13 historical retained, 95:69 and 104:102 points';
+END $cc_coverage$;
