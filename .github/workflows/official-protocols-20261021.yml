@@ -1,0 +1,24 @@
+name: Two official protocols staging QA
+on:
+  push:
+    branches:
+      - feat/20261022-official-protocols-2686-2700
+  pull_request:
+    paths:
+      - 'data/competition/2026-27/official-protocols-20261021.json'
+      - 'tests/official-protocols-20261021.test.cjs'
+      - '.github/workflows/official-protocols-20261021.yml'
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate source and rosters
+        run: node --test tests/official-protocols-20261021.test.cjs
+      - name: Double independent parse
+        run: |
+          node --check tests/official-protocols-20261021.test.cjs
+          node -e "const d=require('./data/competition/2026-27/official-protocols-20261021.json');if(d.matches.length!==2)process.exit(1)"
