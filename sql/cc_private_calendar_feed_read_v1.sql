@@ -35,6 +35,7 @@ begin
     'id',e.id,'title',e.title,'type',e.event_type,
     'start',e.starts_at,'end',e.ends_at,
     'venue',e.venue,'address',e.address,'court',e.court,
+    'meetingAt',e.meeting_at,'meetingPlace',e.meeting_place,
     'status',e.status,'updatedAt',e.updated_at,'createdAt',e.created_at
   ) order by e.starts_at,e.id),'[]'::jsonb)
   into v_events
