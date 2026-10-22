@@ -1,0 +1,32 @@
+name: Private calendar gate
+on:
+  pull_request:
+    paths:
+      - 'sql/cc_private_calendar_feed_*.sql'
+      - 'supabase/functions/cc-calendar/**'
+      - 'tests/calendar-ics.test.mjs'
+      - '.github/workflows/private-calendar-gate.yml'
+  push:
+    branches:
+      - 'feat/20261022-private-ios-calendar-phase1'
+jobs:
+  calendar-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate ICS
+        run: node --test tests/calendar-ics.test.mjs
+      - name: Check bearer auth contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'revoke all on private.cc_calendar_feed_tokens_v1 from public,anon,authenticated' sql/cc_private_calendar_feed_tokens_v1.sql
+          grep -q 'grant execute on function public.cc_calendar_feed_read_v1(text) to service_role' sql/cc_private_calendar_feed_read_v1.sql
+          grep -q 'a.status=\x27going\x27' sql/cc_private_calendar_feed_read_v1.sql
+          grep -q 't.revoked_at is null' sql/cc_private_calendar_feed_read_v1.sql
+          grep -q 'member' sql/cc_private_calendar_feed_read_v1.sql
+          grep -q 'no-store' supabase/functions/cc-calendar/index.ts
+          ! grep -q 'SUPABASE_SERVICE_ROLE_KEY' tests/calendar-ics.test.mjs
