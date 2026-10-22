@@ -2,6 +2,8 @@
 
 **Aktuális elsődleges átadás:** [docs/handover/HANDOVER_20261022_CC_CURRENT.md](docs/handover/HANDOVER_20261022_CC_CURRENT.md). **Folytatási kulcs:** `CC-FOLYTATÁS`.
 
+**2026-10-22 iOS/Apple Calendar fejlesztési checkpoint (csak draft PR-okon):** [docs/handover/HANDOVER_20261022_CALENDAR_QA_COMPLETE.md](docs/handover/HANDOVER_20261022_CALENDAR_QA_COMPLETE.md). Manager #72 + Player #25; két elkülönített PostgreSQL adatbázisos QA-pass, tesztelt push-meeting változás és tokenrotáció, CI zöld. **A LIVE ICS-végpont, adatbázis-migráció és a Player feliratkozás még NINCS élesítve; bejelentkezett iOS/HTTP E2E továbbra is nyitott.**
+
 A 2026-10-21-i alábbi átadás történeti előzmény; az új elsődleges dokumentum tartalmazza a canonical meccs-/statisztika-integrációkat, a Manager belépési `forEach` hiba javítását és a következő **privát, automatikusan frissülő iOS ICS feed + push értesítés** feladatot. Az iOS naptár-előfizetés **még nincs megvalósítva**. A bejelentkezett iPhone UX verifikáció továbbra is nyitott.
 
 ---
