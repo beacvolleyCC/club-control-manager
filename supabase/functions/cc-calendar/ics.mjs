@@ -44,6 +44,9 @@ export function buildIcs(events){
     if(end&&end>start)lines.push(`DTEND:${end}`);
     lines.push(`SUMMARY:${escapeText(e.title||(e.type==='match'?'Mérkőzés':'Edzés'))}`);
     if(location)lines.push(`LOCATION:${escapeText(location)}`);
+    if(e.meetingPlace){
+      lines.push(`DESCRIPTION:${escapeText('Találkozó helye: '+e.meetingPlace)}`);
+    }
     lines.push(e.status==='cancelled'?'STATUS:CANCELLED':'STATUS:CONFIRMED');
     lines.push('END:VEVENT');
     rows.push(...lines);
