@@ -42,7 +42,7 @@ select case k
  else k end
 from (select regexp_replace(translate(lower(coalesce(p_name,'')),
  'áéíóöőúüű','aeiooouuu'),'[^a-z0-9]','','g') as k) x;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION private.cc_competition_canonical_team_stats_v1()
  RETURNS jsonb
@@ -100,4 +100,4 @@ select coalesce(jsonb_agg(jsonb_build_object(
  'position',null,'tablePoints',null,'source','canonical_official_results_partial',
  'officialRankVerified',false
 ) order by competition_label,team_name),'[]'::jsonb) from stats;
-$function$
+$function$;
