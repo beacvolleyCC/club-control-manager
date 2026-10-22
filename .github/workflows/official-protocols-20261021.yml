@@ -7,6 +7,8 @@ on:
     paths:
       - 'data/competition/2026-27/official-protocols-20261021.json'
       - 'tests/official-protocols-20261021.test.cjs'
+      - 'tests/official-protocols-20261021-migration-coherence.test.cjs'
+      - 'sql/official_protocols_20261021_identity_safe_migration.sql'
       - '.github/workflows/official-protocols-20261021.yml'
 jobs:
   protocol:
@@ -18,6 +20,8 @@ jobs:
           node-version: '22'
       - name: Validate source and rosters
         run: node --test tests/official-protocols-20261021.test.cjs
+      - name: Validate migration to staging evidence consistency
+        run: node --test tests/official-protocols-20261021-migration-coherence.test.cjs
       - name: Double independent parse
         run: |
           node --check tests/official-protocols-20261021.test.cjs
