@@ -150,3 +150,38 @@ BEGIN
   END LOOP;
   RAISE NOTICE 'CC_PROTOCOL_COVERAGE_QA_OK: 298 matches, 15 played/linked, 13 historical retained, 95:69 and 104:102 points';
 END $cc_coverage$;
+
+
+-- The shared Manager/Player team-statistics function must reflect the same
+-- official four team sides without inventing league rankings from partial data.
+DO $cc_stats$
+DECLARE
+  stats jsonb;
+  t jsonb; row_spec record; seen int:=0;
+BEGIN
+  stats:=private.cc_competition_canonical_team_stats_v1();
+  FOR row_spec IN SELECT * FROM (VALUES
+   ('Női Budapest I. osztály','mtk',1,1,0,3,1,95,69),
+   ('Női Budapest I. osztály','panoramase',1,0,1,1,3,69,95),
+   ('Férfi Budapest I. osztály – B csoport','mozdulj',1,1,0,3,2,104,102),
+   ('Férfi Budapest I. osztály – B csoport','mafcvasarhelyi',1,0,1,2,3,102,104)
+  ) AS checks(league,team,played,wins,losses,sets_for,sets_against,points_for,points_against)
+  LOOP
+    SELECT v INTO STRICT t FROM jsonb_array_elements(stats) v
+     WHERE v->>'competitionLabel'=row_spec.league AND v->>'teamKey'=row_spec.team;
+    IF (t->>'played')::int<>row_spec.played
+     OR (t->>'wins')::int<>row_spec.wins
+     OR (t->>'losses')::int<>row_spec.losses
+     OR (t->>'setsFor')::int<>row_spec.sets_for
+     OR (t->>'setsAgainst')::int<>row_spec.sets_against
+     OR (t->>'pointsFor')::int<>row_spec.points_for
+     OR (t->>'pointsAgainst')::int<>row_spec.points_against
+     OR t->>'position' IS NOT NULL OR t->>'tablePoints' IS NOT NULL
+     OR (t->>'officialRankVerified')::boolean IS DISTINCT FROM false
+    THEN RAISE EXCEPTION 'Official side statistics are wrong or a fake ranking was created: % / % / %',
+     row_spec.league,row_spec.team,t; END IF;
+    seen:=seen+1;
+  END LOOP;
+  IF seen<>4 THEN RAISE EXCEPTION 'Missing match sides for statistics'; END IF;
+  RAISE NOTICE 'CC_PROTOCOL_TEAM_STATS_QA_OK: four sides 1-0/0-1, official points, no fake ranks';
+END $cc_stats$;
