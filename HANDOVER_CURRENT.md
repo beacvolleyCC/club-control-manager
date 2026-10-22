@@ -1,5 +1,7 @@
 # CLUB CONTROL — AKTUÁLIS HANDOVER (2026-10-22)
 
+**ÚJ, KIZÁRÓLAG INTEGRÁCIÓS QA (2026-10-22):** [docs/handover/CC_20261022_CROSS_PR_INTEGRATION_QA.md](docs/handover/CC_20261022_CROSS_PR_INTEGRATION_QA.md). Manager #74 + #72 + #73 egy elkülönített tesztágon, Player #25 + #26 egy másikon. A két valódi, de mesterséges PostgreSQL-adatbázison végzett közös CI sikeres; az éles klubadatok, jelentkezések, valamint a main ágak változatlanok. **Ez nem élesítési vagy beolvasztási jóváhagyás.** A régebbi Manager #68 és Player #19 PR továbbra is konfliktusos.
+
 **Aktuális elsődleges átadás:** [docs/handover/HANDOVER_20261022_CC_CURRENT.md](docs/handover/HANDOVER_20261022_CC_CURRENT.md). **Folytatási kulcs:** `CC-FOLYTATÁS`.
 
 **Release-készenléti csomag, ÉLESÍTÉS NÉLKÜL (2026-10-22):** [docs/handover/CALENDAR_RELEASE_PACKAGE_20261022.md](docs/handover/CALENDAR_RELEASE_PACKAGE_20261022.md). A kész Player felület `CALENDAR_SUBSCRIPTION_ENABLED: false` flag mögött van. A `cc-calendar` HTTP végpont külön egységtesztelt, scoped `verify_jwt=false` konfigurációval, kizárólag tokenhitelesítéssel. A két draft PR (#72/#25) nem merge-elt, új adatbázis/funkció nincs LIVE. A későbbi bevezetés függ a korábbi Club Control adatbázis és modulok lezárásától, majd a bejelentkezett/Apple E2E-től.
