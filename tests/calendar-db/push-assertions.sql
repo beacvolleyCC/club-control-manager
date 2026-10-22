@@ -15,7 +15,7 @@ BEGIN
     RAISE EXCEPTION 'QA: meeting_at change not in push dedupe signature';
   END IF;
   v_text:=public.cc_push_notification_changed_event_body_v1(v_old,v_new,'BEAC');
-  IF v_text NOT LIKE '%Találkozó%' OR v_text NOT LIKE '%17:30%'
+  IF v_text NOT ILIKE '%találkozó%' OR v_text NOT LIKE '%17:30%'
     OR v_text NOT LIKE '%18:30%' THEN
     RAISE EXCEPTION 'QA: Budapest meeting time change text missing: %',v_text;
   END IF;
