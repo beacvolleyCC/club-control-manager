@@ -19,7 +19,7 @@ test('canonical identity and on-field bookings may not be altered',()=>{
   assert.match(sql,/sourceFixtureSnapshot/);
   assert.match(sql,/CC_PROTOCOL_MATCH_UUID_CHANGED/);
   assert.match(sql,/CC_PROTOCOL_REGRESSION/);
-  assert.match(sql,/CC_PROTOCOL_PARTIAL_IMPORT/);
+  assert.match(sql,/applied NOT IN \(0,2\)/);
   assert.match(sql,/CC_PROTOCOL_FIXTURE_DRIFT/);
   assert.match(sql,/old_played\+applied/);
   assert.match(sql,/old_count<>298/);
