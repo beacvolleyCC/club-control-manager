@@ -1,5 +1,7 @@
 # CLUB CONTROL — AKTUÁLIS HANDOVER (2026-10-22)
 
+**Régi menetrend PR #68/#19 ütközés és safe fix-ek:** [docs/handover/CC_20261022_LEGACY_SCHEDULE_CONFLICTS.md](docs/handover/CC_20261022_LEGACY_SCHEDULE_CONFLICTS.md). Canonical elsőbbség, Player statisztikai szettösszesítés és konfliktusszűrés, Manager forrásazonosító/év szerinti visszakeresés, PWA verzió-egyezés: integrációs tesztágakon, zöld CI. A régi két PR GitHub-merge-konfliktusa még nyitott; semmi LIVE.
+
 **ÚJ, KIZÁRÓLAG INTEGRÁCIÓS QA (2026-10-22):** [docs/handover/CC_20261022_CROSS_PR_INTEGRATION_QA.md](docs/handover/CC_20261022_CROSS_PR_INTEGRATION_QA.md). Manager #74 + #72 + #73 egy elkülönített tesztágon, Player #25 + #26 egy másikon. A két valódi, de mesterséges PostgreSQL-adatbázison végzett közös CI sikeres; az éles klubadatok, jelentkezések, valamint a main ágak változatlanok. **Ez nem élesítési vagy beolvasztási jóváhagyás.** A régebbi Manager #68 és Player #19 PR továbbra is konfliktusos.
 
 **Aktuális elsődleges átadás:** [docs/handover/HANDOVER_20261022_CC_CURRENT.md](docs/handover/HANDOVER_20261022_CC_CURRENT.md). **Folytatási kulcs:** `CC-FOLYTATÁS`.
