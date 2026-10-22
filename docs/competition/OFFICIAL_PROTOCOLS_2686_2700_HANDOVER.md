@@ -49,3 +49,31 @@ Events: 279; bookings: **667**; canonical matches: 298; played: 13; previously s
 **Release preconditions:** verify current production canonical schema against the captured test view, confirm the two sources are still in the expected `scheduled` state, take a backup, verify counts and booking baseline, run the staged SQL in the approved migration process, inspect canonical payload in Manager and Player, then run the full 11-point QA twice. If any other existing migration changes the canonical identity derivation, review/update this patch before release. Keep the PR draft until the user asks to integrate.
 
 **Known display limit:** a verified external online PDF URL has not been attached; the official score and rosters are embedded in canonical data, but an official clickable original-PDF endpoint needs separate verification. Do not invent links.
+
+## Manager / Player közös megjelenítési szerződés (2026-10-22, folytatás)
+
+A két feltöltött hivatalos jegyzőkönyv eredményein túl a jelenlegi frontendek
+már a `canonicalMatches[].protocol.teams[].players`, `teams[].staff` és
+`protocol.officials` mezőket dolgozzák fel. A meglévő canonical payload
+eddig csak a mezszámot, nevet, igazolási számot és K/CS-jelölést másolta át;
+a kapitány-/liberójelölés és a stáb adatai elvesztek volna.
+
+A #74 fejlesztési ágon az integrációs SQL-ben ezt célzottan kijavítottuk:
+- minden játékosnál `captain` és `libero`, a forrás szerinti K/CS/null;
+- mindkét csapat edzői a megfelelő `staff` csoportban, névvel és szerepkörrel;
+- dokumentált játékvezetők / jegyzőkönyvvezető a `protocol.officials` tömbben;
+- kizárólag az eredetiben rögzített személyek: hiányzó stáb/érték nem kerül feltöltésre;
+- a korábbi 13 jegyzőkönyv változatlan `protocol.teams` ága továbbra is elsőbbséget kap;
+- a meg nem erősített külső Hunvolley URL továbbra is üres, nem találunk ki hivatkozást.
+
+**Kétszer ellenőrző PostgreSQL CI:** a `verify.sql` új igazolásai: 2686 és
+2700 összesen 4 kapitányjelölése, 3 liberójelölése, 3 stábtag és 3
+hivatalos személy, a jelöletlenek megőrzése, a teljes 38 fős névsor,
+változatlan 298/15 mérkőzés, 13 régi eredmény és stabil canonical ID.
+Mindkét külön adatbázison a létrehozás, ismétlés, rollback és újraimport
+után is fut az ellenőrzés.
+
+**A képernyős, bejelentkezett Manager/Player ellenőrzés továbbra sem történt meg:**
+a LIVE canonical payload most még 298/13, az új MRSZ-kódok nincsenek telepítve.
+A felhasználó korábbi döntésének megfelelően csak később, az adatbázis
+integrációs bevezetésekor telepítünk és tesztelünk. A #74 PR draft marad.
