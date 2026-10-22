@@ -16,7 +16,7 @@ const headers = {
 };
 const failure=()=>new Response('Not found',{status:404,headers:{'cache-control':'no-store','referrer-policy':'no-referrer'}});
 Deno.serve(async(req:Request)=>{
-  if(req.method!=="GET")return new Response(null,{status:405,headers:{allow:"GET","cache-control":"no-store"}});
+  if(req.method!=="GET" && req.method!=="HEAD")return new Response(null,{status:405,headers:{allow:"GET","cache-control":"no-store"}});
   if(!admin)return new Response("Unavailable",{status:503,headers:{"cache-control":"no-store"}});
   let token:string|null=null;
   try{token=new URL(req.url).searchParams.get("token");}catch{return failure();}
@@ -27,5 +27,5 @@ Deno.serve(async(req:Request)=>{
   const {data,error}=await admin.rpc("cc_calendar_feed_read_v1",{p_token_sha256:hash});
   if(error)return new Response("Unavailable",{status:503,headers:{"cache-control":"no-store"}});
   if(!data || !Array.isArray(data.events))return failure();
-  return new Response(buildIcs(data.events),{status:200,headers});
+  return new Response(req.method==="HEAD"?null:buildIcs(data.events),{status:200,headers});
 });
