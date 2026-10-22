@@ -70,8 +70,9 @@ test('backend failure and unavailable credentials give 503 without leaking secre
    {rpc:async()=>{throw Error('private server error')}}]){
    const res=await createCalendarHandler(client)(request(endpoint+'?token='+secret));
    assert.equal(res.status,503);
-   assert.ok(!(await res.text()).includes(secret));
-   assert.ok(!(await res.text()).includes('SECRET_TOKEN'));
+   const responseBody=await res.text();
+   assert.ok(!responseBody.includes(secret));
+   assert.ok(!responseBody.includes('SECRET_TOKEN'));
  }
 });
 
