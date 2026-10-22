@@ -16,7 +16,8 @@ jobs:
             tests/calendar-ics.test.mjs \
             tests/calendar-http.test.mjs \
             tests/official-protocols-20261021.test.cjs \
-            tests/official-protocols-20261021-migration-coherence.test.cjs
+            tests/official-protocols-20261021-migration-coherence.test.cjs \
+            tests/manager-canonical-legacy-compat-20261022.test.cjs
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
