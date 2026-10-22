@@ -177,6 +177,6 @@ from (
  left join public.cc_competition_mrsz_screenshot_v1 s on s.source_key=m.source_key
  group by m.competition_label
 ) s;
-$function$
+$function$;
 
 COMMIT;
