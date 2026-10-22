@@ -47,7 +47,7 @@ test('anonymous Apple HEAD request still checks authorization, never returns bod
 test('invalid, missing, duplicate, upper-case and malformed tokens are rejected without RPC',async()=>{
  const {handle,calls}=successful();
  const bad=[endpoint,endpoint+'?token=',endpoint+'?token=abc',
-  endpoint+'?token='+secret+'&token='+secret,endpoint+'?token='+secret.toUpperCase(),
+  endpoint+'?token='+secret+'&token='+secret,endpoint+'?token='+secret+'&debug=1',endpoint+'?token='+secret.toUpperCase(),
   endpoint+'?token=../etc/passwd',endpoint+'?token='+secret+'0'];
  for(const url of bad){
    const r=await handle(request(url));
