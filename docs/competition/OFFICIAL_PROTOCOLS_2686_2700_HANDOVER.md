@@ -77,3 +77,24 @@ után is fut az ellenőrzés.
 a LIVE canonical payload most még 298/13, az új MRSZ-kódok nincsenek telepítve.
 A felhasználó korábbi döntésének megfelelően csak később, az adatbázis
 integrációs bevezetésekor telepítünk és tesztelünk. A #74 PR draft marad.
+
+## Player-side source-contract QA PR (not merged)
+
+[Player draft PR #26](https://github.com/beacvolleyCC/player_application/pull/26)
+tests the existing mobile match cards and protocol rendering against two
+synthetic, source-shaped #2686/#2700 canonical examples: scores, sets,
+captain/libero/substitute/unmarked badges, team staff, officials and the
+absence of unverified external protocol URLs. It also runs the current
+Player nomination-based athlete statistics test. No Player runtime code was
+modified and the PR is not deployed.
+
+The older `protocol-match-order-20261019.test.cjs` currently reports a
+separate, **already existing Player-main PWA cache token mismatch** (app
+and statistics assets carry different cache versions). This is tracked
+separately in Player calendar draft PR #25; it is not evidence against the
+new official-score-sheet parser and should not be silenced by changing
+the actual score or roster data.
+
+**Release order:** canonical Manager #74 migration after all usual 11 QA
+checks, then Player UI/protocol smoke test with an authenticated account.
+Do not merge or deploy either PR automatically.
