@@ -41,6 +41,7 @@ jobs:
             export PGDATABASE="cc_protocols_pass_${pass}"
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/bootstrap.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-view.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-stats-functions.sql
             test "$(psql -XAt -c 'select count(*) from private.cc_canonical_competition_matches_v1')" = 298
             test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
             psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
@@ -61,6 +62,7 @@ jobs:
           export PGDATABASE=cc_protocols_invalid
           psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/bootstrap.sql
           psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-view.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-stats-functions.sql
           psql -X -v ON_ERROR_STOP=1 -c "update public.cc_competition_mrsz_screenshot_v1 set data=jsonb_set(data,'{awayName}','\"DIFFERENT\"') where source_key='brsz:2026/27:menB:userofficial:01'"
           if psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql > /tmp/cc-invalid.out 2>&1; then
             echo "ERROR: drift unexpectedly accepted"; exit 1
