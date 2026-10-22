@@ -1,8 +1,18 @@
 
 -- Disposable PostgreSQL 17 fixture. NEVER use on Club Control LIVE.
-CREATE ROLE anon NOLOGIN;
-CREATE ROLE authenticated NOLOGIN;
-CREATE ROLE service_role NOLOGIN;
+DO $
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
+    CREATE ROLE anon NOLOGIN;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN
+    CREATE ROLE authenticated NOLOGIN;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN
+    CREATE ROLE service_role NOLOGIN;
+  END IF;
+END
+$;
 CREATE SCHEMA auth;
 CREATE SCHEMA private;
 CREATE SCHEMA extensions;
