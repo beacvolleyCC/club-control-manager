@@ -1,0 +1,31 @@
+# Two newly uploaded official MRSZ score sheets — staging and import guards
+Date: 2026-10-22. **Staged in draft PR only. Not written to LIVE Supabase.**
+
+## PDF files inspected (text extraction and separate high-resolution visual review)
+- `mtk-panorama_bb1.pdf`, SHA256 `b72d1dd8d4e1a6db04a5ddc7fc7c2ea0c021a4a67d755bdaea85aef3b890c9c1`.
+- `mozdulj-vasarhelyi_bb1.pdf`, SHA256 `e0dbe1e1e9b83d7324ad396b34d00879f7a07352084845008e81b8020a7c0736`.
+
+## Official results
+1. **MRSZ #2686**, 2026-10-21 21:00 Budapest, Női Budapest I, MTK Budapest–Panoráma SE **3–1**, sets `25:20 25:9 20:25 25:15`. Venue MTK Röplabda Csarnok, Szamos u. 2/C. **19 players**: MTK 12 (6 K, 5 Cs, 1 unmarked), Panoráma 7 (6 K, 1 Cs). Coaches, captain and libero markers, all player registration IDs entered.
+2. **MRSZ #2700**, 2026-10-21 20:00 Budapest, Férfi Budapest I/B, Mozdulj–MAFC-Vásárhelyi **3–2**, sets `25:18 25:23 21:25 18:25 15:11`. Venue Mozdulj Sportcsarnok, Monori út 15. **19 players**: Mozdulj 10 (6 K, 2 Cs, 2 unmarked), MAFC 9 (6 K, 3 Cs). Coaches when present, captain and libero markers, all player registration IDs entered. Never treat an unmarked player as a starter or substitution.
+
+## Connection to existing canonical data — verified READ ONLY
+- Existing canonical fixture: `20261001:fixture:39` (MTK–Panoráma, same local kickoff), source team IDs `1092`/`753`; canonical projected matchId `04eaceee-57e2-7563-a618-beb933c0ffc0`, status `scheduled`.
+- Existing canonical fixture: `brsz:2026/27:menB:userofficial:01` (Mozdulj–MAFC, same local kickoff), source team IDs `1213`/`45`; projected matchId `25a14406-2887-62fc-086c-ad770d160a6b`, status `scheduled`.
+- Neither MRSZ code **2686** nor **2700** was already in the uploaded-protocol match records at inspection time.
+- Legacy `public.cc_competition_user_schedule_v1` contains the same pairs at **2026-10-28**, conflicting with the official PDF. Do not overwrite or silently re-date that historical import: flag it for future canonical cutover.
+- `private.cc_canonical_competition_matches_v1` currently partitions fixture versus protocol by different keys. **Inserting two new `match` rows without a verified fixture-supersession change would add duplicate canonical matches.** Do not directly import this JSON into LIVE as-is.
+- Required release semantics: preserve raw original fixture records and their 298 canonical unique match identities; link one verified protocol to exactly one existing fixture; make final canonical visible rows remain **298**, with **15** played (13 earlier + 2), retaining all existing 13 previously recorded protocol links and unmodified event bookings.
+- Preserve the *existing* canonical matchIds above when linking these protocol sources; do not generate two new active UI match identities. The two new MRSZ protocol codes do not appear in current private canonical ID mappings.
+- A live protocol HTTP URL was **not independently verified**. No `protocolUrl` is asserted in staged JSON; in-app protocol view may be generated from the recorded rosters after migration, and a verified official link can be attached later.
+
+## Changes and release gate
+Structured extracted source: `data/competition/2026-27/official-protocols-20261021.json`. Its `sourceKey` is from the PDF's official match code; its `canonicalFixtureSourceKey` refers to the *existing* trusted fixture key. Team IDs are inherited from those exact fixture records, not printed in the PDFs.
+
+- `tests/official-protocols-20261021.test.cjs` checks both 3-win scores, all complete set point pairs, 38 player rows, 4 captains, 3 liberos, unmarked roster statuses and source identity.
+- `sql/official_protocols_20261021_readonly_preflight.sql` checks fixture baseline before any potential release.
+- **No SQL INSERT/UPDATE/DELETE or Edge deployment in this PR.**
+- Before release: implement canonical nonduplicating supersession in a *separate* backward-compatible migration, test against 298/15 invariants and prior 13 protocols twice; preserve raw sources and all 666 bookings, no Manager `events` recreation, do not generate push from a historical protocol import.
+
+## Independent QA status
+The two attached official pages were checked once via PDF extracted text and a second time visually from the rendered originals. GitHub CI is a separate data-structure/consistency gate. These checks are not a LIVE app import claim.
