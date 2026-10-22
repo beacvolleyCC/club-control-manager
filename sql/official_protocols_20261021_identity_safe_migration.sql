@@ -101,13 +101,36 @@ select coalesce(jsonb_agg(jsonb_build_object(
      then jsonb_build_object('sourceUrl',m.protocol_url,'teams',jsonb_build_array(
        jsonb_build_object('name',m.home_name,'players',coalesce(
          (select jsonb_agg(jsonb_build_object('name',pl.v->>'name','number',pl.v->>'jersey',
-          'code',pl.v->>'registrationId','designation',case when upper(coalesce(pl.v->>'designation',''))='CS' then 'CS' else pl.v->>'designation' end) order by pl.ord)
-          from jsonb_array_elements(s.data->'rosters'->'home') with ordinality pl(v,ord)),'[]'::jsonb)),
+          'code',pl.v->>'registrationId','captain',pl.v->'captain','libero',pl.v->>'libero','designation',case when upper(coalesce(pl.v->>'designation',''))='CS' then 'CS' else pl.v->>'designation' end) order by pl.ord)
+          from jsonb_array_elements(s.data->'rosters'->'home') with ordinality pl(v,ord)),'[]'::jsonb),
+       'staff',coalesce((select jsonb_agg(
+          jsonb_build_object('name',o.v->>'name','role',o.v->>'designation',
+                             'code',o.v->>'registrationId') order by o.ord)
+          from jsonb_array_elements(case
+             when jsonb_typeof(s.data->'officialProtocolEvidence'->'officials'->'home')='array'
+             then s.data->'officialProtocolEvidence'->'officials'->'home'
+             else '[]'::jsonb end) with ordinality o(v,ord)),'[]'::jsonb)),
        jsonb_build_object('name',m.away_name,'players',coalesce(
          (select jsonb_agg(jsonb_build_object('name',pl.v->>'name','number',pl.v->>'jersey',
-          'code',pl.v->>'registrationId','designation',case when upper(coalesce(pl.v->>'designation',''))='CS' then 'CS' else pl.v->>'designation' end) order by pl.ord)
-          from jsonb_array_elements(s.data->'rosters'->'away') with ordinality pl(v,ord)),'[]'::jsonb))
-       )) else null end),
+          'code',pl.v->>'registrationId','captain',pl.v->'captain','libero',pl.v->>'libero','designation',case when upper(coalesce(pl.v->>'designation',''))='CS' then 'CS' else pl.v->>'designation' end) order by pl.ord)
+          from jsonb_array_elements(s.data->'rosters'->'away') with ordinality pl(v,ord)),'[]'::jsonb),
+       'staff',coalesce((select jsonb_agg(
+          jsonb_build_object('name',o.v->>'name','role',o.v->>'designation',
+                             'code',o.v->>'registrationId') order by o.ord)
+          from jsonb_array_elements(case
+             when jsonb_typeof(s.data->'officialProtocolEvidence'->'officials'->'away')='array'
+             then s.data->'officialProtocolEvidence'->'officials'->'away'
+             else '[]'::jsonb end) with ordinality o(v,ord)),'[]'::jsonb))
+       ),
+       'officials',coalesce((select jsonb_agg(jsonb_build_object(
+            'name',z.person->>'name','role',z.role,'code',z.person->>'registrationId'
+          ) order by z.priority)
+          from (values
+            (1,s.data->'officialProtocolEvidence'->'referee','Játékvezető'::text),
+            (2,s.data->'officialProtocolEvidence'->'scorekeeper','Jegyzőkönyvvezető'::text)
+          ) z(priority,person,role)
+          where jsonb_typeof(z.person)='object'),'[]'::jsonb)
+       ) else null end),
 'venue',m.venue,'status',m.match_status,'source',s.data->>'source',
 'homeSourceTeamId',m.home_source_team_id,'awaySourceTeamId',m.away_source_team_id)
 order by m.competition_label,m.kickoff_local nulls last,m.source_key),'[]'::jsonb)
