@@ -145,7 +145,8 @@ left join lateral (
  order by other.source_key limit 1
 ) pr on true;
 $function$;
--- Verified in-app MRSZ protocols count even when an external PDF URL is absent.
+-- A verified internally stored PDF-derived report counts as a linked protocol,
+-- even when the federation URL has not been independently verified.
 CREATE OR REPLACE FUNCTION private.cc_competition_canonical_coverage_v1()
  RETURNS jsonb
  LANGUAGE sql
@@ -164,20 +165,17 @@ from (
  count(*) filter(where match_status='played') played,
  count(*) filter(where match_status='scheduled') scheduled,
  count(*) filter(where match_status='postponed') postponed,
- count(*) filter(where m.match_status='played' AND
- (m.protocol_url IS NOT NULL OR
-  (s.data->>'officialProtocolMatchCode' = s.data->'officialProtocolEvidence'->>'matchCode'
-   AND coalesce(s.data->>'officialProtocolFileSha256','') ~ '^[0-9a-f]{64}
+ count(*) filter(where m.match_status='played' and (
+   m.protocol_url is not null or (
+     s.data->>'officialProtocolMatchCode'=s.data->'officialProtocolEvidence'->>'matchCode'
+     and coalesce(s.data->>'officialProtocolFileSha256','') ~ '^[0-9a-f]{64}$'
+     and jsonb_typeof(s.data->'officialProtocolEvidence'->'rosters'->'home')='array'
+     and jsonb_typeof(s.data->'officialProtocolEvidence'->'rosters'->'away')='array'
+   )
+ )) protocol_linked
  from private.cc_canonical_competition_matches_v1 m
  left join public.cc_competition_mrsz_screenshot_v1 s on s.source_key=m.source_key
  group by m.competition_label
-) s;
-$function$
-
-   AND jsonb_typeof(s.data->'officialProtocolEvidence'->'rosters'->'home')='array'
-   AND jsonb_typeof(s.data->'officialProtocolEvidence'->'rosters'->'away')='array'
-  ))) protocol_linked
- from private.cc_canonical_competition_matches_v1 group by competition_label
 ) s;
 $function$
 
