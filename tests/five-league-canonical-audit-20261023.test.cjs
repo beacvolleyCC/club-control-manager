@@ -121,7 +121,7 @@ test('same home/away names across genders, divisions or A/B groups do not cross-
  assert.ok(matches>=2,'Every candidate query must require the same competition');
  assert.match(sql,/u\.league=c\.competition_label/);
  assert.match(sql,/x\.home_key=u\.home_key AND x\.away_key=u\.away_key/);
- assert.match(sql,/c\.home_key=u\.home_key AND c\.away_key=u\.away_key/);
+ assert.match(sql,/u\.home_key=c\.home_key AND u\.away_key=c\.away_key/);
  const leagueMapping=['menA','menB','womenI','womenIIA','womenIIB'];
  for(const league of leagueMapping)assert.match(sql,new RegExp("WHEN '"+league+"' THEN"));
  const sample=[
