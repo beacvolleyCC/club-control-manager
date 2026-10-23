@@ -65,7 +65,7 @@ jobs:
                 ([.candidates[] | select(.reviewDecision == "BLOCK_SELF_MATCH") | .possibleMatches | length] | add) == 0
               '
               seven="$(psql -XAt -v ON_ERROR_STOP=1 -f sql/audit_seven_manager_event_crosswalk_20261023.sql)"
-              printf '%s\\n' "$seven" | jq -e '
+              printf '%s\n' "$seven" | jq -e '
                 .unlinkedManagerMatches == 7 and
                 .unlinkedBookings == 15 and
                 .decisionCounts.BLOCK_ARCHIVED_EVENT == 2 and
@@ -108,7 +108,7 @@ jobs:
                 '2026/27','Férfi Budapest I. osztály – B csoport',
                 '1213','709','2026-11-18 20:00:00','scheduled')"
             seven_ambiguous="$(psql -XAt -v ON_ERROR_STOP=1 -f sql/audit_seven_manager_event_crosswalk_20261023.sql)"
-            printf '%s\\n' "$seven_ambiguous" | jq -e '
+            printf '%s\n' "$seven_ambiguous" | jq -e '
               .unlinkedManagerMatches == 7 and
               .unlinkedBookings == 15 and
               .decisionCounts.SCOPED_TIME_CANDIDATE_ONLY == 1 and
