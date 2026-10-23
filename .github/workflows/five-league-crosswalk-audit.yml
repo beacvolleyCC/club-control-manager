@@ -7,6 +7,9 @@ on:
       - 'sql/audit_five_league_canonical_versus_user_20261022.sql'
       - 'data/competition/2026-27/canonical-legacy-five-league-audit-20261023.json'
       - 'tests/five-league-canonical-audit-20261023.test.cjs'
+      - 'sql/audit_official_identity_release_gate_20261023.sql'
+      - 'data/competition/2026-27/official-identity-review-20261023.json'
+      - 'tests/official-identity-review-20261023.test.cjs'
       - '.github/workflows/five-league-crosswalk-audit.yml'
 jobs:
   verify:
@@ -19,8 +22,9 @@ jobs:
       - name: Validate audit source and 300-vs-298 captured results
         run: |
           node --check tests/five-league-canonical-audit-20261023.test.cjs
-          node --test tests/five-league-canonical-audit-20261023.test.cjs
+          node --check tests/official-identity-review-20261023.test.cjs
+          node --test tests/five-league-canonical-audit-20261023.test.cjs tests/official-identity-review-20261023.test.cjs
       - name: Double independent snapshot validation
         run: |
-          node --test tests/five-league-canonical-audit-20261023.test.cjs
+          node --test tests/five-league-canonical-audit-20261023.test.cjs tests/official-identity-review-20261023.test.cjs
           node -e "const x=require('./data/competition/2026-27/canonical-legacy-five-league-audit-20261023.json');if(x.reviewRecords.length!==11||x.staleLegacyFixtureStatus.length!==5)process.exit(1)"
