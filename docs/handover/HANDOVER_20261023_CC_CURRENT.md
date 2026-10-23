@@ -12,7 +12,7 @@ Elsőként olvasd el ezeket, **ebben a sorrendben**:
 3. `docs/competition/OFFICIAL_IDENTITY_REVIEW_20261023.md` – 11 vitás meccs és jóváhagyási kapu.
 4. `docs/competition/FIVE_LEAGUE_CANONICAL_SCHEDULE_AUDIT_20261023.md` – 300 vs. 298 tételes összevetése.
 5. `docs/handover/CC_20261022_CROSS_PR_INTEGRATION_QA.md` és `docs/handover/CC_20261022_LEGACY_SCHEDULE_CONFLICTS.md`.
-6. Player: `docs/INTEGRATION_CALENDAR_PROTOCOL_QA_20261022.md`, ugyanazon Player-integrációs ágon; a további részletes Player-átadás a saját dokumentumában.
+6. Player: [`docs/HANDOVER_20261023_PLAYER_CURRENT.md`](https://github.com/beacvolleyCC/player_application/blob/integration/20261022-player-calendar-protocol-qa/docs/HANDOVER_20261023_PLAYER_CURRENT.md), valamint `docs/INTEGRATION_CALENDAR_PROTOCOL_QA_20261022.md` a Player-integrációs ágon.
 
 **Manager repo:** `beacvolleyCC/club-control-manager`  
 **AKTUÁLIS Manager integrációs ág:** `integration/20261022-manager-calendar-protocol-crosswalk-qa`  
