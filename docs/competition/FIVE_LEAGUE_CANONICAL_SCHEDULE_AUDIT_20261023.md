@@ -35,3 +35,9 @@ A régi importban még `fixture`, a canonical rendszerben már lejátszott: BEAC
 - Automatizált QA: `tests/five-league-canonical-audit-20261023.test.cjs`, a külön GitHub Actions ellenőrzéssel.
 - A canonical rétegben 13 LIVE eredmény van; a 2 új hivatalos jegyzőkönyv a Manager #74-ben van előkészítve. A canonical meccsazonosítók és jelentkezések változatlanok.
 - A csapatnevek normalizálása **jelöltpárosítás**, nem hivatalos azonosító. A dátumeltérésekhez hivatalos ellenőrzés kell. Sem automatikus alias, sem törlés, sem kitalált hivatalos helyezés nem engedélyezett.
+
+## Kötelező osztály- és csoporthatár
+
+A normalizált csapatnév csak az adott idényen, teljes bajnokságon és csoporton belül értelmezhető. **Azonos csapatnevet vagy csapatpárt különböző osztályok között nem szabad egyesíteni.** A live canonical adatbázisban a BEAC–Mozdulj, BEAC–Semmelweis, Kandó–Ráckeve és más névpárok férfi és női versenyekben is előfordulnak. A Manager és Player integrációs ágon a canonical és a régi fallback menetrend minden beillesztési pontján teljes `competitionLabel`-egyezést követel; a korábbi ellenőrzött `source_key` és idények sértetlenek maradnak.
+
+A read-only audit szintén először `season='2026/27'`, majd **pontosan egyező** `competition_label` és csak ezután normalizált hazai/vendég csapat szerint keresi a jelölteket. A CI negatív példái azonos nevű csapatokat tesztelnek Férfi I/B és Női I., Női II/A és II/B, valamint két idény között. A normalizált egyezés továbbra sem jogosít fel automatikus alias létrehozására.
