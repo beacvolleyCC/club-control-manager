@@ -110,3 +110,30 @@ test('SQL reuses the canonical team normalizer but never writes, approves, or me
  assert.doesNotMatch(source,/\bpg_sleep\b/i);
  assert.ok(source.trim().startsWith('WITH legacy AS'));
 });
+
+
+test('same home/away names across genders, divisions or A/B groups do not cross-link',()=>{
+ // The persistent normalizer identifies a team within its own league.
+ // League and season are mandatory components of a fixture identity.
+ assert.match(sql,/FROM public\.cc_competition_user_schedule_v1 u WHERE u\.season='2026\/27'/i);
+ assert.match(sql,/FROM private\.cc_canonical_competition_matches_v1 c WHERE c\.season='2026\/27'/i);
+ const matches=[...sql.matchAll(/(?:x|c)\.competition_label=u\.league/g)].length;
+ assert.ok(matches>=3,'Every candidate join, status review and unmatched lookup needs league scope');
+ assert.match(sql,/x\.home_key=u\.home_key AND x\.away_key=u\.away_key/);
+ assert.match(sql,/c\.home_key=u\.home_key AND c\.away_key=u\.away_key/);
+ const leagueMapping=['menA','menB','womenI','womenIIA','womenIIB'];
+ for(const league of leagueMapping)assert.match(sql,new RegExp("WHEN '"+league+"' THEN"));
+ const sample=[
+  {season:'2026/27',league:'Férfi Budapest I. osztály – B csoport',home:'beac',away:'mozdulj'},
+  {season:'2026/27',league:'Női Budapest I. osztály',home:'beac',away:'mozdulj'},
+  {season:'2026/27',league:'Női Budapest II. osztály – A csoport',home:'beacii',away:'uteu20pink'},
+  {season:'2026/27',league:'Női Budapest II. osztály – B csoport',home:'beacii',away:'uteu20pink'},
+  {season:'2025/26',league:'Férfi Budapest I. osztály – B csoport',home:'beac',away:'mozdulj'}
+ ];
+ const key=r=>[r.season,r.league,r.home,r.away].join('|');
+ assert.equal(new Set(sample.map(key)).size,sample.length,
+  'identical team names must remain different competition identities');
+ assert.notEqual(key(sample[0]),key(sample[1]));
+ assert.notEqual(key(sample[2]),key(sample[3]));
+ assert.notEqual(key(sample[0]),key(sample[4]));
+});
