@@ -7,6 +7,7 @@ on:
       - 'sql/official_protocols_20261021_identity_safe_migration.sql'
       - 'tests/official-protocols-20261021/**'
       - 'sql/official_protocols_20261021_manual_rollback.sql'
+      - 'sql/official_protocols_20261021_source_conflict_audit.sql'
       - 'data/competition/2026-27/official-protocols-20261021.json'
       - '.github/workflows/official-protocols-20261021-db.yml'
 jobs:
@@ -42,16 +43,23 @@ jobs:
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/bootstrap.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-view.sql
           psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-stats-functions.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-fixtures.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
             test "$(psql -XAt -c 'select count(*) from private.cc_canonical_competition_matches_v1')" = 298
             test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
             psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
             psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
             psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_manual_rollback.sql
             test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
             psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
             echo "CC canonical independent pass ${pass}: 298/15 stable, rerun idempotent, reversible"
           done
       - name: Drift blocks atomic update, no result partially written
@@ -63,11 +71,15 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/bootstrap.sql
           psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-view.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-stats-functions.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-fixtures.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
           psql -X -v ON_ERROR_STOP=1 -c "update public.cc_competition_mrsz_screenshot_v1 set data=jsonb_set(data,'{awayName}','\"DIFFERENT\"') where source_key='brsz:2026/27:menB:userofficial:01'"
           if psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql > /tmp/cc-invalid.out 2>&1; then
             echo "ERROR: drift unexpectedly accepted"; exit 1
           fi
           grep -q 'CC_PROTOCOL_FIXTURE_DRIFT' /tmp/cc-invalid.out
           test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
           test "$(psql -XAt -c "select count(*) from public.cc_competition_mrsz_screenshot_v1 where data ? 'officialProtocolEvidence'")" = 0
+          psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
           echo "CC canonical rejection: atomic rollback confirmed"
