@@ -102,3 +102,31 @@ test('Manager legacy fallback never imports an official result from a different 
  assert.equal(rows[0].homeSets,3);
  assert.ok(rows.every(x=>x.competitionLabel===menB));
 });
+
+
+test('Manager keeps MTK kék–RKSK Oct 13 protocol and Jan 11 reverse leg, never silently imports Nov 24',()=>{
+ const league='Női Budapest II. osztály – B csoport';
+ const oct={competitionLabel:league,matchId:'7f8a8eaf-96c2-8d4a-bd8f-5492d526b2fc',
+  sourceKey:'mrsz:2026/27:protocol:2337',season:'2026/27',
+  startsAt:'2026-10-13T18:20:00+02:00',homeName:'MTK Budapest kék',
+  awayName:'RKSK felnőtt női',homeSets:3,awaySets:0,status:'played'};
+ const jan={competitionLabel:league,matchId:'reverse-jan11',
+  sourceKey:'brsz:2026/27:bb2b:userofficial:22',season:'2026/27',
+  startsAt:'2027-01-11T20:00:00+01:00',homeName:'RKSK felnőtt női',
+  awayName:'MTK kék',homeSets:null,awaySets:null,status:'scheduled'};
+ const old={competitionLabel:league,sourceMatchKey:'ui20261018:womenIIB:mtkkek:rkskfelnottnoi:2',
+  startsAt:'2026-11-24T18:20:00+01:00',homeName:'MTK kék',awayName:'RKSK felnőtt női'};
+ const ctx=vm.createContext({
+  ccMrszPhotoState_:{canonicalMatches:[oct,jan],userMatches:[old]},
+  text:v=>String(v??''),ccManagerMatchVisualSort_:()=>0
+ });
+ vm.runInContext(section('function ccMrszMergedLeagueMatches_(',
+  '// An unscored BEAC–BEAC record'),ctx);
+ const matches=ctx.ccMrszMergedLeagueMatches_(league);
+ assert.equal(matches.length,2);
+ assert.deepEqual(matches.map(m=>m.matchId),[oct.matchId,jan.matchId]);
+ assert.equal(matches[0].homeSets,3);
+ assert.equal(matches[1].homeSets,null);
+ assert.equal(matches[0].homeName,'MTK Budapest kék');
+ assert.equal(matches[1].homeName,'RKSK felnőtt női');
+});
