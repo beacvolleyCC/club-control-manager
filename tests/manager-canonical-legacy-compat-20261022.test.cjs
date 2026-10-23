@@ -54,3 +54,51 @@ test('Legacy league context must not claim a hardcoded 300/8 result snapshot is 
    merged.indexOf('ccMrszPhotoState_.userMatches'));
  assert.ok(!merged.includes('all.length!==300'));
 });
+
+
+test('same BEAC vs Mozdulj teams in different genders/divisions never share the Manager canonical list',()=>{
+ const menB='Férfi Budapest I. osztály – B csoport';
+ const womenI='Női Budapest I. osztály';
+ const first={competitionLabel:menB,homeName:'BEAC',awayName:'Mozdulj SE',
+   startsAt:'2026-11-19T19:00:00+01:00',matchId:'MENS-MATCH',homeSets:3,awaySets:0,status:'played'};
+ const second={...first,competitionLabel:womenI,matchId:'WOMENS-MATCH',homeSets:1,awaySets:3};
+ const ctx=vm.createContext({
+  ccMrszPhotoState_:{canonicalMatches:[first,second]},
+  text:v=>String(v??''),ccManagerMatchVisualSort_:()=>0
+ });
+ vm.runInContext(section('function ccMrszMergedLeagueMatches_(',
+  '// An unscored BEAC–BEAC record'),ctx);
+ const men=ctx.ccMrszMergedLeagueMatches_(menB);
+ const women=ctx.ccMrszMergedLeagueMatches_(womenI);
+ assert.deepEqual(men.map(x=>x.matchId),['MENS-MATCH']);
+ assert.deepEqual(women.map(x=>x.matchId),['WOMENS-MATCH']);
+ assert.notEqual(men[0].homeSets,women[0].homeSets);
+});
+test('Manager legacy fallback never imports an official result from a different division',()=>{
+ const menB='Férfi Budapest I. osztály – B csoport';
+ const womenI='Női Budapest I. osztály';
+ const match={homeName:'BEAC',awayName:'Mozdulj SE',startsAt:'2026-11-19T19:00:00+01:00',
+  homeSets:3,awaySets:0,status:'played'};
+ const men={...match,competitionLabel:menB,matchId:'MENS-FIXTURE'};
+ const women={...match,competitionLabel:womenI,matchId:'WOMENS-REPORT',homeSets:0,awaySets:3};
+ const ctx=vm.createContext({
+  ccMrszPhotoState_:{
+   canonicalMatches:[],matches:[women],fixtures:[men],
+   userMatches:[{...women,matchId:'WOMENS-OVERRIDE',_verified:true}]
+  },
+  ccBrszEffectiveMatches_:[],
+  ccManagerMatchVisualSort_:()=>0,
+  ccMrszLocalKickoff_:m=>({date:String(m||'').slice(0,10)}),
+  ccMrszNormPairName_:s=>String(s||'').toLowerCase().replace(/\W/g,''),
+  ccManagerKnownMovedFixture_:()=>null,
+  ccManagerVerifiedOfficialReport_:m=>m._verified?{matchCode:'1234'}:null,
+  text:v=>String(v??'')
+ });
+ vm.runInContext(section('function ccMrszMergedLeagueMatches_(',
+  '// An unscored BEAC–BEAC record'),ctx);
+ const rows=ctx.ccMrszMergedLeagueMatches_(menB,[women,men]);
+ assert.equal(rows.length,1);
+ assert.equal(rows[0].matchId,'MENS-FIXTURE');
+ assert.equal(rows[0].homeSets,3);
+ assert.ok(rows.every(x=>x.competitionLabel===menB));
+});
