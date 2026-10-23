@@ -1,0 +1,157 @@
+{
+  "asOf": "2026-10-23",
+  "season": "2026/27",
+  "status": "read_only_review",
+  "automaticAliasApproved": false,
+  "source": "LIVE private.cc_canonical_competition_matches_v1 read-only exact-competition home/away source team IDs",
+  "pairs": [
+    {
+      "name": "Dág KSE – KÖZGÁZ",
+      "competitionLabel": "Férfi Budapest I. osztály – A csoport",
+      "legacy": {
+        "oldKey": "ui20261018:menA:dagkse:kozgaz:1",
+        "oldDate": "2026-11-19",
+        "decision": "date_conflict_pending_official_verification"
+      },
+      "legs": [
+        {
+          "review_label": "Dág KSE – KÖZGÁZ",
+          "competition_label": "Férfi Budapest I. osztály – A csoport",
+          "source_key": "20261001:fixture:93",
+          "match_id": "30407d80-b696-58fc-d596-c7e8370515e8",
+          "home_name": "Dág KSE",
+          "away_name": "KÖZGÁZ",
+          "home_source_team_id": "864",
+          "away_source_team_id": "10",
+          "kickoff_local": "2026-10-15 20:15:00",
+          "match_status": "scheduled",
+          "oriented_leg": "home_leg"
+        },
+        {
+          "review_label": "Dág KSE – KÖZGÁZ",
+          "competition_label": "Férfi Budapest I. osztály – A csoport",
+          "source_key": "20261001:fixture:114",
+          "match_id": "a77b638a-5813-d003-31e5-40e0cbe566fb",
+          "home_name": "KÖZGÁZ",
+          "away_name": "Dág KSE",
+          "home_source_team_id": "10",
+          "away_source_team_id": "864",
+          "kickoff_local": "2027-01-14 19:30:00",
+          "match_status": "scheduled",
+          "oriented_leg": "away_leg"
+        }
+      ]
+    },
+    {
+      "name": "Mozdulj SE – MAFC-Schönherz",
+      "competitionLabel": "Férfi Budapest I. osztály – B csoport",
+      "legacy": {
+        "oldKey": "ui20261018:menB:mozduljse:mafcschonherz:1",
+        "oldDate": null,
+        "decision": "rescheduled_from_postponement_not_officially_confirmed"
+      },
+      "legs": [
+        {
+          "review_label": "Mozdulj SE – MAFC-Schönherz",
+          "competition_label": "Férfi Budapest I. osztály – B csoport",
+          "source_key": "brsz:2026/27:menB:userofficial:14",
+          "match_id": "112d6644-7580-6681-fbf3-bd4f057e9a47",
+          "home_name": "MAFC-Schönherz",
+          "away_name": "Mozdulj SE",
+          "home_source_team_id": "640",
+          "away_source_team_id": "1213",
+          "kickoff_local": "2026-12-02 20:30:00",
+          "match_status": "scheduled",
+          "oriented_leg": "away_leg"
+        },
+        {
+          "review_label": "Mozdulj SE – MAFC-Schönherz",
+          "competition_label": "Férfi Budapest I. osztály – B csoport",
+          "source_key": "brsz:2026/27:menB:userofficial:38",
+          "match_id": "d5f97408-5801-7442-fa59-a200a54abd9d",
+          "home_name": "Mozdulj SE",
+          "away_name": "MAFC-Schönherz",
+          "home_source_team_id": "1213",
+          "away_source_team_id": "640",
+          "kickoff_local": "2027-03-03 20:00:00",
+          "match_status": "scheduled",
+          "oriented_leg": "home_leg"
+        }
+      ]
+    },
+    {
+      "name": "KEAC – KRE-B",
+      "competitionLabel": "Női Budapest II. osztály – A csoport",
+      "legacy": {
+        "oldKey": "ui20261018:womenIIA:keac:kreb:1",
+        "oldDate": "2026-10-28",
+        "decision": "date_conflict_pending_official_verification"
+      },
+      "legs": [
+        {
+          "review_label": "KEAC – KRE-B",
+          "competition_label": "Női Budapest II. osztály – A csoport",
+          "source_key": "brsz:2026/27:bb2a:official:16",
+          "match_id": "acc575bd-a04e-5470-5cef-f29eb68b9a57",
+          "home_name": "KEAC",
+          "away_name": "KRE-B",
+          "home_source_team_id": "1166",
+          "away_source_team_id": "1205",
+          "kickoff_local": "2026-11-28 11:30:00",
+          "match_status": "scheduled",
+          "oriented_leg": "home_leg"
+        },
+        {
+          "review_label": "KEAC – KRE-B",
+          "competition_label": "Női Budapest II. osztály – A csoport",
+          "source_key": "brsz:2026/27:bb2a:official:24",
+          "match_id": "80f3a9d9-15b2-88e2-9660-c7d39e4c8f66",
+          "home_name": "KRE-B",
+          "away_name": "KEAC",
+          "home_source_team_id": "1205",
+          "away_source_team_id": "1166",
+          "kickoff_local": "2027-01-13 18:00:00",
+          "match_status": "scheduled",
+          "oriented_leg": "away_leg"
+        }
+      ]
+    },
+    {
+      "name": "MTK kék – RKSK felnőtt női",
+      "competitionLabel": "Női Budapest II. osztály – B csoport",
+      "legacy": {
+        "oldKey": "ui20261018:womenIIB:mtkkek:rkskfelnottnoi:2",
+        "oldDate": "2026-11-24",
+        "decision": "possible_distinct_old_fixture_do_not_map_to_oct13_or_jan11"
+      },
+      "legs": [
+        {
+          "review_label": "MTK kék – RKSK felnőtt női",
+          "competition_label": "Női Budapest II. osztály – B csoport",
+          "source_key": "mrsz:2026/27:protocol:2337",
+          "match_id": "7f8a8eaf-96c2-8d4a-bd8f-5492d526b2fc",
+          "home_name": "MTK Budapest kék",
+          "away_name": "RKSK felnőtt női",
+          "home_source_team_id": "1165",
+          "away_source_team_id": "1215",
+          "kickoff_local": "2026-10-13 18:20:00",
+          "match_status": "played",
+          "oriented_leg": "home_leg"
+        },
+        {
+          "review_label": "MTK kék – RKSK felnőtt női",
+          "competition_label": "Női Budapest II. osztály – B csoport",
+          "source_key": "brsz:2026/27:bb2b:userofficial:22",
+          "match_id": "800dfdbd-1c6a-c104-a08b-caf4235c3cb0",
+          "home_name": "RKSK felnőtt női",
+          "away_name": "MTK kék",
+          "home_source_team_id": "1215",
+          "away_source_team_id": "1165",
+          "kickoff_local": "2027-01-11 20:00:00",
+          "match_status": "scheduled",
+          "oriented_leg": "away_leg"
+        }
+      ]
+    }
+  ]
+}
