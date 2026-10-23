@@ -118,7 +118,8 @@ test('same home/away names across genders, divisions or A/B groups do not cross-
  assert.match(sql,/FROM public\.cc_competition_user_schedule_v1 u WHERE u\.season='2026\/27'/i);
  assert.match(sql,/FROM private\.cc_canonical_competition_matches_v1 c WHERE c\.season='2026\/27'/i);
  const matches=[...sql.matchAll(/(?:x|c)\.competition_label=u\.league/g)].length;
- assert.ok(matches>=3,'Every candidate join, status review and unmatched lookup needs league scope');
+ assert.ok(matches>=2,'Every candidate query must require the same competition');
+ assert.match(sql,/u\.league=c\.competition_label/);
  assert.match(sql,/x\.home_key=u\.home_key AND x\.away_key=u\.away_key/);
  assert.match(sql,/c\.home_key=u\.home_key AND c\.away_key=u\.away_key/);
  const leagueMapping=['menA','menB','womenI','womenIIA','womenIIB'];
