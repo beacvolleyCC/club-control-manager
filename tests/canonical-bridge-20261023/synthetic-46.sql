@@ -85,3 +85,40 @@ INSERT INTO public.availability VALUES (md5('unlinked:3')::uuid);
 
 -- We deliberately DO NOT insert any alias linking either unlinked event
 -- or canonical projection ID. The bridge is strictly a review report.
+
+-- Extend disposable Manager events for a separate, seven-event review query.
+-- This is intentionally synthetic; these UUIDs are not live Club Control IDs.
+ALTER TABLE public.events ADD COLUMN team_id uuid, ADD COLUMN home_away text,
+ ADD COLUMN starts_at timestamptz, ADD COLUMN title text;
+UPDATE public.events SET team_id='10000000-0000-4000-8000-000000000002',
+ home_away='home',starts_at='2026-11-03 19:30+01',title='BEAC II. – Corvinus'
+ WHERE id=md5('unlinked:1')::uuid;
+UPDATE public.events SET team_id='10000000-0000-4000-8000-000000000001',
+ home_away='home',starts_at='2026-11-10 19:30+01',
+ title='BEAC – BEAC · ELLENFÉL JAVÍTANDÓ'
+ WHERE id=md5('unlinked:2')::uuid;
+UPDATE public.events SET team_id='10000000-0000-4000-8000-000000000002',
+ home_away='away',starts_at='2026-11-11 18:00+01',title='KRE-B – BEAC II.'
+ WHERE id=md5('unlinked:3')::uuid;
+UPDATE public.events SET team_id='10000000-0000-4000-8000-000000000002',
+ home_away='away',starts_at='2026-11-11 20:30+01',
+ title='MAFC-BME – BEAC II. · NEM BIZTOS IDŐPONT'
+ WHERE id=md5('unlinked:4')::uuid;
+UPDATE public.events SET team_id='10000000-0000-4000-8000-000000000002',
+ home_away='home',starts_at='2026-11-11 20:30+01',
+ title='BEAC II. – Budapest Bunnies · NEM BIZTOS IDŐPONT'
+ WHERE id=md5('unlinked:5')::uuid;
+UPDATE public.events SET team_id='10000000-0000-4000-8000-000000000003',
+ home_away='away',starts_at='2026-11-18 20:00+01',title='Mozdulj SE – BEAC'
+ WHERE id=md5('unlinked:6')::uuid;
+UPDATE public.events SET team_id='10000000-0000-4000-8000-000000000003',
+ home_away='home',starts_at='2027-02-08 19:30+01',title='BEAC – Mozdulj SE'
+ WHERE id=md5('unlinked:7')::uuid;
+-- These are *candidates*, never approved foreign keys / aliases:
+INSERT INTO private.cc_canonical_competition_matches_v1 VALUES
+('qa:canonical:mozdulj-away',md5('mozdulj-away')::uuid,'2026/27',
+ 'Férfi Budapest I. osztály – B csoport','1213','709',
+ '2026-11-18 20:00','scheduled'),
+('qa:canonical:mozdulj-home',md5('mozdulj-home')::uuid,'2026/27',
+ 'Férfi Budapest I. osztály – B csoport','709','1213',
+ '2027-02-08 19:30','scheduled');
