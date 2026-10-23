@@ -3278,18 +3278,20 @@
     return diff?(pastA?-diff:diff):text(a?.homeName).localeCompare(text(b?.homeName),'hu');
   }
   function ccMrszMergedLeagueMatches_(group,canonicalMatches=[]){
+    // Competition label includes gender, division and group: never match on names alone.
+    const inGroup=m=>text(m?.competitionLabel)===group;
     // The shared canonical feed contains reconciled fixtures and reports.
     // Keep the legacy merge as fallback for old RPC versions and editor/audit flows.
     const shared=ccMrszPhotoState_.canonicalMatches;
     if(Array.isArray(shared)&&shared.length){
-      return shared.filter(m=>text(m.competitionLabel)===group)
+      return shared.filter(inGroup)
         .map(m=>({...m,isFixture:m.status!=='played',isPhoto:m.status==='played'})).sort((a,b)=>text(a.status)==='postponed'?-1:text(b.status)==='postponed'?1:ccManagerMatchVisualSort_(a,b));
     }
-    const photo=(ccMrszPhotoState_.matches||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isPhoto:true}));
-    const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(m=>text(m.competitionLabel)===group).map(m=>({...m,isFixture:true}));
-    const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(m=>text(m.competitionLabel)===group);
+    const photo=(ccMrszPhotoState_.matches||[]).filter(inGroup).map(m=>({...m,isPhoto:true}));
+    const fixtures=(ccMrszPhotoState_.fixtures||[]).filter(inGroup).map(m=>({...m,isFixture:true}));
+    const brsz=((typeof ccBrszEffectiveMatches_==='undefined'?[]:ccBrszEffectiveMatches_)||[]).filter(inGroup);
     const updated=(ccMrszPhotoState_.userMatches||[]).filter(m=>
-      ccManagerKnownMovedFixture_(m,group)||text(m.competitionLabel)===group&&!!ccManagerVerifiedOfficialReport_(m));
+      inGroup(m)&&(ccManagerKnownMovedFixture_(m,group)||!!ccManagerVerifiedOfficialReport_(m)));
     const superseded=m=>m?.homeSets==null&&m?.awaySets==null&&(
       photo.some(p=>text(p.source)==='mrsz_official_protocol_pdf'
         &&text(p.competitionLabel)===text(m.competitionLabel)
@@ -3313,7 +3315,7 @@
       +ccMrszNormPairName_(m._ccOriginalAwayName||m.awayName);
     const unique=new Map();
     const take=(match,priority)=>{
-      if(superseded(match))return;
+      if(!inGroup(match)||superseded(match))return;
       const k=key(match),prior=unique.get(k);
       const annotated={...match,__sourcePriority:priority};
       if(!prior||(!prior._ccManualOverride&&annotated._ccManualOverride)
