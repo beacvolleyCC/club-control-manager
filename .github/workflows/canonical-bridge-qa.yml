@@ -4,11 +4,13 @@ on:
     branches: [audit/20261022-canonical-event-crosswalk]
     paths:
       - 'sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql'
+      - 'sql/audit_seven_manager_event_crosswalk_20261023.sql'
       - 'tests/canonical-bridge-20261023/**'
       - '.github/workflows/canonical-bridge-qa.yml'
   pull_request:
     paths:
       - 'sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql'
+      - 'sql/audit_seven_manager_event_crosswalk_20261023.sql'
       - 'tests/canonical-bridge-20261023/**'
       - '.github/workflows/canonical-bridge-qa.yml'
 jobs:
@@ -36,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Audit contains no database mutation
         run: |
-          if grep -Eiq '^[[:space:]]*(insert|update|delete|create|alter|drop|truncate|grant|revoke)[[:space:]]' sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql; then
+          if grep -Eiq '^[[:space:]]*(insert|update|delete|create|alter|drop|truncate|grant|revoke)[[:space:]]' sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql sql/audit_seven_manager_event_crosswalk_20261023.sql; then
             echo 'ERROR: production bridge audit is not read-only'; exit 1
           fi
       - name: Two independent review-only PostgreSQL 17 passes
@@ -62,6 +64,18 @@ jobs:
                 ([.candidates[] | select(.crosswalkApproved != false)] | length) == 0 and
                 ([.candidates[] | select(.reviewDecision == "BLOCK_SELF_MATCH") | .possibleMatches | length] | add) == 0
               '
+              seven="$(psql -XAt -v ON_ERROR_STOP=1 -f sql/audit_seven_manager_event_crosswalk_20261023.sql)"
+              printf '%s\\n' "$seven" | jq -e '
+                .unlinkedManagerMatches == 7 and
+                .unlinkedBookings == 15 and
+                .decisionCounts.BLOCK_ARCHIVED_EVENT == 2 and
+                .decisionCounts.BLOCK_EXPLICIT_UNCERTAINTY == 2 and
+                .decisionCounts.REVIEW_NO_SCOPED_CANDIDATE == 1 and
+                .decisionCounts.SCOPED_TIME_CANDIDATE_ONLY == 2 and
+                .autoLinksAllowed == false and
+                ([.events[] | select(.crosswalkApproved != false)] | length) == 0 and
+                ([.events[] | select(.existingBookings == 12 and .reviewDecision == "BLOCK_ARCHIVED_EVENT")] | length) == 1
+              '
               test "$(psql -XAt -c 'select count(*) from public.events')" = 53
               test "$(psql -XAt -c 'select count(*) from public.availability')" = 15
               test "$(psql -XAt -c "select count(*) from private.cc_canonical_match_aliases_v1 where source_system='manager_event'")" = 46
@@ -85,4 +99,25 @@ jobs:
               ([.candidates[] | select(.crosswalkApproved != false)] | length) == 0
             '
             echo "CC_BRIDGE_AMBIGUITY_BLOCK_PASS ${pass}"
+            # If a second candidate is introduced for one *unlinked*
+            # Manager event, the read-only reviewer must mark it ambiguous.
+            psql -X -v ON_ERROR_STOP=1 -c "
+              INSERT INTO private.cc_canonical_competition_matches_v1
+              VALUES ('qa:canonical:mozdulj-away-duplicate',
+                md5('mozdulj-away-duplicate')::uuid,
+                '2026/27','Férfi Budapest I. osztály – B csoport',
+                '1213','709','2026-11-18 20:00:00','scheduled')"
+            seven_ambiguous="$(psql -XAt -v ON_ERROR_STOP=1 -f sql/audit_seven_manager_event_crosswalk_20261023.sql)"
+            printf '%s\\n' "$seven_ambiguous" | jq -e '
+              .unlinkedManagerMatches == 7 and
+              .unlinkedBookings == 15 and
+              .decisionCounts.SCOPED_TIME_CANDIDATE_ONLY == 1 and
+              .decisionCounts.REVIEW_MULTIPLE_SCOPED_CANDIDATES == 1 and
+              .decisionCounts.BLOCK_ARCHIVED_EVENT == 2 and
+              .decisionCounts.BLOCK_EXPLICIT_UNCERTAINTY == 2 and
+              .autoLinksAllowed == false and
+              ([.events[] | select(.crosswalkApproved != false)] | length) == 0
+            '
+            echo "CC_SEVEN_EVENT_AMBIGUITY_BLOCK_PASS ${pass}"
+
           done
