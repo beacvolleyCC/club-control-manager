@@ -42,3 +42,20 @@ Az ellenőrzés minden canonical jelölthöz külön tárolja az aktuális `matc
 A még vitás Dág–KÖZGÁZ és KEAC–KRE-B dátumeltérést, a Mozdulj–MAFC-Schönherz újra kitűzését és az MTK kék–RKSK november 24-i kiírását külön hivatalos, az **azonos idényen és versenycsoporton belül érvényes** azonosító vagy dokumentum alapján ellenőrizni. Az új jegyzőkönyvekkel alátámasztott két mérkőzést a #74-es, 298-as azonosítószámot megőrző, külön tesztelt migrációval lehet majd később bevezetni, de csak a végleges adatbázis-kiadás részeként, kétszeri teljes 11 pontos QA mellett.
 
 Sem LIVE SQL-migráció, sem Player/Manager main-merge, sem esemény-/jelentkezésmódosítás, sem push-értesítés nem történt.
+
+## 2026-10-23 – visszavágók és azonos pályaválasztású dupla régi sorok
+
+A jelenlegi canonical LIVE adatokból, csak olvasással külön kigyűjtöttük a nyitott négy csapatpár mindkét pályaválasztású mérkőzését. A **teljes bajnokság és az idény** egyezése minden egyes keresési feltételben kötelező. Az eredmény: mindegyik párhoz 1 hazai és 1 fordított pályaválasztású canonical rekord tartozik.
+
+| Pontos bajnokság | Hazai mérkőzés | Fordított pályaválasztás | Régi vitás forrás |
+|---|---|---|---|
+| Férfi I/A: Dág KSE – KÖZGÁZ | 2026.10.15. 20:15 | KÖZGÁZ–Dág, 2027.01.14. 19:30 | Dág–KÖZGÁZ 2026.11.19 |
+| Férfi I/B: Mozdulj–MAFC-Schönherz | 2027.03.03. 20:00 | MAFC-Schönherz–Mozdulj, 2026.12.02. 20:30 | Halasztott, időpont nélküli régi sor |
+| Női II/A: KEAC–KRE-B | 2026.11.28. 11:30 | KRE-B–KEAC, 2027.01.13. 18:00 | KEAC–KRE-B 2026.10.28 |
+| Női II/B: MTK kék–RKSK | 2026.10.13. 18:20, **#2337, 3:0** | RKSK–MTK kék, 2027.01.11. 20:00 | **2026.11.24.** újabb, azonos hazai–vendég sorrendű régi sor |
+
+A női II/B-ben két október/novemberi régi rekord van ugyanarra a *hazai MTK kék – vendég RKSK* párosításra, miközben a canonical szerint október 13-án már lejátszották, a januári mérkőzésen pedig **RKSK a hazai csapat**. A november 24-i régi sor azonossága ezért nem igazolható pusztán a nevek vagy a körmérkőzéses jelleg alapján. Továbbra is **kézi ellenőrzésre vár, nem töröljük és nem írjuk át**.
+
+**Új forrás és ellenőrzés:** `sql/audit_official_home_away_legs_20261023.sql`, `data/competition/2026-27/official-leg-review-20261023.json`, `tests/official-home-away-legs-20261023.test.cjs`. A négy csapatpár mindkét iránya pontos bajnokságra, 2026/27 idényre és eredeti MRSZ/BRSZ csapatazonosítóra szűrve lett rögzítve. A Player és Manager külön regressziója is ellenőrzi az októberi eredmény és a januári fordított pályaválasztású mérkőzés külön azonosítóját.
+
+A nyilvános BRSZ felület jelenlegi, adott dátumra szűrt oldalai a rendelkezésre álló webes lekérdezéssel nem voltak hozzáférhetők. Régi évadból származó BRSZ keresési találat **nem igazolja a 2026/27-es találkozókat**, ezért a négy még kérdéses dátumot nem írtuk át és a 11 rekordból nem lett további hivatalosan jóváhagyott alias.
