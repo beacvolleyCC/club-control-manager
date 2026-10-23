@@ -1,0 +1,88 @@
+name: Canonical legacy bridge isolated QA
+on:
+  push:
+    branches: [audit/20261022-canonical-event-crosswalk]
+    paths:
+      - 'sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql'
+      - 'tests/canonical-bridge-20261023/**'
+      - '.github/workflows/canonical-bridge-qa.yml'
+  pull_request:
+    paths:
+      - 'sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql'
+      - 'tests/canonical-bridge-20261023/**'
+      - '.github/workflows/canonical-bridge-qa.yml'
+jobs:
+  two-disposable-databases:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: cc_bridge_qa_only
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: cc_bridge_qa_only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit contains no database mutation
+        run: |
+          if grep -Eiq '^[[:space:]]*(insert|update|delete|create|alter|drop|truncate|grant|revoke)[[:space:]]' sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql; then
+            echo 'ERROR: production bridge audit is not read-only'; exit 1
+          fi
+      - name: Two independent review-only PostgreSQL 17 passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pass in 1 2; do
+            createdb "cc_bridge_qa_${pass}"
+            export PGDATABASE="cc_bridge_qa_${pass}"
+            psql -X -v ON_ERROR_STOP=1 -f tests/canonical-bridge-20261023/synthetic-46.sql
+
+            for repeat in 1 2; do
+              report="$(psql -XAt -v ON_ERROR_STOP=1 -f sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql)"
+              printf '%s\n' "$report" | jq -e '
+                .rawBRSZRows == 46 and
+                .legacyManagerAliasCount == 46 and
+                .unlinkedManagerEvents == 7 and
+                .unlinkedManagerBookings == 15 and
+                .decisionCounts.SCOPED_EXACT_TIME_CANDIDATE_ONLY == 42 and
+                .decisionCounts.REVIEW_START_OR_STATUS_CONFLICT == 2 and
+                .decisionCounts.BLOCK_SELF_MATCH == 2 and
+                .allMatchesUnapproved == true and
+                ([.candidates[] | select(.crosswalkApproved != false)] | length) == 0 and
+                ([.candidates[] | select(.reviewDecision == "BLOCK_SELF_MATCH") | .possibleMatches | length] | add) == 0
+              '
+              test "$(psql -XAt -c 'select count(*) from public.events')" = 53
+              test "$(psql -XAt -c 'select count(*) from public.availability')" = 15
+              test "$(psql -XAt -c "select count(*) from private.cc_canonical_match_aliases_v1 where source_system='manager_event'")" = 46
+              echo "CC_BRIDGE_PASS ${pass}/${repeat}: 42 candidates, 2 date drift, 2 blocked, 7 unlinked, 15 bookings"
+            done
+
+            # Deliberately inject a SECOND projection candidate for the same
+            # old source IDs. The audited decision must degrade to REVIEW.
+            psql -X -v ON_ERROR_STOP=1 -c "
+              INSERT INTO private.cc_canonical_competition_matches_v1
+              VALUES ('qa:canonical:duplicate',md5('duplicate:1')::uuid,
+                '2026/27','Női Budapest I. osztály','299','9001',
+                '2026-11-02 19:30:00','scheduled')"
+            ambiguous="$(psql -XAt -v ON_ERROR_STOP=1 -f sql/audit_legacy_brsz_to_canonical_bridge_20261023.sql)"
+            printf '%s\n' "$ambiguous" | jq -e '
+              .decisionCounts.REVIEW_MULTIPLE_CANONICAL_CANDIDATES == 1 and
+              .decisionCounts.SCOPED_EXACT_TIME_CANDIDATE_ONLY == 41 and
+              .decisionCounts.REVIEW_START_OR_STATUS_CONFLICT == 2 and
+              .decisionCounts.BLOCK_SELF_MATCH == 2 and
+              ([.candidates[] | select(.reviewDecision == "REVIEW_MULTIPLE_CANONICAL_CANDIDATES")] | length) == 1 and
+              ([.candidates[] | select(.crosswalkApproved != false)] | length) == 0
+            '
+            echo "CC_BRIDGE_AMBIGUITY_BLOCK_PASS ${pass}"
+          done
