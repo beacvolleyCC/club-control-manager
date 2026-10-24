@@ -38,6 +38,40 @@ BEGIN
  RAISE NOTICE 'CC_V3_VERIFIED_POSITIVE_AND_NEGATIVE_OK: only 2 of 6 manual rows resolved';
 END $cc_verify$;
 
+-- Explicitly verified alternate official-source row matches report.data.matchCode.
+-- Same federation code in another league or with a different record_kind
+-- must not be trusted. Restore the poisoned approval after the positive test.
+UPDATE private.cc_verified_match_bridge_v1
+ SET official_proof_ref='MRSZ:2026/27:2340'
+ WHERE legacy_match_id=md5('qa:old:44')::uuid;
+DO $cc_report$
+BEGIN
+ IF jsonb_array_length(private.cc_competition_verified_match_bridge_v1())<>3
+ THEN RAISE EXCEPTION 'CC_OFFICIAL_MATCH_CODE_SOURCE_NOT_ACCEPTED'; END IF;
+END $cc_report$;
+UPDATE public.cc_competition_mrsz_screenshot_v1
+ SET competition_label='Női Budapest I. osztály'
+ WHERE source_key='qa:canonical:44';
+DO $cc_report$
+BEGIN
+ IF jsonb_array_length(private.cc_competition_verified_match_bridge_v1())<>2
+ THEN RAISE EXCEPTION 'CC_WRONG_REPORT_LEAGUE_WAS_ACCEPTED'; END IF;
+END $cc_report$;
+UPDATE public.cc_competition_mrsz_screenshot_v1
+ SET competition_label='Női Budapest II. osztály – B csoport',
+     record_kind='standings'
+ WHERE source_key='qa:canonical:44';
+DO $cc_report$
+BEGIN
+ IF jsonb_array_length(private.cc_competition_verified_match_bridge_v1())<>2
+ THEN RAISE EXCEPTION 'CC_WRONG_REPORT_KIND_WAS_ACCEPTED'; END IF;
+END $cc_report$;
+UPDATE public.cc_competition_mrsz_screenshot_v1
+ SET record_kind='match' WHERE source_key='qa:canonical:44';
+UPDATE private.cc_verified_match_bridge_v1
+ SET official_proof_ref='MRSZ:2026/27:2686'
+ WHERE legacy_match_id=md5('qa:old:44')::uuid;
+
 -- Revoking the underlying official evidence at read time must NOT leave a
 -- cached or guessed mapping visible. Revert the synthetic drift afterward.
 UPDATE public.competition_source_matches
