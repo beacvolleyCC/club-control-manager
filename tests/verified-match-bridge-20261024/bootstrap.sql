@@ -30,7 +30,11 @@ CREATE TABLE private.cc_canonical_competition_matches_v1 (
  kickoff_local timestamp,match_status text
 );
 CREATE TABLE public.cc_competition_mrsz_screenshot_v1 (
- source_key text PRIMARY KEY, data jsonb NOT NULL
+ source_key text PRIMARY KEY,
+ season text NOT NULL,
+ competition_label text NOT NULL,
+ record_kind text NOT NULL,
+ data jsonb NOT NULL
 );
 CREATE TABLE public.events(id uuid PRIMARY KEY,event_type text NOT NULL,status text NOT NULL);
 CREATE TABLE public.availability(event_id uuid REFERENCES public.events(id),player_id uuid);
