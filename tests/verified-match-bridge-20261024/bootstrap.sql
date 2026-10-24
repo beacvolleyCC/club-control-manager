@@ -1,7 +1,14 @@
 -- Disposable PostgreSQL 17 synthetic QA. NEVER run on Club Control LIVE.
 -- Shape reflects existing tables; values are synthetic and non-identifying.
-CREATE ROLE anon NOLOGIN;
-CREATE ROLE authenticated NOLOGIN;
+-- PostgreSQL roles belong to the cluster, not to an individual test DB.
+-- The two disposable databases run against the same PostgreSQL service.
+DO $cc_roles$
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='anon')
+ THEN CREATE ROLE anon NOLOGIN; END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='authenticated')
+ THEN CREATE ROLE authenticated NOLOGIN; END IF;
+END $cc_roles$;
 CREATE SCHEMA private;
 CREATE TABLE private.cc_canonical_matches_v1 (
  id uuid PRIMARY KEY, season text NOT NULL, competition_label text NOT NULL
