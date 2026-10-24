@@ -77,7 +77,10 @@ JOIN private.cc_canonical_competition_matches_v1 cm
    OR EXISTS (
      SELECT 1 FROM public.cc_competition_mrsz_screenshot_v1 report
      WHERE report.source_key=cm.source_key
-       AND report.data->>'officialProtocolMatchCode'=
+       AND report.season=b.season
+       AND report.competition_label=b.competition_label
+       AND report.record_kind='match'
+       AND report.data->>'matchCode'=
            split_part(b.official_proof_ref,':',3)
    )
  )
