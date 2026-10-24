@@ -47,6 +47,8 @@ test('No cross-league or uncertain team pair can be substituted',()=>{
  assert.equal(ctx.ccManagerKnownMovedFixture_(wrong,group),null);
 });
 test('Manager PWA cache includes verified matches update',()=>{
- assert.ok(html.includes('app.js?v=20261020-mrsz-reports-v66'));
- assert.ok(sw.includes('cc-manager-20261020-mrsz-reports-v66'));
+ const version=/app\.js\?v=([^"]+)/.exec(html)?.[1];
+ assert.ok(version,'Manager cache token must exist');
+ assert.ok(html.includes('styles.css?v='+version));
+ assert.ok(sw.includes('cc-manager-'+version));
 });
