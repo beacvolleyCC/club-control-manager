@@ -126,7 +126,7 @@ test('source code is opt-in and never auto-links to event IDs or bookings',()=>{
  assert.match(config,/CANONICAL_BRIDGE_V3_ENABLED:\s*false/);
  assert.ok(html.indexOf('competition-match-bridge.js')>=0);
  assert.ok(html.indexOf('competition-match-bridge.js')<html.indexOf('app.js?v='));
- assert.match(app,/CCVerifiedMatchBridge\.loadSnapshot/);
+ assert.match(app,/(?:CCVerifiedMatchBridge|ccBridgeApi)\.loadSnapshot/);
  assert.match(app,/CANONICAL_BRIDGE_V3_ENABLED===true/);
  assert.match(app,/verifiedLegacyMatchBridge/);
  assert.match(app,/ccVerifiedCanonical|ccCanonicalRows/);
