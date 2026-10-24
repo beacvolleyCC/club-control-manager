@@ -79,7 +79,7 @@ JOIN private.cc_canonical_competition_matches_v1 cm
         split_part(b.official_proof_ref,':',3)
     AND raw.source_hash ~ '^[0-9a-f]{64}$'
     AND raw.source_hash=raw.raw_payload->>'sourceHash'
-    AND raw.source_url ~ '^https://(www\\.)?(brsz\\.hu|hunvolley\\.info)/'
+    AND raw.source_url ~ '^https://(www[.])?(brsz[.]hu|hunvolley[.]info)/'
    )
    OR (b.official_proof_kind='mrsz_match_code'
        AND cm.source_key='mrsz:'||b.season||':protocol:'||
