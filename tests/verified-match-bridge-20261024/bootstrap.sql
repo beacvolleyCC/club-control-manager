@@ -21,7 +21,8 @@ CREATE TABLE private.cc_canonical_match_aliases_v1 (
 CREATE TABLE public.competition_source_matches (
  source text NOT NULL,season text NOT NULL,source_match_key text PRIMARY KEY,
  source_team_id text,home_source_team_id text,away_source_team_id text,
- starts_at timestamptz,source_status text,needs_review boolean NOT NULL DEFAULT false
+ starts_at timestamptz,source_status text,needs_review boolean NOT NULL DEFAULT false,
+ source_url text,source_hash text,raw_payload jsonb NOT NULL DEFAULT '{}'::jsonb
 );
 CREATE TABLE private.cc_canonical_competition_matches_v1 (
  match_id uuid PRIMARY KEY,source_key text UNIQUE NOT NULL,season text NOT NULL,
@@ -143,6 +144,17 @@ OR (SELECT count(*) FROM private.cc_canonical_match_aliases_v1 WHERE source_syst
 THEN RAISE EXCEPTION 'QA_BOOTSTRAP_WRONG_BASELINE'; END IF;
 END $qa$;
 
+
+-- All sample hashes and the sole officialFixtureId below are FAKE evidence.
+-- No BRSZ fixture IDs exist in the actual 46-row LIVE source payload yet.
+UPDATE public.competition_source_matches SET
+ source_url='https://www.brsz.hu/bajnoksagok.php?bajnoksag_id=1121',
+ source_hash=repeat('a',64),
+ raw_payload=jsonb_build_object('sourceHash',repeat('a',64));
+UPDATE public.competition_source_matches SET
+ raw_payload=jsonb_build_object('sourceHash',repeat('a',64),
+   'officialFixtureId','12345')
+ WHERE source_match_key='qa:brsz:1';
 
 -- Actual LIVE report schema uses data.matchCode, not data.officialProtocolMatchCode.
 -- This synthetic report intentionally has a non-MRSZ canonical source key
