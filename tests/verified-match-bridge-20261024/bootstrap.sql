@@ -22,6 +22,9 @@ CREATE TABLE private.cc_canonical_competition_matches_v1 (
  home_source_team_id text,away_source_team_id text,
  kickoff_local timestamp,match_status text
 );
+CREATE TABLE public.cc_competition_mrsz_screenshot_v1 (
+ source_key text PRIMARY KEY, data jsonb NOT NULL
+);
 CREATE TABLE public.events(id uuid PRIMARY KEY,event_type text NOT NULL,status text NOT NULL);
 CREATE TABLE public.availability(event_id uuid REFERENCES public.events(id),player_id uuid);
 
@@ -72,7 +75,9 @@ WITH t AS (
 INSERT INTO private.cc_canonical_competition_matches_v1
 (match_id,source_key,season,competition_label,home_source_team_id,
  away_source_team_id,kickoff_local,match_status)
-SELECT md5('qa:new:'||i)::uuid,'qa:canonical:'||i,'2026/27',
+SELECT md5('qa:new:'||i)::uuid,
+CASE WHEN i=43 THEN 'mrsz:2026/27:protocol:2699'
+     ELSE 'qa:canonical:'||i END,'2026/27',
 CASE seed WHEN '299' THEN 'Női Budapest I. osztály'
           WHEN '959' THEN 'Női Budapest II. osztály – B csoport'
           ELSE 'Férfi Budapest I. osztály – B csoport' END,
