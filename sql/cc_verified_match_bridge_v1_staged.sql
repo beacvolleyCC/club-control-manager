@@ -71,10 +71,20 @@ JOIN private.cc_canonical_competition_matches_v1 cm
  AND cm.home_source_team_id=b.home_source_team_id
  AND cm.away_source_team_id=b.away_source_team_id
  AND (
-   b.official_proof_kind='brsz_official_fixture_id'
-   OR cm.source_key='mrsz:'||b.season||':protocol:'||
-                     split_part(b.official_proof_ref,':',3)
-   OR EXISTS (
+   (b.official_proof_kind='brsz_official_fixture_id'
+    -- A division listing URL + invented BRSZ:... code is NOT proof.
+    -- Until the federation feed supplies a stable official fixture ID
+    -- bound to its fingerprint, BRSZ-only approvals MUST fail closed.
+    AND raw.raw_payload->>'officialFixtureId'=
+        split_part(b.official_proof_ref,':',3)
+    AND raw.source_hash ~ '^[0-9a-f]{64}$'
+    AND raw.source_hash=raw.raw_payload->>'sourceHash'
+    AND raw.source_url ~ '^https://(www\\.)?(brsz\\.hu|hunvolley\\.info)/'
+   )
+   OR (b.official_proof_kind='mrsz_match_code'
+       AND cm.source_key='mrsz:'||b.season||':protocol:'||
+                     split_part(b.official_proof_ref,':',3))
+   OR (b.official_proof_kind='mrsz_match_code' AND EXISTS (
      SELECT 1 FROM public.cc_competition_mrsz_screenshot_v1 report
      WHERE report.source_key=cm.source_key
        AND report.season=b.season
@@ -82,7 +92,7 @@ JOIN private.cc_canonical_competition_matches_v1 cm
        AND report.record_kind='match'
        AND report.data->>'matchCode'=
            split_part(b.official_proof_ref,':',3)
-   )
+   ))
  )
 WHERE b.home_source_team_id<>b.away_source_team_id
 AND lm.competition_label='BRSZ imported fixture';
