@@ -131,3 +131,17 @@ OR (SELECT count(*) FROM private.cc_canonical_match_aliases_v1 WHERE source_syst
 OR (SELECT count(*) FROM private.cc_canonical_match_aliases_v1 WHERE source_system='brsz_fixture')<>46
 THEN RAISE EXCEPTION 'QA_BOOTSTRAP_WRONG_BASELINE'; END IF;
 END $qa$;
+
+-- Immutable hashes permit detection of data alteration, not just row count drift.
+CREATE TABLE private.cc_qa_original_fingerprints AS
+SELECT
+ (SELECT md5(coalesce(jsonb_agg(to_jsonb(e) ORDER BY id)::text,'[]'))
+  FROM public.events e) AS events_hash,
+ (SELECT md5(coalesce(jsonb_agg(to_jsonb(v) ORDER BY event_id,player_id)::text,'[]'))
+  FROM public.availability v) AS bookings_hash,
+ (SELECT md5(coalesce(jsonb_agg(to_jsonb(a) ORDER BY source_system,source_key)::text,'[]'))
+  FROM private.cc_canonical_match_aliases_v1 a) AS aliases_hash,
+ (SELECT md5(coalesce(jsonb_agg(to_jsonb(m) ORDER BY source_match_key)::text,'[]'))
+  FROM public.competition_source_matches m) AS raw_sources_hash,
+ (SELECT md5(coalesce(jsonb_agg(to_jsonb(c) ORDER BY source_key)::text,'[]'))
+  FROM private.cc_canonical_competition_matches_v1 c) AS projection_hash;
