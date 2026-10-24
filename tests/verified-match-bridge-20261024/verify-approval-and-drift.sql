@@ -38,6 +38,52 @@ BEGIN
  RAISE NOTICE 'CC_V3_VERIFIED_POSITIVE_AND_NEGATIVE_OK: only 2 of 6 manual rows resolved';
 END $cc_verify$;
 
+-- BRSZ official fixture IDs must come from the actual source payload.
+-- A competition listing link alone, guessed number or altered source
+-- fingerprint is never enough to turn the row into a verified alias.
+UPDATE public.competition_source_matches
+ SET raw_payload=raw_payload-'officialFixtureId'
+ WHERE source_match_key='qa:brsz:1';
+DO $cc_brsz$
+BEGIN
+ IF jsonb_array_length(private.cc_competition_verified_match_bridge_v1())<>1
+ THEN RAISE EXCEPTION 'CC_FAKE_BRSZ_NUMBER_ACCEPTED_WITHOUT_FEDERATION_ID'; END IF;
+END $cc_brsz$;
+UPDATE public.competition_source_matches
+ SET raw_payload=raw_payload||jsonb_build_object('officialFixtureId','12345')
+ WHERE source_match_key='qa:brsz:1';
+
+UPDATE public.competition_source_matches
+ SET source_hash=repeat('b',64)
+ WHERE source_match_key='qa:brsz:1';
+DO $cc_brsz$
+BEGIN
+ IF jsonb_array_length(private.cc_competition_verified_match_bridge_v1())<>1
+ THEN RAISE EXCEPTION 'CC_MISMATCHED_BRSZ_FINGERPRINT_ACCEPTED'; END IF;
+END $cc_brsz$;
+UPDATE public.competition_source_matches
+ SET source_hash=repeat('a',64)
+ WHERE source_match_key='qa:brsz:1';
+
+UPDATE public.competition_source_matches
+ SET source_url='https://spoofed-schedule.example/bajnoksag.php'
+ WHERE source_match_key='qa:brsz:1';
+DO $cc_brsz$
+BEGIN
+ IF jsonb_array_length(private.cc_competition_verified_match_bridge_v1())<>1
+ THEN RAISE EXCEPTION 'CC_UNTRUSTED_BRSZ_SOURCE_DOMAIN_ACCEPTED'; END IF;
+END $cc_brsz$;
+UPDATE public.competition_source_matches
+ SET source_url='https://www.brsz.hu/bajnoksagok.php?bajnoksag_id=1121'
+ WHERE source_match_key='qa:brsz:1';
+
+DO $cc_brsz$
+BEGIN
+ IF jsonb_array_length(private.cc_competition_verified_match_bridge_v1())<>2
+ THEN RAISE EXCEPTION 'CC_VALID_BRSZ_FEDERATION_EVIDENCE_NOT_RESTORED'; END IF;
+ RAISE NOTICE 'CC_BRSZ_ID_HASH_HOST_PROOF_NEGATIVE_TESTS_PASS';
+END $cc_brsz$;
+
 -- Explicitly verified alternate official-source row matches report.data.matchCode.
 -- Same federation code in another league or with a different record_kind
 -- must not be trusted. Restore the poisoned approval after the positive test.
