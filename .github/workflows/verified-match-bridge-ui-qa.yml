@@ -1,0 +1,33 @@
+name: Verified match bridge UI contract QA
+on:
+  push:
+    branches: [feat/20261024-verified-canonical-bridge-stage1]
+    paths:
+      - 'competition-match-bridge.js'
+      - 'app.js'
+      - 'config.js'
+      - 'index.html'
+      - 'tests/verified-match-bridge-ui.test.cjs'
+      - '.github/workflows/verified-match-bridge-ui-qa.yml'
+  pull_request:
+    paths:
+      - 'competition-match-bridge.js'
+      - 'app.js'
+      - 'config.js'
+      - 'index.html'
+      - 'tests/verified-match-bridge-ui.test.cjs'
+      - '.github/workflows/verified-match-bridge-ui-qa.yml'
+jobs:
+  browser-source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify unchanged v2 default, optional v3 and fail-closed old ID adapter
+        run: |
+          node --check app.js
+          node --check competition-match-bridge.js
+          node --test tests/verified-match-bridge-ui.test.cjs
+          node --test tests/competition-context-catalog.test.cjs

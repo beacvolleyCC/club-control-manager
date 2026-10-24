@@ -29,6 +29,10 @@ test('starting player retains bold marker and no-entry is not wrongly labelled a
  assert.ok(!missing.includes('is-subs'));
 });
 test('PWA index and service worker share the new CSS/JS cache version',()=>{
- assert.ok(html.includes('app.js?v=20261020-mrsz-reports-v66'));
- assert.ok(sw.includes("cc-manager-20261020-mrsz-reports-v66"));
+ const version=/app\.js\?v=([^"]+)/.exec(html)?.[1];
+ assert.ok(version,'Manager app must have an explicit cache token');
+ assert.ok(html.includes('styles.css?v='+version));
+ assert.ok(html.includes('competition-match-bridge.js?v='+version));
+ assert.ok(sw.includes('cc-manager-'+version));
+ assert.ok(sw.includes('competition-match-bridge.js'));
 });

@@ -2775,7 +2775,7 @@
 
 
   // Isolated Hunvolley screenshots: not the automatic BRSZ schedule or league source.
-  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[],userMatches:[],canonicalMatches:[],canonicalCoverage:[],canonicalTeamStats:[]};
+  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[],userMatches:[],canonicalMatches:[],canonicalCoverage:[],canonicalTeamStats:[],verifiedLegacyMatchBridge:[]};
   let ccBrszEffectiveMatches_=[];
   // Snapshot-based league selection is independent from BEAC team permissions.
   // Empty value means follow the existing BEAC team context.
@@ -2814,9 +2814,22 @@
     if(ccMrszPhotoState_.loaded||ccMrszPhotoState_.loading)return;
     ccMrszPhotoState_.loading=true;
     try{
-      const [data,sourceMatches,userMatches]=await Promise.all([rpc('cc_manager_competition_mrsz_snapshot_v2'),rpc('cc_manager_competition_source_matches_effective_v1'),rpc('cc_manager_competition_user_schedule_v1').catch(()=>[])]);
+      const ccBridgeApi=typeof window!=='undefined'?window.CCVerifiedMatchBridge:null;
+      const ccBridgeEnabled=typeof window!=='undefined'&&window.CC_MANAGER_CONFIG?.CANONICAL_BRIDGE_V3_ENABLED===true;
+      const [data,sourceMatches,userMatches]=await Promise.all([
+         ccBridgeApi?ccBridgeApi.loadSnapshot(rpc,'manager',ccBridgeEnabled)
+           :rpc('cc_manager_competition_mrsz_snapshot_v2'),
+         rpc('cc_manager_competition_source_matches_effective_v1'),
+         rpc('cc_manager_competition_user_schedule_v1').catch(()=>[])]);
       ccBrszEffectiveMatches_=Array.isArray(sourceMatches)?sourceMatches:[];
-      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[],userMatches:Array.isArray(userMatches)?userMatches:[],canonicalMatches:Array.isArray(data?.canonicalMatches)?data.canonicalMatches:[],canonicalCoverage:Array.isArray(data?.canonicalCoverage)?data.canonicalCoverage:[],canonicalTeamStats:Array.isArray(data?.canonicalTeamStats)?data.canonicalTeamStats:[]};
+      const ccCanonicalRows=Array.isArray(data?.canonicalMatches)?data.canonicalMatches:[];
+      const ccVerifiedLinks=ccBridgeEnabled&&ccBridgeApi
+        ?ccBridgeApi.normalize(data?.verifiedLegacyMatchBridge):[];
+      // No event UUID / RSVP linkage: only annotate exact approved source IDs.
+      const ccVerifiedCanonical=ccVerifiedLinks.length
+        ?ccBridgeApi.annotateCanonical(ccCanonicalRows,ccVerifiedLinks)
+        :ccCanonicalRows;
+      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[],userMatches:Array.isArray(userMatches)?userMatches:[],canonicalMatches:ccVerifiedCanonical,canonicalCoverage:Array.isArray(data?.canonicalCoverage)?data.canonicalCoverage:[],canonicalTeamStats:Array.isArray(data?.canonicalTeamStats)?data.canonicalTeamStats:[],verifiedLegacyMatchBridge:ccVerifiedLinks};
     }catch(err){ccBrszEffectiveMatches_=[];ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
     else if(ccRouteIs_('competition','standings'))renderManagerStandings_();

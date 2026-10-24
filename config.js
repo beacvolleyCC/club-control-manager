@@ -8,6 +8,7 @@ window.CC_MANAGER_CONFIG = Object.freeze({
   DATA_MODE: 'supabase',
   SUPABASE_URL: 'https://snqsxlyhontaepembaic.supabase.co',
   SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_k1tiZDFFUHGu4aO8DbfIiw_YvBH-qPx',
+  CANONICAL_BRIDGE_V3_ENABLED: false, // Source-ready only; v2 is default.
   DEFAULT_SEASON: '2026/27',
   DEFAULT_AREA: 'competition'
 });
