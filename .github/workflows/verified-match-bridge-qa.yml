@@ -64,5 +64,6 @@ jobs:
             test "$(psql -XAt -c 'select count(*) from public.availability')" = 672
             psql -X -v ON_ERROR_STOP=1 -f sql/cc_verified_match_bridge_v1_staged.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/verified-match-bridge-20261024/verify-clean.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/verified-match-bridge-20261024/role-authorization.sql
             echo "CC_VERIFIED_BRIDGE_2DB_PASS=${pass}: 279/672/298 preserved, six test proofs, two approved-only, guarded rollback/reinstall"
           done
