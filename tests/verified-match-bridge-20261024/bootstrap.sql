@@ -143,6 +143,15 @@ OR (SELECT count(*) FROM private.cc_canonical_match_aliases_v1 WHERE source_syst
 THEN RAISE EXCEPTION 'QA_BOOTSTRAP_WRONG_BASELINE'; END IF;
 END $qa$;
 
+
+-- Actual LIVE report schema uses data.matchCode, not data.officialProtocolMatchCode.
+-- This synthetic report intentionally has a non-MRSZ canonical source key
+-- to exercise the secondary evidence lookup instead of the source-key shortcut.
+INSERT INTO public.cc_competition_mrsz_screenshot_v1
+ (source_key,season,competition_label,record_kind,data)
+VALUES ('qa:canonical:44','2026/27','Női Budapest II. osztály – B csoport',
+ 'match',jsonb_build_object('matchCode','2686'));
+
 -- Immutable hashes permit detection of data alteration, not just row count drift.
 CREATE TABLE private.cc_qa_original_fingerprints AS
 SELECT
