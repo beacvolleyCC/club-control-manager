@@ -150,7 +150,7 @@ END $qa$;
 INSERT INTO public.cc_competition_mrsz_screenshot_v1
  (source_key,season,competition_label,record_kind,data)
 VALUES ('qa:canonical:44','2026/27','Női Budapest II. osztály – B csoport',
- 'match',jsonb_build_object('matchCode','2686'));
+ 'match',jsonb_build_object('matchCode','2340'));
 
 -- Immutable hashes permit detection of data alteration, not just row count drift.
 CREATE TABLE private.cc_qa_original_fingerprints AS
