@@ -66,10 +66,13 @@ SELECT legacy_match_id,legacy_source_key,legacy_catalog_class,season,competition
  (raw_payload->>'officialFixtureId') AS original_federation_fixture_id,
  candidate_count,canonical_match_id,canonical_source_key,
  canonical_kickoff_local,canonical_status,federation_match_code,
+ (legacy_match_id=canonical_match_id) AS already_canonical_same_id,
  CASE WHEN home_source_team_id=away_source_team_id
     THEN 'BLOCK_SELF_MATCH'
   WHEN needs_review IS TRUE THEN 'BLOCK_RAW_REVIEW'
+  WHEN legacy_match_id=canonical_match_id THEN 'ALREADY_CANONICAL_SAME_ID'
   WHEN competition_label IS NULL THEN 'BLOCK_UNKNOWN_DIVISION'
+  WHEN legacy_catalog_class<>'BRSZ imported fixture' THEN 'REVIEW_EXISTING_LEGACY_MATCH_CLASS'
   WHEN candidate_count=0 THEN 'REVIEW_NO_SCOPED_MATCH'
   WHEN candidate_count>1 THEN 'REVIEW_MULTIPLE_SCOPED_MATCHES'
   WHEN starts_at IS DISTINCT FROM
