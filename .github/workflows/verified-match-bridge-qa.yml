@@ -67,3 +67,6 @@ jobs:
             psql -X -v ON_ERROR_STOP=1 -f tests/verified-match-bridge-20261024/role-authorization.sql
             echo "CC_VERIFIED_BRIDGE_2DB_PASS=${pass}: 279/672/298 preserved, six test proofs, two approved-only, guarded rollback/reinstall"
           done
+
+      - name: Enforce archived review queue cannot be treated as approval
+        run: node --test tests/verified-match-bridge-20261024/review-manifest.test.cjs
