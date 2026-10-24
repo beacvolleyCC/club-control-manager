@@ -1,0 +1,68 @@
+name: Verified canonical match bridge isolated QA
+on:
+  push:
+    branches: [feat/20261024-verified-canonical-bridge-stage1]
+    paths:
+      - 'sql/cc_verified_match_bridge_v1_staged.sql'
+      - 'sql/cc_verified_match_bridge_v1_rollback_staged.sql'
+      - 'tests/verified-match-bridge-20261024/**'
+      - '.github/workflows/verified-match-bridge-qa.yml'
+  pull_request:
+    paths:
+      - 'sql/cc_verified_match_bridge_v1_staged.sql'
+      - 'sql/cc_verified_match_bridge_v1_rollback_staged.sql'
+      - 'tests/verified-match-bridge-20261024/**'
+      - '.github/workflows/verified-match-bridge-qa.yml'
+
+jobs:
+  two-disposable-postgres-17:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: cc_verified_bridge_test_only
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: cc_verified_bridge_test_only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Two clean databases, negative proof tests, protected rollback and reapply
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pass in 1 2; do
+            export PGDATABASE="cc_verified_bridge_pass_${pass}"
+            createdb "$PGDATABASE"
+            psql -X -v ON_ERROR_STOP=1 -f tests/verified-match-bridge-20261024/bootstrap.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_verified_match_bridge_v1_staged.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/verified-match-bridge-20261024/verify-clean.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/verified-match-bridge-20261024/approval-cases.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/verified-match-bridge-20261024/verify-approval-and-drift.sql
+            # Refuse rollback if two genuine and four intentionally poisoned
+            # approved rows still exist, never lose review evidence silently.
+            if psql -X -v ON_ERROR_STOP=1 -f sql/cc_verified_match_bridge_v1_rollback_staged.sql > /tmp/cc_bridge_rollback.out 2>&1; then
+              echo "ERROR: rollback discarded approved data"; exit 1
+            fi
+            grep -q 'CC_BRIDGE_ROLLBACK_BLOCKED_NONEMPTY_APPROVALS' /tmp/cc_bridge_rollback.out
+            test "$(psql -XAt -c 'select count(*) from private.cc_verified_match_bridge_v1')" = 6
+            # Cleanup of approval cases is TEST ONLY, in disposable database.
+            psql -X -v ON_ERROR_STOP=1 -c 'DELETE FROM private.cc_verified_match_bridge_v1'
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_verified_match_bridge_v1_rollback_staged.sql
+            test "$(psql -XAt -c "SELECT count(*) FROM pg_proc WHERE proname='cc_manager_competition_mrsz_snapshot_v3'")" = 0
+            test "$(psql -XAt -c 'select count(*) from public.events')" = 279
+            test "$(psql -XAt -c 'select count(*) from public.availability')" = 672
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_verified_match_bridge_v1_staged.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/verified-match-bridge-20261024/verify-clean.sql
+            echo "CC_VERIFIED_BRIDGE_2DB_PASS=${pass}: 279/672/298 preserved, six test proofs, two approved-only, guarded rollback/reinstall"
+          done
