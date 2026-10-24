@@ -4,7 +4,7 @@
 -- Dates are independently checked as Europe/Budapest local clock time.
 WITH legacy AS (
  SELECT a.match_id AS legacy_match_id,a.source_key AS legacy_source_key,
-   x.source_match_key,x.source_team_id,x.season,x.home_source_team_id,
+   x.source_match_key,x.source_team_id,x.season,m.competition_label AS legacy_catalog_class,x.home_source_team_id,
    x.away_source_team_id,x.starts_at,x.source_status,x.needs_review,
    x.source_url,x.source_hash,x.raw_payload,
    CASE x.source_team_id
@@ -15,7 +15,8 @@ WITH legacy AS (
  FROM private.cc_canonical_match_aliases_v1 a
  JOIN private.cc_canonical_matches_v1 m
    ON m.id=a.match_id AND m.season='2026/27'
-   AND m.competition_label='BRSZ imported fixture'
+   -- Do not lose BRSZ aliases already attached to another official class.
+   -- Their collision must be exposed for manual review, not silently filtered.
  JOIN public.competition_source_matches x
    ON x.source_match_key=a.source_key
    AND x.source='brsz' AND x.season='2026/27'
@@ -57,7 +58,7 @@ review AS (
    AND r.competition_label=l.competition_label
    AND r.record_kind='match'
 )
-SELECT legacy_match_id,legacy_source_key,season,competition_label,
+SELECT legacy_match_id,legacy_source_key,legacy_catalog_class,season,competition_label,
  source_team_id,home_source_team_id,away_source_team_id,
  starts_at AT TIME ZONE 'Europe/Budapest' AS legacy_kickoff_local,
  source_status,needs_review,source_url,
