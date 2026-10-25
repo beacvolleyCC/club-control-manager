@@ -27,7 +27,7 @@ vm.createContext(ctx);
 vm.runInContext(app.slice(a,b)+'\nthis.qaHtml=ccMrszProtocolHtml_;',ctx);
 // The real Manager match detail is wired to mouse/touch click plus keyboard.
 const ui={opened:0,errors:[],cards:[],body:{innerHTML:''},title:{textContent:''},eyebrow:{textContent:''},
- dialog:{handlers:{},classList:{add(){},remove(){}},addEventListener(type,fn){this.handlers[type]=fn}}};
+ sheet:{scrollTop:45},dialog:{scrollTop:15,handlers:{},classList:{add(){},remove(){}},querySelector(selector){return selector==='.entity-dialog-card'?ui.sheet:null},addEventListener(type,fn){this.handlers[type]=fn}}};
 const widgets={'#entityDialog':ui.dialog,'#entityDialogBody':ui.body,
  '#entityDialogTitle':ui.title,'#entityDialogEyebrow':ui.eyebrow};
 ctx.$=(selector)=>widgets[selector]||null;
@@ -112,8 +112,11 @@ test('Manager touch/click and keyboard report opens the right in-app PDF, suppre
  assert.equal(typeof handlers.keydown,'function');
  let before=ui.opened;
  const normal={closest:()=>null},nested={closest:()=>({tagName:'BUTTON'})};
+ ui.sheet.scrollTop=98;ui.dialog.scrollTop=36;
  handlers.click({target:normal});
  assert.equal(ui.opened,before+1);
+ assert.equal(ui.sheet.scrollTop,0,'Manager report should always open at top');
+ assert.equal(ui.dialog.scrollTop,0);
  assert.ok(ui.body.innerHTML.includes('Mérkőzéskód: 2686'));
  assert.ok(ui.title.textContent.includes('MTK Budapest'));
  before=ui.opened;
