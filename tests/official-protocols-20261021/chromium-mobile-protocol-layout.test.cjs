@@ -32,6 +32,8 @@ function markup(c){
  const js=fs.readFileSync(c.directory+'/app.js','utf8');
  const html=fs.readFileSync(c.directory+'/index.html','utf8');
  const context={
+  // Player protocol renderer excerpt binds its close button at module scope.
+  document:{getElementById:()=>null},
   text:v=>String(v??'').trim(),
   esc:v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;'),
