@@ -3047,6 +3047,10 @@
     if($('#entityDialogEyebrow'))$('#entityDialogEyebrow').textContent='VERSENYSPORT · JEGYZŐKÖNYV';
     title.textContent=text(found[0].homeName)+' – '+text(found[0].awayName);
     body.innerHTML=ccMrszProtocolHtml_(found[0]);
+    // Reset stale scroll when reopening lengthy official match reports.
+    const protocolSheet=d.querySelector('.entity-dialog-card');
+    if(protocolSheet)protocolSheet.scrollTop=0;
+    d.scrollTop=0;
     d.classList.add('cc-protocol-dialog');
     d.addEventListener('close',()=>d.classList.remove('cc-protocol-dialog'),{once:true});
     ccOpenDialogStable_(d);
