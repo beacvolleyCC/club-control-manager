@@ -69,7 +69,7 @@ this.qaGetScope=()=>ccLeagueMatchScope_;
 `,matchContext);
 test('all-three-team Manager match page starts on BEAC but can show ALL fixtures',()=>{
  const first=matchContext.qaPage();
- assert.equal((first.match(/data-league=/g)||[]).length,4,'Both men's groups and both women's BEAC groups remain available');
+ assert.equal((first.match(/data-league=/g)||[]).length,4,'Four league contexts remain available for BEAC teams');
  assert.ok(!first.includes('data-scope="all"'));
  assert.equal(matchContext.qaGetScope(),'beac');
  matchContext.qaScope('all');
