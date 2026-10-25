@@ -40,7 +40,7 @@ const openBegin=app.indexOf('  function ccOpenMrszProtocol_(');
 const openEnd=app.indexOf('  // A saved federation/screenshot key is mandatory.',openBegin);
 assert.ok(openBegin>=0&&openEnd>openBegin,'Manager click/keyboard binder missing');
 vm.runInContext(app.slice(openBegin,openEnd)+
- '\\nthis.qaOpen=ccOpenMrszProtocol_;this.qaBind=ccBindMrszProtocol_;',ctx);
+ '\nthis.qaOpen=ccOpenMrszProtocol_;this.qaBind=ccBindMrszProtocol_;',ctx);
 const expected=[
  {code:'2686',league:'Női Budapest I. osztály',source:'20261001:fixture:39',
   uuid:'04eaceee-57e2-7563-a618-beb933c0ffc0',home:'MTK Budapest',away:'Panoráma SE',
