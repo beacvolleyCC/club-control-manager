@@ -25,6 +25,22 @@ const ctx={
 };
 vm.createContext(ctx);
 vm.runInContext(app.slice(a,b)+'\nthis.qaHtml=ccMrszProtocolHtml_;',ctx);
+// The real Manager match detail is wired to mouse/touch click plus keyboard.
+const ui={opened:0,errors:[],cards:[],body:{innerHTML:''},title:{textContent:''},eyebrow:{textContent:''},
+ dialog:{handlers:{},classList:{add(){},remove(){}},addEventListener(type,fn){this.handlers[type]=fn}}};
+const widgets={'#entityDialog':ui.dialog,'#entityDialogBody':ui.body,
+ '#entityDialogTitle':ui.title,'#entityDialogEyebrow':ui.eyebrow};
+ctx.$=(selector)=>widgets[selector]||null;
+ctx.$$=(selector)=>selector==='#viewContent [data-cc-mrsz-protocol]'?ui.cards:[];
+ctx.ccMrszPhotoState_={canonicalMatches:projected,matches:[]};
+ctx.ccOpenDialogStable_=()=>{ui.opened++};
+ctx.status=(text,level)=>{ui.errors.push({text,level})};
+ctx.ccBindSourceMatchEdit_=()=>{};
+const openBegin=app.indexOf('  function ccOpenMrszProtocol_(');
+const openEnd=app.indexOf('  // A saved federation/screenshot key is mandatory.',openBegin);
+assert.ok(openBegin>=0&&openEnd>openBegin,'Manager click/keyboard binder missing');
+vm.runInContext(app.slice(openBegin,openEnd)+
+ '\\nthis.qaOpen=ccOpenMrszProtocol_;this.qaBind=ccBindMrszProtocol_;',ctx);
 const expected=[
  {code:'2686',league:'Női Budapest I. osztály',source:'20261001:fixture:39',
   uuid:'04eaceee-57e2-7563-a618-beb933c0ffc0',home:'MTK Budapest',away:'Panoráma SE',
@@ -82,4 +98,54 @@ test('No cross-league score leakage or duplicate historical fixture',()=>{
  assert.notEqual(byCode.get('2686').matchId,byCode.get('2700').matchId);
  assert.ok(projected.every(m=>!String(m.sourceKey).startsWith('mrsz:2026/27:protocol:')));
  assert.equal(projected.reduce((sum,m)=>sum+m.protocol.teams.reduce((n,t)=>n+t.players.length,0),0),38);
+});
+
+test('Manager touch/click and keyboard report opens the right in-app PDF, suppresses nested edit clicks',()=>{
+ const handlers={};
+ const card={
+  dataset:{ccMrszProtocol:'2686',ccMrszProtocolLeague:'Női Budapest I. osztály'},
+  addEventListener(type,fn){handlers[type]=fn}
+ };
+ ui.cards=[card];
+ ctx.qaBind();
+ assert.equal(typeof handlers.click,'function');
+ assert.equal(typeof handlers.keydown,'function');
+ let before=ui.opened;
+ const normal={closest:()=>null},nested={closest:()=>({tagName:'BUTTON'})};
+ handlers.click({target:normal});
+ assert.equal(ui.opened,before+1);
+ assert.ok(ui.body.innerHTML.includes('Mérkőzéskód: 2686'));
+ assert.ok(ui.title.textContent.includes('MTK Budapest'));
+ before=ui.opened;
+ handlers.click({target:nested});
+ assert.equal(ui.opened,before,'nested edit/button controls do not open a protocol');
+ let prevented=0;
+ for(const key of ['Enter',' ']){
+  handlers.keydown({key,target:normal,preventDefault(){prevented++}});
+ }
+ assert.equal(ui.opened,before+2);
+ assert.equal(prevented,2);
+ handlers.keydown({key:'Escape',target:normal,preventDefault(){prevented++}});
+ handlers.keydown({key:'Enter',target:nested,preventDefault(){prevented++}});
+ assert.equal(ui.opened,before+2);
+ assert.equal(prevented,2);
+ ui.cards=[];
+});
+test('Manager report refuses wrong league, duplicate match-code collision and absent canonical result',()=>{
+ const before=ui.opened;
+ ctx.qaOpen('2686','Női Budapest II. osztály – B csoport');
+ assert.equal(ui.opened,before);
+ const double={...projected[0],matchId:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'};
+ ctx.ccMrszPhotoState_.canonicalMatches.push(double);
+ ctx.qaOpen('2686','Női Budapest I. osztály');
+ assert.equal(ui.opened,before,'ambiguous canonical match number must not silently select a row');
+ ctx.ccMrszPhotoState_.canonicalMatches.pop();
+ const existing=ctx.ccMrszPhotoState_.canonicalMatches;
+ try{
+  ctx.ccMrszPhotoState_.canonicalMatches=[];
+  ctx.ccMrszPhotoState_.matches=[];
+  ctx.qaOpen('2686','Női Budapest I. osztály');
+  assert.equal(ui.opened,before,'a schedule without protocol data is not a report');
+ }finally{ctx.ccMrszPhotoState_.canonicalMatches=existing}
+ assert.ok(ui.errors.length>=3);
 });
