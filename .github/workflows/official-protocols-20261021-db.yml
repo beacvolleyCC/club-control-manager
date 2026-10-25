@@ -65,6 +65,9 @@ jobs:
             psql -XAt -c "select coalesce(jsonb_agg(x.v),'[]'::jsonb) from jsonb_array_elements(private.cc_competition_canonical_payload_v1()) x(v) where x.v->>'matchCode' in ('2686','2700')" > "$CC_PROTOCOL_CANONICAL_JSON_FILE"
             node --test tests/official-protocols-20261021/manager-render-projected-protocol.test.cjs
             CC_MANAGER_APP_FILE=qa-manager/app.js node --test tests/official-protocols-20261021/manager-render-projected-protocol.test.cjs
+            # Seven synthetic JWT identities exercise the actual SQL role switch
+            # before any further migration/rollback; no production credentials.
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/authenticated-protocol-access.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
             psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
