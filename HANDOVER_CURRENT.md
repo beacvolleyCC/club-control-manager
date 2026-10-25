@@ -2,7 +2,7 @@
 
 **Elsőként ezt olvasd:** [docs/handover/HANDOVER_20261025_CC_CURRENT.md](docs/handover/HANDOVER_20261025_CC_CURRENT.md). **Folytatási kulcs:** `CC-FOLYTATÁS`.
 
-A legfrissebb Manager #74/#76, Player #28, Supabase-jogosultsági #77 fejlesztéseket, a draft PR-eket és a kételkülönített PostgreSQL-tesztjeiket az új átadás tartalmazza. Az alábbi, 2026.10.22-i és korábbi részek **történeti dokumentációk**, nem a 2026.10.25-i PR- vagy éles adatbázisállapotot írják le.
+A legfrissebb Manager #74/#76, Player #28, Supabase-jogosultsági #77 fejlesztéseket, a draft PR-eket és a két elkülönített PostgreSQL-tesztjeiket az új átadás tartalmazza. Az alábbi, 2026.10.22-i és korábbi részek **történeti dokumentációk**, nem a 2026.10.25-i PR- vagy éles adatbázisállapotot írják le.
 
 **Fontos felhasználói döntés:** a korábban belinkelt 2026/27-es menetrend végleges. A 41 régi BRSZ alias egyeztetése nem akadálya a meccsmodul megjelenítésének. Nem történt új PR merge, élesítés vagy LIVE Supabase-írás. Valódi bejelentkezett iPhone/Manager/Player QA és külön release-engedély szükséges.
 
