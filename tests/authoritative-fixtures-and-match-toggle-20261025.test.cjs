@@ -86,3 +86,11 @@ test('match page never passes forcing onlyBeac:true to clickable filter panels',
  assert.ok(!segment.includes('ccLeagueMatchScope_=\'beac\';'));
  assert.match(app,/ccLeagueMatchScope_=button\.dataset\.leagueMatchScope==='all'\?'all':'beac';\s*renderCompetitionMatchCards_\(\)/);
 });
+
+
+test('Manager official report keeps mobile close/header sticky and roster swipe-enabled',()=>{
+ const css=fs.readFileSync('styles.css','utf8');
+ assert.match(css,/#entityDialog\.cc-protocol-dialog \.entity-dialog-card>\.dialog-head\s*\{\s*position:sticky;/);
+ assert.match(css,/#entityDialog\.cc-protocol-dialog \.cc-protocol-table-scroll\s*\{[\s\S]*?overflow-x:auto;/);
+ assert.match(css,/#entityDialog\.cc-protocol-dialog \.cc-protocol-team table\s*\{min-width:370px\}/);
+});
