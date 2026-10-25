@@ -37,13 +37,13 @@ jobs:
       # Pinned to the reviewed Manager #76 branch head; update when #76 changes.
       - uses: actions/checkout@v4
         with:
-          ref: c967d43f87495e789a7c2acbc299d40dbc312486
+          ref: b97ed731be1eb51f40f06eb06cb2bc2eeea9417c
           path: qa-manager
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
           repository: beacvolleyCC/player_application
-          ref: db720c9386a5730cc24ed7c66be5faff9a2bde18
+          ref: 55eb674f22104cdbc84768c71a4040396ac44cd5
           path: qa-player
           persist-credentials: false
       - uses: actions/setup-node@v4
