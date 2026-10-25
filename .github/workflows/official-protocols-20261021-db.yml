@@ -37,13 +37,13 @@ jobs:
       # Pinned to the reviewed Manager #76 branch head; update when #76 changes.
       - uses: actions/checkout@v4
         with:
-          ref: 2833edbfb747a00f0393d6530bf49f5051bcb104
+          ref: c967d43f87495e789a7c2acbc299d40dbc312486
           path: qa-manager
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
           repository: beacvolleyCC/player_application
-          ref: ba57d94b707710a302e97c0bd97fbca6b1b51fd8
+          ref: db720c9386a5730cc24ed7c66be5faff9a2bde18
           path: qa-player
           persist-credentials: false
       - name: Check combined Manager #76 fixture code syntax and scope UX
