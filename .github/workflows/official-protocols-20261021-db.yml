@@ -46,6 +46,13 @@ jobs:
           ref: db720c9386a5730cc24ed7c66be5faff9a2bde18
           path: qa-player
           persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Chromium automation driver (runner-installed Chrome)
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright-core@1.56.1
+          (command -v google-chrome || command -v google-chrome-stable) || exit 1
       - name: Check combined Manager #76 fixture code syntax and scope UX
         run: |
           node --check qa-manager/app.js
@@ -72,6 +79,7 @@ jobs:
             node --test tests/official-protocols-20261021/manager-render-projected-protocol.test.cjs
             CC_MANAGER_APP_FILE=qa-manager/app.js node --test tests/official-protocols-20261021/manager-render-projected-protocol.test.cjs
             CC_PLAYER_APP_FILE=qa-player/app.js node --test tests/official-protocols-20261021/player-render-pg17-canonical.test.cjs
+            node --test tests/official-protocols-20261021/chromium-mobile-protocol-layout.test.cjs
             # Seven synthetic JWT identities exercise the actual SQL role switch
             # before any further migration/rollback; no production credentials.
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/authenticated-protocol-access.sql
