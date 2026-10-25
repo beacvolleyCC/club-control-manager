@@ -17,7 +17,7 @@ function section(start,end){
 }
 const htmlEscape=x=>String(x??'').replace(/&/g,'&amp;')
  .replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const view={body:{innerHTML:''},dialog:{},opened:0,closed:0,
+const view={body:{innerHTML:''},sheet:{scrollTop:74},dialog:{scrollTop:17,querySelector(selector){return selector==='.player-protocol-dialog-card'?view.sheet:null}},opened:0,closed:0,
  closeButton:{handlers:{},addEventListener(k,fn){this.handlers[k]=fn}},cards:[]};
 const ctx={
  URL,Intl,Date,escapeHtml_:htmlEscape,
@@ -84,10 +84,13 @@ for(const e of expected)test('Player PR28 consumes PG17 protocol '+e.code,()=>{
  assert.ok(details.includes('aria-label="Kapitány"'));
  assert.ok(details.includes('aria-label="Libero"'));
  assert.ok(details.includes('aria-label="Csere"'));
+ view.sheet.scrollTop=71;view.dialog.scrollTop=9;
  const before=view.opened;
  ctx.qaOpen(e.code,e.league);
  assert.equal(view.opened,before+1);
  assert.ok(view.body.innerHTML.includes('Meccskód: '+e.code));
+ assert.equal(view.sheet.scrollTop,0,'Player dialog reopens at top');
+ assert.equal(view.dialog.scrollTop,0);
 });
 test('Player does not open report for another league or ambiguous match code',()=>{
  const before=view.opened;
