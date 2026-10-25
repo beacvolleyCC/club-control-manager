@@ -23,3 +23,5 @@ jobs:
         run: node --check app.js
       - name: Authoritative schedule and functional BEAC/ALL scope
         run: node --test tests/authoritative-fixtures-and-match-toggle-20261025.test.cjs
+      - name: Existing league panels, scoreboard and official result regressions
+        run: node --test tests/league-matches-page.test.cjs tests/league-context-ui.test.cjs tests/scoreboard-match-cards.test.cjs tests/manager-verified-official-results-20261020.test.cjs
