@@ -69,7 +69,9 @@ test('Standings introduction and empty state never imply live automatic data upd
  const from=app.indexOf('  function renderManagerStandings_()');
  const end=app.indexOf('  function msPositionDelta_(',from);
  const snippet=app.slice(from,end>from?end:from+12000);
- assert.ok(snippet.includes("const meta=showPhoto?[group,'Frissítve: 2026.10.14.']"));
+ assert.ok(snippet.includes("const meta=canonicalPartial?'Részleges eredményadatok · '"));
+ assert.ok(snippet.includes("showPhoto?[group,'Frissítve: 2026.10.14.']"));
+ assert.ok(snippet.includes('Nem hivatalos tabella'));
  assert.ok(snippet.includes('ccMrszCoverageLabel_(null)'));
  assert.ok(snippet.includes('Még nincs tabellaadat'));
  assert.ok(!snippet.includes('Aktuális bajnoki állás'));
