@@ -68,7 +68,8 @@ test('main standings render does not create a second table',()=>{
  const st=js.indexOf('  function renderManagerStandings_()');
  const end=js.indexOf('\n  function ',st+10);
  const render=js.slice(st,end);
- assert.ok(render.includes('const rawRows=showPhoto?ccStandingsPhotoTeamRows_'));
+ assert.ok(render.includes('const rawRows=canonicalPartial?canonicalRows:showPhoto?ccStandingsPhotoTeamRows_'));
+ assert.ok(render.includes('const rows=canonicalPartial||showPhoto||hasRealRank?rawRows:'));
  assert.ok(!render.includes('ccMrszMainPhotoTableHtml_('));
  assert.ok(!render.includes('.outerHTML=html'));
  assert.ok(render.includes('ccMrszLeagueFixturePanelHtml_'));
