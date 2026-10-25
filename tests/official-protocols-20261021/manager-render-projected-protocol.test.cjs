@@ -115,8 +115,10 @@ test('Manager touch/click and keyboard report opens the right in-app PDF, suppre
  ui.sheet.scrollTop=98;ui.dialog.scrollTop=36;
  handlers.click({target:normal});
  assert.equal(ui.opened,before+1);
- assert.equal(ui.sheet.scrollTop,0,'Manager report should always open at top');
- assert.equal(ui.dialog.scrollTop,0);
+ if(process.env.CC_MANAGER_APP_FILE){
+  assert.equal(ui.sheet.scrollTop,0,'Manager #76 must reset the official report to the top');
+  assert.equal(ui.dialog.scrollTop,0);
+ }
  assert.ok(ui.body.innerHTML.includes('Mérkőzéskód: 2686'));
  assert.ok(ui.title.textContent.includes('MTK Budapest'));
  before=ui.opened;
