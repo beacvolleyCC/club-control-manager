@@ -12,7 +12,7 @@ const projected=JSON.parse(fs.readFileSync(path,'utf8'));
 assert.equal(projected.length,2,'exactly two new protocol overlays; no duplicates');
 const byCode=new Map(projected.map(x=>[String(x.matchCode),x]));
 assert.deepEqual([...byCode.keys()].sort(),['2686','2700']);
-const app=fs.readFileSync('app.js','utf8');
+const app=fs.readFileSync(process.env.CC_MANAGER_APP_FILE||'app.js','utf8');
 const a=app.indexOf('  function ccMrszProfileUrl_(');
 const b=app.indexOf('  function ccOpenMrszProtocol_(',a);
 assert.ok(a>=0&&b>a,'Manager user-facing protocol renderer must exist');
