@@ -90,7 +90,9 @@ CREATE OR REPLACE FUNCTION private.cc_competition_canonical_payload_v1()
 AS $function$
 select coalesce(jsonb_agg(jsonb_build_object(
 'matchId',m.match_id,'sourceKey',m.source_key,'season',m.season,
-'competitionLabel',m.competition_label,'homeName',m.home_name,'awayName',m.away_name,
+'competitionLabel',m.competition_label,
+'homeName',coalesce(s.data->'officialProtocolEvidence'->>'homeName',m.home_name),
+'awayName',coalesce(s.data->'officialProtocolEvidence'->>'awayName',m.away_name),
 'startsAt',case when m.kickoff_local is null then null else to_char(m.kickoff_local,'YYYY-MM-DD"T"HH24:MI:SS') end,
 'homeSets',m.home_sets,'awaySets',m.away_sets,'setScores',m.set_scores,
 'protocolUrl',m.protocol_url,'matchCode',coalesce(s.data->>'matchCode',s.data->>'officialProtocolMatchCode'),'rosters',s.data->'rosters',
@@ -99,7 +101,7 @@ select coalesce(jsonb_agg(jsonb_build_object(
      then pr.data->'protocol'||jsonb_build_object('sourceUrl',m.protocol_url) else null end,
    case when jsonb_typeof(s.data->'rosters'->'home')='array' and jsonb_typeof(s.data->'rosters'->'away')='array'
      then jsonb_build_object('sourceUrl',m.protocol_url,'teams',jsonb_build_array(
-       jsonb_build_object('name',m.home_name,'players',coalesce(
+       jsonb_build_object('name',coalesce(s.data->'officialProtocolEvidence'->>'homeName',m.home_name),'players',coalesce(
          (select jsonb_agg(jsonb_build_object('name',pl.v->>'name','number',pl.v->>'jersey',
           'code',pl.v->>'registrationId','captain',pl.v->'captain','libero',pl.v->>'libero','designation',case when upper(coalesce(pl.v->>'designation',''))='CS' then 'CS' else pl.v->>'designation' end) order by pl.ord)
           from jsonb_array_elements(s.data->'rosters'->'home') with ordinality pl(v,ord)),'[]'::jsonb),
@@ -110,7 +112,7 @@ select coalesce(jsonb_agg(jsonb_build_object(
              when jsonb_typeof(s.data->'officialProtocolEvidence'->'officials'->'home')='array'
              then s.data->'officialProtocolEvidence'->'officials'->'home'
              else '[]'::jsonb end) with ordinality o(v,ord)),'[]'::jsonb)),
-       jsonb_build_object('name',m.away_name,'players',coalesce(
+       jsonb_build_object('name',coalesce(s.data->'officialProtocolEvidence'->>'awayName',m.away_name),'players',coalesce(
          (select jsonb_agg(jsonb_build_object('name',pl.v->>'name','number',pl.v->>'jersey',
           'code',pl.v->>'registrationId','captain',pl.v->'captain','libero',pl.v->>'libero','designation',case when upper(coalesce(pl.v->>'designation',''))='CS' then 'CS' else pl.v->>'designation' end) order by pl.ord)
           from jsonb_array_elements(s.data->'rosters'->'away') with ordinality pl(v,ord)),'[]'::jsonb),
