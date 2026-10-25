@@ -1,0 +1,61 @@
+name: Supabase public Data API grants and RLS QA
+on:
+  push:
+    branches: [qa/20261025-supabase-explicit-grant-guard]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/r1-attendance/**'
+      - 'sql/**'
+      - 'scripts/check-public-table-permissions.cjs'
+      - 'tests/supabase-public-grants-20261025.*'
+      - '.github/workflows/supabase-public-data-api-grants.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/r1-attendance/**'
+      - 'sql/**'
+      - 'scripts/check-public-table-permissions.cjs'
+      - 'tests/supabase-public-grants-20261025.*'
+      - '.github/workflows/supabase-public-data-api-grants.yml'
+jobs:
+  explicit-grants-and-role-isolation:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: cc_grant_qa_only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: cc_grant_qa_only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check all tracked public CREATE TABLE statements, explicit grants and RLS
+        run: |
+          node --check scripts/check-public-table-permissions.cjs
+          node scripts/check-public-table-permissions.cjs
+          node --test tests/supabase-public-grants-20261025.test.cjs
+      - name: Two independent disposable Postgres 17 databases with post-cutoff permissions
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pass in 1 2; do
+            export PGDATABASE="cc_data_api_grant_test_$pass"
+            createdb "$PGDATABASE"
+            psql -X -v ON_ERROR_STOP=1 -f tests/supabase-public-grants-20261025.sql
+            echo "CC_OCTOBER_30_PG17_PASS=$pass: fresh public tables denied by default; auth RLS isolated"
+          done
