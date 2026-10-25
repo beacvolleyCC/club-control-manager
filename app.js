@@ -3365,7 +3365,7 @@
     return '';
   }
 
-  let ccLeagueMatchScope_='all';
+  let ccLeagueMatchScope_='beac'; // Default to BEAC, but allow switching to every league fixture.
   let ccMatchesAuditOpen_=false;
   let ccMrszAuditType_='all';
   let ccMrszAuditQuery_='';
@@ -3659,14 +3659,13 @@
     const groups=allTeams
       ?['Női Budapest I. osztály','Női Budapest II. osztály – B csoport','Férfi Budapest I. osztály – B csoport','Férfi Budapest I. osztály – A csoport']
       :[group];
-    const oldScope=ccLeagueMatchScope_;
-    if(allTeams)ccLeagueMatchScope_='beac';
-    try{
-      return '<section class="cc-match-league-context">'
-        +(allTeams?'':('<div class="cc-matches-league-picker">'+ccLeagueContextSelectHtml_(group)+'</div>'))
-        +groups.map(league=>ccMrszLeagueFixturePanelHtml_(league,[],{onlyBeac:true})).join('')
-        +'</section>';
-    }finally{ccLeagueMatchScope_=oldScope}
+    // The selected scope is persistent for the match page. Do not override it
+    // while rendering all three BEAC contexts: doing so left the "Összes"
+    // control visually clickable but functionally stuck on "BEAC".
+    return '<section class="cc-match-league-context">'
+      +(allTeams?'':('<div class="cc-matches-league-picker">'+ccLeagueContextSelectHtml_(group)+'</div>'))
+      +groups.map(league=>ccMrszLeagueFixturePanelHtml_(league)).join('')
+      +'</section>';
   }
 
   function renderCompetitionMatchCards_(){if(!ccRouteIs_('competition','matches'))return;
