@@ -135,7 +135,7 @@ test('Manager report refuses wrong league, duplicate match-code collision and ab
  const before=ui.opened;
  ctx.qaOpen('2686','Női Budapest II. osztály – B csoport');
  assert.equal(ui.opened,before);
- const double={...projected[0],matchId:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'};
+ const double={...byCode.get('2686'),matchId:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'};
  ctx.ccMrszPhotoState_.canonicalMatches.push(double);
  ctx.qaOpen('2686','Női Budapest I. osztály');
  assert.equal(ui.opened,before,'ambiguous canonical match number must not silently select a row');
