@@ -1,0 +1,25 @@
+name: Authoritative canonical fixtures Manager UX QA
+on:
+  push:
+    branches: [qa/20261025-authoritative-match-display]
+    paths:
+      - 'app.js'
+      - 'tests/authoritative-fixtures-and-match-toggle-20261025.test.cjs'
+      - '.github/workflows/authoritative-fixtures-20261025.yml'
+  pull_request:
+    paths:
+      - 'app.js'
+      - 'tests/authoritative-fixtures-and-match-toggle-20261025.test.cjs'
+      - '.github/workflows/authoritative-fixtures-20261025.yml'
+jobs:
+  user-confirmed-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check app.js
+      - name: Authoritative schedule and functional BEAC/ALL scope
+        run: node --test tests/authoritative-fixtures-and-match-toggle-20261025.test.cjs
