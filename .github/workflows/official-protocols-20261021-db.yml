@@ -40,6 +40,12 @@ jobs:
           ref: 2833edbfb747a00f0393d6530bf49f5051bcb104
           path: qa-manager
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: beacvolleyCC/player_application
+          ref: ba57d94b707710a302e97c0bd97fbca6b1b51fd8
+          path: qa-player
+          persist-credentials: false
       - name: Check combined Manager #76 fixture code syntax and scope UX
         run: |
           node --check qa-manager/app.js
@@ -65,6 +71,7 @@ jobs:
             psql -XAt -c "select coalesce(jsonb_agg(x.v),'[]'::jsonb) from jsonb_array_elements(private.cc_competition_canonical_payload_v1()) x(v) where x.v->>'matchCode' in ('2686','2700')" > "$CC_PROTOCOL_CANONICAL_JSON_FILE"
             node --test tests/official-protocols-20261021/manager-render-projected-protocol.test.cjs
             CC_MANAGER_APP_FILE=qa-manager/app.js node --test tests/official-protocols-20261021/manager-render-projected-protocol.test.cjs
+            CC_PLAYER_APP_FILE=qa-player/app.js node --test tests/official-protocols-20261021/player-render-pg17-canonical.test.cjs
             # Seven synthetic JWT identities exercise the actual SQL role switch
             # before any further migration/rollback; no production credentials.
             psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/authenticated-protocol-access.sql
