@@ -1,0 +1,63 @@
+name: Supabase trigger EXECUTE privilege least-privilege QA
+on:
+  push:
+    branches: [security/20261026-trigger-execute-least-privilege]
+  pull_request:
+    paths:
+      - 'sql/cc_security_definer_trigger_acl_hardening_20261026.sql'
+      - 'sql/cc_security_definer_anon_readonly_audit_20261026.sql'
+      - 'tests/security-definer-acl-*.sql'
+      - '.github/workflows/security-definer-acl-20261026.yml'
+  workflow_dispatch:
+jobs:
+  pg17-acl:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: cc_disposable_only
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: cc_disposable_only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Two independent PostgreSQL 17 positive checks, including active triggers
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in 1 2; do
+            createdb "cc_acl_pass_${i}"
+            export PGDATABASE="cc_acl_pass_${i}"
+            psql -X -v ON_ERROR_STOP=1 -f tests/security-definer-acl-fixture-20261026.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_security_definer_anon_readonly_audit_20261026.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_security_definer_trigger_acl_hardening_20261026.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/security-definer-acl-verify-20261026.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/cc_security_definer_trigger_acl_hardening_20261026.sql
+            echo "PASS: independent ACL check ${i}, trigger functionality, idempotency"
+          done
+      - name: Drift without attached trigger must fail closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          createdb cc_acl_invalid
+          export PGDATABASE=cc_acl_invalid
+          psql -X -v ON_ERROR_STOP=1 -f tests/security-definer-acl-fixture-20261026.sql
+          psql -X -v ON_ERROR_STOP=1 -c 'DROP TRIGGER cc_history_insert ON public.competition_source_standings'
+          if psql -X -v ON_ERROR_STOP=1 -f sql/cc_security_definer_trigger_acl_hardening_20261026.sql > /tmp/cc-acl-invalid.log 2>&1; then
+            echo 'FAIL: missing dependency accepted'; exit 1
+          fi
+          grep -q CC_TRIGGER_SECURITY_PRECHECK /tmp/cc-acl-invalid.log
+          # Failed BEGIN/transaction must leave original function privileges intact.
+          test "$(psql -XAt -c "SELECT has_function_privilege('anon','public.rls_auto_enable()','EXECUTE')")" = t
+          echo 'PASS: drift transaction aborts without partial privilege mutation'
