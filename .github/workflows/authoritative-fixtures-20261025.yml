@@ -5,11 +5,19 @@ on:
     paths:
       - 'app.js'
       - 'tests/authoritative-fixtures-and-match-toggle-20261025.test.cjs'
+      - 'tests/league-matches-page.test.cjs'
+      - 'tests/league-context-ui.test.cjs'
+      - 'tests/scoreboard-match-cards.test.cjs'
+      - 'tests/manager-verified-official-results-20261020.test.cjs'
       - '.github/workflows/authoritative-fixtures-20261025.yml'
   pull_request:
     paths:
       - 'app.js'
       - 'tests/authoritative-fixtures-and-match-toggle-20261025.test.cjs'
+      - 'tests/league-matches-page.test.cjs'
+      - 'tests/league-context-ui.test.cjs'
+      - 'tests/scoreboard-match-cards.test.cjs'
+      - 'tests/manager-verified-official-results-20261020.test.cjs'
       - '.github/workflows/authoritative-fixtures-20261025.yml'
 jobs:
   user-confirmed-fixtures:
