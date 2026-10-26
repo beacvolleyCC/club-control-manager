@@ -1,0 +1,25 @@
+name: Private schema export & fingerprint tools QA
+on:
+  push:
+    branches: [rc/20261026-competition-manager-74-76]
+  pull_request:
+    paths:
+      - 'scripts/qa/export-private-supabase-schema.ps1'
+      - 'scripts/qa/compare-schema-fingerprint.cjs'
+      - 'sql/cc_schema_structure_fingerprint_readonly_20261026.sql'
+      - 'data/qa/supabase-schema-fingerprint-20261026.json'
+      - 'tests/private-schema-export-20261026.test.cjs'
+      - '.github/workflows/private-schema-export-20261026.yml'
+jobs:
+  safe-export-tools:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: PowerShell path-guard self-test (offline — no remote connection)
+        shell: pwsh
+        run: ./scripts/qa/export-private-supabase-schema.ps1 -SelfTest
+      - name: Fingerprint comparator and non-production fixture tests
+        run: node --test tests/private-schema-export-20261026.test.cjs

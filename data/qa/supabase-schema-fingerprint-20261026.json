@@ -1,0 +1,39 @@
+{
+  "observed_date": "2026-10-26",
+  "project_ref": "snqsxlyhontaepembaic",
+  "scope": [
+    "public",
+    "private"
+  ],
+  "description": "Metadata-only structure fingerprints; no personal or row data. pg_proc aggregate functions not included in functions category.",
+  "schema_structure": {
+    "columns": {
+      "objects": 710,
+      "fingerprint": "1ab615b3105e9fd51f8da7fc113ae2de"
+    },
+    "indexes": {
+      "objects": 145,
+      "fingerprint": "e1584821fa7de8d6b0bc98ddf2a81012"
+    },
+    "policies": {
+      "objects": 11,
+      "fingerprint": "6c8c49b5a339650e15e5efc8a94d22be"
+    },
+    "triggers": {
+      "objects": 18,
+      "fingerprint": "ae5ad555c7afcd2a71cf266d00aed2ef"
+    },
+    "functions": {
+      "objects": 335,
+      "fingerprint": "13b67766e01c21f7cd0be59eb2142470"
+    },
+    "relations": {
+      "objects": 71,
+      "fingerprint": "345a13f5ad2492040ce602805dc94162"
+    },
+    "constraints": {
+      "objects": 202,
+      "fingerprint": "c2e0c5ea7152ba55e047acba3b5b4271"
+    }
+  }
+}
