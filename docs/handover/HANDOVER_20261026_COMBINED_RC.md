@@ -21,3 +21,7 @@
 - Release-kor sorrend: egyeztetett frontend és jogosultságok, friss read-only LIVE baseline, külön jóváhagyott tranzakciós #74 SQL overlay, újabb read-only post-check. Hiba esetén dokumentált rollback. **Ezt ez az RC nem hajtja végre.**
 
 Az új, user által véglegesnek jelölt 2026/27-es kiírás az irányadó. A 41 régi BRSZ alias nem általános release-blocker; konkrét ütközés vizsgálható külön.
+
+## 2026-10-26 — WebKit regresszió hozzáadva
+
+Az összevont Manager #79 PostgreSQL CI ugyanazon két különálló adatbázisból előállított MRSZ jegyzőkönyv JSON-nal most Chromium **és desktop WebKit** 320/390/768 px mobil-viewport tesztet végez mindkét Manager/Player rendereren. A sticky bezárás, 19 fős névsor, vízszintes swipe, görgetés és Escape lezárás ismételt ellenőrzése. A WebKit **nem** valós iPhone/iOS Safari, nem auth és nem service-worker E2E. A teszt nem telepít adatot LIVE rendszerbe.

@@ -1,15 +1,18 @@
 'use strict';
 /*
- * Real Chromium layout QA using *actual* Manager #76 + Player #28 CSS and
+ * Real Chromium / desktop WebKit layout QA using *actual* Manager #76 + Player #28 CSS and
  * official canonical protocol JSON exported by the disposable PostgreSQL
- * 17 migration. Chromium mobile emulation is NOT a real iPhone Safari test.
+ * 17 migration. Browser mobile emulation is NOT a real iPhone Safari test.
  * No live credentials or API calls.
  */
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const {chromium}=require('playwright-core');
+const {chromium,webkit}=require('playwright-core');
+const engine=process.env.CC_PROTOCOL_BROWSER||'chromium';
+assert.ok(engine==='chromium'||engine==='webkit','Unsupported browser QA engine');
+const browserType=engine==='webkit'?webkit:chromium;
 const filename=process.env.CC_PROTOCOL_CANONICAL_JSON_FILE;
 assert.ok(filename && fs.existsSync(filename),'Missing PG17 official protocol JSON');
 const fixtures=JSON.parse(fs.readFileSync(filename,'utf8'));
@@ -62,14 +65,18 @@ const info=Object.fromEntries(configs.map(c=>[c.kind,markup(c)]));
 const chromePaths=['/usr/bin/google-chrome','/usr/bin/google-chrome-stable',
   '/opt/google/chrome/chrome','/usr/bin/chromium'];
 const executablePath=chromePaths.find(p=>fs.existsSync(p));
-const launchArgs={headless:true,args:['--no-sandbox','--disable-dev-shm-usage']};
-if(executablePath)launchArgs.executablePath=executablePath;
-else launchArgs.channel='chrome';
+const launchArgs=engine==='chromium'
+ ?{headless:true,args:['--no-sandbox','--disable-dev-shm-usage']}
+ :{headless:true};
+if(engine==='chromium'){
+ if(executablePath)launchArgs.executablePath=executablePath;
+ else launchArgs.channel='chrome';
+}
 let browserPromise;
 test.after(async()=>{if(browserPromise)await (await browserPromise).close()});
 for(const c of configs)for(const width of [320,390,768]){
- test(c.kind+' '+width+'px: real official roster sheet scroll, close, swipe and Escape',async()=>{
-  browserPromise??=chromium.launch(launchArgs);
+ test(engine+' '+c.kind+' '+width+'px: real official roster sheet scroll, close, swipe and Escape',async()=>{
+  browserPromise??=browserType.launch(launchArgs);
   const browser=await browserPromise;
   const page=await browser.newPage({viewport:{width,height:640},
     deviceScaleFactor:2,isMobile:true,hasTouch:true});
