@@ -1,3 +1,9 @@
+# AKTUÁLIS TELEPÍTÉSI ÚTVONAL — 2026-10-26
+
+**NEM szükséges új GitHub-repository.** A Manager TEST közvetlenül publikálható a meglévő `beacvolleyCC/club-control-manager` repó TEST ágából, külön Cloudflare Pages Free projektbe. Kövesd a [TEST_CLOUDFLARE_PAGES_INSTALL_20261026.md](TEST_CLOUDFLARE_PAGES_INSTALL_20261026.md) leírást. A régi, új GitHub-repós megoldás alább alternatívaként marad, de nem szükséges.
+
+---
+
 # Club Control – Manager TEST phone installation (2026-10-26)
 
 Current source: `beacvolleyCC/club-control-manager:test/20261026-manager-document-intake`. The FULL Manager TEST release is **not deployed**, nor connected to a real database. The current Supabase Free TEST project `szzoubvhlwnojtzqjebc` contains zero Club Control application tables.
