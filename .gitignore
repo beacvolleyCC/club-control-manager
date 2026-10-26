@@ -1,0 +1,5 @@
+# Never check generated TEST private roster imports into GitHub.
+private-import/
+.env
+.env.*
+dist-test/
