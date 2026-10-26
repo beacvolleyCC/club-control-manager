@@ -7049,3 +7049,25 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
   outline:2px solid var(--yellow-dark,#b58217);outline-offset:3px;
 }
 .cc-mrsz-league-matches .cc-postponed-filter{min-height:35px}
+
+
+/* Official match protocol: persistent close/header and readable swipeable rosters. */
+#entityDialog.cc-protocol-dialog .entity-dialog-card{
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+#entityDialog.cc-protocol-dialog .entity-dialog-card>.dialog-head{
+  position:sticky;
+  top:0;
+  z-index:20;
+  padding:8px 0;
+  background:var(--card,#fff);
+}
+#entityDialog.cc-protocol-dialog .cc-protocol-table-scroll{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+@media(max-width:700px){
+  #entityDialog.cc-protocol-dialog .cc-protocol-team table{min-width:370px}
+}

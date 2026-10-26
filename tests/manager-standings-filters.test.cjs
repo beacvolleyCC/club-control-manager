@@ -67,7 +67,10 @@ test('snapshot choice shows actual known rows and discloses missing male B group
  ccMrszPhotoState_:{loaded:true,tables:[{competitionLabel:'Férfi Budapest I. osztály – A csoport',rows:[{position:1,teamName:'MAFC',played:1}]}]},
  ccStandingsPhotoTeamRows_:x=>x.rows,
  ccMrszCoverageLabel_:snapshot=>snapshot?'MRSZ · mentett tabella':'MRSZ · nincs tabella',
- standingsForContext_:()=>[{teamName:'Férfi csapat',position:null,played:0,tablePoints:0}]
+ standingsForContext_:()=>[{teamName:'Férfi csapat',position:null,played:0,tablePoints:0}],
+ ccOverviewLeagueInsights_:{},
+ ccEnsureOverviewLeagueInsight_:()=>{},
+ ccLeagueInsightRows_:()=>[]
  };
  vm.createContext(ctx);
  vm.runInContext(functions+'\nthis.get=ccOverviewStandingsModel_;',ctx);

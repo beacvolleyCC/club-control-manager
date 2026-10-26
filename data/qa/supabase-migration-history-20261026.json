@@ -1,0 +1,130 @@
+{
+  "recordedOn": "2026-10-26",
+  "description": "Read-only Supabase migration history; no user information, no schema export",
+  "migrations": [
+    {
+      "version": "20261010154944",
+      "name": "mass_public_booking_waitlist_2h_cutoff_20261010"
+    },
+    {
+      "version": "20261010224013",
+      "name": "cc_mass_public_catalog_readonly_v1"
+    },
+    {
+      "version": "20261010230807",
+      "name": "cc_mass_email_outbox_v1"
+    },
+    {
+      "version": "20261010231749",
+      "name": "cc_mass_booking_batch_mail_v1"
+    },
+    {
+      "version": "20261010232611",
+      "name": "cc_mass_mail_23h_idempotency_guard_v1"
+    },
+    {
+      "version": "20261011000314",
+      "name": "cc_mass_booking_batch_token_compat_v1"
+    },
+    {
+      "version": "20261011001723",
+      "name": "cc_mass_waitlist_offer_2h_guard_v1"
+    },
+    {
+      "version": "20261011001953",
+      "name": "cc_mass_waitlist_offer_mail_queue_v1"
+    },
+    {
+      "version": "20261014073911",
+      "name": "cc_competition_mrsz_screenshot_season_snapshot_v1"
+    },
+    {
+      "version": "20261014075350",
+      "name": "cc_player_finance_online_beac_paid_visible_v1"
+    },
+    {
+      "version": "20261014094309",
+      "name": "cc_mrsz_women1_partial_standings_from_photo_results_v1"
+    },
+    {
+      "version": "20261014095015",
+      "name": "cc_mrsz_readonly_fixture_snapshot_separate_kind_v1"
+    },
+    {
+      "version": "20261014125538",
+      "name": "cc_preserve_competition_match_identity_v1"
+    },
+    {
+      "version": "20261014135156",
+      "name": "cc_sync_identity_ambiguous_pair_preserve_v2"
+    },
+    {
+      "version": "20261014153502",
+      "name": "cc_manager_competition_change_audit_readonly_v1"
+    },
+    {
+      "version": "20261014170539",
+      "name": "cc_manager_roster_decline_note_read_v1"
+    },
+    {
+      "version": "20261014171525",
+      "name": "cc_manager_competition_position_counts_season_v1"
+    },
+    {
+      "version": "20261015152035",
+      "name": "cc_manager_mass_cancellations_read_v1"
+    },
+    {
+      "version": "20261015194827",
+      "name": "cc_manager_mass_training_history_v1"
+    },
+    {
+      "version": "20261015215543",
+      "name": "cc_manager_mass_event_save_safe_v2"
+    },
+    {
+      "version": "20261018123459",
+      "name": "cc_competition_manual_match_overrides_v1"
+    },
+    {
+      "version": "20261018133601",
+      "name": "cc_competition_manual_match_history_v1"
+    },
+    {
+      "version": "20261018225223",
+      "name": "cc_competition_user_schedule_import_20261019"
+    },
+    {
+      "version": "20261018225858",
+      "name": "cc_20261018_user_fixtures_300"
+    },
+    {
+      "version": "20261018225943",
+      "name": "competition_user_schedule_20261018"
+    },
+    {
+      "version": "20261018230041",
+      "name": "competition_user_schedule_20261018"
+    },
+    {
+      "version": "20261018230057",
+      "name": "competition_match_arrangements_v1"
+    },
+    {
+      "version": "20261018230507",
+      "name": "competition_match_arrangements_20261018"
+    },
+    {
+      "version": "20261018230515",
+      "name": "competition_user_schedule_read_20261018"
+    },
+    {
+      "version": "20261019063740",
+      "name": "cc_manager_court_impact_v1_20261019"
+    },
+    {
+      "version": "20261021113057",
+      "name": "cc_canonical_match_identity_seed_v1"
+    }
+  ]
+}
