@@ -5,6 +5,8 @@ on:
       - test/20261026-manager-document-intake
     paths:
       - 'scripts/build-cloudflare-test.cjs'
+      - 'scripts/prepare-staging-player-import.cjs'
+      - 'tests/staging-roster-import-20261026.test.cjs'
       - 'tests/cloudflare-test-bundle-20261026.test.cjs'
       - 'index.html'
       - 'app.js'
@@ -30,3 +32,5 @@ jobs:
           node --check sw.js
           node --check scripts/build-cloudflare-test.cjs
           node --test tests/cloudflare-test-bundle-20261026.test.cjs
+          node --check scripts/prepare-staging-player-import.cjs
+          node --test tests/staging-roster-import-20261026.test.cjs
