@@ -1,12 +1,15 @@
 'use strict';
-// Club Control 2026/27: manual, real-JWT, READ-ONLY PostgREST RPC acceptance.
+// Club Control 2026/27: staging-only, real-JWT, HTTP GET-only RPC acceptance.
 // Never submit a user JWT/password through GitHub, a PR, screenshots or chat.
 // Node 22. No service-role keys. Does not log tokens, bodies or athlete records.
+// IMPORTANT: a Manager GET may bind an unbound auth_user_id and INSERT an audit log.
+// GET is NOT equivalent to a transaction marked READ ONLY. Never target production.
 const assert=require('node:assert/strict');
-const {pathToFileURL}=require('node:url');
 
 const MANAGER='cc_manager_competition_mrsz_snapshot_v2';
 const PLAYER='cc_player_competition_mrsz_snapshot_v2';
+// Explicitly block the known Club Control LIVE environment, even if mislabeled staging.
+const LIVE_PROJECT_REF='snqsxlyhontaepembaic';
 const REQUIRED=[
  'CC_TEST_MANAGER_ALLOWED_JWT','CC_TEST_MANAGER_DENIED_JWT',
  'CC_TEST_PLAYER_ALLOWED_JWT','CC_TEST_PLAYER_INACTIVE_JWT',
@@ -30,9 +33,12 @@ function config(env) {
  const apiKey=String(env.CC_TEST_PUBLISHABLE_KEY||'');
  if(!apiKey || apiKey.startsWith('sb_secret_') || apiKey.length>2048)
    throw Error('Missing publishable/legacy anon key; secret key forbidden');
- if(!['staging','production'].includes(env.CC_TEST_ENV))throw Error('CC_TEST_ENV must be staging or production');
- if(env.CC_TEST_ENV==='production' && env.CC_CONFIRM_LIVE_READONLY!=='YES')
-   throw Error('Explicit production READ-ONLY acknowledgement required');
+ if(env.CC_TEST_ENV!=='staging')
+   throw Error('Live or unrecognized environment blocked: staging-only auth QA');
+ if(ref===LIVE_PROJECT_REF)
+   throw Error('Known LIVE Supabase project blocked even when labeled staging: Manager RPC can bind an auth account');
+ if(env.CC_CONFIRM_LIVE_READONLY==='YES')
+   throw Error('A GET request cannot guarantee no database writes: remove the obsolete LIVE flag');
  const tokens={};
  for(const key of REQUIRED){
   const jwt=String(env[key]||'');
@@ -78,7 +84,7 @@ async function run(env,fetchImpl=fetch,logger=console.log) {
   successful++;
   logger(`PASS: ${name} — HTTP ${result.status}`);
  }
- logger(`PASS: ${successful} real-role read-only checks; no results or credentials printed`);
+ logger(`PASS: ${successful} staging GET-only role checks; no results or credentials printed`);
  return successful;
 }
 module.exports={config,requestSnapshot,run,MANAGER,PLAYER,CASES};
