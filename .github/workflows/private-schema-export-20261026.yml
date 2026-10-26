@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - 'scripts/qa/export-private-supabase-schema.ps1'
+      - 'scripts/qa/recover-private-supabase-migrations.ps1'
       - 'scripts/qa/compare-schema-fingerprint.cjs'
       - 'sql/cc_schema_structure_fingerprint_readonly_20261026.sql'
       - 'data/qa/supabase-schema-fingerprint-20261026.json'
@@ -21,5 +22,8 @@ jobs:
       - name: PowerShell path-guard self-test (offline — no remote connection)
         shell: pwsh
         run: ./scripts/qa/export-private-supabase-schema.ps1 -SelfTest
+      - name: Migration recovery read-only self-test (offline)
+        shell: pwsh
+        run: ./scripts/qa/recover-private-supabase-migrations.ps1 -SelfTest
       - name: Fingerprint comparator and non-production fixture tests
         run: node --test tests/private-schema-export-20261026.test.cjs

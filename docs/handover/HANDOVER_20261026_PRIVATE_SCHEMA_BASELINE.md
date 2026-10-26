@@ -31,3 +31,13 @@ Forrás: https://supabase.com/docs/reference/cli/supabase-db-dump
 
 ## CI runner-kompatibilitás (2026-10-26)
 A `Official protocols canonical PostgreSQL QA` egy korábbi `ubuntu-latest` futása GitHub ubuntu-26.04 környezetére került, amelyre a rögzített Playwright 1.56.1 **nem támogatja a WebKit telepítést** (konkrét CI napló: `Playwright does not support webkit on ubuntu26.04-x64`). Nem volt alkalmazáskód/DB-hiba. A workflow-t ezért ellenőrizhetően `ubuntu-24.04` runnerre rögzítettük. Későbbi böngészőverzió-frissítés külön kockázatfelmérést igényel.
+
+## 31/31 migráció: SQL-visszanyerési útvonal megvan
+
+2026-10-26-án csak olvasási metadatakérdéssel ellenőriztük a `supabase_migrations.schema_migrations` táblát. **31/31** migrációhoz nem üres `statements` tömb tartozik, összesen 31 utasítás és **456 853 karakter SQL**. A korábbi 28 Git-migrációhiány így jórészt rekonstruálható az eredeti SQL-ből, nem kitalált javításokkal.
+
+Elkészült: `scripts/qa/recover-private-supabase-migrations.ps1`. Windows PowerShell 7 alatt, saját gépen `pwsh -NoProfile -File ./scripts/qa/recover-private-supabase-migrations.ps1` futtatásával a Supabase hivatalos **`supabase migration fetch --linked`** parancsa a privát, repo-kívüli `_supabase_cli_workspace/supabase/migrations` mappába menti az éles history SQL-fájljait. A program ellenőrzi, hogy **pontosan 31** letöltött verzió, a 2026-10-26-i metaadatokkal egyező sorrend, és nem üres fájlok állnak rendelkezésre.
+
+**Nem történt tényleges letöltés itt**, nincs remote history javítás, nem futott le egyetlen recovered SQL staging-en sem. A migrációk egyes SQL-jei tartalmazhatnak `INSERT/UPDATE` utasításokat, seed adatokat vagy érzékeny konstansokat; nem kerülnek automatikusan GitHubra. Ezzel sem lesz meg automatikusan a szeptember–október 10. közötti eredeti kiindulási séma: a privát schema-only dump és a 31 későbbi migráció együttes értelmezése, staging-próbareplay és strukturális összehasonlítás kötelező.
+
+Hivatalos referencia: https://supabase.com/docs/reference/cli/supabase-migration-fetch

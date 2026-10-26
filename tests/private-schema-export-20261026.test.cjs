@@ -28,3 +28,12 @@ test('PowerShell export is explicitly schema-only and blocks repository paths',(
  assert.doesNotMatch(s,/\& supabase db (?:push|pull|reset)/);
  assert.doesNotMatch(s,/\& supabase migration repair/);
 });
+
+test('recovery script cannot write migration SQL to GitHub or mutate remote migrations',()=>{
+ const s=fs.readFileSync(path.join(__dirname,'../scripts/qa/recover-private-supabase-migrations.ps1'),'utf8');
+ assert.match(s,/supabase migration fetch --linked/);
+ assert.match(s,/Refusing to recover migration SQL inside the Git repository/);
+ assert.match(s,/\[switch\]\$SelfTest/);
+ assert.match(s,/supabase link --project-ref snqsxlyhontaepembaic/);
+ assert.doesNotMatch(s,/\& supabase (?:db (?:reset|push|pull)|migration (?:repair|up|down))/);
+});
