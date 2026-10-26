@@ -12,7 +12,9 @@ on:
       - '.github/workflows/official-protocols-20261021-db.yml'
 jobs:
   dual-db:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 WebKit does not support GitHub's ubuntu26.04-x64 runner.
+    # Keep this runner explicit until the verified Playwright/WebKit upgrade.
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:17

@@ -28,3 +28,6 @@
 - Új Supabase-projekt vagy branch költségét előbb egyeztetni kell, és a szervezeti célt meg kell erősíteni. Az éles adatbázisnál automatikus DDL vagy migrációtörténet átírása tilos.
 
 Forrás: https://supabase.com/docs/reference/cli/supabase-db-dump
+
+## CI runner-kompatibilitás (2026-10-26)
+A `Official protocols canonical PostgreSQL QA` egy korábbi `ubuntu-latest` futása GitHub ubuntu-26.04 környezetére került, amelyre a rögzített Playwright 1.56.1 **nem támogatja a WebKit telepítést** (konkrét CI napló: `Playwright does not support webkit on ubuntu26.04-x64`). Nem volt alkalmazáskód/DB-hiba. A workflow-t ezért ellenőrizhetően `ubuntu-24.04` runnerre rögzítettük. Későbbi böngészőverzió-frissítés külön kockázatfelmérést igényel.
