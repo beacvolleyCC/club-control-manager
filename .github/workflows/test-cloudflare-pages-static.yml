@@ -1,0 +1,32 @@
+name: TEST MANAGER static Pages build
+on:
+  push:
+    branches:
+      - test/20261026-manager-document-intake
+    paths:
+      - 'scripts/build-cloudflare-test.cjs'
+      - 'tests/cloudflare-test-bundle-20261026.test.cjs'
+      - 'index.html'
+      - 'app.js'
+      - 'sw.js'
+      - 'config.js'
+      - 'manifest.webmanifest'
+      - 'icons/**'
+      - 'assets/**'
+      - '.github/workflows/test-cloudflare-pages-static.yml'
+  workflow_dispatch:
+jobs:
+  bundle-qa:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check app.js
+          node --check sw.js
+          node --check scripts/build-cloudflare-test.cjs
+          node --test tests/cloudflare-test-bundle-20261026.test.cjs

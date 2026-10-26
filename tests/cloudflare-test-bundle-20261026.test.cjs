@@ -1,0 +1,24 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),cp=require('node:child_process'),path=require('node:path');
+const repo=path.resolve(__dirname,'..');
+test('Cloudflare Pages bundle contains only verified CC MANAGER TEST static assets',()=>{
+ cp.execFileSync(process.execPath,['scripts/build-cloudflare-test.cjs'],{cwd:repo,stdio:'pipe'});
+ const d=path.join(repo,'dist-test');
+ const man=JSON.parse(fs.readFileSync(path.join(d,'manifest.webmanifest'),'utf8'));
+ assert.equal(man.short_name,'MGR TEST');
+ assert.ok(fs.existsSync(path.join(d,'index.html')));
+ assert.ok(fs.existsSync(path.join(d,'app.js')));
+ assert.ok(fs.existsSync(path.join(d,'sw.js')));
+ for(const p of ['data','docs','sql','supabase','tests','scripts','.git','.github','.env','HANDOVER_CURRENT.md'])assert.ok(!fs.existsSync(path.join(d,p)),'unwanted published path: '+p);
+ const cfg=fs.readFileSync(path.join(d,'config.js'),'utf8');
+ assert.doesNotMatch(cfg,/snqsxlyhontaepembaic|sb_secret_|service_role/i);
+ assert.match(cfg,/DATA_MODE:'demo'/);
+ assert.match(fs.readFileSync(path.join(d,'_headers'),'utf8'),/X-Robots-Tag: noindex/);
+});
+test('Pages build is self-contained and does not alter source configuration',()=>{
+ const script=fs.readFileSync(path.join(repo,'scripts/build-cloudflare-test.cjs'),'utf8');
+ assert.match(script,/mediaExt=new Set/);
+ assert.doesNotMatch(script,/cp\.execSync|curl|fetch\(|wget|post\(/i);
+ assert.match(script,/lstatSync/);
+ assert.match(script,/symlinks not allowed/);
+});
