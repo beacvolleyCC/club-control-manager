@@ -1,0 +1,21 @@
+name: Competition authenticated RPC QA harness (offline tests only)
+on:
+  push:
+    branches: [rc/20261026-competition-manager-74-76]
+  pull_request:
+    paths:
+      - 'scripts/qa/live-competition-auth-rpc.cjs'
+      - 'tests/live-competition-auth-rpc-20261026.test.cjs'
+      - '.github/workflows/competition-live-auth-harness-20261026.yml'
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Contract and fail-closed regression (NO LIVE TOKENS, NO NETWORK)
+        run: |
+          node --check scripts/qa/live-competition-auth-rpc.cjs
+          node --test tests/live-competition-auth-rpc-20261026.test.cjs
