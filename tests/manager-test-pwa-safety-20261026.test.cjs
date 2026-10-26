@@ -33,3 +33,12 @@ test('future Pages deploy remains isolated to a second GitHub repo and does not 
  assert.match(w,/github\.repository == 'beacvolleyCC\/club-control-manager-test'/);
  assert.doesNotMatch(w,/cp -r data|supabase\/migrations|\.sql\s+_site|cp -r docs/);
 });
+
+test('safe public export manifest excludes archived data, SQL migrations and secrets',()=>{
+ const s=read('scripts/export-manager-test-pages.ps1');
+ assert.match(s,/Target must be empty except for the .git directory/);
+ assert.match(s,/CC Manager TEST: export ONLY vetted/);
+ assert.doesNotMatch(s,/Copy-Item.+?data(?:\/|')/);
+ assert.doesNotMatch(s,/Copy-Item.+?supabase\/migrations/);
+ assert.match(s,/Copy-Item -LiteralPath \$in -Destination \$to/);
+});

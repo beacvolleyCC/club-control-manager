@@ -16,3 +16,9 @@ The current GitHub connector cannot **create new repositories**, and neither ded
 Before switching demo mode to real TEST backend: verify 0 USD Free status; rebuild 57 application tables and 337 live functions appropriately, compare schema fingerprint; create TEST Auth users only and verify RLS; then change Manager and Player TEST config to staging URL and staging publishable key, never LIVE. Revalidate iPhone Safari/PWA login and attendance writes. No LIVE writes without separate patch review.
 
 Cost hard requirement: 0 HUF, no paid upgrades or development branches.
+
+## Curated standalone repository export
+
+Rather than running `git clone` + copying **all files** into a new public repo, use the checked script `scripts/export-manager-test-pages.ps1 -Destination <empty-new-clone-folder>`. It exports ONLY the runtime file whitelist, icons, logos, safety test and Pages workflow. No `data/`, `docs/`, migrations, private SQL, raw PDFs or tests with protocol rosters are copied.
+
+The GitHub App cannot create the new repository; the user creates **`beacvolleyCC/club-control-manager-test`**, without README, then clones that empty repo to a target folder. On Windows run the exporter from the source Manager TEST checkout and `git add .; git commit; git push` from the target. Settings → Pages → GitHub Actions. Deploy workflow refuses execution outside the exact repository name. Source project and LIVE branches unaffected.
