@@ -1,0 +1,36 @@
+name: Publish Manager TEST PWA (new dedicated repository only)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  publish:
+    if: github.repository == 'beacvolleyCC/club-control-manager-test'
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          node --check app.js
+          node --test tests/manager-test-pwa-safety-20261026.test.cjs
+      - name: Copy vetted runtime assets only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html config.js app.js sw.js manifest.webmanifest styles.css scoreboard.css scoreboard.js volleyball-core.js volleyball-ui.js volleyball.css competition-context-catalog.js _site/
+          cp -r icons assets _site/
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site}
+      - id: deployment
+        uses: actions/deploy-pages@v4

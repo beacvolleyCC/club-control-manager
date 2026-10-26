@@ -1,0 +1,24 @@
+name: Manager TEST PWA safety regression
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+  pull_request:
+    paths:
+      - 'app.js'
+      - 'config.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'manifest.webmanifest'
+      - 'icons/cc-manager-test-180.png'
+      - 'tests/manager-test-pwa-safety-20261026.test.cjs'
+jobs:
+  safety:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          node --check app.js
+          node --check sw.js
+          node --test tests/manager-test-pwa-safety-20261026.test.cjs
