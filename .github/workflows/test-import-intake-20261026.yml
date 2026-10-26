@@ -1,0 +1,14 @@
+name: TEST Manager import intake smoke
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+jobs:
+  test-intake:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          node --check app.js
+          node --test tests/test-import-intake-20261026.test.cjs
