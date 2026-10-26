@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f7b700">
+  <meta name="theme-color" content="#a4430d">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://hunvolley.info https://www.hunvolley.info https://*.hunvolley.info https://hunvolley.hu https://www.hunvolley.hu https://*.hunvolley.hu; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self';">
-  <title>Club Control – Manager</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://hunvolley.info https://www.hunvolley.info https://*.hunvolley.info https://hunvolley.hu https://www.hunvolley.hu https://*.hunvolley.hu; connect-src 'self' https://szzoubvhlwnojtzqjebc.supabase.co wss://szzoubvhlwnojtzqjebc.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self';">
+  <title>CC MANAGER TEST</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
@@ -14,7 +14,8 @@
   <link rel="stylesheet" href="./scoreboard.css">
   <link rel="stylesheet" href="./volleyball.css">
 </head>
-<body>
+<body data-cc-test="manager">
+  <div role="status" id="ccManagerTestBanner" style="position:relative;z-index:200;background:#a4430d;color:#fff;padding:8px 12px;text-align:center;font:700 12px/1.4 system-ui,sans-serif;letter-spacing:.1em">CC MANAGER TEST · DEMÓ · NEM ÉLES</div>
   <div class="login-overlay hidden" id="loginOverlay">
     <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
       <div class="eyebrow">CLUB CONTROL · MANAGER</div>

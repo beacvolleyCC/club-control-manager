@@ -1,5 +1,10 @@
 (()=>{
   'use strict';
+  const ccManagerTestStore_=Object.freeze({
+    getItem:key=>window.localStorage.getItem('cc-manager-test-20261026:'+String(key)),
+    setItem:(key,value)=>window.localStorage.setItem('cc-manager-test-20261026:'+String(key),value),
+    removeItem:key=>window.localStorage.removeItem('cc-manager-test-20261026:'+String(key))
+  });
 
   const FRONTEND_BUILD='manager-r1-ui1-9k-score-v1-2026-10-08';
 
@@ -27,7 +32,7 @@
 
   const state={
     mode:String(cfg.DATA_MODE||'demo').toLowerCase(),supabase:null,session:null,manager:null,permissions:[],teams:[],players:[],events:[],calendarEvents:[],activityEvents:[],massTrainings:[],massCalendarEvents:[],massArchiveEvents:[],massAthletes:[],massPasses:[],massLoadError:'',massDetailCache:new Map(),massDetailUi:new Map(),admins:[],adminTeams:[],adminsLoadError:'',adminEditId:'',adminBusy:false,overview:null,rsvpMatrix:{events:[],players:[],responses:[]},cardRsvpMatrix:{events:[],players:[],responses:[]},eventRosterCache:new Map(),matrixFilterOpen:false,eventFiltersOpen:false,calendarFiltersOpen:false,matrixFilters:{team:'',period:'14',kind:'ALL',status:'ALL',from:'',to:''},
-    area:['mass','competition'].includes(cfg.DEFAULT_AREA)?cfg.DEFAULT_AREA:'competition',module:'overview',calendarMode:'week',calendarAnchor:new Date(),calendarTeam:'',calendarType:'',calendarScope:'COMPETITION',massCalendarLevel:'',massCalendarSession:'',massAthleteSearch:'',massAthleteLevel:'',massAthleteStatus:'',massPassSearch:'',massPassMonth:'',playerTeam:'',playerSearch:'',playerMedical:'all',playerSort:(()=>{try{return localStorage.getItem('cc-manager-player-sort')||'name'}catch(_){return'name'}})(),playerSortDir:(()=>{try{return localStorage.getItem('cc-manager-player-sort-dir')||'asc'}catch(_){return'asc'}})(),playerListMode:(()=>{try{return localStorage.getItem('cc-manager-player-list-mode')==='grouped'?'grouped':'all'}catch(_){return'all'}})(),playerFiltersOpen:false,massAthleteFiltersOpen:false,massPassFiltersOpen:false,massCalendarFiltersOpen:false,massTrainingFiltersOpen:false,massTrainingPeriod:'upcoming',massTrainingDate:'',massAthleteMonth:'',massAthletePass:'all',massAthleteFirst:'all',teamFiltersOpen:false,eventTeam:'',eventPeriod:'upcoming',overviewTeam:'',selectedTeam:'',selectedPlayer:'',pendingEmail:'',loading:false,massActionBusy:'',massAttendanceBusy:new Set(),notificationRecipients:[],notificationHistory:[],notificationSelectedPlayerId:'',notificationSearch:'',notificationBusy:false,notificationLoadError:'',competitionSyncStatus:null,competitionSyncBusy:false,competitionResults:[],competitionStandings:[],competitionDataError:'',managerStandingsContext:(()=>{try{return localStorage.getItem('cc-manager-standings-context')||''}catch(_){return''}})(),managerStandingsTeam:(()=>{try{return localStorage.getItem('cc-manager-standings-team')||'all'}catch(_){return'all'}})(),managerStandingsMatchScope:(()=>{try{return localStorage.getItem('cc-manager-standings-match-scope')==='beac'?'beac':'all'}catch(_){return'all'}})(),managerLeagueInsights:{key:'',loading:false,loaded:false,error:'',data:null},financeTab:'competition',financeTeam:'',financeData:null,financeAudit:[],financeSettings:null,financeSettingsTeam:'',financePassCatalog:[],financePassCatalogLoaded:false,financePassSearch:'',financePassType:'',financePassLevel:'',financePassTeam:'',financePassMonth:'',financePassStatus:'',financeCompetitionSearch:'',financeCompetitionMonth:'',financeCompetitionStatus:'',financeCompetitionType:'',financeCompetitionFiltersOpen:false,financePassFiltersOpen:false,financeLoading:false,teamDetailTab:'grid',teamGridPeriod:(()=>{try{return localStorage.getItem('cc-manager-team-grid-period')==='all'?'all':'upcoming'}catch(_){return'upcoming'}})(),equipmentByTeam:new Map(),equipmentLoading:new Set(),coachAvailability:[],coachAvailabilityBusy:new Set(),managerMedicalAppointments:[],teamFilters:{overview:[],events:[],players:[],teams:[]},teamFilterOpen:{overview:false,events:false,players:false,teams:false},plannerTeam:'',plannerTab:'planner'
+    area:['mass','competition'].includes(cfg.DEFAULT_AREA)?cfg.DEFAULT_AREA:'competition',module:'overview',calendarMode:'week',calendarAnchor:new Date(),calendarTeam:'',calendarType:'',calendarScope:'COMPETITION',massCalendarLevel:'',massCalendarSession:'',massAthleteSearch:'',massAthleteLevel:'',massAthleteStatus:'',massPassSearch:'',massPassMonth:'',playerTeam:'',playerSearch:'',playerMedical:'all',playerSort:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-player-sort')||'name'}catch(_){return'name'}})(),playerSortDir:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-player-sort-dir')||'asc'}catch(_){return'asc'}})(),playerListMode:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-player-list-mode')==='grouped'?'grouped':'all'}catch(_){return'all'}})(),playerFiltersOpen:false,massAthleteFiltersOpen:false,massPassFiltersOpen:false,massCalendarFiltersOpen:false,massTrainingFiltersOpen:false,massTrainingPeriod:'upcoming',massTrainingDate:'',massAthleteMonth:'',massAthletePass:'all',massAthleteFirst:'all',teamFiltersOpen:false,eventTeam:'',eventPeriod:'upcoming',overviewTeam:'',selectedTeam:'',selectedPlayer:'',pendingEmail:'',loading:false,massActionBusy:'',massAttendanceBusy:new Set(),notificationRecipients:[],notificationHistory:[],notificationSelectedPlayerId:'',notificationSearch:'',notificationBusy:false,notificationLoadError:'',competitionSyncStatus:null,competitionSyncBusy:false,competitionResults:[],competitionStandings:[],competitionDataError:'',managerStandingsContext:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-standings-context')||''}catch(_){return''}})(),managerStandingsTeam:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-standings-team')||'all'}catch(_){return'all'}})(),managerStandingsMatchScope:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-standings-match-scope')==='beac'?'beac':'all'}catch(_){return'all'}})(),managerLeagueInsights:{key:'',loading:false,loaded:false,error:'',data:null},financeTab:'competition',financeTeam:'',financeData:null,financeAudit:[],financeSettings:null,financeSettingsTeam:'',financePassCatalog:[],financePassCatalogLoaded:false,financePassSearch:'',financePassType:'',financePassLevel:'',financePassTeam:'',financePassMonth:'',financePassStatus:'',financeCompetitionSearch:'',financeCompetitionMonth:'',financeCompetitionStatus:'',financeCompetitionType:'',financeCompetitionFiltersOpen:false,financePassFiltersOpen:false,financeLoading:false,teamDetailTab:'grid',teamGridPeriod:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-team-grid-period')==='all'?'all':'upcoming'}catch(_){return'upcoming'}})(),equipmentByTeam:new Map(),equipmentLoading:new Set(),coachAvailability:[],coachAvailabilityBusy:new Set(),managerMedicalAppointments:[],teamFilters:{overview:[],events:[],players:[],teams:[]},teamFilterOpen:{overview:false,events:false,players:false,teams:false},plannerTeam:'',plannerTab:'planner'
   };
 
   const $=sel=>document.querySelector(sel), $$=sel=>Array.from(document.querySelectorAll(sel));
@@ -128,11 +133,16 @@
       timer=setTimeout(run,240);
     }else timer=setTimeout(run,48);
   }
-  function configured(){return state.mode==='supabase'&&/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(text(cfg.SUPABASE_URL))&&text(cfg.SUPABASE_PUBLISHABLE_KEY)}
+  function configured(){
+    return cfg.TEST_ONLY===true && cfg.STAGING_REF==='szzoubvhlwnojtzqjebc'
+      &&state.mode==='supabase'
+      &&text(cfg.SUPABASE_URL)==='https://szzoubvhlwnojtzqjebc.supabase.co'
+      &&/^sb_publishable_/.test(text(cfg.SUPABASE_PUBLISHABLE_KEY));
+  }
 
   const FILTER_PREF_PREFIX='cc-manager-filter-open:';
-  function filterOpen_(key,fallback=false){try{const v=localStorage.getItem(FILTER_PREF_PREFIX+key);return v==null?!!fallback:v==='1'}catch(_){return !!fallback}}
-  function setFilterOpen_(key,open){const value=!!open;try{localStorage.setItem(FILTER_PREF_PREFIX+key,value?'1':'0')}catch(_){}return value}
+  function filterOpen_(key,fallback=false){try{const v=ccManagerTestStore_.getItem(FILTER_PREF_PREFIX+key);return v==null?!!fallback:v==='1'}catch(_){return !!fallback}}
+  function setFilterOpen_(key,open){const value=!!open;try{ccManagerTestStore_.setItem(FILTER_PREF_PREFIX+key,value?'1':'0')}catch(_){}return value}
   function firstPermittedRoute_(){
     for(const area of ['competition','mass']){const mod=AREAS[area].modules.find(m=>canRoute(area,m[0]));if(mod)return{area,module:mod[0]}}
     if(canMainSection_('planning'))return{area:state.area,module:'planning'};
@@ -171,7 +181,7 @@
     if(window.supabase?.createClient)return;
     await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.async=true;s.onload=resolve;s.onerror=()=>reject(new Error('A Supabase klienskönyvtár nem tölthető be.'));document.head.appendChild(s)});
   }
-  async function createSupabase(){if(!configured())return null;await ensureSupabaseLibrary();return window.supabase.createClient(text(cfg.SUPABASE_URL),text(cfg.SUPABASE_PUBLISHABLE_KEY),{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'cc-manager-auth-session-v1'}})}
+  async function createSupabase(){if(!configured())return null;await ensureSupabaseLibrary();return window.supabase.createClient(text(cfg.SUPABASE_URL),text(cfg.SUPABASE_PUBLISHABLE_KEY),{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'cc-manager-test-auth-session-v1'}})}
   function normalizeRpc(data){if(typeof data==='string'){try{return JSON.parse(data)}catch(_){return data}}return data}
   async function rpc(name,args={}){if(!state.supabase)throw new Error('Supabase nincs inicializálva.');const {data,error}=await state.supabase.rpc(name,args);if(error)throw error;return normalizeRpc(data)}
 
@@ -431,9 +441,9 @@
     const roots=[document.scrollingElement,document.documentElement,document.body,$('#mainContent'),$('#view-dynamic'),$('#viewContent')];
     roots.forEach(el=>{if(el&&el.scrollLeft)el.scrollLeft=0});
   }
-  function setRoute(area,module,{replace=false}={}){ccAdvanceRouteGeneration_();let h;if(module==='calendar')state.calendarScope=area==='mass'?'MASS':'COMPETITION';if(module==='settings'){state.module='settings';h='#settings'}else if(module==='planning'){state.module='planning';state.plannerTab='planner';h='#planning'}else if(module==='finance'){state.module='finance';h='#finance'}else if(module==='calendar'){state.area=area;state.module='calendar';h='#calendar'}else{state.area=area;state.module=module;h=`#${area}/${module}`;try{localStorage.setItem(`cc-manager-last-module:${area}`,module)}catch(_){}}replace?history.replaceState(null,'',h):history.pushState(null,'',h);renderChrome();renderView();try{window.scrollTo({left:0,top:0,behavior:'auto'})}catch(_){window.scrollTo(0,0)};requestAnimationFrame(ccForceRootHorizontalZero_)}
+  function setRoute(area,module,{replace=false}={}){ccAdvanceRouteGeneration_();let h;if(module==='calendar')state.calendarScope=area==='mass'?'MASS':'COMPETITION';if(module==='settings'){state.module='settings';h='#settings'}else if(module==='planning'){state.module='planning';state.plannerTab='planner';h='#planning'}else if(module==='finance'){state.module='finance';h='#finance'}else if(module==='calendar'){state.area=area;state.module='calendar';h='#calendar'}else{state.area=area;state.module=module;h=`#${area}/${module}`;try{ccManagerTestStore_.setItem(`cc-manager-last-module:${area}`,module)}catch(_){}}replace?history.replaceState(null,'',h):history.pushState(null,'',h);renderChrome();renderView();try{window.scrollTo({left:0,top:0,behavior:'auto'})}catch(_){window.scrollTo(0,0)};requestAnimationFrame(ccForceRootHorizontalZero_)}
   function setPlannerTab_(tab){if(!canMainSection_('planning'))return;ccAdvanceRouteGeneration_();state.module='planning';state.plannerTab=tab==='counter'?'counter':'planner';history.pushState(null,'',state.plannerTab==='counter'?'#planning/counter':'#planning');renderChrome();renderView();try{window.scrollTo({left:0,top:0,behavior:'auto'})}catch(_){window.scrollTo(0,0)}}
-  function legacyDefaultModule_(area){const preferred=area==='mass'?'trainings':'overview';let saved='';try{saved=localStorage.getItem(`cc-manager-last-module:${area}`)||''}catch(_){};if(saved&&permittedAreaModules_(area).some(m=>m[0]===saved))return saved;if(canRoute(area,preferred))return preferred;return permittedAreaModules_(area)[0]?.[0]||preferred}
+  function legacyDefaultModule_(area){const preferred=area==='mass'?'trainings':'overview';let saved='';try{saved=ccManagerTestStore_.getItem(`cc-manager-last-module:${area}`)||''}catch(_){};if(saved&&permittedAreaModules_(area).some(m=>m[0]===saved))return saved;if(canRoute(area,preferred))return preferred;return permittedAreaModules_(area)[0]?.[0]||preferred}
   function switchArea(area){if(!AREAS[area])return;setRoute(area,legacyDefaultModule_(area))}
 
   function permittedAreaModules_(area){return (AREAS[area]?.modules||[]).filter(m=>{if(m[0]==='calendar')return false;if(area==='mass'&&['archive','passes'].includes(m[0]))return false;return canRoute(area,m[0])})}
@@ -667,7 +677,7 @@
     ccClearLeagueContext_();
     state.managerStandingsContext=text(contextId);
     state.managerStandingsTeam=text(sourceId)||'all';
-    try{localStorage.setItem('cc-manager-standings-context',state.managerStandingsContext);localStorage.setItem('cc-manager-standings-team',state.managerStandingsTeam)}catch(_){}
+    try{ccManagerTestStore_.setItem('cc-manager-standings-context',state.managerStandingsContext);ccManagerTestStore_.setItem('cc-manager-standings-team',state.managerStandingsTeam)}catch(_){}
     setRoute('competition','standings');
   }
   function bindOverviewStandings_(){
@@ -743,7 +753,7 @@
     if(!id||!list.some(t=>text(t.id)===id)) id=text(list[0]?.id||'');
     if(id!==text(state.managerStandingsContext)){
       state.managerStandingsContext=id;
-      try{localStorage.setItem('cc-manager-standings-context',id)}catch(_){}
+      try{ccManagerTestStore_.setItem('cc-manager-standings-context',id)}catch(_){}
     }
     return state.teams.find(t=>text(t.id)===id)||null;
   }
@@ -766,7 +776,7 @@
     const id=text(state.managerStandingsTeam||'all');
     if(!id||id==='all')return null;
     const row=rows.find(r=>text(r.sourceTeamId)===id)||null;
-    if(!row){state.managerStandingsTeam='all';try{localStorage.setItem('cc-manager-standings-team','all')}catch(_){}return null}
+    if(!row){state.managerStandingsTeam='all';try{ccManagerTestStore_.setItem('cc-manager-standings-team','all')}catch(_){}return null}
     return row;
   }
   function msFocusRow_(rows=msRows_()){return rows.find(r=>r.focus)||rows[0]||null}
@@ -839,13 +849,13 @@
     catch(err){if(state.managerLeagueInsights.key!==key)return;state.managerLeagueInsights={key,loading:false,loaded:true,error:text(err?.message||err||'A bajnoki statisztikák nem érhetők el.'),data:null}}
     if(state.area==='competition'&&state.module==='standings')renderManagerStandings_()
   }
-  function msSetTeam_(sourceId){state.managerStandingsTeam=text(sourceId)||'all';try{localStorage.setItem('cc-manager-standings-team',state.managerStandingsTeam)}catch(_){}renderManagerStandings_()}
+  function msSetTeam_(sourceId){state.managerStandingsTeam=text(sourceId)||'all';try{ccManagerTestStore_.setItem('cc-manager-standings-team',state.managerStandingsTeam)}catch(_){}renderManagerStandings_()}
   function msBind_(){
-    $('#msContextSelect')?.addEventListener('change',e=>{ccClearLeagueContext_();state.managerStandingsContext=text(e.target.value);state.managerStandingsTeam='all';state.managerStandingsMatchScope=state.managerStandingsContext==='10000000-0000-4000-8000-000000000003'&&ccMrszMenGroup_==='A'?'all':'beac';ccLeagueMatchScope_=state.managerStandingsMatchScope;state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};try{localStorage.setItem('cc-manager-standings-context',state.managerStandingsContext);localStorage.setItem('cc-manager-standings-team','all');localStorage.setItem('cc-manager-standings-match-scope',state.managerStandingsMatchScope)}catch(_){}renderManagerStandings_()});
+    $('#msContextSelect')?.addEventListener('change',e=>{ccClearLeagueContext_();state.managerStandingsContext=text(e.target.value);state.managerStandingsTeam='all';state.managerStandingsMatchScope=state.managerStandingsContext==='10000000-0000-4000-8000-000000000003'&&ccMrszMenGroup_==='A'?'all':'beac';ccLeagueMatchScope_=state.managerStandingsMatchScope;state.managerLeagueInsights={key:'',loading:false,loaded:false,error:'',data:null};try{ccManagerTestStore_.setItem('cc-manager-standings-context',state.managerStandingsContext);ccManagerTestStore_.setItem('cc-manager-standings-team','all');ccManagerTestStore_.setItem('cc-manager-standings-match-scope',state.managerStandingsMatchScope)}catch(_){}renderManagerStandings_()});
     $('#ccLeagueContextSelect')?.addEventListener('change',e=>ccSetLeagueContext_(e.target.value));
     $('#msTeamSelect')?.addEventListener('change',e=>msSetTeam_(e.target.value));
     $('#msMatchTeamSelect')?.addEventListener('change',e=>msSetTeam_(e.target.value));
-    $('#msMatchScopeSelect')?.addEventListener('change',e=>{state.managerStandingsMatchScope=e.target.value==='beac'?'beac':'all';try{localStorage.setItem('cc-manager-standings-match-scope',state.managerStandingsMatchScope)}catch(_){}renderManagerStandings_()});
+    $('#msMatchScopeSelect')?.addEventListener('change',e=>{state.managerStandingsMatchScope=e.target.value==='beac'?'beac':'all';try{ccManagerTestStore_.setItem('cc-manager-standings-match-scope',state.managerStandingsMatchScope)}catch(_){}renderManagerStandings_()});
     $$('[data-ms-team]').forEach(b=>b.addEventListener('click',()=>{const id=text(b.dataset.msTeam);if(id)msSetTeam_(id)}));
   }
   // Read-only metrics derived exclusively from the selected saved MRSZ table.
@@ -2779,7 +2789,7 @@
   let ccBrszEffectiveMatches_=[];
   // Snapshot-based league selection is independent from BEAC team permissions.
   // Empty value means follow the existing BEAC team context.
-  let ccLeagueContextSelection_=(()=>{try{return text(localStorage.getItem('cc-manager-league-context-v1'))}catch(_){return''}})();
+  let ccLeagueContextSelection_=(()=>{try{return text(ccManagerTestStore_.getItem('cc-manager-league-context-v1'))}catch(_){return''}})();
   function ccLeagueCatalog_(){
     return window.CCCompetitionContextCatalog?.build({
       season:'2026/27',fixtures:ccMrszPhotoState_.fixtures,
@@ -2802,13 +2812,13 @@
     ccLeagueContextSelection_=c.competitionLabel;
     state.managerStandingsTeam='all';
     ccLeagueMatchScope_='all';
-    try{localStorage.setItem('cc-manager-league-context-v1',ccLeagueContextSelection_);localStorage.setItem('cc-manager-standings-team','all')}catch(_){}
+    try{ccManagerTestStore_.setItem('cc-manager-league-context-v1',ccLeagueContextSelection_);ccManagerTestStore_.setItem('cc-manager-standings-team','all')}catch(_){}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
     else renderManagerStandings_();
   }
   function ccClearLeagueContext_(){
     ccLeagueContextSelection_='';
-    try{localStorage.removeItem('cc-manager-league-context-v1')}catch(_){}
+    try{ccManagerTestStore_.removeItem('cc-manager-league-context-v1')}catch(_){}
   }
   async function ccLoadMrszPhotoSnapshot_(){
     if(ccMrszPhotoState_.loaded||ccMrszPhotoState_.loading)return;
@@ -3905,7 +3915,7 @@
   }
   async function teamSeasonAttendanceWrite_(button){if(!button||button.disabled)return;const eventId=text(button.dataset.eventId),playerId=text(button.dataset.playerId),current=text(button.dataset.attState),next=current==='present'?'absent':current==='absent'?'':'present',db=next||'clear';button.disabled=true;try{const result=await ccCompetitionAttendanceRpc_(eventId,playerId,db),saved=text(result?.attendanceStatus??result?.status??'');if(saved!==next)throw new Error('A jelenlét mentése nem igazolható vissza.');ccPatchAttendanceCaches_(eventId,playerId,saved);renderTeams();status('Jelenlét mentve.','success')}catch(err){button.disabled=false;status(err.message||'A jelenlét mentése sikertelen.','error')}}
   function bindTeamSeasonGrid_(){
-    $('#teamGridPeriodSelect')?.addEventListener('change',e=>{state.teamGridPeriod=e.target.value==='all'?'all':'upcoming';try{localStorage.setItem('cc-manager-team-grid-period',state.teamGridPeriod)}catch(_){}renderTeams()});
+    $('#teamGridPeriodSelect')?.addEventListener('change',e=>{state.teamGridPeriod=e.target.value==='all'?'all':'upcoming';try{ccManagerTestStore_.setItem('cc-manager-team-grid-period',state.teamGridPeriod)}catch(_){}renderTeams()});
     $$('[data-team-season-att]').forEach(b=>b.addEventListener('click',()=>teamSeasonAttendanceWrite_(b)));
     bindCoachAvailabilityControls_($('#viewContent')||document);bindEventDetailActions()
   }
@@ -4094,9 +4104,9 @@
     });
     bindTeamMultiFilter_('players',renderPlayers);
     $('#playerMedicalFilter')?.addEventListener('change',e=>{state.playerMedical=e.target.value;afterNativePicker(e.target,renderPlayers)});
-    $('#playerListMode')?.addEventListener('change',e=>{state.playerListMode=e.target.value==='grouped'?'grouped':'all';try{localStorage.setItem('cc-manager-player-list-mode',state.playerListMode)}catch(_){};afterNativePicker(e.target,renderPlayers)});
-    $('#playerSort')?.addEventListener('change',e=>{state.playerSort=e.target.value||'name';try{localStorage.setItem('cc-manager-player-sort',state.playerSort)}catch(_){};afterNativePicker(e.target,renderPlayers)});
-    $('#playerSortDir')?.addEventListener('change',e=>{state.playerSortDir=e.target.value==='desc'?'desc':'asc';try{localStorage.setItem('cc-manager-player-sort-dir',state.playerSortDir)}catch(_){};afterNativePicker(e.target,renderPlayers)});
+    $('#playerListMode')?.addEventListener('change',e=>{state.playerListMode=e.target.value==='grouped'?'grouped':'all';try{ccManagerTestStore_.setItem('cc-manager-player-list-mode',state.playerListMode)}catch(_){};afterNativePicker(e.target,renderPlayers)});
+    $('#playerSort')?.addEventListener('change',e=>{state.playerSort=e.target.value||'name';try{ccManagerTestStore_.setItem('cc-manager-player-sort',state.playerSort)}catch(_){};afterNativePicker(e.target,renderPlayers)});
+    $('#playerSortDir')?.addEventListener('change',e=>{state.playerSortDir=e.target.value==='desc'?'desc':'asc';try{ccManagerTestStore_.setItem('cc-manager-player-sort-dir',state.playerSortDir)}catch(_){};afterNativePicker(e.target,renderPlayers)});
     $('#playerFilterReset')?.addEventListener('click',()=>{state.playerTeam='';state.teamFilters.players=[];state.playerSearch='';state.playerMedical='all';state.playerSort='name';state.playerSortDir='asc';renderPlayers()});
     const toggle=$('#playerFiltersToggle'),panel=$('#playerFiltersPanel');if(toggle)toggle.classList.toggle('open',state.playerFiltersOpen);
     toggle?.addEventListener('click',()=>{const open=setFilterOpen_('competition.players',!state.playerFiltersOpen);state.playerFiltersOpen=open;toggle.setAttribute('aria-expanded',String(open));toggle.classList.toggle('open',open);if(panel)panel.hidden=!open;ccBlurPointerControl_(toggle)});
@@ -4481,7 +4491,7 @@
     $('#viewContent').innerHTML=`<div class="page-intro finance-page-intro"><div><h2>Pénzügyek</h2><p>Versenyengedély, bérlet/tagdíj, edzői díj, értékesítés és teljes módosítási napló.</p></div></div><div class="finance-top-tabs">${financeTabsHtml_()}</div>${content}`;bindFinance_()
   }
 
-  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9K</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');localStorage.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
+  function renderSettings(){if(!ccSectionIs_('settings'))return;const canManage=canAction('settings','edit');$('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Beállítások</h2><p>Megjelenés, Manager-fiókok és jogosultságok.</p></div><span class="read-only-badge ${canManage?'write-enabled':''}">${canManage?'ADMIN WRITE':'VIEW'}</span></div><div class="settings-layout"><article class="panel"><div class="setting-row"><div><strong>Megjelenés</strong><small>Világos / sötét téma ezen az eszközön.</small></div><button class="button quiet" id="themeToggle" type="button">Téma váltása</button></div><div class="setting-row"><div><strong>Manager build</strong><small>${esc(FRONTEND_BUILD)}</small></div><span class="status-pill ok">R1 UI1.9K</span></div><div class="setting-row"><div><strong>Rendszer és integrációk</strong><small>Adatkapcsolat: ${configured()?'aktív':'nincs konfigurálva'} · Player értesítések: közös backend infrastruktúra</small></div><span class="status-pill ${configured()?'ok':'warn'}">${configured()?'AKTÍV':'ELLENŐRIZD'}</span></div><div class="setting-row"><div><strong>Edzéstervezés</strong><small>A régi Manager szerkezete aktív; a részletes edzésterv-szerkesztő külön következő kör.</small></div><span class="status-pill">STRUKTÚRA KÉSZ</span></div></article>${canManage?`<article class="panel admin-panel"><div class="panel-head"><div><h3>Adminok és jogosultságok</h3><p>Manager hozzáférés e-mail alapján, modul- és csapatscope-pal.</p></div><button class="button primary small" id="adminAddBtn" type="button" ${state.adminsLoadError?'disabled':''}>+ Új admin</button></div><div class="admin-layout"><div>${adminListHtml()}</div><div>${adminEditorHtml()}</div></div></article>`:''}</div>`;$('#themeToggle')?.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');ccManagerTestStore_.setItem('cc-manager-theme',dark?'dark':'light')});if(canManage)bindAdminEditor()}
 
   function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`;ccScheduleTeamSelectorDecorate_();requestAnimationFrame(ccForceRootHorizontalZero_)}
 
@@ -4507,7 +4517,7 @@
   }
 
   async function boot(){
-    if(localStorage.getItem('cc-manager-theme')==='dark')document.body.classList.add('dark');
+    if(ccManagerTestStore_.getItem('cc-manager-theme')==='dark')document.body.classList.add('dark');
     resolveInitialRoute();bindStaticUi();installManagerPullToRefresh_();
 
     const localTest=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
@@ -4518,7 +4528,7 @@
           await Promise.all(regs.map(r=>r.unregister()));
           if('caches'in window){
             const keys=await caches.keys();
-            await Promise.all(keys.filter(k=>/^cc-manager-/i.test(k)).map(k=>caches.delete(k)));
+            await Promise.all(keys.filter(k=>/^cc-manager-test-/i.test(k)).map(k=>caches.delete(k)));
           }
         }catch(err){console.warn('Local Manager cache cleanup:',err)}
       }else{
@@ -4526,7 +4536,12 @@
       }
     }
 
-    if(!configured()){hideLogin();status('Manager PWA konfigurációs hiba: a Supabase kapcsolat nincs beállítva.','error');renderChrome();renderView();return}
+    if(cfg.TEST_ONLY===true && state.mode==='demo'){
+      hideLogin();useDemo();
+      status('CC MANAGER TEST · DEMÓ – a STAGING adatbázis még üres. Nincs éles adatkapcsolat.');
+      return;
+    }
+    if(!configured()){hideLogin();status('TEST kapcsolat nem engedélyezett. Éles Supabase tiltva.','error');renderChrome();renderView();return}
     try{
       state.supabase=await createSupabase();
       showLogin('loginLoadingStep');

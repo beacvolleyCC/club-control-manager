@@ -1,4 +1,4 @@
-const CACHE='cc-manager-20261025-protocol-mobile-v2';
+const CACHE='cc-manager-test-20261026-demo-v1';
 const CORE=[
   './','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest','./scoreboard.js','./scoreboard.css','./competition-context-catalog.js','./volleyball-core.js','./volleyball-ui.js','./volleyball.css',
   './assets/player-animals.webp','./assets/event-training-mask.png','./assets/event-home-mask.png','./assets/event-away-mask.png','./assets/beac-logo-96.png','./assets/team-logos/beac.png','./assets/team-logos/bdseemericus.png','./assets/team-logos/bdseemericus_dark.png','./assets/team-logos/bunnies.png','./assets/team-logos/dag.png','./assets/team-logos/kando.png','./assets/team-logos/keac.png','./assets/team-logos/kispest.png','./assets/team-logos/kispest_dark.png','./assets/team-logos/kozgaz.png','./assets/team-logos/kre.png','./assets/team-logos/kse.png','./assets/team-logos/mafc.png','./assets/team-logos/mozdulj.png','./assets/team-logos/mtk.png','./assets/team-logos/ossc.png','./assets/team-logos/ossc_dark.png','./assets/team-logos/panorama.png','./assets/team-logos/panorama_dark.png','./assets/team-logos/pase.png','./assets/team-logos/rackeve.png','./assets/team-logos/rksk.png','./assets/team-logos/semmeilweis.png','./assets/team-logos/taksony.png','./assets/team-logos/ute.png','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
@@ -9,7 +9,7 @@ self.addEventListener('install',event=>{
 });
 
 self.addEventListener('activate',event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('cc-manager-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
 });
 
 self.addEventListener('fetch',event=>{

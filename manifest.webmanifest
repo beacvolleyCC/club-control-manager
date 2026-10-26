@@ -1,12 +1,12 @@
 {
-  "name": "Club Control Manager",
-  "short_name": "CC Manager",
+  "name": "Club Control TEST – Manager",
+  "short_name": "MGR TEST",
   "description": "Club Control Manager PWA",
-  "start_url": "./",
+  "start_url": "./?cc_test=manager",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f7b700",
-  "theme_color": "#f7b700",
+  "background_color": "#a4430d",
+  "theme_color": "#a4430d",
   "orientation": "any",
   "icons": [
     {
@@ -25,5 +25,6 @@
       "type": "image/png",
       "purpose": "any"
     }
-  ]
+  ],
+  "id": "./?cc-app=manager-test-20261026"
 }
