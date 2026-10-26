@@ -1,0 +1,23 @@
+name: Staging migration-history parity gate
+on:
+  push:
+    branches: [rc/20261026-competition-manager-74-76]
+  pull_request:
+    paths:
+      - 'scripts/qa/staging-migration-parity.cjs'
+      - 'tests/staging-migration-parity-20261026.test.cjs'
+      - 'data/qa/supabase-migration-history-20261026.json'
+      - '.github/workflows/staging-migration-parity-20261026.yml'
+jobs:
+  migration-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify gate fails closed on partial migration history
+        run: |
+          node --check scripts/qa/staging-migration-parity.cjs
+          node --test tests/staging-migration-parity-20261026.test.cjs
+          node scripts/qa/staging-migration-parity.cjs --audit
