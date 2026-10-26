@@ -76,7 +76,7 @@ requireColumns(players,['id','name','email','active'],'players');
 requireColumns(membership,['id','player_id','team_id','starts_on','active'],'team_memberships');
 const map=new Map(),emails=new Set(),sentences=[
 '-- TEST ONLY. Offline, privacy-reduced roster import; never run against LIVE.',
-'-- Only sport data and selected TEST email. No auth_user_id, medical or financial data.',
+'-- Only sport data and selected TEST email. No authentication, medical or financial data.',
 '-- This does not delete pre-existing synthetic fixtures.',
 'BEGIN;'
 ];
@@ -90,7 +90,7 @@ for(const p of players){
   if(!name||name.length>160)fail('invalid name');
   const email=String(p.email||'').trim().toLowerCase();
   if(!email)fail('missing email');
-  const safeEmail=email===preserve?email:'cc-test-'+id.slice(0,12)+'@example.invalid';
+  const safeEmail=email===preserve?email:'cc-test-'+id.replaceAll('-','').slice(0,12)+'@example.invalid';
   if(email===preserve)kept++;
   if(emails.has(safeEmail))fail('duplicate sanitized email');
   emails.add(safeEmail);
