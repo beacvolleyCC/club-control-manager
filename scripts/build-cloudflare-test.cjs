@@ -63,4 +63,24 @@ fs.writeFileSync(path.join(dest,'robots.txt'),'User-agent: *\nDisallow: /\n','ut
 assert(!fs.existsSync(path.join(dest,'data'))&&!fs.existsSync(path.join(dest,'supabase'))
  &&!fs.existsSync(path.join(dest,'docs'))&&!fs.existsSync(path.join(dest,'tests'))
  &&!fs.existsSync(path.join(dest,'.github')),'unexpected developer/private data copied');
+
+// Create the connected test deployment from offline-safe demo source.
+// Source config.js remains DEMO for source-level regression tests and QA.
+const STAGING_URL='https://szzoubvhlwnojtzqjebc.supabase.co';
+const stageConfig="/* CC MANAGER TEST – scoped to separate STAGING ONLY (publishable browser key). */\nwindow.CC_MANAGER_CONFIG=Object.freeze({\n BUILD:'cc-manager-staging-20261028',TEST_ONLY:true,\n STAGING_REF:'szzoubvhlwnojtzqjebc', DATA_MODE:'supabase',\n SUPABASE_URL:'https://szzoubvhlwnojtzqjebc.supabase.co',\n SUPABASE_PUBLISHABLE_KEY:'sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB',\n DEFAULT_SEASON:'2026/27',DEFAULT_AREA:'competition'\n});\n";
+assert(/^sb_publishable_/.test("sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB"),'TEST publishable API key missing');
+assert(stageConfig.includes(STAGING_URL)&&!stageConfig.includes('snqsxlyhontaepembaic'),'TEST endpoint invariant');
+fs.writeFileSync(path.join(dest,'config.js'),stageConfig,'utf8');
+let stageHtml=fs.readFileSync(path.join(dest,'index.html'),'utf8');
+assert(stageHtml.includes('CC MANAGER TEST · DEMÓ · NEM ÉLES'),'source TEST banner missing');
+assert(stageHtml.includes('connect-src \'self\' https://szzoubvhlwnojtzqjebc.supabase.co'),'TEST CSP missing');
+stageHtml=stageHtml.replace('CC MANAGER TEST · DEMÓ · NEM ÉLES','CC MANAGER TEST · STAGING · NEM ÉLES');
+fs.writeFileSync(path.join(dest,'index.html'),stageHtml,'utf8');
+let runtime=fs.readFileSync(path.join(dest,'app.js'),'utf8');
+assert(runtime.includes('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'),'Supabase client loader missing');
+runtime=runtime.replace('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0');
+runtime=runtime.replaceAll('shouldCreateUser:true','shouldCreateUser:false');
+fs.writeFileSync(path.join(dest,'app.js'),runtime,'utf8');
+assert(!/https?:\/\/snqsxlyhontaepembaic\.supabase\.co/.test(stageHtml+stageConfig+runtime),'production endpoint in staging output');
+
 console.log('PASS: MANAGER TEST static-only Pages bundle:',count,'files,',bytes,'bytes; target=dist-test');

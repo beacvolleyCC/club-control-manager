@@ -12,7 +12,13 @@ test('Cloudflare Pages bundle contains only verified CC MANAGER TEST static asse
  for(const p of ['data','docs','sql','supabase','tests','scripts','.git','.github','.env','HANDOVER_CURRENT.md'])assert.ok(!fs.existsSync(path.join(d,p)),'unwanted published path: '+p);
  const cfg=fs.readFileSync(path.join(d,'config.js'),'utf8');
  assert.doesNotMatch(cfg,/snqsxlyhontaepembaic|sb_secret_|service_role/i);
- assert.match(cfg,/DATA_MODE:'demo'/);
+ assert.match(cfg,/DATA_MODE:'supabase'/);
+ assert.match(cfg,/SUPABASE_URL:'https:\/\/szzoubvhlwnojtzqjebc\.supabase\.co'/);
+ assert.match(cfg,/SUPABASE_PUBLISHABLE_KEY:'sb_publishable_/);
+ const page=fs.readFileSync(path.join(d,'index.html'),'utf8');
+ assert.match(page,/CC MANAGER TEST · STAGING · NEM ÉLES/);
+ assert.match(fs.readFileSync(path.join(d,'app.js'),'utf8'),/supabase-js@2\.118\.0/);
+ assert.doesNotMatch(fs.readFileSync(path.join(d,'app.js'),'utf8'),/shouldCreateUser:true/);
  assert.match(fs.readFileSync(path.join(d,'_headers'),'utf8'),/X-Robots-Tag: noindex/);
 });
 test('Pages build is self-contained and does not alter source configuration',()=>{
