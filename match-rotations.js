@@ -254,8 +254,9 @@ function onClick(event){
   snapshot('Új játszma');match.set++;match.score=[0,0];match.server=null;match.lastAction='Új játszma: válaszd ki a nyitó csapatot.';selection=null;notice='';save();paint();return;
  }
  if(act==='new-match'){
-  if(!confirm('Új mérkőzést indítasz? Az eredmény, nyitásjog és a cserék törlődnek.'))return;
-  match=defaultMatch();selection=null;notice='';save();paint();return;
+  if(!confirm('Új mérkőzést indítasz? A pontok, játszmaszám és nyitásjog nullázódnak; a jelenlegi névsorok és felállások megmaradnak.'))return;
+  match.score=[0,0];match.server=null;match.set=1;match.history=[];match.lastAction='Új mérkőzés. Válaszd ki a nyitó csapatot.';
+  selection=null;notice='';save();paint();return;
  }
  if(act==='bench-player'&&team){selection={side,id};notice='Válaszd ki a cél pályahelyet ('+team.name+').';paint();return}
  if(act==='court-player'&&team){
