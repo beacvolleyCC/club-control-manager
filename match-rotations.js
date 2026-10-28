@@ -217,7 +217,15 @@ function changePlayer(side,id,pos){
   selection=null;notice='';save();paint();return;
  }
  if(player.role==='libero'){
-  if(tr.libero)return fail('Már van liberó a pályán. Előbb az eredeti játékosát kell visszahozni.');
+  if(tr.libero){
+   if(old.role!=='libero'||tr.libero.liberoId!==old.id)return fail('Egyszerre csak egy liberó játszhat. A második liberó az aktív liberó helyére léphet.');
+   if(tr.lastLiberoRally===match.rally)return fail('A két liberó közötti cseréhez is szükséges egy befejezett labdamenet.');
+   snapshot('Liberóváltás');
+   t.spots[to]=id;tr.libero.liberoId=id;tr.lastLiberoRally=match.rally;
+   match.lastAction=t.name+': '+labelPlayer(player)+' váltja a másik liberót ('+atPos+'. hely).';
+   eventLog('libero',match.lastAction);
+   selection=null;notice='';save();paint();return;
+  }
   if(![1,5,6].includes(atPos))return fail('A liberó csak az 1., 5. vagy 6. (hátsó soros) helyre állhat be.');
   if(tr.lastLiberoRally===match.rally)return fail('Két liberócsere között legalább egy befejezett labdamenet szükséges.');
   snapshot('Liberó be');
