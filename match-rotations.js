@@ -362,10 +362,31 @@ function closeDialog(repaint=true){
  if(imageUrl){URL.revokeObjectURL(imageUrl);imageUrl=null}
  if(repaint)paint();
 }
+function exportLog(){
+ if(!match.events.length)return;
+ const cell=v=>{
+  const raw=String(v??''),safe=/^[=+\-@\t\r]/.test(raw)?"'"+raw:raw;
+  return '"'+safe.replace(/"/g,'""')+'"';
+ };
+ const rows=[
+  ['Időpont','Játszma','A csapat pont','B csapat pont','Eseménytípus','Leírás'],
+  ...match.events.map(e=>[
+   e.at?new Date(e.at).toLocaleString('hu-HU'):'',
+   e.set,e.score?.[0]??'',e.score?.[1]??'',e.kind,e.text
+  ])
+ ];
+ const csv='\ufeff'+rows.map(r=>r.map(cell).join(';')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='club-control-meccsnaplo-'+new Date().toISOString().slice(0,10)+'.csv';
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 function onClick(event){
  const b=event.target.closest('[data-match-action]');
  if(!b||!root.contains(b))return;
  const act=b.dataset.matchAction,side=integer(b.dataset.side,-1),id=integer(b.dataset.id,-1),team=match.teams[side];
+ if(act==='export-log'){exportLog();return}
  if(act==='point'&&team){award(side);return}
  if(act==='server'&&team){
   snapshot('Nyitásjog');match.server=side;match.lastAction=team.name+' nyit.';eventLog('server',match.lastAction);notice='';save();paint();return;
