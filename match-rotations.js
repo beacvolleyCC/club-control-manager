@@ -184,26 +184,82 @@ function effect(message){notice=message;save();paint()}
 function award(side){
  if(match.server===null){effect('A pontozás előtt jelöld ki a nyitó csapatot.');return}
  snapshot('Pont');
+ lockLineups();
  const prev=match.server;
- match.score[side]++;
- if(side!==prev){rotate(match.teams[side]);match.server=side;match.lastAction=match.teams[side].name+' pontot szerzett és forgott (nyitáscsere).'}
- else match.lastAction=match.teams[side].name+' pontot szerzett, nyitás marad.';
+ match.score[side]++;match.rally++;
+ if(side!==prev){
+  const t=match.teams[side],lib=t.tracking.libero;
+  // A libero in position 5 must leave before the side-out rotation takes them to front-row 4.
+  if(lib && t.spots.indexOf(lib.liberoId)===4)leaveLibero(t,true);
+  rotate(t);match.server=side;
+  match.lastAction=t.name+' pontot szerzett és forgott (nyitáscsere).';
+ }else match.lastAction=match.teams[side].name+' pontot szerzett, nyitás marad.';
+ eventLog('point',match.lastAction);
  notice='';save();paint();
 }
 function changePlayer(side,id,pos){
- const t=match.teams[side],player=t.players.find(p=>p.id===id),atPos=integer(pos,-1);
+ const t=match.teams[side],player=t?.players.find(p=>p.id===id),atPos=integer(pos,-1);
  if(!player||atPos<1||atPos>6)return;
- const from=t.spots.indexOf(id),to=atPos-1;
+ const tr=t.tracking,from=t.spots.indexOf(id),to=atPos-1,old=current(t,atPos);
  if(from===to){selection=null;paint();return}
- snapshot('Játékoscsere');
- const old=t.players.find(p=>p.id===t.spots[to]);
- if(from>=0){[t.spots[from],t.spots[to]]=[t.spots[to],t.spots[from]];match.lastAction=t.name+': helycsere ('+labelPlayer(player)+' ↔ '+labelPlayer(old)+').'}
- else {
-   // Substituted player inherits the court role unless explicitly edited afterwards.
-   player.role=old?.role||player.role;
-   t.spots[to]=id;
-   match.lastAction=t.name+': '+labelPlayer(player)+' be, '+labelPlayer(old)+' le.';
+ const fail=msg=>{selection=null;effect(msg)};
+ if(from>=0){
+  if(tr.locked)return fail('A kezdőfelállás a labdamenetek után rögzített. Két pályán lévő játékos szabad felcserélése csak az első pont előtt lehetséges.');
+  if(tr.libero)return fail('Aktív liberó mellett előbb a liberócserét fejezd be.');
+  snapshot('Felállás módosítása');
+  [t.spots[from],t.spots[to]]=[t.spots[to],t.spots[from]];
+  match.lastAction=t.name+': felálláscsere ('+labelPlayer(player)+' ↔ '+labelPlayer(old)+').';
+  eventLog('lineup',match.lastAction);
+  selection=null;notice='';save();paint();return;
  }
+ if(player.role==='libero'){
+  if(tr.libero)return fail('Már van liberó a pályán. Előbb az eredeti játékosát kell visszahozni.');
+  if(![1,5,6].includes(atPos))return fail('A liberó csak az 1., 5. vagy 6. (hátsó soros) helyre állhat be.');
+  if(tr.lastLiberoRally===match.rally)return fail('Két liberócsere között legalább egy befejezett labdamenet szükséges.');
+  if(tr.locked && !tr.starters.includes(old.id))return fail('A liberó a rendes cserejátékost ebben az egyszerűsített követőben nem válthatja. Előbb az eredeti kezdő visszatérését ellenőrizd.');
+  snapshot('Liberó be');
+  tr.libero={liberoId:id,replacedId:old.id};
+  t.spots[to]=id;tr.lastLiberoRally=match.rally;
+  match.lastAction=t.name+': '+labelPlayer(player)+' (liberó) be, '+labelPlayer(old)+' le, '+atPos+'. hely.';
+  eventLog('libero',match.lastAction);
+  selection=null;notice='';save();paint();return;
+ }
+ if(old.role==='libero'){
+  if(!tr.libero||tr.libero.replacedId!==id)return fail('A liberót csak az általa váltott játékos hozhatja le.');
+  if(!leaveLibero(t,false))return fail('Két liberócsere között még nem volt befejezett labdamenet.');
+  match.lastAction=t.name+': '+labelPlayer(player)+' vissza a liberó helyére.';
+  selection=null;notice='';save();paint();return;
+ }
+ if(tr.libero && tr.libero.replacedId===id)return fail('Ez a játékos jelenleg a liberó helyett a padon van; csak a liberó helyére térhet vissza.');
+ if(!tr.locked){
+  // Initial line-up selection, before the first rally: does not count as a substitution.
+  snapshot('Kezdőfelállás');
+  if(player.role==='other')player.role=old.role;
+  t.spots[to]=id;
+  match.lastAction=t.name+': '+labelPlayer(player)+' a kezdőfelállás '+atPos+'. helyére.';
+  eventLog('lineup',match.lastAction);
+  selection=null;notice='';save();paint();return;
+ }
+ if(tr.subs>=6)return fail(t.name+': elfogyott a 6 rendes csere ebben a játszmában.');
+ if(tr.lastSubRally===match.rally)return fail('Egy csapat nem kérhet két külön rendes cserét ugyanabban a játékmegszakításban. Következő befejezett labdamenet után folytatható.');
+ const oldStarter=tr.starters.includes(old.id),inStarter=tr.starters.includes(id);
+ if(oldStarter){
+  if(inStarter)return fail('Kezdőjátékos csak az őt korábban váltó cserejátékos helyére térhet vissza.');
+  if(tr.pairs[old.id]||tr.returned.includes(old.id))return fail('Ez a kezdőjátékos már felhasználta a rendes cserelehetőségét.');
+  if(tr.used.includes(id))return fail('Ez a cserejátékos már pályára lépett ebben a játszmában.');
+  snapshot('Rendes csere');
+  tr.pairs[old.id]=id;tr.used.push(id);
+ }else{
+  const starter=Number(Object.keys(tr.pairs).find(k=>tr.pairs[k]===old.id));
+  if(!starter||id!==starter||tr.returned.includes(starter))return fail('A cserejátékost csak az eredetileg lecserélt kezdőjátékos válthatja vissza.');
+  snapshot('Visszacsere');
+  tr.returned.push(starter);
+ }
+ tr.subs++;tr.lastSubRally=match.rally;
+ if(player.role==='other')player.role=old.role;
+ t.spots[to]=id;
+ match.lastAction=t.name+': '+labelPlayer(player)+' be, '+labelPlayer(old)+' le. ('+tr.subs+'/6 rendes csere)';
+ eventLog('sub',match.lastAction);
  selection=null;notice='';save();paint();
 }
 function rosterFromManager(side){
