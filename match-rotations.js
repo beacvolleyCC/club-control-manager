@@ -99,7 +99,7 @@ function rosterCard(side){
  const t=match.teams[side],bench=standing(t),teamOptions=rosters.map(r=>
  '<option value="'+escapeHtml(r.id)+'" '+(t.teamId===r.id?'selected':'')+'>'+escapeHtml(r.name)+'</option>').join('');
  return '<section class="cc-match-roster" style="--match-color:'+t.color+'"><header><h3>'+escapeHtml(t.name)+' · névsor</h3><span>'+bench.length+' csere</span></header>'+
- '<div class="cc-match-import-row"><select data-match-roster-select="'+side+'" aria-label="Club Control csapat választása"><option value="">BEAC csapat kiválasztása…</option>'+teamOptions+'</select>'+
+ '<label class="cc-match-team-name">Csapat neve<input type="text" maxlength="65" data-match-team-name="'+side+'" value="'+escapeHtml(t.name)+'"></label><div class="cc-match-import-row"><select data-match-roster-select="'+side+'" aria-label="Club Control csapat választása"><option value="">BEAC csapat kiválasztása…</option>'+teamOptions+'</select>'+
  '<button type="button" data-match-action="load-roster" data-side="'+side+'">Betöltés</button></div>'+
  '<div class="cc-match-bench">'+(bench.map(p=>
  '<button type="button" draggable="true" data-match-source="'+side+':'+p.id+'" data-match-action="bench-player" data-side="'+side+'" data-id="'+p.id+'" class="cc-match-bench-player'+(selection?.side===side&&selection?.id===p.id?' selected':'')+'"><b>'+escapeHtml(p.number?'#'+p.number:'·')+'</b><span>'+escapeHtml(p.name||'Új játékos')+'</span></button>').join('')||'<p class="cc-match-no-bench">Nincs játékos a cserepadon.</p>')+'</div>'+
@@ -265,8 +265,8 @@ function onClick(event){
  }
  if(act==='edit-player'&&team){editorDialog(side,id);return}
  if(act==='add-player'&&team){
-  const p={id:team.nextId++,number:'',name:'',role:'other',sourceId:''};
-  snapshot('Játékos felvétele');team.players.push(p);save();paint();editorDialog(side,p.id);return;
+  snapshot('Játékos felvétele');
+  const p={id:team.nextId++,number:'',name:'',role:'other',sourceId:''};team.players.push(p);save();paint();editorDialog(side,p.id);return;
  }
  if(act==='load-roster'&&team){rosterFromManager(side);return}
  if(act==='import-text'&&team){importDialog(side);return}
@@ -290,6 +290,11 @@ function onSubmit(event){
 }
 function onChange(event){
  const f=event.target;
+ if(f.matches?.('[data-match-team-name]')){
+  const side=integer(f.dataset.matchTeamName,-1),t=match.teams[side];
+  if(t){snapshot('Csapatnév módosítása');t.name=f.value.trim().slice(0,65)||t.name;match.lastAction='Csapat neve: '+t.name;save();paint()}
+  return;
+ }
  if(f.matches?.('[data-match-image]')){
   const preview=root.querySelector('[data-match-image-preview]'),file=f.files?.[0];
   if(imageUrl){URL.revokeObjectURL(imageUrl);imageUrl=null}
