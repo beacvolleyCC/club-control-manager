@@ -167,7 +167,7 @@ function rosterCard(side){
  '<label class="cc-match-team-name">Csapat neve<input type="text" maxlength="65" data-match-team-name="'+side+'" value="'+escapeHtml(t.name)+'"></label><div class="cc-match-import-row"><select data-match-roster-select="'+side+'" aria-label="Club Control csapat választása"><option value="">BEAC csapat kiválasztása…</option>'+teamOptions+'</select>'+
  '<button type="button" data-match-action="load-roster" data-side="'+side+'">Betöltés</button></div>'+
  '<div class="cc-match-bench">'+(bench.map(p=>
- '<button type="button" draggable="true" data-match-source="'+side+':'+p.id+'" data-match-action="bench-player" data-side="'+side+'" data-id="'+p.id+'" class="cc-match-bench-player'+(selection?.side===side&&selection?.id===p.id?' selected':'')+'"><b>'+escapeHtml(p.number?'#'+p.number:'·')+'</b><span>'+escapeHtml(p.name||'Új játékos')+'</span></button>').join('')||'<p class="cc-match-no-bench">Nincs játékos a cserepadon.</p>')+'</div>'+
+ '<button type="button" draggable="true" data-match-source="'+side+':'+p.id+'" data-match-action="bench-player" data-side="'+side+'" data-id="'+p.id+'" class="cc-match-bench-player'+(selection?.side===side&&selection?.id===p.id?' selected':'')+'"><b>'+escapeHtml(p.number?'#'+p.number:'·')+'</b><span>'+escapeHtml(p.name||'Új játékos')+'</span>'+(p.role==='libero'?'<small class="cc-match-libero-pill">L</small>':'')+'</button>').join('')||'<p class="cc-match-no-bench">Nincs játékos a cserepadon.</p>')+'</div>'+
  '<div class="cc-match-roster-actions"><button type="button" data-match-action="add-player" data-side="'+side+'">+ Játékos hozzáadása</button>'+
  '<button type="button" data-match-action="import-text" data-side="'+side+'">Névsor szövegből / képernyőképről</button></div></section>';
 }
@@ -175,7 +175,7 @@ function paint(){
  if(!root||!root.isConnected)return;
  root.innerHTML='<div class="cc-match-app">'+
  '<div class="cc-match-intro"><button type="button" data-match-action="clear-selection">Kijelölés törlése</button>'+
- '<span>Játékos a cserepadról → húzd vagy koppintsd a pályahelyre</span></div>'+
+ '<span>'+(match.rally?'Felállás rögzítve · '+match.rally+' labdamenet':'Felállás szerkeszthető az első pontig')+' · cserepadról húzás vagy koppintás</span></div>'+
  scoreboard()+'<div class="cc-match-board">'+courtHalf(1)+'<div class="cc-match-net">HÁLÓ</div>'+courtHalf(0)+'</div>'+
  '<p class="cc-match-helper">Az első pont előtt szabadon rendezhető a kezdőfelállás. A meccs kezdetétől 6 rendes csere/szett érvényes. Liberócsere: csak hátsó sorban, a lecserélt játékos térhet vissza. Telefonon: cserejátékos, majd cél pályahely.</p>'+
  '<div class="cc-match-rosters">'+rosterCard(0)+rosterCard(1)+'</div>'+activityLog()+
@@ -227,7 +227,9 @@ function changePlayer(side,id,pos){
  }
  if(old.role==='libero'){
   if(!tr.libero||tr.libero.replacedId!==id)return fail('A liberót csak az általa váltott játékos hozhatja le.');
-  if(!leaveLibero(t,false))return fail('Két liberócsere között még nem volt befejezett labdamenet.');
+  if(tr.lastLiberoRally===match.rally)return fail('Két liberócsere között még nem volt befejezett labdamenet.');
+  snapshot('Liberó le');
+  if(!leaveLibero(t,false))return fail('A liberó visszacseréje nem sikerült.');
   match.lastAction=t.name+': '+labelPlayer(player)+' vissza a liberó helyére.';
   selection=null;notice='';save();paint();return;
  }
