@@ -286,6 +286,8 @@ function fitMatchViewport(){
 }
 function paint(){
  if(!root||!root.isConnected)return;
+ const timelineTrack=root.querySelector('.cc-match-timeline-track');
+ const timelineScroll=timelineTrack?{left:timelineTrack.scrollLeft,end:timelineTrack.scrollWidth-timelineTrack.scrollLeft-timelineTrack.clientWidth<70}:null;
  const saved={};
  ['.cc-match-history-list','[data-match-bench-list="0"]','[data-match-bench-list="1"]'].forEach(q=>{
   const el=root.querySelector(q);if(el)saved[q]=el.scrollTop;
@@ -300,6 +302,8 @@ function paint(){
  root.querySelectorAll('.cc-match-bench').forEach((el,i)=>el.dataset.matchBenchList=String(i));
  settings.forEach(id=>{const el=root.querySelector('[data-match-settings="'+id+'"]');if(el)el.hidden=false});
  Object.entries(saved).forEach(([q,scroll])=>{const el=root.querySelector(q);if(el)el.scrollTop=scroll});
+ const newTrack=root.querySelector('.cc-match-timeline-track');
+ if(newTrack)newTrack.scrollLeft=!timelineScroll||timelineScroll.end?newTrack.scrollWidth:timelineScroll.left;
  fitMatchViewport();
 }
 function effect(message){notice=message;save();paint()}
@@ -529,6 +533,7 @@ function onClick(event){
  if(!b||!root.contains(b))return;
  const act=b.dataset.matchAction,side=integer(b.dataset.side,-1),id=integer(b.dataset.id,-1),team=match.teams[side];
  if(act==='export-log'){exportLog();return}
+ if(act==='inspect-point'){inspectPoint(integer(b.dataset.seq,-1));return}
  if(act==='point'&&team){award(side);return}
  if(act==='timeout'&&team){recordTimeout(side);return}
  if(act==='server'&&team){
@@ -542,11 +547,11 @@ function onClick(event){
  }
  if(act==='new-set'){
   if(!confirm('Új játszmát indítasz? A pontok és a rendes cserék száma nullázódik. A névsor megmarad, a liberó visszamegy a padra.'))return;
-  snapshot('Új játszma');resetSetRules();match.set++;match.score=[0,0];match.server=null;match.lastAction='Új játszma: a hat rendes csere ismét elérhető.';eventLog('set',match.lastAction);selection=null;notice='';save();paint();return;
+  snapshot('Új játszma');resetSetRules();match.set++;timelineSet=null;match.score=[0,0];match.server=null;match.lastAction='Új játszma: a hat rendes csere ismét elérhető.';eventLog('set',match.lastAction);selection=null;notice='';save();paint();return;
  }
  if(act==='new-match'){
   if(!confirm('Új mérkőzést indítasz? A korábbi eseménynapló és pontszám törlődik! A névsor és felállás megmarad. Exportáld a naplót előtte, ha szükséged van rá.'))return;
-  resetSetRules();match.score=[0,0];match.server=null;match.set=1;match.history=[];match.events=[];match.eventSeq=1;match.lastAction='Új mérkőzés. Válaszd ki a nyitó csapatot.';
+  resetSetRules();match.score=[0,0];match.server=null;match.set=1;timelineSet=null;match.history=[];match.events=[];match.eventSeq=1;match.lastAction='Új mérkőzés. Válaszd ki a nyitó csapatot.';
   selection=null;notice='';save();paint();return;
  }
  if(act==='bench-player'&&team){selection={side,id};notice='Válaszd ki a cél pályahelyet ('+team.name+').';paint();return}
@@ -600,6 +605,7 @@ function onSubmit(event){
 }
 function onChange(event){
  const f=event.target;
+ if(f.matches?.('[data-match-timeline-set]')){timelineSet=Math.max(1,Math.min(9,integer(f.value,match.set)));paint();return}
  if(f.matches?.('[data-match-team-name]')){
   const side=integer(f.dataset.matchTeamName,-1),t=match.teams[side];
   if(t){snapshot('Csapatnév módosítása');t.name=f.value.trim().slice(0,65)||t.name;match.lastAction='Csapat neve: '+t.name;save();paint()}
@@ -663,7 +669,7 @@ function onPointerUp(event){
 }
 function mount(element,options={}){
  root=element;if(!root)return;
- match=load();selection=null;notice='';drag=null;
+ match=load();selection=null;notice='';drag=null;timelineSet=null;
  rosters=(Array.isArray(options.teams)?options.teams:[]).filter(x=>x&&x.id).map(t=>({
   id:String(t.id),name:String(t.name||'Csapat').slice(0,65),players:[]
  }));
