@@ -124,29 +124,40 @@ function rotate(team){
 function current(team,pos){return team.players.find(p=>p.id===team.spots[pos-1])}
 function standing(team){return team.players.filter(p=>!team.spots.includes(p.id))}
 function labelPlayer(p){return (p.number?'#'+p.number+' ':'')+(p.name||roleLabel(p.role))}
+function shortRole(id){return ({setter:'S','outside-near':'OH','outside-far':'OH','middle-near':'MB','middle-far':'MB',opposite:'OP',libero:'L',other:'–'})[id]||'–'}
+function isNear(id){return id==='outside-near'||id==='middle-near'}
+function replacementForBench(team,player){
+ const tr=team.tracking;
+ if(tr.libero&&tr.libero.replacedId===player.id){
+  const on=team.players.find(p=>p.id===tr.libero.liberoId);
+  if(on&&team.spots.includes(on.id))return {player:on,pos:team.spots.indexOf(on.id)+1,libero:true};
+ }
+ const pairId=tr.pairs?.[player.id];
+ if(pairId&&!tr.returned.includes(player.id)&&team.spots.includes(pairId)){
+  const on=team.players.find(p=>p.id===pairId);
+  if(on)return {player:on,pos:team.spots.indexOf(on.id)+1,libero:false};
+ }
+ return null;
+}
 function activityLog(){
- const events=match.events.slice().reverse();
- return '<section class="cc-match-history"><div class="cc-match-history-title"><h3>Eseménynapló</h3><span>'+match.events.length+' esemény</span></div>'+
- '<button type="button" class="cc-match-export" data-match-action="export-log" '+(!events.length?'disabled':'')+'>Eseménynapló exportálása (.csv)</button>'+
+ const events=match.events.slice(-65).reverse();
+ return '<section class="cc-match-history" aria-label="Meccsnapló"><div class="cc-match-history-title"><h3>Napló</h3><div><span>'+match.events.length+'</span><button type="button" class="cc-match-export" data-match-action="export-log" '+(!events.length?'disabled':'')+' title="Eseménynapló letöltése">CSV ↓</button></div></div>'+
  '<div class="cc-match-history-list">'+(events.map(e=>
- '<div class="cc-match-history-entry"><span class="cc-match-history-type">'+escapeHtml(e.kind==='point'?'PONT':e.kind==='sub'?'CSERE':e.kind==='libero'?'LIBERÓ':e.kind==='rotation'?'FORGÁS':'ESEMÉNY')+'</span>'+
- '<span class="cc-match-history-text">'+escapeHtml(e.text)+'</span><small>'+e.set+'. szett'+(e.score?' · '+e.score.join(':'):'')+(e.at?' · '+new Date(e.at).toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'}):'')+'</small></div>').join('')||'<p>Még nincs rögzített esemény.</p>')+'</div>'+
- '<p class="cc-match-history-hint">A teljes meccsnapló megmarad ezen az eszközön (legfeljebb 800 esemény). Egy kattintással CSV-be exportálható.</p></section>';
+ '<div class="cc-match-history-entry"><span class="cc-match-history-type">'+escapeHtml(e.kind==='point'?'PONT':e.kind==='sub'?'CSERE':e.kind==='libero'?'LIB':e.kind==='lineup'?'HELY':'INFÓ')+'</span>'+
+ '<span class="cc-match-history-text">'+escapeHtml(e.text)+'</span><small>'+e.set+'. szett · '+(e.score?e.score.join(':'):'–')+'</small></div>').join('')||'<p class="cc-match-empty-log">Még nincs esemény.</p>')+'</div></section>';
 }
 function scoreboard(){
- return '<div class="cc-match-score"><div class="cc-match-heading"><div><h2>Meccs mód</h2><p>Pontozás, nyitásjog, forgások és cserék</p></div><span class="cc-match-set">'+match.set+'. játszma</span></div>'+
+ return '<section class="cc-match-score"><div class="cc-match-topline"><span class="cc-match-title">MECCS <b>●</b> <span>'+match.set+'. SZETT</span></span><div class="cc-match-toolbar">'+
+ '<button type="button" data-match-action="undo" '+(!match.history.length?'disabled':'')+' title="Utolsó művelet visszavonása">↶ Vissza</button>'+
+ '<button type="button" data-match-action="new-set">+ Szett</button><button type="button" data-match-action="new-match" title="Új mérkőzés">Új meccs</button></div></div>'+
  '<div class="cc-match-score-grid">'+match.teams.map((t,i)=>
- '<section class="cc-match-score-team" style="--match-color:'+t.color+'"><b>'+escapeHtml(t.name)+'</b>'+
+ '<section class="cc-match-score-team" style="--match-color:'+t.color+'"><div class="cc-match-score-id"><b title="'+escapeHtml(t.name)+'">'+escapeHtml(t.name)+'</b>'+
+ '<small>'+t.tracking.subs+'/6 csere'+(t.tracking.libero?' · L':'')+'</small></div>'+
  '<div class="cc-match-bigscore">'+match.score[i]+'</div>'+
- '<div class="cc-match-serve">'+(match.server===i?'● NYIT':'')+'</div>'+
- '<div class="cc-match-sub-counter">Rendes cserék: <b>'+t.tracking.subs+'/6</b> · Liberó: '+(t.tracking.libero?'pályán':'padon')+'</div>'+
- '<button type="button" class="cc-match-point" data-match-action="point" data-side="'+i+'" '+(match.server===null?'disabled':'')+'>+1 PONT</button>'+
- '<button type="button" class="cc-match-serve-btn" data-match-action="server" data-side="'+i+'">'+(match.server===i?'Kezdő nyitó ✓':'Nyitás átadása')+'</button></section>').join('')+'</div>'+
- (match.server===null?'<p class="cc-match-start-hint">Először válaszd ki a nyitó csapatot. A pontot szerző fogadó csapat automatikusan egyet forog.</p>':'')+
- '<div class="cc-match-toolbar"><button type="button" data-match-action="undo" '+(!match.history.length?'disabled':'')+'>↶ Visszavonás</button>'+
- '<button type="button" data-match-action="new-set">Új játszma</button><button type="button" data-match-action="new-match">Új mérkőzés</button></div>'+
- (match.lastAction?'<p class="cc-match-last">'+escapeHtml(match.lastAction)+'</p>':'')+
- (notice?'<p class="cc-match-notice" role="status">'+escapeHtml(notice)+'</p>':'')+'</div>';
+ '<button type="button" class="cc-match-point" data-match-action="point" data-side="'+i+'" '+(match.server===null?'disabled':'')+' aria-label="'+escapeHtml(t.name)+' kap egy pontot">+1</button>'+
+ '<button type="button" class="cc-match-serve-btn'+(match.server===i?' serving':'')+'" data-match-action="server" data-side="'+i+'" title="'+(match.server===i?'Nyitó csapat':'Nyitásjog beállítása')+'">'+(match.server===i?'● NYIT':'Nyitás')+'</button></section>').join('')+'</div>'+
+ (match.server===null?'<p class="cc-match-start-hint">A pontozás előtt válaszd ki a nyitó csapatot.</p>':'')+
+ (notice?'<p class="cc-match-notice" role="status">'+escapeHtml(notice)+'</p>':'')+'</section>';
 }
 function courtPlayer(side,pos){
  const t=match.teams[side],p=current(t,pos),selected=selection&&selection.side===side&&selection.id===p.id;
