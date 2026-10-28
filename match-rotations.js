@@ -66,7 +66,7 @@ function load(){
    a.history=Array.isArray(raw.history)?raw.history.slice(-60):[];
    a.lastAction=String(raw.lastAction||'').slice(0,160);
    a.rally=Math.max(0,Math.min(500,integer(raw.rally,a.score[0]+a.score[1])));
-   a.events=Array.isArray(raw.events)?raw.events.filter(x=>x&&typeof x==='object').slice(-160).map(x=>({
+   a.events=Array.isArray(raw.events)?raw.events.filter(x=>x&&typeof x==='object').slice(-800).map(x=>({
     seq:integer(x.seq),set:integer(x.set,1),score:Array.isArray(x.score)?x.score.slice(0,2).map(z=>integer(z)):null,
     kind:String(x.kind||'note').slice(0,24),text:String(x.text||'').slice(0,240),at:integer(x.at,0)
    })):[];
@@ -83,7 +83,7 @@ function load(){
 function save(){try{localStorage.setItem(KEY,JSON.stringify(match))}catch(_){}}
 function eventLog(kind,text){
  match.events.push({seq:match.eventSeq++,kind,text:String(text||'').slice(0,240),set:match.set,score:[...match.score],at:Date.now()});
- if(match.events.length>160)match.events.shift();
+ if(match.events.length>800)match.events.shift();
 }
 function lockLineups(){
  for(const t of match.teams){
@@ -112,8 +112,8 @@ function resetSetRules(){
  match.rally=0;
 }
 function snapshot(label){
- const {history,...current}=match;
- match.history.push(JSON.parse(JSON.stringify({...current,lastAction:label})));
+ const {history,events,...current}=match;
+ match.history.push(JSON.parse(JSON.stringify({...current,eventCount:events.length,lastAction:label})));
  if(match.history.length>60)match.history.shift();
 }
 function rotate(team){
@@ -125,12 +125,13 @@ function current(team,pos){return team.players.find(p=>p.id===team.spots[pos-1])
 function standing(team){return team.players.filter(p=>!team.spots.includes(p.id))}
 function labelPlayer(p){return (p.number?'#'+p.number+' ':'')+(p.name||roleLabel(p.role))}
 function activityLog(){
- const events=match.events.slice(-45).reverse();
+ const events=match.events.slice().reverse();
  return '<section class="cc-match-history"><div class="cc-match-history-title"><h3>Eseménynapló</h3><span>'+match.events.length+' esemény</span></div>'+
+ '<button type="button" class="cc-match-export" data-match-action="export-log" '+(!events.length?'disabled':'')+'>Eseménynapló exportálása (.csv)</button>'+
  '<div class="cc-match-history-list">'+(events.map(e=>
  '<div class="cc-match-history-entry"><span class="cc-match-history-type">'+escapeHtml(e.kind==='point'?'PONT':e.kind==='sub'?'CSERE':e.kind==='libero'?'LIBERÓ':e.kind==='rotation'?'FORGÁS':'ESEMÉNY')+'</span>'+
- '<span class="cc-match-history-text">'+escapeHtml(e.text)+'</span><small>'+e.set+'. szett'+(e.score?' · '+e.score.join(':'):'')+'</small></div>').join('')||'<p>Még nincs rögzített esemény.</p>')+'</div>'+
- '<p class="cc-match-history-hint">A legutóbbi 45 esemény látható; a visszavonás a hozzájuk tartozó állapotot is visszaállítja.</p></section>';
+ '<span class="cc-match-history-text">'+escapeHtml(e.text)+'</span><small>'+e.set+'. szett'+(e.score?' · '+e.score.join(':'):'')+(e.at?' · '+new Date(e.at).toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'}):'')+'</small></div>').join('')||'<p>Még nincs rögzített esemény.</p>')+'</div>'+
+ '<p class="cc-match-history-hint">A teljes meccsnapló megmarad ezen az eszközön (legfeljebb 800 esemény). Egy kattintással CSV-be exportálható.</p></section>';
 }
 function scoreboard(){
  return '<div class="cc-match-score"><div class="cc-match-heading"><div><h2>Meccs mód</h2><p>Pontozás, nyitásjog, forgások és cserék</p></div><span class="cc-match-set">'+match.set+'. játszma</span></div>'+
@@ -184,6 +185,8 @@ function paint(){
 function effect(message){notice=message;save();paint()}
 function award(side){
  if(match.server===null){effect('A pontozás előtt jelöld ki a nyitó csapatot.');return}
+ const serving=match.teams[match.server],serverPlayer=current(serving,1);
+ if(serverPlayer?.role==='libero'){effect('A liberó az FIVB szabályai szerint nem nyithat. Előbb hozd vissza a helyére az általa váltott játékost.');return}
  snapshot('Pont');
  lockLineups();
  const prev=match.server;
@@ -217,7 +220,6 @@ function changePlayer(side,id,pos){
   if(tr.libero)return fail('Már van liberó a pályán. Előbb az eredeti játékosát kell visszahozni.');
   if(![1,5,6].includes(atPos))return fail('A liberó csak az 1., 5. vagy 6. (hátsó soros) helyre állhat be.');
   if(tr.lastLiberoRally===match.rally)return fail('Két liberócsere között legalább egy befejezett labdamenet szükséges.');
-  if(tr.locked && !tr.starters.includes(old.id))return fail('A liberó a rendes cserejátékost ebben az egyszerűsített követőben nem válthatja. Előbb az eredeti kezdő visszatérését ellenőrizd.');
   snapshot('Liberó be');
   tr.libero={liberoId:id,replacedId:old.id};
   t.spots[to]=id;tr.lastLiberoRally=match.rally;
@@ -370,14 +372,16 @@ function onClick(event){
  }
  if(act==='undo'){
   const previous=match.history.pop();if(!previous)return;
-  const remaining=match.history;match={...previous,history:remaining};selection=null;notice='';save();paint();return;
+  const remaining=match.history,events=match.events;
+  match={...previous,history:remaining,events:typeof previous.eventCount==='number'?events.slice(0,previous.eventCount):(Array.isArray(previous.events)?previous.events:events)};
+  delete match.eventCount;selection=null;notice='';save();paint();return;
  }
  if(act==='new-set'){
   if(!confirm('Új játszmát indítasz? A pontok és a rendes cserék száma nullázódik. A névsor megmarad, a liberó visszamegy a padra.'))return;
   snapshot('Új játszma');resetSetRules();match.set++;match.score=[0,0];match.server=null;match.lastAction='Új játszma: a hat rendes csere ismét elérhető.';eventLog('set',match.lastAction);selection=null;notice='';save();paint();return;
  }
  if(act==='new-match'){
-  if(!confirm('Új mérkőzést indítasz? A pontok, játszmaszám és nyitásjog nullázódnak; a jelenlegi névsorok és felállások megmaradnak.'))return;
+  if(!confirm('Új mérkőzést indítasz? A korábbi eseménynapló és pontszám törlődik! A névsor és felállás megmarad. Exportáld a naplót előtte, ha szükséged van rá.'))return;
   resetSetRules();match.score=[0,0];match.server=null;match.set=1;match.history=[];match.events=[];match.eventSeq=1;match.lastAction='Új mérkőzés. Válaszd ki a nyitó csapatot.';
   selection=null;notice='';save();paint();return;
  }
