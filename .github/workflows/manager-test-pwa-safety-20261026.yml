@@ -22,3 +22,6 @@ jobs:
           node --check app.js
           node --check sw.js
           node --test tests/manager-test-pwa-safety-20261026.test.cjs
+          # Repeat the static security plan check to catch nondeterministic regressions.
+          node --test tests/manager-membership-date-rls-candidate-20261028.test.cjs
+          node --test tests/manager-membership-date-rls-candidate-20261028.test.cjs
