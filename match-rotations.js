@@ -13,8 +13,9 @@ let root=null,match=null,rosters=[],selection=null,editTarget=null,drag=null,ima
 const escapeHtml=v=>String(v==null?'':v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const integer=(n,def=0)=>Number.isInteger(Number(n))?Number(n):def;
 const roleLabel=id=>ROLES.find(x=>x[0]===id)?.[1]||'Egyéb';
-const defaultTeam=i=>({name:i===0?'A csapat':'B csapat',color:i===0?'#bd8b00':'#2783ba',teamId:'',nextId:7,spots:[1,2,3,4,5,6],players:Array.from({length:6},(_,j)=>({id:j+1,number:'',name:'',role:ROLES[j][0],sourceId:''}))});
-const defaultMatch=()=>({version:1,teams:[defaultTeam(0),defaultTeam(1)],score:[0,0],server:null,set:1,history:[],lastAction:''});
+const emptyTracking=()=>({locked:false,starters:[],pairs:{},used:[],returned:[],subs:0,lastSubRally:-1,lastLiberoRally:-1,libero:null});
+const defaultTeam=i=>({name:i===0?'A csapat':'B csapat',color:i===0?'#bd8b00':'#2783ba',teamId:'',nextId:7,spots:[1,2,3,4,5,6],players:Array.from({length:6},(_,j)=>({id:j+1,number:'',name:'',role:ROLES[j][0],sourceId:''})),tracking:emptyTracking()});
+const defaultMatch=()=>({version:2,teams:[defaultTeam(0),defaultTeam(1)],score:[0,0],server:null,set:1,rally:0,events:[],eventSeq:1,history:[],lastAction:''});
 function cleanTeam(raw,i){
  const t=defaultTeam(i);
  if(!raw||typeof raw!=='object')return t;
@@ -36,6 +37,21 @@ function cleanTeam(raw,i){
    t.spots=[1,2,3,4,5,6];
  }
  t.nextId=Math.max(integer(raw.nextId,7),...t.players.map(p=>p.id+1),7);
+ if(raw.tracking && typeof raw.tracking==='object'){
+  const x=raw.tracking,ids=new Set(t.players.map(p=>p.id));
+  const tr=emptyTracking();
+  tr.locked=x.locked===true;
+  tr.starters=Array.isArray(x.starters)?x.starters.map(Number).filter(id=>ids.has(id)).slice(0,6):[];
+  if(tr.starters.length!==6||new Set(tr.starters).size!==6)tr.locked=false;
+  tr.pairs=x.pairs&&typeof x.pairs==='object'?Object.fromEntries(Object.entries(x.pairs).filter(([k,v])=>ids.has(Number(k))&&ids.has(Number(v))).slice(0,6)):{};
+  tr.used=Array.isArray(x.used)?x.used.map(Number).filter(id=>ids.has(id)):[];
+  tr.returned=Array.isArray(x.returned)?x.returned.map(Number).filter(id=>ids.has(id)):[];
+  tr.subs=Math.max(0,Math.min(6,integer(x.subs)));
+  tr.lastSubRally=integer(x.lastSubRally,-1);
+  tr.lastLiberoRally=integer(x.lastLiberoRally,-1);
+  if(x.libero&&ids.has(Number(x.libero.liberoId))&&ids.has(Number(x.libero.replacedId)))tr.libero={liberoId:Number(x.libero.liberoId),replacedId:Number(x.libero.replacedId)};
+  t.tracking=tr;
+ }
  return t;
 }
 function load(){
@@ -49,12 +65,52 @@ function load(){
    a.set=Math.max(1,Math.min(9,integer(raw.set,1)));
    a.history=Array.isArray(raw.history)?raw.history.slice(-60):[];
    a.lastAction=String(raw.lastAction||'').slice(0,160);
+   a.rally=Math.max(0,Math.min(500,integer(raw.rally,a.score[0]+a.score[1])));
+   a.events=Array.isArray(raw.events)?raw.events.filter(x=>x&&typeof x==='object').slice(-160).map(x=>({
+    seq:integer(x.seq),set:integer(x.set,1),score:Array.isArray(x.score)?x.score.slice(0,2).map(z=>integer(z)):null,
+    kind:String(x.kind||'note').slice(0,24),text:String(x.text||'').slice(0,240),at:integer(x.at,0)
+   })):[];
+   a.eventSeq=Math.max(integer(raw.eventSeq,1),...a.events.map(x=>x.seq+1),1);
+   if(a.rally>0)for(const team of a.teams)if(!team.tracking.locked){
+    team.tracking.starters=team.spots.map(id=>id===team.tracking.libero?.liberoId?team.tracking.libero.replacedId:id);
+    team.tracking.locked=true;
+   }
    return a;
   }
  }catch(_){}
  return defaultMatch();
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(match))}catch(_){}}
+function eventLog(kind,text){
+ match.events.push({seq:match.eventSeq++,kind,text:String(text||'').slice(0,240),set:match.set,score:[...match.score],at:Date.now()});
+ if(match.events.length>160)match.events.shift();
+}
+function lockLineups(){
+ for(const t of match.teams){
+  const tr=t.tracking;
+  if(tr.locked)continue;
+  tr.starters=t.spots.map(id=>id===tr.libero?.liberoId?tr.libero.replacedId:id);
+  tr.locked=true;
+ }
+}
+function leaveLibero(t,forced=false){
+ const tr=t.tracking,active=tr.libero;
+ if(!active)return false;
+ const atPos=t.spots.indexOf(active.liberoId);
+ if(atPos<0)return false;
+ if(!forced && tr.lastLiberoRally===match.rally)return false;
+ t.spots[atPos]=active.replacedId;
+ tr.libero=null;tr.lastLiberoRally=match.rally;
+ eventLog('libero',t.name+': liberó le, '+labelPlayer(t.players.find(p=>p.id===active.replacedId))+' vissza ('+(atPos+1)+'. hely).');
+ return true;
+}
+function resetSetRules(){
+ for(const t of match.teams){
+  if(t.tracking.libero)leaveLibero(t,true);
+  t.tracking=emptyTracking();
+ }
+ match.rally=0;
+}
 function snapshot(label){
  const {history,...current}=match;
  match.history.push(JSON.parse(JSON.stringify({...current,lastAction:label})));
@@ -68,6 +124,14 @@ function rotate(team){
 function current(team,pos){return team.players.find(p=>p.id===team.spots[pos-1])}
 function standing(team){return team.players.filter(p=>!team.spots.includes(p.id))}
 function labelPlayer(p){return (p.number?'#'+p.number+' ':'')+(p.name||roleLabel(p.role))}
+function activityLog(){
+ const events=match.events.slice(-45).reverse();
+ return '<section class="cc-match-history"><div class="cc-match-history-title"><h3>Eseménynapló</h3><span>'+match.events.length+' esemény</span></div>'+
+ '<div class="cc-match-history-list">'+(events.map(e=>
+ '<div class="cc-match-history-entry"><span class="cc-match-history-type">'+escapeHtml(e.kind==='point'?'PONT':e.kind==='sub'?'CSERE':e.kind==='libero'?'LIBERÓ':e.kind==='rotation'?'FORGÁS':'ESEMÉNY')+'</span>'+
+ '<span class="cc-match-history-text">'+escapeHtml(e.text)+'</span><small>'+e.set+'. szett'+(e.score?' · '+e.score.join(':'):'')+'</small></div>').join('')||'<p>Még nincs rögzített esemény.</p>')+'</div>'+
+ '<p class="cc-match-history-hint">A legutóbbi 45 esemény látható; a visszavonás a hozzájuk tartozó állapotot is visszaállítja.</p></section>';
+}
 function scoreboard(){
  return '<div class="cc-match-score"><div class="cc-match-heading"><div><h2>Meccs mód</h2><p>Pontozás, nyitásjog, forgások és cserék</p></div><span class="cc-match-set">'+match.set+'. játszma</span></div>'+
  '<div class="cc-match-score-grid">'+match.teams.map((t,i)=>
