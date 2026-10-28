@@ -9,12 +9,12 @@ const ROLES=[
  ['outside-far','Távolabbi négyes'],['middle-far','Távolabbi center'],
  ['libero','Liberó'],['other','Egyéb']
 ];
-let root=null,match=null,rosters=[],selection=null,editTarget=null,drag=null,imageUrl=null,screen='court',notice='';
+let root=null,match=null,rosters=[],selection=null,editTarget=null,drag=null,imageUrl=null,screen='court',notice='',timelineSet=null;
 const escapeHtml=v=>String(v==null?'':v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const integer=(n,def=0)=>Number.isInteger(Number(n))?Number(n):def;
 const roleLabel=id=>ROLES.find(x=>x[0]===id)?.[1]||'Egyéb';
 const emptyTracking=()=>({locked:false,starters:[],pairs:{},used:[],returned:[],subs:0,lastSubRally:-1,lastLiberoRally:-1,libero:null});
-const defaultTeam=i=>({name:i===0?'A csapat':'B csapat',color:i===0?'#bd8b00':'#2783ba',teamId:'',nextId:7,spots:[1,2,3,4,5,6],players:Array.from({length:6},(_,j)=>({id:j+1,number:'',name:'',role:ROLES[j][0],sourceId:''})),tracking:emptyTracking()});
+const defaultTeam=i=>({name:i===0?'A csapat':'B csapat',color:i===0?'#bd8b00':'#2783ba',teamId:'',nextId:7,spots:[1,2,3,4,5,6],players:Array.from({length:6},(_,j)=>({id:j+1,number:'',name:'',role:ROLES[j][0],sourceId:''})),tracking:emptyTracking(),rotation:1,timeouts:0});
 const defaultMatch=()=>({version:2,teams:[defaultTeam(0),defaultTeam(1)],score:[0,0],server:null,set:1,rally:0,events:[],eventSeq:1,history:[],lastAction:''});
 function cleanTeam(raw,i){
  const t=defaultTeam(i);
@@ -37,6 +37,8 @@ function cleanTeam(raw,i){
    t.spots=[1,2,3,4,5,6];
  }
  t.nextId=Math.max(integer(raw.nextId,7),...t.players.map(p=>p.id+1),7);
+ t.rotation=Math.max(1,Math.min(6,integer(raw.rotation,1)));
+ t.timeouts=Math.max(0,Math.min(2,integer(raw.timeouts,0)));
  if(raw.tracking && typeof raw.tracking==='object'){
   const x=raw.tracking,ids=new Set(t.players.map(p=>p.id));
   const tr=emptyTracking();
@@ -68,7 +70,14 @@ function load(){
    a.rally=Math.max(0,Math.min(500,integer(raw.rally,a.score[0]+a.score[1])));
    a.events=Array.isArray(raw.events)?raw.events.filter(x=>x&&typeof x==='object').slice(-800).map(x=>({
     seq:integer(x.seq),set:integer(x.set,1),score:Array.isArray(x.score)?x.score.slice(0,2).map(z=>integer(z)):null,
-    kind:String(x.kind||'note').slice(0,24),text:String(x.text||'').slice(0,240),at:integer(x.at,0)
+    kind:String(x.kind||'note').slice(0,24),text:String(x.text||'').slice(0,240),at:integer(x.at,0),
+    rally:Math.max(0,integer(x.rally,0)),side:x.side===0||x.side===1?x.side:null,
+    serveSide:x.serveSide===0||x.serveSide===1?x.serveSide:null,
+    servePlayerId:integer(x.servePlayerId,-1),serveJersey:String(x.serveJersey||'').slice(0,3),
+    scoreBefore:Array.isArray(x.scoreBefore)?x.scoreBefore.slice(0,2).map(n=>integer(n)):null,
+    rotationsBefore:Array.isArray(x.rotationsBefore)?x.rotationsBefore.slice(0,2).map(n=>integer(n)):null,
+    lineupBefore:Array.isArray(x.lineupBefore)?x.lineupBefore.slice(0,2).map(ids=>Array.isArray(ids)?ids.slice(0,6).map(n=>integer(n)):[]):null,
+    inNumber:String(x.inNumber||'').slice(0,3),outNumber:String(x.outNumber||'').slice(0,3)
    })):[];
    a.eventSeq=Math.max(integer(raw.eventSeq,1),...a.events.map(x=>x.seq+1),1);
    if(a.rally>0)for(const team of a.teams)if(!team.tracking.locked){
@@ -81,8 +90,8 @@ function load(){
  return defaultMatch();
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(match))}catch(_){}}
-function eventLog(kind,text){
- match.events.push({seq:match.eventSeq++,kind,text:String(text||'').slice(0,240),set:match.set,score:[...match.score],at:Date.now()});
+function eventLog(kind,text,extra={}){
+ match.events.push({seq:match.eventSeq++,kind,text:String(text||'').slice(0,240),set:match.set,score:[...match.score],at:Date.now(),rally:match.rally,...extra});
  if(match.events.length>800)match.events.shift();
 }
 function lockLineups(){
@@ -107,7 +116,7 @@ function leaveLibero(t,forced=false){
 function resetSetRules(){
  for(const t of match.teams){
   if(t.tracking.libero)leaveLibero(t,true);
-  t.tracking=emptyTracking();
+  t.tracking=emptyTracking();t.rotation=1;t.timeouts=0;
  }
  match.rally=0;
 }
@@ -120,6 +129,7 @@ function rotate(team){
  const next=[];
  for(let p=1;p<=6;p++)next[NEXT[p]-1]=team.spots[p-1];
  team.spots=next;
+ team.rotation=team.rotation%6+1;
 }
 function current(team,pos){return team.players.find(p=>p.id===team.spots[pos-1])}
 function standing(team){return team.players.filter(p=>!team.spots.includes(p.id))}
