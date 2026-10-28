@@ -557,7 +557,7 @@ function onClick(event){
  if(!b||!root.contains(b))return;
  const act=b.dataset.matchAction,side=integer(b.dataset.side,-1),id=integer(b.dataset.id,-1),team=match.teams[side];
  if(act==='match-settings'){matchSettingsDialog();return}
- if(act==='roster-setup'&&team){closeDialog(false);paint();const el=root.querySelector('[data-match-settings="'+side+'"]');if(el)el.hidden=false;return}
+ if(act==='roster-setup'&&team){closeDialog(false);paint();const el=root.querySelector('[data-match-settings="'+side+'"]');if(el){el.hidden=false;el.closest('.cc-match-roster')?.scrollIntoView?.({behavior:'smooth',block:'center'})}return}
  if(act==='export-log'){exportLog();return}
  if(act==='inspect-point'){inspectPoint(integer(b.dataset.seq,-1));return}
  if(act==='point'&&team){award(side);return}
