@@ -46,7 +46,11 @@ test('No cross-league or uncertain team pair can be substituted',()=>{
  const wrong={...imported,awayName:'MAFC-Schönherz'};
  assert.equal(ctx.ccManagerKnownMovedFixture_(wrong,group),null);
 });
-test('Manager PWA cache includes verified matches update',()=>{
- assert.ok(html.includes('app.js?v=20261020-mrsz-reports-v66'));
- assert.ok(sw.includes('cc-manager-20261020-mrsz-reports-v66'));
+test('Manager PWA retains versioned core and match assets',()=>{
+ const jsVersion=html.match(/<script\s+src="\.\/app\.js\?v=([^"]+)"\s*><\/script>/);
+ assert.ok(jsVersion,'Manager index must load versioned app.js');
+ assert.match(sw,/^const CACHE='cc-manager-[^']+';/m,'Service worker needs a versioned cache name');
+ assert.ok(sw.includes("'./app.js'"),'Service worker must include app.js');
+ assert.ok(html.includes('match-rotations.js?v='),'Match mode must load versioned JS');
+ assert.ok(sw.includes("'./match-rotations.js'"),'Service worker must cache match mode');
 });
