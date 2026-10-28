@@ -241,6 +241,8 @@ function award(side){
  snapshot('Pont');
  lockLineups();
  const prev=match.server;
+ const rallyInfo={side,serveSide:prev,servePlayerId:serverPlayer?.id||-1,serveJersey:serverPlayer?.number||'',
+  scoreBefore:[...match.score],rotationsBefore:match.teams.map(t=>t.rotation),lineupBefore:match.teams.map(t=>[...t.spots])};
  match.score[side]++;match.rally++;
  if(side!==prev){
   const t=match.teams[side],lib=t.tracking.libero;
@@ -249,7 +251,7 @@ function award(side){
   rotate(t);match.server=side;
   match.lastAction=t.name+' pontot szerzett és forgott (nyitáscsere).';
  }else match.lastAction=match.teams[side].name+' pontot szerzett, nyitás marad.';
- eventLog('point',match.lastAction);
+ eventLog('point',match.lastAction,rallyInfo);
  notice='';save();paint();
 }
 function changePlayer(side,id,pos){
