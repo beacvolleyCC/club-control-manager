@@ -88,3 +88,5 @@
 .cc-match-score-team{padding:8px 3px}
 .cc-match-serve-btn{font-size:10px;padding:7px}
 }
+.cc-match-team-name{display:flex;flex-direction:column;gap:4px;margin-top:12px;font-size:11px;font-weight:800;color:var(--muted)}
+.cc-match-team-name input{min-height:39px;border:1px solid var(--line);background:var(--bg);color:var(--black);border-radius:8px;padding:7px 9px;font-size:15px}
