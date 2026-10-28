@@ -28,7 +28,11 @@ test('starting player retains bold marker and no-entry is not wrongly labelled a
  assert.ok(missing.includes('is-no-entry'));
  assert.ok(!missing.includes('is-subs'));
 });
-test('PWA index and service worker share the new CSS/JS cache version',()=>{
- assert.ok(html.includes('app.js?v=20261020-mrsz-reports-v66'));
- assert.ok(sw.includes("cc-manager-20261020-mrsz-reports-v66"));
+test('PWA index has versioned app and service worker caches all match scripts',()=>{
+ const jsVersion=html.match(/<script\s+src="\.\/app\.js\?v=([^"]+)"\s*><\/script>/);
+ assert.ok(jsVersion,'Manager index must load versioned app.js');
+ assert.match(sw,/^const CACHE='cc-manager-[^']+';/m,'Service worker needs a versioned cache name');
+ assert.ok(sw.includes("'./app.js'"),'Service worker must include app.js');
+ assert.ok(html.includes('match-rotations.js?v='),'Match mode must load versioned JS');
+ assert.ok(sw.includes("'./match-rotations.js'"),'Service worker must cache match mode');
 });
