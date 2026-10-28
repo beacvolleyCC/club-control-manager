@@ -150,6 +150,73 @@ function replacementForBench(team,player){
  }
  return null;
 }
+function timelineMarker(e){
+ const score=Array.isArray(e.score)?e.score.join(':'):'–';
+ const side=e.side===0?'A':e.side===1?'B':'';
+ let label='';
+ if(e.kind==='timeout')label='TO '+side+' '+score;
+ else if(e.kind==='sub')label='↔ '+(e.outNumber?'#'+e.outNumber:'?')+'→'+(e.inNumber?'#'+e.inNumber:'?')+' '+score;
+ else if(e.kind==='libero')label='L '+(e.outNumber?'#'+e.outNumber+'→':'')+(e.inNumber?'#'+e.inNumber:'')+' '+score;
+ else return '';
+ return '<span class="cc-tl-marker cc-tl-marker-'+e.kind+'" title="'+escapeHtml(e.text)+'">'+escapeHtml(label)+'</span>';
+}
+function renderTimeline(){
+ const sets=Array.from(new Set([match.set,...match.events.map(e=>e.set)]))
+  .filter(n=>Number.isInteger(n)&&n>=1&&n<=9).sort((a,b)=>a-b);
+ const view=sets.includes(timelineSet)?timelineSet:match.set;
+ const events=match.events.filter(e=>e.set===view);
+ const cols=[{point:null,score:[0,0],markers:[]}];
+ let prev=[0,0];
+ for(const e of events){
+  if(e.kind==='point'){
+   const score=Array.isArray(e.score)?e.score:[...prev];
+   const side=e.side===0||e.side===1?e.side:(score[0]>prev[0]?0:score[1]>prev[1]?1:null);
+   cols.push({point:e,score,side,markers:[]});
+   prev=score;
+  }else if(['timeout','sub','libero'].includes(e.kind)){
+   cols[cols.length-1].markers.push(e);
+  }
+ }
+ const options=sets.map(n=>'<option value="'+n+'" '+(n===view?'selected':'')+'>'+n+'. szett</option>').join('');
+ const columns=cols.map((col,i)=>{
+  if(!i&&!col.markers.length)return '';
+  const e=col.point,info=col.markers.map(timelineMarker).join(''),top=e&&col.side===0?col.score[0]:'',bottom=e&&col.side===1?col.score[1]:'';
+  const title=e?(e.score.join(':')+' · '+(col.side===0?match.teams[0].name:match.teams[1].name)+' pont · részletek'):'Szettkezdés';
+  return '<div class="cc-tl-col'+(info?' has-marker':'')+(i===cols.length-1?' current':'')+'" title="'+escapeHtml(title)+'">'+
+   (e?'<button type="button" class="cc-tl-point cc-tl-point-a'+(top!==''?' won':'')+'" data-match-action="inspect-point" data-seq="'+e.seq+'" aria-label="'+escapeHtml(title)+'">'+top+'</button>':
+      '<span class="cc-tl-point cc-tl-point-a"></span>')+
+   '<div class="cc-tl-mid"></div>'+
+   (e?'<button type="button" class="cc-tl-point cc-tl-point-b'+(bottom!==''?' won':'')+'" data-match-action="inspect-point" data-seq="'+e.seq+'" aria-label="'+escapeHtml(title)+'">'+bottom+'</button>':
+      '<span class="cc-tl-point cc-tl-point-b"></span>')+
+   '<div class="cc-tl-markers">'+info+'</div></div>';
+ }).join('');
+ return '<section class="cc-match-timeline" aria-label="Pontok idővonala"><header class="cc-tl-head">'+
+  '<h3>Pontok idővonala <small>· koppints egy pontra a forgási álláshoz</small></h3>'+
+  '<label>Szett <select data-match-timeline-set aria-label="Idővonal szett választása">'+options+'</select></label></header>'+
+  '<div class="cc-tl-body"><div class="cc-tl-labels"><b title="'+escapeHtml(match.teams[0].name)+'">'+escapeHtml(match.teams[0].name)+'</b><span></span><b title="'+escapeHtml(match.teams[1].name)+'">'+escapeHtml(match.teams[1].name)+'</b><small>TO / ↔</small></div>'+
+  '<div class="cc-match-timeline-track"><div class="cc-tl-track">'+(columns||'<p class="cc-tl-empty">Még nincs pont ebben a szettben.</p>')+'</div></div></div></section>';
+}
+function inspectPoint(seq){
+ const e=match.events.find(x=>x.seq===seq&&x.kind==='point');
+ if(!e)return;
+ const lineups=Array.isArray(e.playersBefore)?e.playersBefore:null;
+ const detail=lineups?match.teams.map((t,side)=>
+  '<section class="cc-tl-detail-team"><h4>'+escapeHtml(t.name)+' · '+(e.rotationsBefore?.[side]||'–')+'. forgás</h4>'+
+  '<div>'+lineups[side].map((p,i)=>'<span>'+(i+1)+'. '+escapeHtml(p.number?'#'+p.number:'')+' '+escapeHtml(p.name||shortRole(p.role))+'</span>').join('')+'</div></section>').join(''):
+  '<p>A régebben rögzített labdamenetekhez még nincs mentett hatos és forgási adat.</p>';
+ const title=''+(e.score?.join(':')||'–')+' · '+match.teams[e.side===1?1:0].name+' pont';
+ const html='<dialog class="cc-match-dialog" data-match-dialog><div class="cc-match-dialog-form">'+
+ '<div class="cc-match-dialog-heading"><h3>'+escapeHtml(title)+'</h3><button type="button" data-match-action="close-modal" aria-label="Bezárás">×</button></div>'+
+ '<p><b>Nyitott:</b> '+escapeHtml(e.serveSide===0||e.serveSide===1?match.teams[e.serveSide].name:'Nem ismert')+
+  (e.serveJersey?' · #'+escapeHtml(e.serveJersey):'')+
+  (e.scoreBefore?' · Kezdő állás: '+e.scoreBefore.join(':'):'')+'</p>'+
+ '<div class="cc-tl-detail">'+detail+'</div>'+
+ '<p>A forgási állás és a hatos a labdamenet <b>kezdetén</b> rögzített helyzet.</p>'+
+ '<div class="cc-match-dialog-actions"><button type="button" data-match-action="close-modal">Bezárás</button></div></div></dialog>';
+ root.querySelector('[data-match-dialog]')?.remove();
+ root.insertAdjacentHTML('beforeend',html);
+ root.querySelector('[data-match-dialog]')?.showModal?.();
+}
 function activityLog(){
  const events=match.events.slice(-65).reverse();
  return '<section class="cc-match-history" aria-label="Meccsnapló"><div class="cc-match-history-title"><h3>Napló</h3><div><span>'+match.events.length+'</span><button type="button" class="cc-match-export" data-match-action="export-log" '+(!events.length?'disabled':'')+' title="Eseménynapló letöltése">CSV ↓</button></div></div>'+
@@ -225,7 +292,7 @@ function paint(){
  });
  const settings=Array.from(root.querySelectorAll('[data-match-settings]')).filter(el=>!el.hidden).map(el=>el.dataset.matchSettings);
  root.innerHTML='<div class="cc-match-app">'+scoreboard()+
- '<div class="cc-match-layout"><div class="cc-match-board">'+courtHalf(1)+'<div class="cc-match-net"><span>HÁLÓ</span></div>'+courtHalf(0)+'</div>'+
+ renderTimeline()+'<div class="cc-match-layout"><div class="cc-match-board">'+courtHalf(1)+'<div class="cc-match-net"><span>HÁLÓ</span></div>'+courtHalf(0)+'</div>'+
  '<div class="cc-match-rosters">'+rosterCard(0)+rosterCard(1)+'</div>'+activityLog()+'</div>'+
  '<div class="cc-match-footline"><span>'+(match.rally?'● '+match.rally+'. labdamenet':'Állítsd össze a kezdőhatost')+' · Koppintás: szerkesztés · Csere: játékos → pálya</span>'+
  '<button type="button" data-match-action="clear-selection" '+(!selection?'disabled':'')+'>Kijelölés törlése</button></div>'+
