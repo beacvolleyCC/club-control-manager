@@ -112,3 +112,6 @@
  .cc-match-history-type{font-size:9px}
  .cc-match-sub-counter{font-size:10px}
 }
+
+.cc-match-export{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 12px;margin:0 0 11px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--black);font-size:12px;font-weight:800}
+.cc-match-export:disabled{opacity:.5;cursor:not-allowed}
