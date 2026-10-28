@@ -110,7 +110,7 @@ function leaveLibero(t,forced=false){
  if(!forced && tr.lastLiberoRally===match.rally)return false;
  t.spots[atPos]=active.replacedId;
  tr.libero=null;tr.lastLiberoRally=match.rally;
- eventLog('libero',t.name+': liberó le, '+labelPlayer(t.players.find(p=>p.id===active.replacedId))+' vissza ('+(atPos+1)+'. hely).');
+ eventLog('libero',t.name+': liberó le, '+labelPlayer(t.players.find(p=>p.id===active.replacedId))+' vissza ('+(atPos+1)+'. hely).',{side:match.teams.indexOf(t),inNumber:t.players.find(p=>p.id===active.replacedId)?.number||'',outNumber:t.players.find(p=>p.id===active.liberoId)?.number||''});
  return true;
 }
 function resetSetRules(){
@@ -276,7 +276,7 @@ function changePlayer(side,id,pos){
    snapshot('Liberóváltás');
    t.spots[to]=id;tr.libero.liberoId=id;tr.lastLiberoRally=match.rally;
    match.lastAction=t.name+': '+labelPlayer(player)+' váltja a másik liberót ('+atPos+'. hely).';
-   eventLog('libero',match.lastAction);
+   eventLog('libero',match.lastAction,{side,inNumber:player.number,outNumber:old.number});
    selection=null;notice='';save();paint();return;
   }
   if(![1,5,6].includes(atPos))return fail('A liberó csak az 1., 5. vagy 6. (hátsó soros) helyre állhat be.');
@@ -285,7 +285,7 @@ function changePlayer(side,id,pos){
   tr.libero={liberoId:id,replacedId:old.id};
   t.spots[to]=id;tr.lastLiberoRally=match.rally;
   match.lastAction=t.name+': '+labelPlayer(player)+' (liberó) be, '+labelPlayer(old)+' le, '+atPos+'. hely.';
-  eventLog('libero',match.lastAction);
+  eventLog('libero',match.lastAction,{side,inNumber:player.number,outNumber:old.number});
   selection=null;notice='';save();paint();return;
  }
  if(old.role==='libero'){
@@ -325,7 +325,7 @@ function changePlayer(side,id,pos){
  if(player.role==='other')player.role=old.role;
  t.spots[to]=id;
  match.lastAction=t.name+': '+labelPlayer(player)+' be, '+labelPlayer(old)+' le. ('+tr.subs+'/6 rendes csere)';
- eventLog('sub',match.lastAction);
+ eventLog('sub',match.lastAction,{side,inNumber:player.number,outNumber:old.number});
  selection=null;notice='';save();paint();
 }
 function rosterFromManager(side){
