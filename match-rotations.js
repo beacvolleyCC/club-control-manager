@@ -14,7 +14,7 @@ const escapeHtml=v=>String(v==null?'':v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<
 const integer=(n,def=0)=>Number.isInteger(Number(n))?Number(n):def;
 const roleLabel=id=>ROLES.find(x=>x[0]===id)?.[1]||'Egyéb';
 const emptyTracking=()=>({locked:false,starters:[],pairs:{},used:[],returned:[],subs:0,lastSubRally:-1,lastLiberoRally:-1,libero:null});
-const defaultTeam=i=>({name:i===0?'A csapat':'B csapat',color:i===0?'#bd8b00':'#2783ba',teamId:'',nextId:7,spots:[1,2,3,4,5,6],players:Array.from({length:6},(_,j)=>({id:j+1,number:'',name:'',role:ROLES[j][0],sourceId:''})),tracking:emptyTracking(),rotation:1,timeouts:0});
+const defaultTeam=i=>({name:i===0?'A csapat':'B csapat',color:i===0?'#bd8b00':'#2783ba',teamId:'',nextId:7,spots:[1,2,3,4,5,6],players:Array.from({length:6},(_,j)=>({id:j+1,number:'',name:'',role:ROLES[j][0],sourceId:'',captain:false})),tracking:emptyTracking(),rotation:1,timeouts:0});
 const defaultMatch=()=>({version:2,teams:[defaultTeam(0),defaultTeam(1)],score:[0,0],server:null,set:1,rally:0,events:[],eventSeq:1,history:[],lastAction:''});
 function cleanTeam(raw,i){
  const t=defaultTeam(i);
@@ -27,7 +27,7 @@ function cleanTeam(raw,i){
    const id=integer(p?.id,-1);
    if(id<1||id>100000||seen.has(id))return null;
    seen.add(id);
-   return {id,number:String(p.number||'').slice(0,3),name:String(p.name||'').slice(0,70),role:ROLES.some(r=>r[0]===p.role)?p.role:'other',sourceId:String(p.sourceId||'').slice(0,120)};
+   return {id,number:String(p.number||'').slice(0,3),name:String(p.name||'').slice(0,70),role:ROLES.some(r=>r[0]===p.role)?p.role:'other',sourceId:String(p.sourceId||'').slice(0,120),captain:p.captain===true};
  }).filter(Boolean);
  const spots=Array.isArray(raw.spots)?raw.spots.map(x=>integer(x,-1)):[];
  if(spots.length===6&&new Set(spots).size===6&&spots.every(id=>seen.has(id)))t.spots=spots;
@@ -243,11 +243,17 @@ function scoreboard(){
 }
 function courtPlayer(side,pos){
  const t=match.teams[side],p=current(t,pos),selected=selection&&selection.side===side&&selection.id===p.id;
- const role=shortRole(p.role),near=isNear(p.role),full=labelPlayer(p);
+ const role=shortRole(p.role),near=isNear(p.role),full=labelPlayer(p),tr=t.tracking;
+ const substituted=tr.used.includes(p.id)&&!tr.starters.includes(p.id);
+ const liberoSub=tr.libero?.liberoId===p.id;
+ const inBySub=substituted||liberoSub;
  return '<div class="cc-match-player-wrap" data-match-drop="'+side+':'+pos+'">'+
- '<button type="button" draggable="true" data-match-action="court-player" data-match-source="'+side+':'+p.id+'" data-side="'+side+'" data-pos="'+pos+'" class="cc-match-player'+(selected?' selected':'')+(near?' near':'')+'" title="'+escapeHtml(full)+' · koppintás a szerkesztéshez" aria-label="'+escapeHtml(full)+', '+pos+'. hely. Szerkesztés">'+
- '<span class="cc-match-rot-num">'+pos+'</span><span class="cc-match-jersey">'+escapeHtml(p.number?'#'+p.number:'')+'</span>'+
- '<strong class="cc-match-role">'+escapeHtml(role)+'</strong><span class="cc-match-person">'+escapeHtml(p.name||'')+'</span></button>'+
+ '<button type="button" draggable="true" data-match-action="court-player" data-match-source="'+side+':'+p.id+'" data-side="'+side+'" data-pos="'+pos+'" class="cc-match-player'+(selected?' selected':'')+(near?' near':'')+(p.captain?' captain':'')+'" title="'+escapeHtml(full)+' · koppintás a szerkesztéshez" aria-label="'+escapeHtml(full)+', '+pos+'. hely. Szerkesztés">'+
+ '<span class="cc-match-rot-num" aria-hidden="true">'+pos+'</span>'+
+ '<span class="cc-match-position" aria-hidden="true">'+escapeHtml(role)+'</span>'+
+ (inBySub?'<span class="cc-match-sub-flag" aria-label="Csereként pályán" title="Csereként pályán">↔</span>':'')+
+ '<strong class="cc-match-number'+(p.captain?' is-captain':'')+'">'+escapeHtml(p.number||'–')+'</strong>'+
+ '<span class="cc-match-person">'+escapeHtml(p.name||'')+'</span></button>'+
  '<button type="button" data-match-action="court-select" data-side="'+side+'" data-id="'+p.id+'" aria-label="'+escapeHtml(full)+' kijelölése mozgatáshoz" title="Mozgatás / helycsere" class="cc-match-edit">↔</button></div>';
 }
 function courtHalf(side){
@@ -297,7 +303,7 @@ function paint(){
  });
  const settings=Array.from(root.querySelectorAll('[data-match-settings]')).filter(el=>!el.hidden).map(el=>el.dataset.matchSettings);
  root.innerHTML='<div class="cc-match-app">'+scoreboard()+
- renderTimeline()+'<div class="cc-match-layout"><div class="cc-match-board">'+courtHalf(1)+'<div class="cc-match-net"><span>HÁLÓ</span></div>'+courtHalf(0)+'</div>'+
+ renderTimeline()+'<div class="cc-match-layout"><div class="cc-match-board">'+courtHalf(1)+'<div class="cc-match-net" role="separator" aria-label="Háló"></div>'+courtHalf(0)+'</div>'+
  '<div class="cc-match-rosters">'+rosterCard(0)+rosterCard(1)+'</div>'+activityLog()+'</div>'+
  '<div class="cc-match-footline"><span>'+(match.rally?'● '+match.rally+'. labdamenet':'Állítsd össze a kezdőhatost')+' · Koppintás: szerkesztés · Csere: játékos → pálya</span>'+
  '<button type="button" data-match-action="clear-selection" '+(!selection?'disabled':'')+'>Kijelölés törlése</button></div>'+
@@ -419,7 +425,7 @@ function rosterFromManager(side){
  const existing=new Set(t.players.map(p=>p.sourceId).filter(Boolean));
  for(const player of r.players){
   if(existing.has(player.id)||t.players.length>=45)continue;
-  t.players.push({id:t.nextId++,number:player.number,name:player.name,role:player.role||'other',sourceId:player.id});
+  t.players.push({id:t.nextId++,number:player.number,name:player.name,role:player.role||'other',sourceId:player.id,captain:false});
   existing.add(player.id);
  }
  match.lastAction=r.name+': '+r.players.length+' kerettag elérhető a cserepadon.';
@@ -434,7 +440,8 @@ function editorDialog(side,id){
  '<div class="cc-match-dialog-heading"><h3>'+escapeHtml(t.name)+' · játékos</h3><button type="button" data-match-action="close-modal" aria-label="Bezárás">×</button></div>'+
  '<label>Mezszám<input name="number" type="text" inputmode="numeric" maxlength="3" value="'+escapeHtml(p.number)+'"></label>'+
  '<label>Név<input name="name" type="text" maxlength="70" value="'+escapeHtml(p.name)+'"></label>'+
- '<label>Poszt<select name="role">'+ROLES.map(r=>'<option value="'+r[0]+'"'+(r[0]===p.role?' selected':'')+'>'+escapeHtml(r[1])+'</option>').join('')+'</select></label>'+
+ '<label>Poszt<select name="role">'+ROLES.map(r=>'<option value="'+r[0]+'"'+(r[0]===p.role?' selected':'')+'>'+escapeHtml(r[1])+'</option>').join('')+'</select></label>'+ 
+ '<label class="cc-match-captain-option"><input type="checkbox" name="captain" '+(p.captain?'checked':'')+'> Csapatkapitány (aláhúzott mezszám)</label>'+
  '<div class="cc-match-dialog-actions"><button type="button" data-match-action="close-modal">Mégse</button><button type="submit">Mentés</button></div></form></dialog>';
  root.insertAdjacentHTML('beforeend',html);
  const dialog=root.querySelector('[data-match-dialog]');dialog?.showModal?.();
@@ -489,7 +496,7 @@ function importText(side){
   if(t.players.length>=45)break;
   const key=p.number+'|'+p.name.toLocaleLowerCase('hu-HU');
   if(existing.has(key))continue;
-  t.players.push({id:t.nextId++,number:p.number,name:p.name,role:'other',sourceId:''});
+  t.players.push({id:t.nextId++,number:p.number,name:p.name,role:'other',sourceId:'',captain:false});
   existing.add(key);added++;
  }
  match.lastAction=t.name+': '+added+' játékos importálva.';
@@ -579,7 +586,7 @@ function onClick(event){
  if(act==='edit-player'&&team){editorDialog(side,id);return}
  if(act==='add-player'&&team){
   snapshot('Játékos felvétele');
-  const p={id:team.nextId++,number:'',name:'',role:'other',sourceId:''};team.players.push(p);save();paint();editorDialog(side,p.id);return;
+  const p={id:team.nextId++,number:'',name:'',role:'other',sourceId:'',captain:false};team.players.push(p);save();paint();editorDialog(side,p.id);return;
  }
  if(act==='load-roster'&&team){rosterFromManager(side);return}
  if(act==='import-text'&&team){importDialog(side);return}
@@ -598,6 +605,9 @@ function onSubmit(event){
  snapshot('Játékos szerkesztése');
  p.number=val('number').replace(/[^\d]/g,'').slice(0,3);
  p.name=val('name').trim().slice(0,70);
+ const captain=form.elements.namedItem('captain')?.checked===true;
+ if(captain)t.players.forEach(other=>{other.captain=false});
+ p.captain=captain;
  const role=val('role');
  if(role==='libero'&&t.spots.includes(p.id)){
   notice='A liberót előbb a cserepadon jelöld ki, majd a hátsó sorba cseréld be.';
