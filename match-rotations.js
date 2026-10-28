@@ -165,7 +165,8 @@ function scoreboard(){
  '<small>'+t.tracking.subs+'/6 csere'+(t.tracking.libero?' · L':'')+'</small></div>'+
  '<div class="cc-match-bigscore">'+match.score[i]+'</div>'+
  '<button type="button" class="cc-match-point" data-match-action="point" data-side="'+i+'" '+(match.server===null?'disabled':'')+' aria-label="'+escapeHtml(t.name)+' kap egy pontot">+1</button>'+
- '<button type="button" class="cc-match-serve-btn'+(match.server===i?' serving':'')+'" data-match-action="server" data-side="'+i+'" title="'+(match.server===i?'Nyitó csapat':'Nyitásjog beállítása')+'">'+(match.server===i?'● NYIT':'Nyitás')+'</button></section>').join('')+'</div>'+
+ '<button type="button" class="cc-match-serve-btn'+(match.server===i?' serving':'')+'" data-match-action="server" data-side="'+i+'" title="'+(match.server===i?'Nyitó csapat':'Nyitásjog beállítása')+'">'+(match.server===i?'● NYIT':'Nyitás')+'</button>'+
+ '<button type="button" class="cc-match-timeout-btn" data-match-action="timeout" data-side="'+i+'" '+(t.timeouts>=2?'disabled':'')+' title="Időkérés rögzítése · '+escapeHtml(t.name)+'">TO '+t.timeouts+'/2</button></section>').join('')+'</div>'+
  (match.server===null?'<p class="cc-match-start-hint">A pontozás előtt válaszd ki a nyitó csapatot.</p>':'')+
  (notice?'<p class="cc-match-notice" role="status">'+escapeHtml(notice)+'</p>':'')+'</section>';
 }
@@ -443,12 +444,24 @@ function exportLog(){
  document.body.appendChild(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+function recordTimeout(side){
+ const team=match.teams[side];
+ if(!team)return;
+ if(team.timeouts>=2){effect(team.name+': ebben a szettben már megvolt mindkét időkérés.');return}
+ if(match.server===null){effect('Időkérés előtt válaszd ki a kezdő nyitást.');return}
+ snapshot('Időkérés');
+ team.timeouts++;
+ match.lastAction=team.name+' időkérés · '+match.score.join(':')+' ('+team.timeouts+'/2).';
+ eventLog('timeout',match.lastAction,{side});
+ notice='';save();paint();
+}
 function onClick(event){
  const b=event.target.closest('[data-match-action]');
  if(!b||!root.contains(b))return;
  const act=b.dataset.matchAction,side=integer(b.dataset.side,-1),id=integer(b.dataset.id,-1),team=match.teams[side];
  if(act==='export-log'){exportLog();return}
  if(act==='point'&&team){award(side);return}
+ if(act==='timeout'&&team){recordTimeout(side);return}
  if(act==='server'&&team){
   snapshot('Nyitásjog');match.server=side;match.lastAction=team.name+' nyit.';eventLog('server',match.lastAction);notice='';save();paint();return;
  }
