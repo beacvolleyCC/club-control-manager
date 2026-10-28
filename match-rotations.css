@@ -288,3 +288,23 @@
  .cc-tl-markers{gap:1px}
  .cc-tl-marker{font-size:7px;padding:0 2px}
 }
+
+
+/* Time-out action stays in the same compact scorer row on phones. */
+.cc-match-timeout-btn{
+ min-height:32px;min-width:51px;padding:3px 6px;border:1px solid var(--line);
+ border-radius:7px;background:var(--card);color:var(--black);font-size:9px;font-weight:900;white-space:nowrap
+}
+.cc-match-timeout-btn:disabled{opacity:.4}
+@media(max-width:580px) and (orientation:portrait){
+ .cc-match-score-team{grid-template-columns:minmax(0,1fr) repeat(3,auto);gap:3px}
+ .cc-match-score-id{grid-column:1/-1;grid-row:1}
+ .cc-match-bigscore{grid-column:1;grid-row:2}
+ .cc-match-point{grid-column:2;grid-row:2}
+ .cc-match-serve-btn{grid-column:3;grid-row:2;min-width:35px}
+ .cc-match-timeout-btn{grid-column:4;grid-row:2;min-width:35px;font-size:8px;padding:2px 3px;min-height:28px}
+}
+@media(orientation:landscape) and (max-height:650px){
+ .cc-match-score-team{grid-template-columns:minmax(0,1fr) repeat(4,auto);gap:4px}
+ .cc-match-timeout-btn{min-height:25px;min-width:37px;font-size:8px;padding:1px 3px}
+}
