@@ -204,7 +204,10 @@ function inspectPoint(seq){
   '<section class="cc-tl-detail-team"><h4>'+escapeHtml(t.name)+' · '+(e.rotationsBefore?.[side]||'–')+'. forgás</h4>'+
   '<div>'+lineups[side].map((p,i)=>'<span>'+(i+1)+'. '+escapeHtml(p.number?'#'+p.number:'')+' '+escapeHtml(p.name||shortRole(p.role))+'</span>').join('')+'</div></section>').join(''):
   '<p>A régebben rögzített labdamenetekhez még nincs mentett hatos és forgási adat.</p>';
- const title=''+(e.score?.join(':')||'–')+' · '+match.teams[e.side===1?1:0].name+' pont';
+ const points=match.events.filter(x=>x.set===e.set&&x.kind==='point'),at=points.findIndex(x=>x.seq===e.seq);
+ const lastScore=at>0&&Array.isArray(points[at-1].score)?points[at-1].score:[0,0];
+ const inferred=e.side===0||e.side===1?e.side:(e.score?.[0]>lastScore[0]?0:e.score?.[1]>lastScore[1]?1:null);
+ const title=(e.score?.join(':')||'–')+' · '+(inferred===null?'Pont':match.teams[inferred].name+' pont');
  const html='<dialog class="cc-match-dialog" data-match-dialog><div class="cc-match-dialog-form">'+
  '<div class="cc-match-dialog-heading"><h3>'+escapeHtml(title)+'</h3><button type="button" data-match-action="close-modal" aria-label="Bezárás">×</button></div>'+
  '<p><b>Nyitott:</b> '+escapeHtml(e.serveSide===0||e.serveSide===1?match.teams[e.serveSide].name:'Nem ismert')+
