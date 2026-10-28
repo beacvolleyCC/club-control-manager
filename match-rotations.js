@@ -196,15 +196,32 @@ function rosterCard(side){
  '<button type="button" data-match-action="import-text" data-side="'+side+'">Import</button></div></div>'+
  '<div class="cc-match-bench">'+(benchHtml||'<p class="cc-match-no-bench">Nincs cserejátékos. <button type="button" data-match-action="toggle-roster-settings" data-side="'+side+'">+ Névsor</button></p>')+'</div></section>';
 }
+function fitMatchViewport(){
+ if(!root||!root.isConnected)return;
+ const app=root.querySelector('.cc-match-app');if(!app)return;
+ if(window.matchMedia?.('(orientation: landscape) and (max-height: 650px)').matches){
+  const top=Math.max(0,root.getBoundingClientRect?.().top||0);
+  const height=Math.max(175,window.innerHeight-top-5);
+  app.style.setProperty('--match-available-height',height+'px');
+ }else app.style.removeProperty('--match-available-height');
+}
 function paint(){
  if(!root||!root.isConnected)return;
- root.innerHTML='<div class="cc-match-app">'+
- '<div class="cc-match-intro"><button type="button" data-match-action="clear-selection">Kijelölés törlése</button>'+
- '<span>'+(match.rally?'Felállás rögzítve · '+match.rally+' labdamenet':'Felállás szerkeszthető az első pontig')+' · cserepadról húzás vagy koppintás</span></div>'+
- scoreboard()+'<div class="cc-match-board">'+courtHalf(1)+'<div class="cc-match-net">HÁLÓ</div>'+courtHalf(0)+'</div>'+
- '<p class="cc-match-helper">Az első pont előtt szabadon rendezhető a kezdőfelállás. A meccs kezdetétől 6 rendes csere/szett érvényes. Liberócsere: csak hátsó sorban, a lecserélt játékos térhet vissza. Telefonon: cserejátékos, majd cél pályahely.</p>'+
- '<div class="cc-match-rosters">'+rosterCard(0)+rosterCard(1)+'</div>'+activityLog()+
- '<p class="cc-match-footnote">Segédlet, nem hivatalos jegyzőkönyv. Az eredmény és a csereadatok csak ebben a böngészőben tárolódnak.</p></div>';
+ const saved={};
+ ['.cc-match-history-list','[data-match-bench-list="0"]','[data-match-bench-list="1"]'].forEach(q=>{
+  const el=root.querySelector(q);if(el)saved[q]=el.scrollTop;
+ });
+ const settings=Array.from(root.querySelectorAll('[data-match-settings]')).filter(el=>!el.hidden).map(el=>el.dataset.matchSettings);
+ root.innerHTML='<div class="cc-match-app">'+scoreboard()+
+ '<div class="cc-match-layout"><div class="cc-match-board">'+courtHalf(1)+'<div class="cc-match-net"><span>HÁLÓ</span></div>'+courtHalf(0)+'</div>'+
+ '<div class="cc-match-rosters">'+rosterCard(0)+rosterCard(1)+'</div>'+activityLog()+'</div>'+
+ '<div class="cc-match-footline"><span>'+(match.rally?'● '+match.rally+'. labdamenet':'Állítsd össze a kezdőhatost')+' · Koppintás: szerkesztés · Csere: játékos → pálya</span>'+
+ '<button type="button" data-match-action="clear-selection" '+(!selection?'disabled':'')+'>Kijelölés törlése</button></div>'+
+ '<p class="cc-match-footnote">Edzői segédlet · nem hivatalos jegyzőkönyv · helyi mentés</p></div>';
+ root.querySelectorAll('.cc-match-bench').forEach((el,i)=>el.dataset.matchBenchList=String(i));
+ settings.forEach(id=>{const el=root.querySelector('[data-match-settings="'+id+'"]');if(el)el.hidden=false});
+ Object.entries(saved).forEach(([q,scroll])=>{const el=root.querySelector(q);if(el)el.scrollTop=scroll});
+ fitMatchViewport();
 }
 function effect(message){notice=message;save();paint()}
 function award(side){
@@ -441,8 +458,21 @@ function onClick(event){
  if(act==='bench-player'&&team){selection={side,id};notice='Válaszd ki a cél pályahelyet ('+team.name+').';paint();return}
  if(act==='court-player'&&team){
   const pos=integer(b.dataset.pos,-1),p=current(team,pos);
-  if(selection&&selection.side===side&&p){changePlayer(side,selection.id,pos);return}
-  selection={side,id:p.id};notice='Válassz másik pályahelyet a cseréhez, vagy egy cserejátékost.';paint();return;
+  if(!p)return;
+  if(selection&&selection.side===side){changePlayer(side,selection.id,pos);return}
+  editorDialog(side,p.id);return;
+ }
+ if(act==='court-select'&&team){
+  selection={side,id};notice='Mozgatáshoz válassz egy pályahelyet.';paint();return;
+ }
+ if(act==='quick-return'&&team){
+  const p=team.players.find(x=>x.id===id),linked=p&&replacementForBench(team,p);
+  if(!linked){effect('Ehhez a játékoshoz nincs aktív cserepár.');return}
+  changePlayer(side,id,linked.pos);return;
+ }
+ if(act==='toggle-roster-settings'&&team){
+  const el=root.querySelector('[data-match-settings="'+side+'"]');if(el)el.hidden=!el.hidden;
+  return;
  }
  if(act==='edit-player'&&team){editorDialog(side,id);return}
  if(act==='add-player'&&team){
@@ -566,6 +596,7 @@ function mount(element,options={}){
  root.addEventListener('pointermove',onPointerMove,{passive:false});
  root.addEventListener('pointerup',onPointerUp);
  root.addEventListener('pointercancel',()=>{drag?.ghost?.remove();drag=null});
+ window.addEventListener('resize',fitMatchViewport,{passive:true});
  paint();
 }
 window.CCManagerMatch=Object.freeze({mount});
