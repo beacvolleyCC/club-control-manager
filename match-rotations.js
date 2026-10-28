@@ -138,6 +138,7 @@ function scoreboard(){
  '<section class="cc-match-score-team" style="--match-color:'+t.color+'"><b>'+escapeHtml(t.name)+'</b>'+
  '<div class="cc-match-bigscore">'+match.score[i]+'</div>'+
  '<div class="cc-match-serve">'+(match.server===i?'● NYIT':'')+'</div>'+
+ '<div class="cc-match-sub-counter">Rendes cserék: <b>'+t.tracking.subs+'/6</b> · Liberó: '+(t.tracking.libero?'pályán':'padon')+'</div>'+
  '<button type="button" class="cc-match-point" data-match-action="point" data-side="'+i+'" '+(match.server===null?'disabled':'')+'>+1 PONT</button>'+
  '<button type="button" class="cc-match-serve-btn" data-match-action="server" data-side="'+i+'">'+(match.server===i?'Kezdő nyitó ✓':'Nyitás átadása')+'</button></section>').join('')+'</div>'+
  (match.server===null?'<p class="cc-match-start-hint">Először válaszd ki a nyitó csapatot. A pontot szerző fogadó csapat automatikusan egyet forog.</p>':'')+
@@ -176,8 +177,8 @@ function paint(){
  '<div class="cc-match-intro"><button type="button" data-match-action="clear-selection">Kijelölés törlése</button>'+
  '<span>Játékos a cserepadról → húzd vagy koppintsd a pályahelyre</span></div>'+
  scoreboard()+'<div class="cc-match-board">'+courtHalf(1)+'<div class="cc-match-net">HÁLÓ</div>'+courtHalf(0)+'</div>'+
- '<p class="cc-match-helper">Játékoscsere: húzd a cserepadon lévő játékost a megfelelő helyre. Telefonon: koppints a nevére, majd a pályahelyre. Pályán lévő játékosokat is felcserélhetsz.</p>'+
- '<div class="cc-match-rosters">'+rosterCard(0)+rosterCard(1)+'</div>'+
+ '<p class="cc-match-helper">Az első pont előtt szabadon rendezhető a kezdőfelállás. A meccs kezdetétől 6 rendes csere/szett érvényes. Liberócsere: csak hátsó sorban, a lecserélt játékos térhet vissza. Telefonon: cserejátékos, majd cél pályahely.</p>'+
+ '<div class="cc-match-rosters">'+rosterCard(0)+rosterCard(1)+'</div>'+activityLog()+
  '<p class="cc-match-footnote">Segédlet, nem hivatalos jegyzőkönyv. Az eredmény és a csereadatok csak ebben a böngészőben tárolódnak.</p></div>';
 }
 function effect(message){notice=message;save();paint()}
@@ -363,19 +364,19 @@ function onClick(event){
  const act=b.dataset.matchAction,side=integer(b.dataset.side,-1),id=integer(b.dataset.id,-1),team=match.teams[side];
  if(act==='point'&&team){award(side);return}
  if(act==='server'&&team){
-  snapshot('Nyitásjog');match.server=side;match.lastAction=team.name+' nyit.';notice='';save();paint();return;
+  snapshot('Nyitásjog');match.server=side;match.lastAction=team.name+' nyit.';eventLog('server',match.lastAction);notice='';save();paint();return;
  }
  if(act==='undo'){
   const previous=match.history.pop();if(!previous)return;
   const remaining=match.history;match={...previous,history:remaining};selection=null;notice='';save();paint();return;
  }
  if(act==='new-set'){
-  if(!confirm('Új játszmát indítasz? A pontok nullázódnak; a csapatok és cserék megmaradnak.'))return;
-  snapshot('Új játszma');match.set++;match.score=[0,0];match.server=null;match.lastAction='Új játszma: válaszd ki a nyitó csapatot.';selection=null;notice='';save();paint();return;
+  if(!confirm('Új játszmát indítasz? A pontok és a rendes cserék száma nullázódik. A névsor megmarad, a liberó visszamegy a padra.'))return;
+  snapshot('Új játszma');resetSetRules();match.set++;match.score=[0,0];match.server=null;match.lastAction='Új játszma: a hat rendes csere ismét elérhető.';eventLog('set',match.lastAction);selection=null;notice='';save();paint();return;
  }
  if(act==='new-match'){
   if(!confirm('Új mérkőzést indítasz? A pontok, játszmaszám és nyitásjog nullázódnak; a jelenlegi névsorok és felállások megmaradnak.'))return;
-  match.score=[0,0];match.server=null;match.set=1;match.history=[];match.lastAction='Új mérkőzés. Válaszd ki a nyitó csapatot.';
+  resetSetRules();match.score=[0,0];match.server=null;match.set=1;match.history=[];match.events=[];match.eventSeq=1;match.lastAction='Új mérkőzés. Válaszd ki a nyitó csapatot.';
   selection=null;notice='';save();paint();return;
  }
  if(act==='bench-player'&&team){selection={side,id};notice='Válaszd ki a cél pályahelyet ('+team.name+').';paint();return}
@@ -406,8 +407,13 @@ function onSubmit(event){
  snapshot('Játékos szerkesztése');
  p.number=val('number').replace(/[^\d]/g,'').slice(0,3);
  p.name=val('name').trim().slice(0,70);
- const role=val('role');if(ROLES.some(r=>r[0]===role))p.role=role;
- match.lastAction=t.name+': '+labelPlayer(p)+' módosítva.';closeDialog(false);notice='';save();paint();
+ const role=val('role');
+ if(role==='libero'&&t.spots.includes(p.id)){
+  notice='A liberót előbb a cserepadon jelöld ki, majd a hátsó sorba cseréld be.';
+ }else if(t.tracking.libero?.liberoId===p.id&&role!=='libero'){
+  notice='Az aktív liberó posztját csak a liberócsere után módosíthatod.';
+ }else if(ROLES.some(r=>r[0]===role))p.role=role;
+ match.lastAction=t.name+': '+labelPlayer(p)+' módosítva.';eventLog('edit',match.lastAction);closeDialog(false);save();paint();
 }
 function onChange(event){
  const f=event.target;
