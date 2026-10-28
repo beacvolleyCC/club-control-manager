@@ -76,7 +76,7 @@
 .cc-match-bench{display:flex;flex-direction:column;gap:3px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:5px 1px 1px;scrollbar-width:thin}
 .cc-match-bench-row{display:flex;align-items:center;flex:none;gap:4px;min-width:0;border:1px solid var(--match-stroke);border-radius:7px;background:var(--match-tint);padding:1px 3px}
 .cc-match-bench-row.substituted{border-color:color-mix(in srgb,var(--yellow-dark) 50%,var(--match-stroke));background:color-mix(in srgb,var(--yellow) 12%,var(--match-tint))}
-.cc-match-bench-player{display:flex;align-items:center;flex:1;gap:5px;min-width:0;min-height:29px;padding:2px 3px;border:0;background:transparent;color:var(--match-ink);text-align:left;cursor:grab;touch-action:none}
+.cc-match-bench-player{display:flex;align-items:center;flex:1;gap:5px;min-width:0;min-height:29px;padding:2px 3px;border:0;background:transparent;color:var(--match-ink);text-align:left;cursor:grab;touch-action:pan-y}
 .cc-match-bench-player.selected{background:color-mix(in srgb,var(--yellow) 24%,transparent);border-radius:5px}
 .cc-match-bench-no{min-width:24px;flex:none;font-size:10px;font-weight:900}
 .cc-match-bench-info{display:flex;flex-direction:column;min-width:0;gap:1px}
@@ -210,4 +210,17 @@
  .cc-match-bigscore{font-size:22px}
  .cc-match-rot-num,.cc-match-jersey{font-size:7px}
  .cc-match-footline span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+
+/* Match-only landscape focus: keep the planning tabs for exiting, reclaim the large app header. */
+@media(orientation:landscape) and (max-height:650px){
+ body:has(.cc-match-app) .topbar,
+ body:has(.cc-match-app) .legacy-primary-nav{display:none!important}
+ body:has(.cc-match-app) .legacy-secondary-nav{
+  position:relative!important;top:0!important;min-height:28px!important;height:30px!important;
+  padding:0 max(6px,env(safe-area-inset-right)) 0 max(6px,env(safe-area-inset-left))!important;
+  align-items:center!important
+ }
+ body:has(.cc-match-app) .legacy-secondary-tab{min-height:26px!important;padding:3px 10px!important;font-size:10px!important}
+ body:has(.cc-match-app) .content{padding-top:3px!important;padding-bottom:0!important}
 }
