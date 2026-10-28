@@ -230,6 +230,7 @@ function activityLog(){
 function scoreboard(){
  return '<section class="cc-match-score"><div class="cc-match-topline"><span class="cc-match-title">MECCS <b>●</b> <span>'+match.set+'. SZETT</span></span><div class="cc-match-toolbar">'+
  '<button type="button" data-match-action="undo" '+(!match.history.length?'disabled':'')+' title="Utolsó művelet visszavonása">↶ Vissza</button>'+
+ '<button type="button" class="cc-match-open-settings" data-match-action="match-settings">⚙ Meccs beállításai</button>'+ 
  '<button type="button" data-match-action="new-set">+ Szett</button><button type="button" data-match-action="new-match" title="Új mérkőzés">Új meccs</button></div></div>'+
  '<div class="cc-match-score-grid">'+match.teams.map((t,i)=>
  '<section class="cc-match-score-team" style="--match-color:'+t.color+'"><div class="cc-match-score-id"><b title="'+escapeHtml(t.name)+'">'+escapeHtml(t.name)+'</b>'+
@@ -431,6 +432,19 @@ function rosterFromManager(side){
  match.lastAction=r.name+': '+r.players.length+' kerettag elérhető a cserepadon.';
  notice='';save();paint();
 }
+function matchSettingsDialog(){
+ const old=root.querySelector('[data-match-dialog]');old?.remove();
+ const sides=match.teams.map((t,i)=>
+ '<section class="cc-match-settings-side"><h4>'+escapeHtml(i===0?'A csapat':'B csapat')+'</h4>'+
+ '<label>Csapatnév<input name="name'+i+'" type="text" maxlength="65" value="'+escapeHtml(t.name)+'" autocomplete="off"></label>'+
+ '<button type="button" data-match-action="roster-setup" data-side="'+i+'">Névsor / BEAC-import / játékosok →</button></section>').join('');
+ root.insertAdjacentHTML('beforeend','<dialog class="cc-match-dialog" data-match-dialog><form class="cc-match-dialog-form" data-match-settings-form>'+
+  '<div class="cc-match-dialog-heading"><h3>Meccs beállításai</h3><button type="button" data-match-action="close-modal" aria-label="Bezárás">×</button></div>'+
+  '<p>Csapatnevek és névsorok szerkesztése. A mérkőzés közbeni pontozás és a már rögzített események megmaradnak.</p>'+
+  sides+'<div class="cc-match-dialog-actions"><button type="button" data-match-action="close-modal">Mégse</button><button type="submit">Csapatnevek mentése</button></div>'+
+  '</form></dialog>');
+ root.querySelector('[data-match-dialog]')?.showModal?.();
+}
 function editorDialog(side,id){
  const t=match.teams[side],p=t.players.find(x=>x.id===id);
  if(!p)return;
@@ -542,6 +556,8 @@ function onClick(event){
  const b=event.target.closest('[data-match-action]');
  if(!b||!root.contains(b))return;
  const act=b.dataset.matchAction,side=integer(b.dataset.side,-1),id=integer(b.dataset.id,-1),team=match.teams[side];
+ if(act==='match-settings'){matchSettingsDialog();return}
+ if(act==='roster-setup'&&team){closeDialog(false);paint();const el=root.querySelector('[data-match-settings="'+side+'"]');if(el)el.hidden=false;return}
  if(act==='export-log'){exportLog();return}
  if(act==='inspect-point'){inspectPoint(integer(b.dataset.seq,-1));return}
  if(act==='point'&&team){award(side);return}
@@ -596,6 +612,17 @@ function onClick(event){
  if(act==='close-modal'){closeDialog();return}
 }
 function onSubmit(event){
+ const setup=event.target.closest('[data-match-settings-form]');
+ if(setup&&root.contains(setup)){
+  event.preventDefault();
+  const names=match.teams.map((t,i)=>String(setup.elements.namedItem('name'+i)?.value||'').trim().slice(0,65)||t.name);
+  if(names.some((n,i)=>n!==match.teams[i].name)){
+   snapshot('Meccs csapatnevek');
+   match.teams.forEach((t,i)=>{t.name=names[i]});
+   match.lastAction='Csapatnevek módosítva.';eventLog('edit',match.lastAction);save();
+  }
+  closeDialog(false);paint();return;
+ }
  const form=event.target.closest('[data-match-player-form]');
  if(!form||!root.contains(form))return;
  event.preventDefault();
