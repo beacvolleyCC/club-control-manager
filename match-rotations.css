@@ -308,3 +308,103 @@
  .cc-match-score-team{grid-template-columns:minmax(0,1fr) repeat(4,auto);gap:4px}
  .cc-match-timeout-btn{min-height:25px;min-width:37px;font-size:8px;padding:1px 3px}
 }
+
+
+/* CC match design pass: the entire court is quiet grey, with only boundary lines and a plain net. */
+.cc-match-board{background:var(--card)}
+.cc-match-court{
+ background:#e5e5e2!important;border:1px solid #b4b4b0;
+}
+.cc-match-court::after{background:#b9b9b5}
+.cc-match-net{
+ flex:none;height:5px!important;min-height:5px!important;
+ background:#282828!important;border:0!important;box-shadow:none!important;
+}
+.cc-match-net span{display:none!important}
+body.dark .cc-match-court{background:#31312f!important;border-color:#5a5a57}
+body.dark .cc-match-court::after{background:#585856}
+body.dark .cc-match-net{background:#e0e0da!important}
+
+/* Jersey-first circles: role and substitution in opposite upper corners. */
+.cc-match-player-wrap{min-height:62px;align-self:center;justify-self:stretch}
+.cc-match-player{
+ width:60px!important;height:60px!important;min-height:0!important;min-width:0;
+ border-radius:50%!important;display:flex;flex-direction:column;gap:0!important;
+ align-items:center;justify-content:center;padding:10px 7px 3px!important;
+ box-shadow:none!important;background:var(--card);
+ overflow:visible;position:relative;
+}
+.cc-match-number{
+ display:block;color:var(--black);font-size:26px;line-height:1.02;letter-spacing:-.05em;
+ font-weight:950;max-width:100%;white-space:nowrap
+}
+.cc-match-number.is-captain{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.cc-match-position{position:absolute;left:6px;top:5px;font-size:8px;font-weight:800;color:var(--muted)}
+.cc-match-player.near .cc-match-position{font-weight:950;color:var(--black)}
+.cc-match-sub-flag{position:absolute;right:5px;top:4px;font-size:10px;line-height:1;font-weight:950;color:var(--black)}
+.cc-match-player .cc-match-rot-num{top:auto;left:1px;bottom:4px;font-size:7px;color:var(--muted)}
+.cc-match-player .cc-match-person{
+ max-width:45px;min-height:9px;margin-top:2px;line-height:1.1;
+ font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.cc-match-player.selected{outline:2px solid var(--yellow);border-color:var(--yellow-dark)}
+.cc-match-edit{right:clamp(3px,8%,14px);bottom:1px;background:var(--card)}
+.cc-match-score-id>b{font-size:13px}
+.cc-match-bigscore{font-size:36px}
+.cc-match-toolbar .cc-match-open-settings{
+ background:var(--yellow);color:#191919;border-color:var(--yellow-dark);
+ font-weight:950;white-space:nowrap
+}
+.cc-match-settings-side{border:1px solid var(--line);border-radius:9px;padding:10px;background:var(--soft)}
+.cc-match-settings-side h4{margin:0 0 8px;font-size:13px}
+.cc-match-settings-side label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:800}
+.cc-match-settings-side input{
+ display:block;min-height:42px;padding:8px;width:100%;background:var(--card);
+ border:1px solid var(--line);border-radius:7px;color:var(--black);font-size:16px
+}
+.cc-match-settings-side button{
+ margin-top:8px;width:100%;min-height:34px;padding:6px;border:1px solid var(--line);
+ border-radius:7px;background:var(--card);color:var(--black);font-size:11px;font-weight:800
+}
+.cc-match-captain-option{display:flex!important;flex-direction:row!important;align-items:center;gap:8px!important}
+.cc-match-captain-option input{width:18px!important;height:18px!important;min-height:18px!important}
+
+/* Actual iPhone portrait viewport: smaller pitch, larger jersey number, less empty chrome. */
+@media(max-width:580px) and (orientation:portrait){
+ .cc-match-app{gap:6px}
+ .cc-match-score{padding:6px 7px}
+ .cc-match-toolbar{gap:3px;flex-wrap:wrap}
+ .cc-match-toolbar button{padding:5px 6px;font-size:9px}
+ .cc-match-score-id>b{font-size:11px}
+ .cc-match-score-id>small{font-size:8px}
+ .cc-match-bigscore{font-size:40px}
+ .cc-match-point{min-height:34px}
+ .cc-match-board{min-height:0!important}
+ .cc-match-half{min-height:0!important;flex:0 0 auto;padding:3px 6px}
+ .cc-match-half-header{min-height:16px;padding-bottom:2px}
+ .cc-match-half-header h3{font-size:10px}
+ .cc-match-court{min-height:0!important;grid-template-rows:repeat(2,64px)!important}
+ .cc-match-court-row{min-height:64px!important}
+ .cc-match-player-wrap{min-height:62px!important;height:64px}
+ .cc-match-player{width:54px!important;height:54px!important;padding-top:9px!important}
+ .cc-match-number{font-size:24px}
+ .cc-match-position{font-size:7px;top:4px;left:5px}
+ .cc-match-sub-flag{top:3px;right:4px;font-size:9px}
+ .cc-match-player .cc-match-person{max-width:43px;font-size:7px}
+ .cc-match-edit{right:clamp(3px,13%,20px);bottom:0;width:19px;height:19px;font-size:12px}
+ .cc-match-net{height:4px!important;min-height:4px!important}
+}
+@media(orientation:landscape) and (max-height:650px){
+ .cc-match-player{
+  width:min(42px,72%)!important;height:min(42px,96%)!important;
+  min-height:0!important;padding:7px 4px 1px!important
+ }
+ .cc-match-number{font-size:18px}
+ .cc-match-position{top:2px;left:4px;font-size:7px}
+ .cc-match-sub-flag{top:1px;right:2px;font-size:8px}
+ .cc-match-player .cc-match-person{max-width:35px;min-height:7px;font-size:6px;margin-top:1px}
+ .cc-match-player .cc-match-rot-num{font-size:6px;bottom:1px}
+ .cc-match-net{height:3px!important;min-height:3px!important}
+ .cc-match-bigscore{font-size:27px}
+ .cc-match-toolbar .cc-match-open-settings{font-size:9px}
+}
