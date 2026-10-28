@@ -77,7 +77,8 @@ function load(){
     scoreBefore:Array.isArray(x.scoreBefore)?x.scoreBefore.slice(0,2).map(n=>integer(n)):null,
     rotationsBefore:Array.isArray(x.rotationsBefore)?x.rotationsBefore.slice(0,2).map(n=>integer(n)):null,
     lineupBefore:Array.isArray(x.lineupBefore)?x.lineupBefore.slice(0,2).map(ids=>Array.isArray(ids)?ids.slice(0,6).map(n=>integer(n)):[]):null,
-    inNumber:String(x.inNumber||'').slice(0,3),outNumber:String(x.outNumber||'').slice(0,3)
+    inNumber:String(x.inNumber||'').slice(0,3),outNumber:String(x.outNumber||'').slice(0,3),
+    playersBefore:Array.isArray(x.playersBefore)?x.playersBefore.slice(0,2).map(arr=>Array.isArray(arr)?arr.slice(0,6).map(p=>({id:integer(p?.id,-1),number:String(p?.number||'').slice(0,3),name:String(p?.name||'').slice(0,70),role:String(p?.role||'other').slice(0,30)})):[]):null
    })):[];
    a.eventSeq=Math.max(integer(raw.eventSeq,1),...a.events.map(x=>x.seq+1),1);
    if(a.rally>0)for(const team of a.teams)if(!team.tracking.locked){
@@ -243,7 +244,8 @@ function award(side){
  lockLineups();
  const prev=match.server;
  const rallyInfo={side,serveSide:prev,servePlayerId:serverPlayer?.id||-1,serveJersey:serverPlayer?.number||'',
-  scoreBefore:[...match.score],rotationsBefore:match.teams.map(t=>t.rotation),lineupBefore:match.teams.map(t=>[...t.spots])};
+  scoreBefore:[...match.score],rotationsBefore:match.teams.map(t=>t.rotation),lineupBefore:match.teams.map(t=>[...t.spots]),
+  playersBefore:match.teams.map(t=>t.spots.map(id=>{const p=t.players.find(x=>x.id===id);return {id,number:p?.number||'',name:p?.name||'',role:p?.role||'other'}}))};
  match.score[side]++;match.rally++;
  if(side!==prev){
   const t=match.teams[side],lib=t.tracking.libero;
