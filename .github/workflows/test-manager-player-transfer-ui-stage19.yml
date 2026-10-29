@@ -1,0 +1,27 @@
+name: TEST Manager transfer UI Stage19 QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'app.js'
+      - 'tests/manager-player-transfer-ui-stage19-20261029.test.cjs'
+      - '.github/workflows/test-manager-player-transfer-ui-stage19.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ui-regression:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify syntax of Manager app and UI tests
+        run: |
+          node --check app.js
+          node --check tests/manager-player-transfer-ui-stage19-20261029.test.cjs
+      - name: Run Manager transfer UI contract and behavior twice
+        run: |
+          node --test tests/manager-player-transfer-ui-stage19-20261029.test.cjs
+          node --test tests/manager-player-transfer-ui-stage19-20261029.test.cjs
