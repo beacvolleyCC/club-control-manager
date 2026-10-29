@@ -116,3 +116,21 @@ test('Manager TEST shell and service worker share the same cache version',()=>{
   assert.match(sw,/key\.startsWith\('cc-manager-test-'\)/);
   assert.match(style,/#transferPlayerFeedback:not\(\[hidden\]\)/);
 });
+
+test('a second submit during pending RPC cannot create a duplicate transfer',async()=>{
+  const h=harness();
+  let release;
+  h.context.rpc=async(name,args)=>{
+    h.rpcCalls.push({name,args});
+    await new Promise(resolve=>{release=resolve});
+  };
+  const player={playerId:other,teamId:'team-A',name:'Player One'};
+  const first=h.api.savePlayerTransfer_(player);
+  assert.equal(h.dom['#savePlayerTransferBtn'].disabled,true);
+  const second=h.api.savePlayerTransfer_(player);
+  assert.equal(h.rpcCalls.length,1);
+  release();
+  await Promise.all([first,second]);
+  assert.equal(h.rpcCalls.length,1);
+  assert.equal(h.dom['#savePlayerTransferBtn'].disabled,false);
+});
