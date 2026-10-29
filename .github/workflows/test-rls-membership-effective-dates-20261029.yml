@@ -1,0 +1,28 @@
+name: CC TEST RLS membership effective dates security QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/TEST_RLS_MEMBERSHIP_DATE_CANDIDATE_DO_NOT_APPLY_20261028.sql'
+      - 'docs/security/TEST_RLS_MEMBERSHIP_DATE_DEPLOY_20261029.sql'
+      - 'tests/sql/TEST_RLS_MEMBERSHIP_EFFECTIVE_DATE_ROLLBACK_20261029.sql'
+      - 'tests/manager-membership-date-rls-candidate-20261028.test.cjs'
+      - 'tests/manager-membership-date-rls-deploy-20261029.test.cjs'
+      - '.github/workflows/test-rls-membership-effective-dates-20261029.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    name: Static candidate and rollback matrix (twice, no deploy)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify candidate and staged migration twice
+        run: |
+          node --check tests/manager-membership-date-rls-deploy-20261029.test.cjs
+          node --test tests/manager-membership-date-rls-candidate-20261028.test.cjs tests/manager-membership-date-rls-deploy-20261029.test.cjs
+          node --test tests/manager-membership-date-rls-candidate-20261028.test.cjs tests/manager-membership-date-rls-deploy-20261029.test.cjs
