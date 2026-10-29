@@ -1,0 +1,997 @@
+{
+  "header": "CC TEST API INVENTORY · read-only metadata · not a production parity certificate",
+  "audit_date": "2026-10-29",
+  "test_project_ref": "szzoubvhlwnojtzqjebc",
+  "manager_test": {
+    "repo": "beacvolleyCC/club-control-manager",
+    "branch": "test/20261026-manager-document-intake",
+    "source_sha": "db8282b807b3bca3afa312ac630646e180d2cf58"
+  },
+  "player_test": {
+    "repo": "beacvolleyCC/player_application",
+    "branch": "test/20261026-isolated-player-mobile",
+    "source_sha": "c2382e0705454b79fe1052f00959814b281b4f5e"
+  },
+  "scope_notes": [
+    "Names identified in current TEST app.js source, including fallback branches; token presence does not prove reachability or usage.",
+    "DB availability means a public RPC with matching name exists; arguments, grants and RLS must be checked before calling.",
+    "No LIVE DB data or secrets read; no DB mutations; no deploy."
+  ],
+  "database_public_apis": [
+    {
+      "schema": "public",
+      "name": "cc_manager_bootstrap_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_calendar_v3",
+      "arguments": "p_from timestamp with time zone, p_to timestamp with time zone, p_team_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_competition_results_v1",
+      "arguments": "p_team_ids uuid[]",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_events_v1",
+      "arguments": "p_from timestamp with time zone, p_to timestamp with time zone, p_kind text, p_team_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_overview_v1",
+      "arguments": "p_team_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_players_v2",
+      "arguments": "p_team_id uuid, p_query text",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_rsvp_matrix_v1",
+      "arguments": "p_from timestamp with time zone, p_to timestamp with time zone, p_team_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_teams_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_avatar_team_directory_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_bootstrap",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_bootstrap_filtered_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_competition_insights_v1",
+      "arguments": "p_context_team_id uuid, p_source_team_id text",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_competition_league_insights_v1",
+      "arguments": "p_context_team_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_competition_mrsz_snapshot_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_competition_mrsz_snapshot_v2",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_competition_source_matches_effective_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_competition_standings_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_competition_user_schedule_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_display_names",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_display_names_filtered_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_filter_test_name_array_v1",
+      "arguments": "p_values jsonb",
+      "authenticated_execute": false,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_medical_status_v1",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_notification_dismiss_v1",
+      "arguments": "p_notification_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_notification_read_v1",
+      "arguments": "p_notification_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_notifications_v1",
+      "arguments": "p_limit integer, p_include_dismissed boolean",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_player_profile_data",
+      "arguments": "",
+      "authenticated_execute": true,
+      "anon_execute": false
+    }
+  ],
+  "source_tokens": {
+    "manager": [
+      {
+        "name": "cc_manager_admin_save_v1",
+        "domain": "identity_access",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_admins_v1",
+        "domain": "identity_access",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_bootstrap_v1",
+        "domain": "identity_access",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_calendar_v2",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_calendar_v3",
+        "domain": "training_rsvp",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_coach_availability_set_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_coach_availability_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_attendance_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_attendance_v2",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_change_audit_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_event_cancel_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_event_save_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_event_series_create_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_league_insights_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_match_override_history_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_match_override_reset_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_match_override_save_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_mrsz_snapshot_v2",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_overview_standings_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_position_counts_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_results_v1",
+        "domain": "competition",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_rsvp_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_source_matches_effective_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_standings_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_sync_status_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_competition_user_schedule_v1",
+        "domain": "competition",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_court_impact_v1",
+        "domain": "equipment_facilities",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_equipment_list_v1",
+        "domain": "equipment_facilities",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_equipment_set_v1",
+        "domain": "equipment_facilities",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_event_roster_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_events_v1",
+        "domain": "training_rsvp",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_finance_audit_v1",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_finance_matrix_v1",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_finance_override_set_v1",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_finance_reconcile_beac_v1",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_finance_settings_get_v1",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_finance_settings_get_v2",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_finance_settings_set_v1",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_finance_settings_set_v2",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_athletes_v1",
+        "domain": "mass_sport",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_attendance_r1_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_attendance_snapshot_r1_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_booking_add_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_booking_patch_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_booking_remove_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_calendar_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_cancellations_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_event_delete_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_event_detail_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_event_save_safe_v2",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_event_save_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_event_series_create_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_event_set_active_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_passes_v1",
+        "domain": "mass_sport",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_registration_gate_v1",
+        "domain": "mass_sport",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_training_history_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_trainings_v1",
+        "domain": "training_rsvp",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_notification_history_v1",
+        "domain": "notifications",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_notification_recipients_v1",
+        "domain": "notifications",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_notification_send_v1",
+        "domain": "notifications",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_overview_v1",
+        "domain": "other",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_pass_catalog_v1",
+        "domain": "mass_sport",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_player_avatar_update_v1",
+        "domain": "identity_access",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_player_medical_appointments_v1",
+        "domain": "medical",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_player_transfer_v1",
+        "domain": "identity_access",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_player_update_v1",
+        "domain": "identity_access",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_players_v2",
+        "domain": "other",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_rsvp_matrix_v1",
+        "domain": "training_rsvp",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_team_update_v1",
+        "domain": "identity_access",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_teams_v1",
+        "domain": "identity_access",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_test_player_reassign_v1",
+        "domain": "identity_access",
+        "db_callable": false,
+        "runtime_not_verified": true
+      }
+    ],
+    "player": [
+      {
+        "name": "cc_player_avatar_directory",
+        "domain": "other",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_avatar_team_directory_v1",
+        "domain": "other",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_bootstrap",
+        "domain": "identity_access",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_bootstrap_filtered_v1",
+        "domain": "identity_access",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_competition_insights_v1",
+        "domain": "competition",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_competition_league_insights_v1",
+        "domain": "competition",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_competition_mrsz_snapshot_v2",
+        "domain": "competition",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_competition_source_matches_effective_v1",
+        "domain": "competition",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_competition_standings_v1",
+        "domain": "competition",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_competition_user_schedule_v1",
+        "domain": "competition",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_display_names",
+        "domain": "other",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_display_names_filtered_v1",
+        "domain": "other",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_finance_overrides_v1",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_finance_settings_v1",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_medical_appointment_save_v1",
+        "domain": "medical",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_medical_status_v1",
+        "domain": "medical",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_notification_dismiss_v1",
+        "domain": "notifications",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_notification_read_v1",
+        "domain": "notifications",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_notifications_v1",
+        "domain": "notifications",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_payment_overrides_v2382",
+        "domain": "payments",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_profile_data",
+        "domain": "other",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_push_register_v1",
+        "domain": "notifications",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_push_unregister_all_v1",
+        "domain": "notifications",
+        "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_player_push_unregister_v1",
+        "domain": "notifications",
+        "db_callable": false,
+        "runtime_not_verified": true
+      }
+    ]
+  },
+  "public_tables": [
+    {
+      "table": "attendance_change_audit",
+      "rls_enabled": true
+    },
+    {
+      "table": "audit_log",
+      "rls_enabled": true
+    },
+    {
+      "table": "availability",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_club_finance_settings_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_coach_event_availability_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_competition_match_arrangements_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_competition_match_override_audit_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_competition_match_overrides_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_competition_mrsz_screenshot_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_competition_user_schedule_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_player_fee_audit_v2382",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_player_fee_meta_v2382",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_team_equipment_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "cc_team_finance_settings_v1",
+      "rls_enabled": true
+    },
+    {
+      "table": "competition_source_changes",
+      "rls_enabled": true
+    },
+    {
+      "table": "competition_source_matches",
+      "rls_enabled": true
+    },
+    {
+      "table": "competition_source_standings",
+      "rls_enabled": true
+    },
+    {
+      "table": "competition_source_standings_history",
+      "rls_enabled": true
+    },
+    {
+      "table": "competition_source_team_maps",
+      "rls_enabled": true
+    },
+    {
+      "table": "competition_sync_runs",
+      "rls_enabled": true
+    },
+    {
+      "table": "court_availability",
+      "rls_enabled": true
+    },
+    {
+      "table": "events",
+      "rls_enabled": true
+    },
+    {
+      "table": "legacy_sheet_snapshots",
+      "rls_enabled": true
+    },
+    {
+      "table": "manager_accounts",
+      "rls_enabled": true
+    },
+    {
+      "table": "manager_cutover_runs",
+      "rls_enabled": true
+    },
+    {
+      "table": "manager_migration_runs",
+      "rls_enabled": true
+    },
+    {
+      "table": "manager_module_permissions",
+      "rls_enabled": true
+    },
+    {
+      "table": "manager_runtime_state",
+      "rls_enabled": true
+    },
+    {
+      "table": "manager_settings",
+      "rls_enabled": true
+    },
+    {
+      "table": "manager_team_transfer_audit",
+      "rls_enabled": true
+    },
+    {
+      "table": "manager_test_player_delete_audit",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_athletes",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_bookings",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_events",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_level_overrides",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_live_write_audit",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_pass_month_overrides_b43",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_pass_validity_overrides",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_passes",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_sanctions",
+      "rls_enabled": true
+    },
+    {
+      "table": "mass_waitlist",
+      "rls_enabled": true
+    },
+    {
+      "table": "player_fees",
+      "rls_enabled": true
+    },
+    {
+      "table": "player_medical_appointments",
+      "rls_enabled": true
+    },
+    {
+      "table": "player_notifications",
+      "rls_enabled": true
+    },
+    {
+      "table": "player_private",
+      "rls_enabled": true
+    },
+    {
+      "table": "player_push_deliveries",
+      "rls_enabled": true
+    },
+    {
+      "table": "player_push_outbox",
+      "rls_enabled": true
+    },
+    {
+      "table": "player_push_subscriptions",
+      "rls_enabled": true
+    },
+    {
+      "table": "player_settings",
+      "rls_enabled": true
+    },
+    {
+      "table": "players",
+      "rls_enabled": true
+    },
+    {
+      "table": "team_memberships",
+      "rls_enabled": true
+    },
+    {
+      "table": "teams",
+      "rls_enabled": true
+    }
+  ],
+  "release_blockers": [
+    "Manager Issue #81: membership starts_on effective-date RLS is not fixed in DB.",
+    "Player Issue #31: no hosted real Auth+RSVP E2E acceptance.",
+    "Manager write RPC/API contracts largely not deployed to TEST.",
+    "Cloudflare Pages TEST URL not deployed and iOS browser QA pending.",
+    "Mass sport/financial/official competition data parity is not proven."
+  ]
+}
