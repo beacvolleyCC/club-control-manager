@@ -43,8 +43,8 @@ test('write and audit are atomic in the single function body, with original and 
  assert.equal(occurrence(/UPDATE public\.teams AS t SET/gi),1);
  assert.equal(occurrence(/INSERT INTO public\.audit_log/gi),1);
  assert.match(executable,/FOR UPDATE;/);
- assert.doesNotMatch(executable,/nextval\\('public\\.audit_log_id_seq'::regclass\\)/);
- assert.match(executable,/\\(actor_user_id,action,entity_type,entity_id,old_data,new_data\\)/);
+ assert.equal(executable.includes("nextval('public.audit_log_id_seq'::regclass)"),false);
+ assert.ok(executable.includes('(actor_user_id,action,entity_type,entity_id,old_data,new_data)'));
  assert.match(executable,/to_jsonb\(v_before\),to_jsonb\(v_after\)/);
  assert.match(executable,/RETURN jsonb_build_object\(/);
 });
