@@ -74,6 +74,15 @@
 - Első UX design modul: Login/szerepkör/csapat, utána keret és naptár.
 - Képernyőnként átadás a következőnek; a teljes rendszert csak a modulok és integrációk elfogadása után lehet cserélni.
 
+## Stage 15 – TEST Manager játékosadatok mentése (2026-10-29)
+- `cc_manager_player_update_v1(jsonb)` telepítve a külön TEST Supabase-be: auditált, egy tranzakcióban menti a `players` és `player_private` mezőket.
+- Manager `competition.players/edit`, érvényes tagság/csapat és változatlan Auth/email szükséges. Nem szélesítettünk tábla-jogosultságokat.
+- PostgreSQL rollbackos pozitív/negatív próba a telepítés előtt és után PASS. Node statikus QA 8/8 ×2 PASS.
+- 25 TEST migráció; Manager RPC lefedettség 10/71, Player 16/24 (statikus nevek, legacy/fallbackokkal).
+- Meglévő DB-invariáns: egy játékosnak egyetlen `active=true` csapattagsági sora lehet. A csapatváltás külön API és modell-felülvizsgálat lesz.
+- **#82 külön nyitott**: `cc_manager_players_v2` olvasási RPC még nem vizsgálja a `starts_on` kezdetét a jelenlegi csapat megállapításánál.
+- Handover: `docs/handover/TEST_STAGE15_MANAGER_PLAYER_PROFILE_WRITE_20261029.md`.
+
 ## Stage 14 – TEST csapattagság RLS (2026-10-29, legfrissebb állapot)
 - #81 hibajavítás telepítve: `private.current_team_ids()` és `private.player_in_my_team(uuid)` csak **aktív, már megkezdődött, még érvényes** tagságot fogad el, aktív csapat és játékos mellett.
 - PostgreSQL szerepkörös pozitív/negatív QA és a telepítés utáni DDL-mentes újrafuttatás: PASS. GitHub CI: 14/14 ×2 PASS.
