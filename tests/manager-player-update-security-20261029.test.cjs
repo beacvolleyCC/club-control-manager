@@ -60,3 +60,19 @@ test('bounded values prevent unexpectedly large profile writes',()=>{
  assert.match(code,/INVALID_MEDICAL_DATE/);
  assert.match(code,/PLAYER_FIELD_LENGTH_INVALID/);
 });
+
+test('deployment SQL is exact candidate with nonexecuting TEST-only header',()=>{
+ const deployed=fs.readFileSync(path.join(root,'docs/security/TEST_MANAGER_PLAYER_UPDATE_DEPLOY_20261029.sql'),'utf8');
+ const first=deployed.indexOf('-- Club Control Manager TEST Stage 15:');
+ assert.ok(first>=0);
+ assert.equal(deployed.slice(first),sql);
+ assert.match(deployed,/szzoubvhlwnojtzqjebc/);
+ assert.doesNotMatch(deployed,/snqsxlyhontaepembaic|sb_secret_|service_role/);
+});
+test('postdeploy RLS QA tests persisted function, never changes its schema',()=>{
+ const current=fs.readFileSync(path.join(root,'tests/sql/TEST_MANAGER_PLAYER_UPDATE_POSTDEPLOY_ROLLBACK_20261029.sql'),'utf8');
+ assert.match(current,/^BEGIN;/m);
+ assert.match(current,/^ROLLBACK;/m);
+ assert.doesNotMatch(current,/CREATE OR REPLACE FUNCTION|DROP FUNCTION|ALTER FUNCTION|GRANT EXECUTE|REVOKE EXECUTE/i);
+ for(const key of ['DO $anon$','DO $allow_deny$','DO $audit$','DO $cross_team$','DO $unique_team$','DO $future_membership$','DO $no_auth$'])assert.ok(current.includes(key),key);
+});
