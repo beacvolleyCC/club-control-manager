@@ -16,7 +16,7 @@ Date: 2026-10-29 (Europe/Budapest). Scope: **TEST Supabase only** `szzoubvhlwnoj
 3. The first cross-team QA fixture needed to use the target player's immutable email, calculated **before** switching to authenticated RLS role. Corrected test fixture; not a product workaround.
 4. The existing database index `team_memberships_one_active_per_player` enforces **one active membership row per player**, regardless of its effective dates. A synthetic multiple-active-team QA fixture was rejected with SQLSTATE 23505. This is a legitimate current database invariant, NOT changed. Instead we added positive uniqueness assertion and a future-only membership denial. The backend nevertheless checks every effective team defensively if the schema ever evolves.
 5. Fixed rollback SQL passed real PostgreSQL checks without persisting any user, medical, jersey or license update.
-6. GitHub `CC TEST Manager player profile write security` 8 static tests **twice** passed. Manager PWA/import smoke passed.
+6. GitHub `CC TEST Manager player profile write security` 10 static tests **twice** passed. Manager PWA/import smoke passed.
 7. Deployed the reviewed SQL, then repeated the same PostgreSQL QA **against the installed RPC**, without recreating the function. It passed including rollback.
 8. [CI security workflow](https://github.com/beacvolleyCC/club-control-manager/actions/workflows/manager-player-update-security-20261029.yml).
 9. Source and test files:
