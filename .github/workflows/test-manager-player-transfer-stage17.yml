@@ -1,0 +1,24 @@
+name: TEST Manager player transfer security
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/TEST_MANAGER_PLAYER_TRANSFER_STAGE17_CANDIDATE_20261029.sql'
+      - 'tests/sql/TEST_MANAGER_PLAYER_TRANSFER_STAGE17_ROLLBACK_20261029.sql'
+      - 'tests/manager-player-transfer-stage17-20261029.test.cjs'
+      - '.github/workflows/test-manager-player-transfer-stage17.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Double static regression
+        run: |
+          node --test tests/manager-player-transfer-stage17-20261029.test.cjs
+          node --test tests/manager-player-transfer-stage17-20261029.test.cjs
