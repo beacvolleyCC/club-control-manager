@@ -197,6 +197,8 @@ SELECT set_config('cc.qa.other_player',
   WHERE p.id<>current_setting('cc.qa.player')::uuid AND tm.team_id=current_setting('cc.qa.other_team')::uuid
   AND tm.active AND tm.starts_on<=CURRENT_DATE AND (tm.ends_on IS NULL OR tm.ends_on>=CURRENT_DATE)
   ORDER BY p.id LIMIT 1),true);
+SELECT set_config('cc.qa.other_email',
+ (SELECT p.email::text FROM public.players p WHERE p.id=current_setting('cc.qa.other_player')::uuid),true);
 SELECT set_config('cc.qa.permission',
  (SELECT mp.id::text FROM public.manager_module_permissions mp
   JOIN public.manager_accounts ma ON ma.id=mp.manager_id
@@ -222,6 +224,7 @@ BEGIN
     OR current_setting('cc.qa.team',true) IS NULL
     OR current_setting('cc.qa.other_team',true) IS NULL
     OR current_setting('cc.qa.other_player',true) IS NULL
+    OR current_setting('cc.qa.other_email',true) IS NULL
     OR current_setting('cc.qa.permission',true) IS NULL
     OR current_setting('cc.qa.payload',true) IS NULL
  THEN RAISE EXCEPTION 'QA_FIXTURE_INCOMPLETE'; END IF;
@@ -330,7 +333,7 @@ BEGIN
     jsonb_set(
       jsonb_set(v_payload,'{playerId}',to_jsonb(current_setting('cc.qa.other_player'))),
       '{email}',
-      to_jsonb((SELECT p.email::text FROM public.players p WHERE p.id=current_setting('cc.qa.other_player')::uuid))));
+      to_jsonb(current_setting('cc.qa.other_email'))));
   RAISE EXCEPTION 'QA_UNRELATED_TEAM_WRITE_SUCCEEDED';
  EXCEPTION WHEN insufficient_privilege THEN
   IF SQLERRM<>'PLAYER_TEAM_EDIT_DENIED' THEN RAISE; END IF;
