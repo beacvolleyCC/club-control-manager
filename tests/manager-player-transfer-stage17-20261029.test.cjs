@@ -1,0 +1,12 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.join(__dirname,'..');
+const sql=fs.readFileSync(path.join(root,'docs/security/TEST_MANAGER_PLAYER_TRANSFER_STAGE17_CANDIDATE_20261029.sql'),'utf8');
+const qa=fs.readFileSync(path.join(root,'tests/sql/TEST_MANAGER_PLAYER_TRANSFER_STAGE17_ROLLBACK_20261029.sql'),'utf8');
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+test('UI calls existing exact transfer RPC and matching arguments',()=>{assert.match(app,/rpc\('cc_manager_player_transfer_v1',\{p_player_id:p.playerId,p_team_id:teamId,p_starts_on:date\}\)/);assert.match(sql,/public\.cc_manager_player_transfer_v1\(\s*p_player_id uuid, p_team_id uuid, p_starts_on date/);});
+test('today-only and both team edit rights, active player, current source team',()=>{for(const x of ["p_starts_on<>CURRENT_DATE","TRANSFER_DATE_MUST_BE_TODAY","v_player.active IS DISTINCT FROM TRUE","v_old.starts_on>p_starts_on","private.cc_manager_can_v1('competition.players','edit',v_old.team_id)","private.cc_manager_can_v1('competition.players','edit',p_team_id)"])assert.ok(sql.includes(x),x)});
+test('history retained and old current unique member deactivated before insert',()=>{assert.ok(sql.indexOf('SET active=FALSE,ends_on=v_old_end')<sql.indexOf('INSERT INTO public.team_memberships'));assert.match(sql,/SELECT COUNT\(\*\) FROM public.availability WHERE player_id=p_player_id/);assert.doesNotMatch(sql,/DELETE FROM public\.availability|UPDATE public\.availability|DELETE FROM public\.team_memberships/);});
+test('sensitive future confirmed RSVP protected, no notifications',()=>{assert.match(sql,/av.status='going'/);assert.match(sql,/TRANSFER_FUTURE_OLD_TEAM_GOING_RSVPS_REVIEW_REQUIRED/);assert.doesNotMatch(sql,/cc_push_enqueue|notify|http_post|smtp|net\.http/i);});
+test('function ACL and audit narrow and TEST-only',()=>{assert.match(sql,/FROM PUBLIC/);assert.match(sql,/FROM anon/);assert.match(sql,/TO authenticated/);assert.match(sql,/INSERT INTO public.audit_log/);assert.match(sql,/szzoubvhlwnojtzqjebc/);assert.doesNotMatch(sql,/snqsxlyhontaepembaic|service_role|sb_secret_/);});
+test('rollback matrix covers positive and negative real database cases',()=>{assert.match(qa,/^BEGIN;/m);assert.match(qa,/^ROLLBACK;/m);for(const x of ['preflight','anon','negative','future_rsvp','permission','success','assertions','noauth'])assert.ok(qa.includes('DO $'+x+'$'),x);assert.match(qa,/SET LOCAL ROLE authenticated/);});
