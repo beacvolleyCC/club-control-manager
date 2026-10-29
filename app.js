@@ -4290,6 +4290,12 @@
   }
   async function savePlayerTransfer_(p){
     if(!canAnyAction('competition.players','edit'))return;
+    if(state.transferPlansLoadError||ccPendingTransferPlan_(p.playerId)){
+      const message=state.transferPlansLoadError||'A játékoshoz függő előjegyzés tartozik. A mai csapatváltás előtt előbb vond vissza az előjegyzést.';
+      const warning=$('#transferPlayerFeedback');
+      if(warning){warning.hidden=false;warning.textContent=message}
+      status(message,'error');return;
+    }
     const btn=$('#savePlayerTransferBtn');
     if(btn?.disabled)return;
     const feedback=$('#transferPlayerFeedback');
@@ -4344,7 +4350,7 @@
       await rpc('cc_manager_player_transfer_plan_v1',{p_player_id:p.playerId,p_team_id:targetId,p_effective_on:date});
       await loadTransferPlans_();
       renderPlayers();openPlayerDetail(p.playerId);
-      status('Előjegyzés rögzítve. A játékos még a jelenlegi csapatában marad.','success');
+      status(state.transferPlansLoadError?'Az előjegyzés elkészült, de a lista frissítése nem sikerült. Frissítsd az oldalt.':'Előjegyzés rögzítve. A játékos még a jelenlegi csapatában marad.',state.transferPlansLoadError?'error':'success');
     }catch(err){
       console.error(err);
       const message=ccPlayerTransferErrorText_(err);show(message);status(message,'error');
@@ -4365,7 +4371,7 @@
       await rpc('cc_manager_player_transfer_plan_cancel_v1',{p_plan_id:requestedId});
       await loadTransferPlans_();
       renderPlayers();openPlayerDetail(p.playerId);
-      status('Az előjegyzés visszavonva. A csapattagság nem változott.','success');
+      status(state.transferPlansLoadError?'Az előjegyzés visszavonása sikerült, de a lista nem frissült. Frissítsd az oldalt.':'Az előjegyzés visszavonva. A csapattagság nem változott.',state.transferPlansLoadError?'error':'success');
     }catch(err){
       console.error(err);
       const message=ccPlayerTransferErrorText_(err);
