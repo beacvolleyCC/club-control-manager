@@ -88,7 +88,7 @@ begin
     from rows r
   );
 end;
-$function$
+$function$;
 
 
 SELECT set_config('cc.qa.manager.uid',(SELECT auth_user_id::text FROM public.manager_accounts WHERE active=true AND auth_user_id IS NOT NULL AND EXISTS(SELECT 1 FROM public.manager_module_permissions mp WHERE mp.manager_id=manager_accounts.id AND mp.module_key='competition.players' AND mp.can_view=true) LIMIT 1),true);
