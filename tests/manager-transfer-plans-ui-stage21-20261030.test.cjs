@@ -25,7 +25,7 @@ function harness(pending=[]){
   status:(s,type)=>statuses.push({s,type}),console:{warn:()=>{},error:()=>{}}
  };
  const api=vm.runInNewContext(funcs+'\n'+loadSource+
-    '\n({playerTransferHtml_,playerTransferPlanHtml_,ccPendingTransferPlan_,ccSavePlayerTransferPlan_,ccCancelPlayerTransferPlan_,ccPlayerTransferErrorText_,ccDatePlusDays_,loadTransferPlans_,loadPlayers})',ctx);
+    '\n({playerTransferHtml_,playerTransferPlanHtml_,ccPendingTransferPlan_,ccSavePlayerTransferPlan_,ccCancelPlayerTransferPlan_,savePlayerTransfer_,ccPlayerTransferErrorText_,ccDatePlusDays_,loadTransferPlans_,loadPlayers})',ctx);
  return{api,state,dom,calls,statuses,views,ctx};
 }
 test('plan date calculation is stable across month-end and DST',()=>{
