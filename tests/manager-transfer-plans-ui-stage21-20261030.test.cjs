@@ -149,3 +149,25 @@ test('TEST-only API usage and branch shell never invokes automatic plan executor
  assert.doesNotMatch(funcs,/cc_manager_player_transfer_plan_apply|cc_manager_transfer_plan_cron/);
  assert.match(source,/STAGING_REF==='szzoubvhlwnojtzqjebc'/);
 });
+
+test('existing immediate transfer is blocked while any pending plan is unresolved',async()=>{
+ const h=harness([plan]);
+ await h.api.savePlayerTransfer_({playerId:player.playerId,teamId:'team-A',name:player.name});
+ assert.equal(h.calls.length,0);
+ assert.match(h.statuses.at(-1).s,/előbb vond vissza az előjegyzést/);
+ h.state.transferPlans=[];
+ h.state.transferPlansLoadError='Lista nem érhető el';
+ await h.api.savePlayerTransfer_({playerId:player.playerId,teamId:'team-A',name:player.name});
+ assert.equal(h.calls.length,0);
+});
+test('Stage21 TEST PWA shell, SW cache and styled inline warning stay in sync',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+ const worker=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'..','styles.css'),'utf8');
+ const ver=/app[.]js[?]v=([^"]+)/.exec(html)?.[1];
+ assert.ok(ver&&ver.startsWith('test-20261030-stage21-'));
+ assert.ok(html.includes('styles.css?v='+ver));
+ assert.ok(worker.includes("const CACHE='cc-manager-"+ver+"'"));
+ assert.match(css,/\.manager-transfer-plans\{/);
+ assert.match(css,/#transferPlanFeedback:not\(\[hidden\]\)/);
+});
