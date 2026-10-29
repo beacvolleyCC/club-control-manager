@@ -1,0 +1,23 @@
+name: CC vNext Manager isolation QA (no deploy)
+on:
+  push:
+    branches: [vnext/20261029-modular-rebuild]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  vnext-manager-safe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Guard isolation and regression twice
+        run: |
+          node --check app.js
+          node --check sw.js
+          node --test tests/manager-test-pwa-safety-20261026.test.cjs
+          node --test tests/cc-test-api-contract-inventory-20261029.test.cjs
+          node --test tests/manager-test-pwa-safety-20261026.test.cjs
+          node --test tests/cc-test-api-contract-inventory-20261029.test.cjs
