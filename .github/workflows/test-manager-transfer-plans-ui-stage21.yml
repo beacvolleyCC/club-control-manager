@@ -1,0 +1,27 @@
+name: TEST Stage21 Manager planned transfer UI QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'app.js'
+      - 'tests/manager-transfer-plans-ui-stage21-20261030.test.cjs'
+      - '.github/workflows/test-manager-transfer-plans-ui-stage21.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ui-regression:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check app.js
+          node --check tests/manager-transfer-plans-ui-stage21-20261030.test.cjs
+      - name: Stage21 behavioral suite twice
+        run: |
+          node --test tests/manager-transfer-plans-ui-stage21-20261030.test.cjs
+          node --test tests/manager-transfer-plans-ui-stage21-20261030.test.cjs
