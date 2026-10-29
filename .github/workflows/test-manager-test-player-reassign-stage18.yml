@@ -1,0 +1,24 @@
+name: TEST Manager designated test player reassign QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/TEST_MANAGER_TEST_PLAYER_REASSIGN_STAGE18_20261029.sql'
+      - 'tests/sql/TEST_MANAGER_TEST_PLAYER_REASSIGN_STAGE18_ROLLBACK_20261029.sql'
+      - 'tests/manager-test-player-reassign-stage18-20261029.test.cjs'
+      - '.github/workflows/test-manager-test-player-reassign-stage18.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run 6 security checks twice
+        run: |
+          node --test tests/manager-test-player-reassign-stage18-20261029.test.cjs
+          node --test tests/manager-test-player-reassign-stage18-20261029.test.cjs
