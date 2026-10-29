@@ -32,7 +32,7 @@
 | Gate | Állapot | Befejezés feltétele |
 | --- | --- | --- |
 | Táblák és alap migrációk | Részben kész | Egységes mezők, kulcsok, relációk, modul ownership és adatkontraktus auditálva |
-| Auth és tagság RLS | **BLOKKOLÓ** | Manager #81: future-start, ended, inactive, cross-team és anon negatív PostgreSQL tesztek |
+| Auth és tagság RLS | **TEST PostgreSQL PASS** | #81 kezdő-/lejárati dátum és csapatszintű RLS javítva; HTTPS/iOS Auth regresszió még hátra |
 | Manager API lefedettség | **Hiányos** | Modulonként olvasó/író RPC és jogosultsági szerződés, a felesleges legacy hívások kiiktatása |
 | Player API lefedettség | Részleges | 8 hiányzó forrásnév: szükséges vagy legacy? döntés, tesztek |
 | RSVP mentés | Statikus Node QA kész | Player #31: valódi TEST Auth + backend save/reload/denial/iPhone |
@@ -74,6 +74,13 @@
 - Első UX design modul: Login/szerepkör/csapat, utána keret és naptár.
 - Képernyőnként átadás a következőnek; a teljes rendszert csak a modulok és integrációk elfogadása után lehet cserélni.
 
+## Stage 14 – TEST csapattagság RLS (2026-10-29, legfrissebb állapot)
+- #81 hibajavítás telepítve: `private.current_team_ids()` és `private.player_in_my_team(uuid)` csak **aktív, már megkezdődött, még érvényes** tagságot fogad el, aktív csapat és játékos mellett.
+- PostgreSQL szerepkörös pozitív/negatív QA és a telepítés utáni DDL-mentes újrafuttatás: PASS. GitHub CI: 14/14 ×2 PASS.
+- Az RLS-adatok és grants nem bővültek. TEST 24 migráció, 3 csapat, 19 játékos, 21 tagság, 11 esemény, 66 RSVP.
+- A böngészős Auth+RSVP végteszt (#31) és a Manager további írási API-i továbbra is hátra vannak.
+- Handover: `docs/handover/TEST_STAGE14_EFFECTIVE_MEMBERSHIP_RLS_20261029.md`.
+
 ## Stage 13 – TEST csapatmentés (2026-10-29)
 - A Manager `cc_manager_team_update_v1(uuid,jsonb)` **telepítve kizárólag TEST-be**. Csak a `competition.teams/edit` jog és a konkrét csapat azonosítója mellett ír, naplózza az előtte/utána állapotot.
 - A valódi SQL QA egy `audit_log.id GENERATED ALWAYS` hibát talált az eredeti migrációban; javító v2 migráció alkalmazva, majd ellenőrizve.
@@ -84,11 +91,11 @@
 - További részletek: `docs/handover/TEST_STAGE13_MANAGER_TEAM_UPDATE_20261029.md`.
 
 ## Következő konkrét fejlesztési kör
-1. Manager #81 integrációs RLS ellenőrzés és szűk TEST-only korrekció biztonsági kontrollok szerint.
+1. #81 javítás után következő prioritás: Manager írási API-k biztonságos és modulonkénti kiegészítése (csapat/keret/edzés/RSVP).
 2. API-leltárból kinyerni a valóban használt 63/8 legacy hiányt, azonosítani az újraelnevezhető/összevonható szerződéseket.
 3. Manager író műveletek domain-sorrendje (csapat/keret/edzés/RSVP), nincs széles közvetlen SQL grants.
 4. Player 31 működő TEST Auth+RSVP végteszt csak HTTPS publikálás után.
 5. Cloudflare telepítési lépések csak asztali alkalommal; addig GitHub CI és read-only TEST vizsgálat.
 
 ## Biztonsági szabály
-A jelenlegi TEST adatbázisban a `private.current_team_ids()` és `private.player_in_my_team(uuid)` hibája még valós. A `docs/security/TEST_RLS_MEMBERSHIP_DATE_CANDIDATE_DO_NOT_APPLY_20261028.sql` csak review terv, nem telepített migráció. Semmilyen adathozzáférési blokkolást nem kerülünk meg, és LIVE rendszert nem módosítunk.
+**Stage 14 frissítés (2026-10-29):** a #81 tagsági kezdődátum-javítás telepítve a TEST Supabase-be, és pozitív/negatív PostgreSQL RLS tranzakciós teszteken átment. Forrás: `docs/security/TEST_RLS_MEMBERSHIP_DATE_DEPLOY_20261029.sql`; részletek: `docs/handover/TEST_STAGE14_EFFECTIVE_MEMBERSHIP_RLS_20261029.md`. A korábbi review-only jelölt történeti forrás. Valódi HTTPS/iPhone Auth/RSVP teszt még nincs. LIVE nem változott.
