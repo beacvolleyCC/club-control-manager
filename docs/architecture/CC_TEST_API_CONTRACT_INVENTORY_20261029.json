@@ -1,5 +1,5 @@
 {
-  "header": "CC TEST API INVENTORY · read-only metadata updated after verified TEST Manager team update; not a production parity certificate",
+  "header": "CC TEST API CONTRACT INVENTORY · read-only metadata refreshed after Stage15 audited player edit, not a hosted PWA release certificate",
   "audit_date": "2026-10-29",
   "test_project_ref": "szzoubvhlwnojtzqjebc",
   "manager_test": {
@@ -50,6 +50,13 @@
       "schema": "public",
       "name": "cc_manager_overview_v1",
       "arguments": "p_team_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_player_update_v1",
+      "arguments": "p_payload jsonb",
       "authenticated_execute": true,
       "anon_execute": false
     },
@@ -603,7 +610,7 @@
       {
         "name": "cc_manager_player_update_v1",
         "domain": "identity_access",
-        "db_callable": false,
+        "db_callable": true,
         "runtime_not_verified": true
       },
       {
@@ -1009,5 +1016,14 @@
     "player_source_names": 24,
     "player_db_callable": 16,
     "important": "This does not close Player #31 or Manager #81; no real hosted TEST browser acceptance."
+  },
+  "audit_stage15": {
+    "rpc": "cc_manager_player_update_v1",
+    "deployment": "TEST Supabase only; 2 real PostgreSQL rollback QA runs including postdeployment; grants to authenticated only; 10 source fields and allowlist validated; no actual athlete profile mutations.",
+    "manager_db_callable": 10,
+    "manager_source_names": 71,
+    "player_db_callable": 16,
+    "player_source_names": 24,
+    "important": "Manager #81 PostgreSQL fix completed; Player #31 real hosted iOS Auth+RSVP pending."
   }
 }
