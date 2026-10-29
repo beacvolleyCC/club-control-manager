@@ -1,0 +1,25 @@
+name: TEST Manager future transfer plans Stage20 QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/TEST_STAGE20_TRANSFER_PLANS_CANDIDATE_20261030.sql'
+      - 'tests/sql/TEST_STAGE20_TRANSFER_PLANS_ROLLBACK_20261030.sql'
+      - 'tests/sql/TEST_STAGE20_TRANSFER_PLANS_POSTDEPLOY_ROLLBACK_20261030.sql'
+      - 'tests/manager-transfer-plans-stage20-20261030.test.cjs'
+      - '.github/workflows/test-manager-transfer-plans-stage20.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run checks twice
+        run: |
+          node --test tests/manager-transfer-plans-stage20-20261030.test.cjs
+          node --test tests/manager-transfer-plans-stage20-20261030.test.cjs
