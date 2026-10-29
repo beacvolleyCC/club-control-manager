@@ -77,7 +77,7 @@
 ## Stage 15 – TEST Manager játékosadatok mentése (2026-10-29)
 - `cc_manager_player_update_v1(jsonb)` telepítve a külön TEST Supabase-be: auditált, egy tranzakcióban menti a `players` és `player_private` mezőket.
 - Manager `competition.players/edit`, érvényes tagság/csapat és változatlan Auth/email szükséges. Nem szélesítettünk tábla-jogosultságokat.
-- PostgreSQL rollbackos pozitív/negatív próba a telepítés előtt és után PASS. Node statikus QA 8/8 ×2 PASS.
+- PostgreSQL rollbackos pozitív/negatív próba a telepítés előtt és után PASS. Node statikus QA 10/10 ×2 PASS.
 - 25 TEST migráció; Manager RPC lefedettség 10/71, Player 16/24 (statikus nevek, legacy/fallbackokkal).
 - Meglévő DB-invariáns: egy játékosnak egyetlen `active=true` csapattagsági sora lehet. A csapatváltás külön API és modell-felülvizsgálat lesz.
 - **#82 külön nyitott**: `cc_manager_players_v2` olvasási RPC még nem vizsgálja a `starts_on` kezdetét a jelenlegi csapat megállapításánál.
