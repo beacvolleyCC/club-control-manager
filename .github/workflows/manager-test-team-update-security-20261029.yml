@@ -4,6 +4,7 @@ on:
     branches: [test/20261026-manager-document-intake]
     paths:
       - 'docs/security/TEST_MANAGER_TEAM_UPDATE_V1_REVIEW_20261029.sql'
+      - 'docs/security/TEST_MANAGER_TEAM_UPDATE_V2_IDENTITY_FIX_20261029.sql'
       - 'tests/manager-test-team-update-security-20261029.test.cjs'
       - '.github/workflows/manager-test-team-update-security-20261029.yml'
   workflow_dispatch:
