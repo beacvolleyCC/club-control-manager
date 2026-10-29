@@ -342,20 +342,33 @@ END;
 $cross_team$;
 RESET ROLE;
 
--- One player in two current teams must require rights to both teams.
-INSERT INTO public.team_memberships (player_id,team_id,starts_on,active)
- VALUES(current_setting('cc.qa.player')::uuid,current_setting('cc.qa.other_team')::uuid,CURRENT_DATE,true);
+-- Existing model forbids two simultaneously active team memberships per player.
+DO $unique_team$
+BEGIN
+ BEGIN
+  INSERT INTO public.team_memberships (player_id,team_id,starts_on,active)
+  VALUES(current_setting('cc.qa.player')::uuid,current_setting('cc.qa.other_team')::uuid,CURRENT_DATE,true);
+  RAISE EXCEPTION 'QA_DUPLICATE_ACTIVE_MEMBERSHIP_ALLOWED';
+ EXCEPTION WHEN unique_violation THEN
+  IF SQLERRM NOT LIKE '%team_memberships_one_active_per_player%' THEN RAISE; END IF;
+ END;
+END;
+$unique_team$;
+
+-- No currently effective team means no global player editing, even for a Manager.
+UPDATE public.team_memberships SET starts_on=CURRENT_DATE+INTERVAL '1 day',ends_on=NULL
+ WHERE player_id=current_setting('cc.qa.player')::uuid AND team_id=current_setting('cc.qa.team')::uuid AND active;
 SET LOCAL ROLE authenticated;
-DO $shared_team$
+DO $future_membership$
 BEGIN
  BEGIN
   PERFORM public.cc_manager_player_update_v1(current_setting('cc.qa.payload')::jsonb);
-  RAISE EXCEPTION 'QA_SHARED_TEAM_WRITE_SUCCEEDED';
+  RAISE EXCEPTION 'QA_FUTURE_TEAM_WRITE_SUCCEEDED';
  EXCEPTION WHEN insufficient_privilege THEN
-  IF SQLERRM<>'PLAYER_TEAM_EDIT_DENIED' THEN RAISE; END IF;
+  IF SQLERRM<>'PLAYER_NO_EFFECTIVE_TEAM' THEN RAISE; END IF;
  END;
 END;
-$shared_team$;
+$future_membership$;
 RESET ROLE;
 
 SELECT set_config('request.jwt.claim.sub','',true);
