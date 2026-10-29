@@ -4,6 +4,9 @@ on:
     branches: [test/20261026-manager-document-intake]
     paths:
       - 'app.js'
+      - 'index.html'
+      - 'styles.css'
+      - 'sw.js'
       - 'tests/manager-transfer-plans-ui-stage21-20261030.test.cjs'
       - '.github/workflows/test-manager-transfer-plans-ui-stage21.yml'
   workflow_dispatch:
