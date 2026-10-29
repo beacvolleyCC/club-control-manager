@@ -31,7 +31,7 @@
   ];
 
   const state={
-    mode:String(cfg.DATA_MODE||'demo').toLowerCase(),supabase:null,session:null,manager:null,permissions:[],teams:[],players:[],events:[],calendarEvents:[],activityEvents:[],massTrainings:[],massCalendarEvents:[],massArchiveEvents:[],massAthletes:[],massPasses:[],massLoadError:'',massDetailCache:new Map(),massDetailUi:new Map(),admins:[],adminTeams:[],adminsLoadError:'',adminEditId:'',adminBusy:false,overview:null,rsvpMatrix:{events:[],players:[],responses:[]},cardRsvpMatrix:{events:[],players:[],responses:[]},eventRosterCache:new Map(),matrixFilterOpen:false,eventFiltersOpen:false,calendarFiltersOpen:false,matrixFilters:{team:'',period:'14',kind:'ALL',status:'ALL',from:'',to:''},
+    mode:String(cfg.DATA_MODE||'demo').toLowerCase(),supabase:null,session:null,manager:null,permissions:[],teams:[],players:[],transferPlans:[],transferPlansLoadError:'',events:[],calendarEvents:[],activityEvents:[],massTrainings:[],massCalendarEvents:[],massArchiveEvents:[],massAthletes:[],massPasses:[],massLoadError:'',massDetailCache:new Map(),massDetailUi:new Map(),admins:[],adminTeams:[],adminsLoadError:'',adminEditId:'',adminBusy:false,overview:null,rsvpMatrix:{events:[],players:[],responses:[]},cardRsvpMatrix:{events:[],players:[],responses:[]},eventRosterCache:new Map(),matrixFilterOpen:false,eventFiltersOpen:false,calendarFiltersOpen:false,matrixFilters:{team:'',period:'14',kind:'ALL',status:'ALL',from:'',to:''},
     area:['mass','competition'].includes(cfg.DEFAULT_AREA)?cfg.DEFAULT_AREA:'competition',module:'overview',calendarMode:'week',calendarAnchor:new Date(),calendarTeam:'',calendarType:'',calendarScope:'COMPETITION',massCalendarLevel:'',massCalendarSession:'',massAthleteSearch:'',massAthleteLevel:'',massAthleteStatus:'',massPassSearch:'',massPassMonth:'',playerTeam:'',playerSearch:'',playerMedical:'all',playerSort:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-player-sort')||'name'}catch(_){return'name'}})(),playerSortDir:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-player-sort-dir')||'asc'}catch(_){return'asc'}})(),playerListMode:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-player-list-mode')==='grouped'?'grouped':'all'}catch(_){return'all'}})(),playerFiltersOpen:false,massAthleteFiltersOpen:false,massPassFiltersOpen:false,massCalendarFiltersOpen:false,massTrainingFiltersOpen:false,massTrainingPeriod:'upcoming',massTrainingDate:'',massAthleteMonth:'',massAthletePass:'all',massAthleteFirst:'all',teamFiltersOpen:false,eventTeam:'',eventPeriod:'upcoming',overviewTeam:'',selectedTeam:'',selectedPlayer:'',pendingEmail:'',loading:false,massActionBusy:'',massAttendanceBusy:new Set(),notificationRecipients:[],notificationHistory:[],notificationSelectedPlayerId:'',notificationSearch:'',notificationBusy:false,notificationLoadError:'',competitionSyncStatus:null,competitionSyncBusy:false,competitionResults:[],competitionStandings:[],competitionDataError:'',managerStandingsContext:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-standings-context')||''}catch(_){return''}})(),managerStandingsTeam:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-standings-team')||'all'}catch(_){return'all'}})(),managerStandingsMatchScope:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-standings-match-scope')==='beac'?'beac':'all'}catch(_){return'all'}})(),managerLeagueInsights:{key:'',loading:false,loaded:false,error:'',data:null},financeTab:'competition',financeTeam:'',financeData:null,financeAudit:[],financeSettings:null,financeSettingsTeam:'',financePassCatalog:[],financePassCatalogLoaded:false,financePassSearch:'',financePassType:'',financePassLevel:'',financePassTeam:'',financePassMonth:'',financePassStatus:'',financeCompetitionSearch:'',financeCompetitionMonth:'',financeCompetitionStatus:'',financeCompetitionType:'',financeCompetitionFiltersOpen:false,financePassFiltersOpen:false,financeLoading:false,teamDetailTab:'grid',teamGridPeriod:(()=>{try{return ccManagerTestStore_.getItem('cc-manager-team-grid-period')==='all'?'all':'upcoming'}catch(_){return'upcoming'}})(),equipmentByTeam:new Map(),equipmentLoading:new Set(),coachAvailability:[],coachAvailabilityBusy:new Set(),managerMedicalAppointments:[],teamFilters:{overview:[],events:[],players:[],teams:[]},teamFilterOpen:{overview:false,events:false,players:false,teams:false},plannerTeam:'',plannerTab:'planner'
   };
 
@@ -314,7 +314,22 @@
   }
   async function loadOverview(teamId=state.overviewTeam||null){const d=await rpc('cc_manager_overview_v1',{p_team_id:teamId});state.overview=d||{}}
   async function loadTeams(){const d=await rpc('cc_manager_teams_v1');state.teams=Array.isArray(d)?d:[];if(state.selectedTeam&&!state.teams.some(t=>t.id===state.selectedTeam))state.selectedTeam=''}
-  async function loadPlayers(){const d=await rpc('cc_manager_players_v2',{p_team_id:null,p_query:''});state.players=Array.isArray(d)?d:[]}
+  async function loadTransferPlans_(){
+    if(!canAnyAction('competition.players','view')){state.transferPlans=[];state.transferPlansLoadError='';return}
+    try{
+      const rows=await rpc('cc_manager_player_transfer_plan_list_v1',{p_team_id:null});
+      state.transferPlans=Array.isArray(rows)?rows:[];
+      state.transferPlansLoadError='';
+    }catch(err){
+      console.warn('Stage21 transfer plan list unavailable',err);
+      state.transferPlans=[];state.transferPlansLoadError='Az előjegyzések nem tölthetők be. Új előjegyzés rögzítése most nem engedélyezett.';
+    }
+  }
+  async function loadPlayers(){
+    const d=await rpc('cc_manager_players_v2',{p_team_id:null,p_query:''});
+    state.players=Array.isArray(d)?d:[];
+    await loadTransferPlans_();
+  }
   async function loadManagerMedicalAppointments(){const d=await rpc('cc_manager_player_medical_appointments_v1',{p_team_id:null});state.managerMedicalAppointments=Array.isArray(d)?d:[]}
   async function loadNotificationRecipients(query=''){const d=await rpc('cc_manager_notification_recipients_v1',{p_query:text(query)});state.notificationRecipients=Array.isArray(d)?d:[];state.notificationLoadError='';if(state.notificationSelectedPlayerId&&!state.notificationRecipients.some(p=>text(p.playerId)===text(state.notificationSelectedPlayerId)))state.notificationSelectedPlayerId=''}
   async function loadNotificationHistory(){const d=await rpc('cc_manager_notification_history_v1',{p_limit:30});state.notificationHistory=Array.isArray(d)?d:[]}
@@ -4162,6 +4177,41 @@
       && p?.hasAccount===true
       && /(^|[^a-záéíóöőúüű])(teszt|test)([^a-záéíóöőúüű]|$)/i.test(marker);
   }
+  function ccDatePlusDays_(key,days){
+    const parts=String(key||'').split('-').map(Number);
+    if(parts.length!==3||parts.some(x=>!Number.isInteger(x)))return '';
+    const shifted=new Date(Date.UTC(parts[0],parts[1]-1,parts[2]+days));
+    return shifted.toISOString().slice(0,10);
+  }
+  function ccPendingTransferPlan_(playerId){
+    return (state.transferPlans||[]).find(x=>text(x?.playerId)===text(playerId)&&text(x?.status)==='pending')||null;
+  }
+  function playerTransferPlanHtml_(p,options,today){
+    const plan=ccPendingTransferPlan_(p.playerId);
+    const tomorrow=ccDatePlusDays_(today,1),max=ccDatePlusDays_(today,366);
+    const problem=text(state.transferPlansLoadError);
+    const commonNote='<div class="manager-player-form-note full">Az előjegyzés nem vált csapatot automatikusan, nem módosítja a jelentkezéseket, és külön kézi végrehajtás szükséges a váltás napján.</div>';
+    if(problem)return `<section class="manager-transfer-plans"><h4>Előre ütemezett csapatváltás</h4><div class="manager-player-form-note" role="alert">${esc(problem)}</div></section>`;
+    if(plan){
+      const past=text(plan.effectiveOn)<=today;
+      return `<section class="manager-transfer-plans"><h4>Előjegyzett csapatváltás</h4>
+        <div class="manager-player-form-note"><b>${esc(plan.sourceTeamName||'Jelenlegi csapat')} → ${esc(plan.targetTeamName||'Célcsapat')}</b><span class="manager-transfer-plan-date">Tervezett dátum: ${esc(plan.effectiveOn||'–')} · Függő</span></div>
+        ${past?'<div class="manager-player-form-note" role="status">A tervezett nap már elérkezett, de az áthelyezés NEM történt meg automatikusan. Ellenőrizd az adatokat.</div>':''}
+        ${commonNote}
+        <div class="manager-player-form-note" id="transferPlanFeedback" role="alert" hidden></div>
+        <div class="manager-player-form-actions"><button class="button" type="button" id="cancelPlayerTransferPlanBtn" data-plan-id="${esc(plan.planId)}">Előjegyzés visszavonása</button></div>
+      </section>`;
+    }
+    return `<section class="manager-transfer-plans"><h4>Előre ütemezett csapatváltás</h4>
+      <form class="manager-player-edit-form" id="managerPlayerTransferPlanForm">
+        <label class="full"><span>Célcsapat</span><select id="transferPlanTeam" required><option value="">Válassz…</option>${options}</select></label>
+        <label class="full"><span>Tervezett váltás dátuma</span><input id="transferPlanDate" type="date" value="${esc(tomorrow)}" min="${esc(tomorrow)}" max="${esc(max)}" required></label>
+        ${commonNote}
+        <div class="manager-player-form-note full" id="transferPlanFeedback" role="alert" hidden></div>
+        <div class="manager-player-form-actions full"><button class="button primary" type="submit" id="savePlayerTransferPlanBtn">Előjegyzés rögzítése</button></div>
+      </form>
+    </section>`;
+  }
   function playerTransferHtml_(p){
     const options=state.teams.filter(t=>t.active!==false&&text(t.id)!==text(p.teamId||p.team_id)).map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
     const testPlayer=isTestPlayer_(p);
@@ -4173,7 +4223,7 @@
         <div class="manager-player-form-note full">${testPlayer?'Tesztjátékos: az azonnali áthelyezés csak a kijelölt tesztfiókra érvényes. A jelenlegi tagsági sor marad meg, a korábbi előzmények és a jelentkezések nem változnak.':'Csak mai csapatváltás menthető. A korábbi tagság lezárul, a jelentkezések és a statisztikák megmaradnak. Ha a régi csapat jövőbeli meccsére vagy edzésére már Jövök választ adtak, a váltás előbb egyeztetést igényel. A művelet nem küld automatikus értesítést.'}</div>
         <div class="manager-player-form-note full" id="transferPlayerFeedback" role="alert" hidden></div>
         <div class="manager-player-form-actions full"><button class="button" type="button" data-player-jump="overview">Mégse</button><button class="button primary" id="savePlayerTransferBtn" type="submit">${testPlayer?'Azonnali áthelyezés':'Csapatváltás mentése'}</button></div>
-      </form>`;
+      </form>${playerTransferPlanHtml_(p,options,today)}`;
   }
   function playerAvatarHtml_(p){
     const current=text(p.avatarId||p.avatar_id);
@@ -4193,6 +4243,8 @@
     let scrollTimer;carousel?.addEventListener('scroll',()=>{clearTimeout(scrollTimer);scrollTimer=setTimeout(()=>{const panes=$$('.player-detail-pane');if(!panes.length)return;let best=panes[0],dist=Infinity;panes.forEach(x=>{const d=Math.abs(x.offsetLeft-(carousel.scrollLeft||0));if(d<dist){dist=d;best=x}});activate(best.dataset.playerPane)},90)},{passive:true});
     $('#managerPlayerEditForm')?.addEventListener('submit',async e=>{e.preventDefault();await savePlayerEdit_(p)});
     $('#managerPlayerTransferForm')?.addEventListener('submit',async e=>{e.preventDefault();await savePlayerTransfer_(p)});
+    $('#managerPlayerTransferPlanForm')?.addEventListener('submit',async e=>{e.preventDefault();await ccSavePlayerTransferPlan_(p)});
+    $('#cancelPlayerTransferPlanBtn')?.addEventListener('click',async()=>{await ccCancelPlayerTransferPlan_(p)});
     let selectedAvatar=text(p.avatarId||p.avatar_id);$$('[data-avatar-id]').forEach(b=>b.addEventListener('click',()=>{selectedAvatar=text(b.dataset.avatarId);$$('[data-avatar-id]').forEach(x=>x.classList.toggle('selected',x===b))}));
     $('#savePlayerAvatarBtn')?.addEventListener('click',async()=>{if(!canAnyAction('competition.players','edit'))return;const btn=$('#savePlayerAvatarBtn');if(btn)btn.disabled=true;try{status('Avatar mentése…');await rpc('cc_manager_player_avatar_update_v1',{p_player_id:p.playerId,p_avatar_id:selectedAvatar||null});await loadPlayers();renderPlayers();openPlayerDetail(p.playerId);status('Avatar mentve.','success')}catch(err){console.error(err);status(err.message||'Az avatar mentése sikertelen.','error');if(btn)btn.disabled=false}});
   }
@@ -4219,6 +4271,15 @@
       "REASSIGN_SAME_TEAM":"A tesztjátékos már ebben a csapatban van.",
       "TRANSFER_ACTIVE_TARGET_TEAM_REQUIRED":"A kiválasztott célcsapat nem aktív.",
       "REASSIGN_TARGET_TEAM_NOT_ACTIVE":"A kiválasztott célcsapat nem aktív.",
+      "PLAN_FUTURE_DATE_WITHIN_YEAR_REQUIRED":"A váltás dátuma holnaptól számítva legfeljebb 366 napra lehet.",
+      "PLAN_ALREADY_PENDING":"Ehhez a játékoshoz már tartozik függő előjegyzés. Előbb vond vissza azt.",
+      "PLAN_FUTURE_GOING_RSVP_REVIEW_REQUIRED":"A játékos már Jövök választ adott egy olyan régi csapatos eseményre, amely a tervezett váltás napján vagy utána lesz. Előbb rendezd a jelentkezést.",
+      "PLAN_BOTH_TEAM_PERMISSIONS_REQUIRED":"Az előjegyzéshez a jelenlegi és a célcsapat játékoskeretének szerkesztési joga is szükséges.",
+      "PLAN_SOURCE_MEMBERSHIP_ENDS_EARLIER":"A jelenlegi tagság a tervezett csapatváltás előtt megszűnik; erre a dátumra nem készíthető előjegyzés.",
+      "PLAN_CURRENT_MEMBERSHIP_REQUIRED":"A játékosnak nincs jelenleg érvényes csapattagsága.",
+      "PLAN_NOT_PENDING":"Az előjegyzés már nem függő, ezért nem vonható vissza ismét.",
+      "PLAN_NOT_FOUND":"A megadott előjegyzés nem található.",
+      "PLAN_SAME_TEAM":"A célcsapat azonos a játékos jelenlegi csapatával.",
       "MANAGER_AUTH_REQUIRED":"A munkamenet lejárt. Jelentkezz be újra a Managerbe.",
       "MANAGER_PERMISSION_DENIED":"Nincs megfelelő Manager-jogosultságod a művelethez.",
     };
@@ -4259,6 +4320,57 @@
       console.error(err);
       const message=ccPlayerTransferErrorText_(err);
       showFeedback(message);status(message,'error');
+    }finally{if(btn)btn.disabled=false}
+  }
+  async function ccSavePlayerTransferPlan_(p){
+    if(!canAnyAction('competition.players','edit')||state.transferPlansLoadError)return;
+    const btn=$('#savePlayerTransferPlanBtn');
+    if(btn?.disabled)return;
+    const feedback=$('#transferPlanFeedback');
+    const show=m=>{if(feedback){feedback.hidden=!m;feedback.textContent=m||''}};
+    show('');
+    if(ccPendingTransferPlan_(p.playerId)){const m='Már van függő előjegyzés ehhez a játékoshoz.';show(m);status(m,'error');return}
+    const targetId=text($('#transferPlanTeam')?.value);
+    const date=text($('#transferPlanDate')?.value);
+    const today=localDateKey(new Date());
+    if(!targetId||targetId===text(p.teamId||p.team_id)){
+      const m='Válassz a jelenlegitől eltérő célcsapatot.';show(m);status(m,'error');return
+    }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date<=today||date>ccDatePlusDays_(today,366)){
+      const m='A tervezett dátum holnaptól számítva legfeljebb 366 nappal később lehet.';show(m);status(m,'error');return
+    }
+    if(btn)btn.disabled=true;
+    try{
+      await rpc('cc_manager_player_transfer_plan_v1',{p_player_id:p.playerId,p_team_id:targetId,p_effective_on:date});
+      await loadTransferPlans_();
+      renderPlayers();openPlayerDetail(p.playerId);
+      status('Előjegyzés rögzítve. A játékos még a jelenlegi csapatában marad.','success');
+    }catch(err){
+      console.error(err);
+      const message=ccPlayerTransferErrorText_(err);show(message);status(message,'error');
+    }finally{if(btn)btn.disabled=false}
+  }
+  async function ccCancelPlayerTransferPlan_(p){
+    if(!canAnyAction('competition.players','edit')||state.transferPlansLoadError)return;
+    const plan=ccPendingTransferPlan_(p.playerId);
+    const btn=$('#cancelPlayerTransferPlanBtn');
+    if(btn?.disabled)return;
+    const requestedId=text(btn?.dataset?.planId);
+    if(!plan||!requestedId||text(plan.planId)!==requestedId){
+      status('Az előjegyzés adatai megváltoztak. Frissítsd a játékos adatlapját.','error');return
+    }
+    if(btn)btn.disabled=true;
+    const feedback=$('#transferPlanFeedback');
+    try{
+      await rpc('cc_manager_player_transfer_plan_cancel_v1',{p_plan_id:requestedId});
+      await loadTransferPlans_();
+      renderPlayers();openPlayerDetail(p.playerId);
+      status('Az előjegyzés visszavonva. A csapattagság nem változott.','success');
+    }catch(err){
+      console.error(err);
+      const message=ccPlayerTransferErrorText_(err);
+      if(feedback){feedback.hidden=false;feedback.textContent=message}
+      status(message,'error');
     }finally{if(btn)btn.disabled=false}
   }
   function openPlayerDetail(id){
