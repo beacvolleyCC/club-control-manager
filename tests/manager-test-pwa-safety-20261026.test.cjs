@@ -22,7 +22,9 @@ test('TEST demo is disconnected and rejects all non-staging Supabase URLs',()=>{
  assert.doesNotMatch(html,/https:\/\/\*\.supabase\.co|wss:\/\/\*\.supabase\.co/);
 });
 test('TEST Service Worker and browser Auth/session storage do not collide with production',()=>{
- assert.match(worker,/cc-manager-test-20261026-demo-v1/);
+ const version=/app[.]js[?]v=([^\"]+)/.exec(html)?.[1];
+ assert.ok(version&&version.startsWith('test-'),'PWA cache must stay TEST-only');
+ assert.ok(worker.includes("const CACHE='cc-manager-"+version+"'"));
  assert.match(worker,/keys\.filter\(key=>key\.startsWith\('cc-manager-test-'\)/);
  assert.match(app,/cc-manager-test-auth-session-v1/);
  assert.match(app,/cc-manager-test-20261026:/);
