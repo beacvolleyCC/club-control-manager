@@ -327,7 +327,10 @@ DECLARE v_payload jsonb:=current_setting('cc.qa.payload')::jsonb;
 BEGIN
  BEGIN
   PERFORM public.cc_manager_player_update_v1(
-    jsonb_set(v_payload,'{playerId}',to_jsonb(current_setting('cc.qa.other_player'))));
+    jsonb_set(
+      jsonb_set(v_payload,'{playerId}',to_jsonb(current_setting('cc.qa.other_player'))),
+      '{email}',
+      to_jsonb((SELECT p.email::text FROM public.players p WHERE p.id=current_setting('cc.qa.other_player')::uuid))));
   RAISE EXCEPTION 'QA_UNRELATED_TEAM_WRITE_SUCCEEDED';
  EXCEPTION WHEN insufficient_privilege THEN
   IF SQLERRM<>'PLAYER_TEAM_EDIT_DENIED' THEN RAISE; END IF;
