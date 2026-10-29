@@ -74,6 +74,15 @@
 - Első UX design modul: Login/szerepkör/csapat, utána keret és naptár.
 - Képernyőnként átadás a következőnek; a teljes rendszert csak a modulok és integrációk elfogadása után lehet cserélni.
 
+## Stage 13 – TEST csapatmentés (2026-10-29)
+- A Manager `cc_manager_team_update_v1(uuid,jsonb)` **telepítve kizárólag TEST-be**. Csak a `competition.teams/edit` jog és a konkrét csapat azonosítója mellett ír, naplózza az előtte/utána állapotot.
+- A valódi SQL QA egy `audit_log.id GENERATED ALWAYS` hibát talált az eredeti migrációban; javító v2 migráció alkalmazva, majd ellenőrizve.
+- Anon hozzáférés tiltott; JWT nélküli authenticated hívás tiltott; tiltott mező/hányzó payload/hibás boolean elutasítva; másik csapat szerkesztése tiltott, ha a Manager-jog csak egy csapatra vonatkozik.
+- Pozitív írás + audit teljesült rollbackes TEST tranzakcióban. Ez **nem** ugyanaz, mint a bejelentkezett iPhone/HTTPS E2E.
+- Jelenlegi Manager szám: **9/71** klienskódban hivatkozott Manager RPC név létezik TEST-ben; **62 hiányzik**, köztük legacy/fallback nevekkel. Player **16/24**.
+- #81 RLS effective start date továbbra is NINCS javítva. #31 valódi Player RSVP E2E szintén nyitott. Külön vNext ágak változatlanok.
+- További részletek: `docs/handover/TEST_STAGE13_MANAGER_TEAM_UPDATE_20261029.md`.
+
 ## Következő konkrét fejlesztési kör
 1. Manager #81 integrációs RLS ellenőrzés és szűk TEST-only korrekció biztonsági kontrollok szerint.
 2. API-leltárból kinyerni a valóban használt 63/8 legacy hiányt, azonosítani az újraelnevezhető/összevonható szerződéseket.
