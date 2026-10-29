@@ -4158,17 +4158,21 @@
   }
   function isTestPlayer_(p){
     const marker=[p?.name,p?.displayName,p?.display_name,p?.email].map(text).filter(Boolean).join(' ').toLocaleLowerCase('hu-HU');
-    return /(^|[^a-záéíóöőúüű])(teszt|test)([^a-záéíóöőúüű]|$)/i.test(marker);
+    return text(p?.playerId||p?.id)==='1e8ae2fc-9f5b-4272-a809-b6bb779970bd'
+      && p?.hasAccount===true
+      && /(^|[^a-záéíóöőúüű])(teszt|test)([^a-záéíóöőúüű]|$)/i.test(marker);
   }
   function playerTransferHtml_(p){
     const options=state.teams.filter(t=>t.active!==false&&text(t.id)!==text(p.teamId||p.team_id)).map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
     const testPlayer=isTestPlayer_(p);
+    const today=localDateKey(new Date());
     return `<div class="manager-player-transfer-head"><small>Jelenlegi csapat</small><b>${esc(p.teamName||'Nincs aktív csapat')}</b></div>
       <form class="manager-player-edit-form" id="managerPlayerTransferForm">
         <label class="full"><span>Új csapat</span><select id="transferPlayerTeam" required><option value="">Válassz…</option>${options}</select></label>
-        ${testPlayer?'':`<label class="full"><span>Csapatváltás dátuma</span><input id="transferPlayerDate" type="date" value="${esc(localDateKey(new Date()))}" required></label>`}
-        <div class="manager-player-form-note full">${testPlayer?'Tesztjátékos: az áthelyezés azonnali. Nem hoz létre új dátumos tagsági sort, ezért ugyanazon a napon korlátlanul mozgatható a csapatok között.':'A korábbi aktív csapattagság a váltást megelőző nappal lezárul. A művelet nem küld automatikus emailt vagy push értesítést.'}</div>
-        <div class="manager-player-form-actions full"><button class="button" type="button" data-player-jump="overview">Mégse</button><button class="button primary" type="submit">${testPlayer?'Azonnali áthelyezés':'Csapatváltás mentése'}</button></div>
+        ${testPlayer?'':`<label class="full"><span>Csapatváltás dátuma – ma</span><input id="transferPlayerDate" type="date" value="${esc(today)}" min="${esc(today)}" max="${esc(today)}" required></label>`}
+        <div class="manager-player-form-note full">${testPlayer?'Tesztjátékos: az azonnali áthelyezés csak a kijelölt tesztfiókra érvényes. A jelenlegi tagsági sor marad meg, a korábbi előzmények és a jelentkezések nem változnak.':'Csak mai csapatváltás menthető. A korábbi tagság lezárul, a jelentkezések és a statisztikák megmaradnak. Ha a régi csapat jövőbeli meccsére vagy edzésére már Jövök választ adtak, a váltás előbb egyeztetést igényel. A művelet nem küld automatikus értesítést.'}</div>
+        <div class="manager-player-form-note full" id="transferPlayerFeedback" role="alert" hidden></div>
+        <div class="manager-player-form-actions full"><button class="button" type="button" data-player-jump="overview">Mégse</button><button class="button primary" id="savePlayerTransferBtn" type="submit">${testPlayer?'Azonnali áthelyezés':'Csapatváltás mentése'}</button></div>
       </form>`;
   }
   function playerAvatarHtml_(p){
@@ -4200,13 +4204,47 @@
     if(payload.jerseyNo&&!/^\d+$/.test(payload.jerseyNo)){status('A mezszám csak szám lehet.','error');if(btn)btn.disabled=false;return}
     try{status('Játékos mentése…');await rpc('cc_manager_player_update_v1',{p_payload:payload});await loadPlayers();renderPlayers();openPlayerDetail(p.playerId);status('Játékos adatai mentve.','success')}catch(err){console.error(err);status(err.message||'A játékos mentése sikertelen.','error');if(btn)btn.disabled=false}
   }
+  function ccPlayerTransferErrorText_(err){
+    const raw=text(err?.message||err?.details||'');
+    const descriptions={
+      "TRANSFER_FUTURE_OLD_TEAM_GOING_RSVPS_REVIEW_REQUIRED":"A játékosnak van még Jövök jelentkezése a régi csapat jövőbeli eseményére. Előbb rendezd a jelentkezést, majd próbáld újra.",
+      "REASSIGN_FUTURE_GOING_RSVP_REVIEW_REQUIRED":"A tesztjátékosnak van még Jövök jelentkezése a régi csapat jövőbeli eseményére. Előbb rendezd a jelentkezést.",
+      "TRANSFER_BOTH_TEAMS_EDIT_REQUIRED":"A csapatváltáshoz mindkét csapat játékoskeretének szerkesztési joga szükséges.",
+      "REASSIGN_BOTH_TEAM_PERMISSIONS_REQUIRED":"Az áthelyezéshez mindkét csapat játékoskeretének szerkesztési joga szükséges.",
+      "TRANSFER_DATE_MUST_BE_TODAY":"A jelenlegi rendszerben csak a mai napra menthető csapatváltás.",
+      "TRANSFER_CURRENT_MEMBERSHIP_REQUIRED":"A játékosnak nincs jelenleg érvényes csapattagsága.",
+      "REASSIGN_CURRENT_MEMBERSHIP_REQUIRED":"A tesztjátékosnak nincs jelenleg érvényes csapattagsága.",
+      "REASSIGN_DESIGNATED_TEST_ONLY":"Az azonnali áthelyezés kizárólag a kijelölt Club Control TEST-fiókkal használható.",
+      "TRANSFER_SAME_TEAM":"A játékos már ebben a csapatban van.",
+      "REASSIGN_SAME_TEAM":"A tesztjátékos már ebben a csapatban van.",
+      "TRANSFER_ACTIVE_TARGET_TEAM_REQUIRED":"A kiválasztott célcsapat nem aktív.",
+      "REASSIGN_TARGET_TEAM_NOT_ACTIVE":"A kiválasztott célcsapat nem aktív.",
+      "MANAGER_AUTH_REQUIRED":"A munkamenet lejárt. Jelentkezz be újra a Managerbe.",
+      "MANAGER_PERMISSION_DENIED":"Nincs megfelelő Manager-jogosultságod a művelethez.",
+    };
+    for(const [code,message] of Object.entries(descriptions)){
+      if(raw.includes(code))return message;
+    }
+    return raw||'A csapatváltás nem sikerült. Ellenőrizd a csapatot és a jogosultságokat.';
+  }
   async function savePlayerTransfer_(p){
     if(!canAnyAction('competition.players','edit'))return;
+    const btn=$('#savePlayerTransferBtn');
+    if(btn?.disabled)return;
+    const feedback=$('#transferPlayerFeedback');
+    const showFeedback=(message)=>{if(feedback){feedback.hidden=!message;feedback.textContent=message||''}};
+    showFeedback('');
     const teamId=text($('#transferPlayerTeam')?.value);
-    if(!teamId){status('Válassz csapatot.','error');return}
+    if(!teamId){const message='Válassz célcsapatot.';showFeedback(message);status(message,'error');return}
+    if(teamId===text(p.teamId||p.team_id)){const message='A játékos már ebben a csapatban van.';showFeedback(message);status(message,'error');return}
     const testPlayer=isTestPlayer_(p);
     const date=text($('#transferPlayerDate')?.value);
-    if(!testPlayer&&!date){status('Válassz csapatot és dátumot.','error');return}
+    if(!testPlayer&&!date){const message='Válaszd ki a mai dátumot.';showFeedback(message);status(message,'error');return}
+    if(!testPlayer&&date!==localDateKey(new Date())){
+      const message='A csapatváltás egyelőre csak a mai napra menthető. Frissítsd az űrlapot, ha közben napot váltott a naptár.';
+      showFeedback(message);status(message,'error');return
+    }
+    if(btn)btn.disabled=true;
     try{
       status(testPlayer?'Tesztjátékos áthelyezése…':'Csapatváltás mentése…');
       if(testPlayer){
@@ -4214,9 +4252,14 @@
       }else{
         await rpc('cc_manager_player_transfer_v1',{p_player_id:p.playerId,p_team_id:teamId,p_starts_on:date});
       }
-      await Promise.all([loadPlayers(),loadTeams()]);renderPlayers();openPlayerDetail(p.playerId);
-      status(testPlayer?'Tesztjátékos áthelyezve.':'Csapatváltás mentve.','success');
-    }catch(err){console.error(err);status(err.message||(testPlayer?'A tesztjátékos áthelyezése sikertelen.':'A csapatváltás mentése sikertelen.'),'error')}
+      await Promise.all([loadPlayers(),loadTeams()]);
+      renderPlayers();openPlayerDetail(p.playerId);
+      status(testPlayer?'Tesztjátékos áthelyezve. A korábbi tagságok és jelentkezések megmaradtak.':'Csapatváltás mentve. A korábbi tagság és jelentkezések megmaradtak.','success');
+    }catch(err){
+      console.error(err);
+      const message=ccPlayerTransferErrorText_(err);
+      showFeedback(message);status(message,'error');
+    }finally{if(btn)btn.disabled=false}
   }
   function openPlayerDetail(id){
     ccDialogContext_='player';
