@@ -4,8 +4,10 @@ on:
     branches: [test/20261026-manager-document-intake]
     paths:
       - 'docs/security/TEST_MANAGER_PLAYER_UPDATE_CANDIDATE_20261029.sql'
+      - 'docs/security/TEST_MANAGER_PLAYER_UPDATE_DEPLOY_20261029.sql'
       - 'tests/manager-player-update-security-20261029.test.cjs'
       - 'tests/sql/TEST_MANAGER_PLAYER_UPDATE_ROLLBACK_20261029.sql'
+      - 'tests/sql/TEST_MANAGER_PLAYER_UPDATE_POSTDEPLOY_ROLLBACK_20261029.sql'
       - '.github/workflows/manager-player-update-security-20261029.yml'
   workflow_dispatch:
 permissions:
