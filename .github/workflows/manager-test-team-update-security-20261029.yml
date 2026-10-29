@@ -1,0 +1,24 @@
+name: Manager TEST team-edit RPC security candidate QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/TEST_MANAGER_TEAM_UPDATE_V1_REVIEW_20261029.sql'
+      - 'tests/manager-test-team-update-security-20261029.test.cjs'
+      - '.github/workflows/manager-test-team-update-security-20261029.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review-only:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate proposed SQL with independent repeated static QA
+        run: |
+          node --check tests/manager-test-team-update-security-20261029.test.cjs
+          node --test tests/manager-test-team-update-security-20261029.test.cjs
+          node --test tests/manager-test-team-update-security-20261029.test.cjs
