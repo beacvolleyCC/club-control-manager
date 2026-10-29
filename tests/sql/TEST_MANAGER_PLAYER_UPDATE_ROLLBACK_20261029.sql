@@ -386,4 +386,4 @@ END;
 $no_auth$;
 RESET ROLE;
 ROLLBACK;
-SELECT 'PASS TEST-only Manager player+private atomic edit, audit, forbidden fields, cross-team and shared-team denial, unauthenticated/anon denial; all rolled back' AS verification;
+SELECT 'PASS TEST-only Manager player+private atomic edit, audit, forbidden fields, cross-team and future-membership denial, active-team uniqueness, unauthenticated/anon denial; all rolled back' AS verification;
