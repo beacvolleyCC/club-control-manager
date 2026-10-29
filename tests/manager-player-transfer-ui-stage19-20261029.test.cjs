@@ -110,7 +110,7 @@ test('Manager TEST shell and service worker share the same cache version',()=>{
   const sw=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
   const style=fs.readFileSync(path.join(__dirname,'..','styles.css'),'utf8');
   const version=/app[.]js[?]v=([^"]+)/.exec(html)?.[1];
-  assert.ok(version&&/^test-202610\\d\\d-stage\\d+-/.test(version),'must be isolated TEST PWA cache token');
+  assert.ok(version&&/^test-202610\d\d-stage\d+-/.test(version),'must be isolated TEST PWA cache token');
   assert.ok(html.includes('styles.css?v='+version));
   assert.ok(sw.includes("const CACHE='cc-manager-"+version+"'"));
   assert.match(sw,/key\.startsWith\('cc-manager-test-'\)/);
