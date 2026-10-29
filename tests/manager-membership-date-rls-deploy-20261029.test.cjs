@@ -8,6 +8,7 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const staged=read('docs/security/TEST_RLS_MEMBERSHIP_DATE_DEPLOY_20261029.sql');
 const candidate=read('docs/security/TEST_RLS_MEMBERSHIP_DATE_CANDIDATE_DO_NOT_APPLY_20261028.sql');
 const rollback=read('tests/sql/TEST_RLS_MEMBERSHIP_EFFECTIVE_DATE_ROLLBACK_20261029.sql');
+const postdeploy=read('tests/sql/TEST_RLS_MEMBERSHIP_POSTDEPLOY_ROLLBACK_20261029.sql');
 const clean=sql=>sql.replace(/^--.*$/gm,'').trim();
 const body=sql=>clean(sql).slice(clean(sql).indexOf('CREATE OR REPLACE FUNCTION'));
 const bodyParts=body(staged).split(/CREATE OR REPLACE FUNCTION\s+/i).filter(Boolean);
@@ -45,4 +46,11 @@ test('rollback verification executes the same candidate that is being deployed',
 });
 test('migration only narrows athlete access; does not touch Manager permission paths',()=>{
  assert.doesNotMatch(body(staged),/manager_module_permissions|cc_manager_|public\.audit_log|pg_net|http_post|stripe|notify|push_outbox/i);
+});
+
+test('post-deploy SQL replays same RLS decisions using persisted functions without DDL',()=>{
+ assert.ok(postdeploy.includes('BEGIN;')&&postdeploy.includes('ROLLBACK;'));
+ assert.doesNotMatch(postdeploy,/CREATE OR REPLACE FUNCTION|DROP FUNCTION|GRANT EXECUTE|ALTER POLICY/i);
+ for(const scenario of ['baseline','target_future','future','expired','inactive_membership','inactive_player','inactive_team','inclusive','no_auth'])assert.ok(postdeploy.includes('DO $'+scenario+'$'));
+ assert.doesNotMatch(postdeploy,/snqsxlyhontaepembaic|sb_secret_|service_role/);
 });
