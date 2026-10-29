@@ -1,5 +1,5 @@
 {
-  "header": "CC TEST API INVENTORY · read-only metadata · not a production parity certificate",
+  "header": "CC TEST API INVENTORY · read-only metadata updated after verified TEST Manager team update; not a production parity certificate",
   "audit_date": "2026-10-29",
   "test_project_ref": "szzoubvhlwnojtzqjebc",
   "manager_test": {
@@ -64,6 +64,13 @@
       "schema": "public",
       "name": "cc_manager_rsvp_matrix_v1",
       "arguments": "p_from timestamp with time zone, p_to timestamp with time zone, p_team_id uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_team_update_v1",
+      "arguments": "p_team_id uuid, p_payload jsonb",
       "authenticated_execute": true,
       "anon_execute": false
     },
@@ -614,7 +621,7 @@
       {
         "name": "cc_manager_team_update_v1",
         "domain": "identity_access",
-        "db_callable": false,
+        "db_callable": true,
         "runtime_not_verified": true
       },
       {
@@ -993,5 +1000,14 @@
     "Manager write RPC/API contracts largely not deployed to TEST.",
     "Cloudflare Pages TEST URL not deployed and iOS browser QA pending.",
     "Mass sport/financial/official competition data parity is not proven."
-  ]
+  ],
+  "audit_stage13": {
+    "manager_team_update_rpc": "cc_manager_team_update_v1",
+    "deployment": "TEST Supabase only; authenticated, rollback-based PostgreSQL QA passed",
+    "manager_source_names": 71,
+    "manager_db_callable": 9,
+    "player_source_names": 24,
+    "player_db_callable": 16,
+    "important": "This does not close Player #31 or Manager #81; no real hosted TEST browser acceptance."
+  }
 }
