@@ -1,14 +1,14 @@
 'use strict';
-// Static security review of a TEST-only proposal, NOT a PostgreSQL integration test.
+// Static regression of the TEST fix-forward migration. PostgreSQL E2E is executed separately.
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const sql=fs.readFileSync(path.join(__dirname,'..','docs/security/TEST_MANAGER_TEAM_UPDATE_V1_REVIEW_20261029.sql'),'utf8');
+const sql=fs.readFileSync(path.join(__dirname,'..','docs/security/TEST_MANAGER_TEAM_UPDATE_V2_IDENTITY_FIX_20261029.sql'),'utf8');
 const executable=sql.replace(/--[^\n]*/g,'');
 function occurrence(re){return [...executable.matchAll(re)].length;}
 test('candidate stays outside migrations and is explicitly TEST-review only',()=>{
- assert.match(sql,/Review-only SQL, NOT auto-deployed/);
+ assert.match(sql,/Fix-forward replacement/);
  assert.match(sql,/szzoubvhlwnojtzqjebc/);
  assert.doesNotMatch(executable,/snqsxlyhontaepembaic|sb_secret_|service_role/i);
  assert.equal(occurrence(/CREATE OR REPLACE FUNCTION/gi),1);
@@ -43,7 +43,8 @@ test('write and audit are atomic in the single function body, with original and 
  assert.equal(occurrence(/UPDATE public\.teams AS t SET/gi),1);
  assert.equal(occurrence(/INSERT INTO public\.audit_log/gi),1);
  assert.match(executable,/FOR UPDATE;/);
- assert.match(executable,/nextval\('public\.audit_log_id_seq'::regclass\)/);
+ assert.doesNotMatch(executable,/nextval\\('public\\.audit_log_id_seq'::regclass\\)/);
+ assert.match(executable,/\\(actor_user_id,action,entity_type,entity_id,old_data,new_data\\)/);
  assert.match(executable,/to_jsonb\(v_before\),to_jsonb\(v_after\)/);
  assert.match(executable,/RETURN jsonb_build_object\(/);
 });
