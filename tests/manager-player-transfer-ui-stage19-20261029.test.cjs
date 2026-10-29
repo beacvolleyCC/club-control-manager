@@ -104,3 +104,15 @@ test('test source strictly isolated and changes only Manager TEST app',()=>{
   assert.equal((src.match(/rpc\('cc_manager_player_transfer_v1'/g)||[]).length,1);
   assert.equal((src.match(/rpc\('cc_manager_test_player_reassign_v1'/g)||[]).length,1);
 });
+
+test('Manager TEST shell and service worker share the same cache version',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+  const sw=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
+  const style=fs.readFileSync(path.join(__dirname,'..','styles.css'),'utf8');
+  const version=/app[.]js[?]v=([^"]+)/.exec(html)?.[1];
+  assert.ok(version&&version.startsWith('test-20261029-stage19-'));
+  assert.ok(html.includes('styles.css?v='+version));
+  assert.ok(sw.includes("const CACHE='cc-manager-"+version+"'"));
+  assert.match(sw,/key\.startsWith\('cc-manager-test-'\)/);
+  assert.match(style,/#transferPlayerFeedback:not\(\[hidden\]\)/);
+});
