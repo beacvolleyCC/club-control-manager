@@ -87,5 +87,5 @@ begin
     from rows r
   );
 end;
-$function$
+$function$;
 
