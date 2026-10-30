@@ -1,0 +1,157 @@
+{
+  "contract": "club-control-vnext-domain",
+  "version": "0.1.0",
+  "status": "design-contract-only",
+  "asOf": "2026-10-30",
+  "authority": {
+    "canonicalRepository": "beacvolleyCC/club-control-manager",
+    "canonicalBranch": "test/20261026-manager-document-intake",
+    "mirrorRepository": "beacvolleyCC/player_application",
+    "mirrorBranch": "test/20261026-isolated-player-mobile"
+  },
+  "target": {
+    "backend": "isolated-test-supabase",
+    "backendRef": "szzoubvhlwnojtzqjebc",
+    "clients": [
+      "Manager TEST vNext",
+      "Player TEST vNext"
+    ],
+    "liveWritesAllowed": false,
+    "externalNotificationDispatch": false
+  },
+  "domain": [
+    {
+      "name": "identity",
+      "keys": [
+        "playerId",
+        "authUserId"
+      ],
+      "sources": [
+        "public.players",
+        "public.mass_athletes"
+      ],
+      "rule": "do-not-merge-mass-and-competition-athletes-by-name"
+    },
+    {
+      "name": "teams",
+      "keys": [
+        "teamId"
+      ],
+      "sources": [
+        "public.teams"
+      ],
+      "rule": "team-and-league-season-context-explicit"
+    },
+    {
+      "name": "membership",
+      "keys": [
+        "membershipId",
+        "playerId",
+        "teamId"
+      ],
+      "sources": [
+        "public.team_memberships"
+      ],
+      "rule": "currently-one-active-membership-per-player; starts/end dates validated"
+    },
+    {
+      "name": "schedule",
+      "keys": [
+        "eventId",
+        "teamId"
+      ],
+      "sources": [
+        "public.events",
+        "public.mass_events"
+      ],
+      "rule": "same-event-id-for-both-clients-when-shared; postponed/cancelled never recreated silently"
+    },
+    {
+      "name": "rsvp",
+      "keys": [
+        "eventId",
+        "playerId"
+      ],
+      "sources": [
+        "public.availability",
+        "public.mass_bookings"
+      ],
+      "rule": "Manager-and-Player-read-the-same-competition-availability-record"
+    },
+    {
+      "name": "competition",
+      "keys": [
+        "seasonId",
+        "leagueId",
+        "matchId"
+      ],
+      "sources": [
+        "public.competition_source_matches",
+        "public.cc_competition_user_schedule_v1"
+      ],
+      "rule": "BB1-BB2-Men-separated; source-alias-mapping-not-name-only"
+    },
+    {
+      "name": "finances",
+      "keys": [
+        "personId",
+        "paymentId"
+      ],
+      "sources": [
+        "public.player_fees",
+        "public.mass_passes"
+      ],
+      "rule": "no-automatic-money-movement"
+    },
+    {
+      "name": "notifications",
+      "keys": [
+        "notificationId"
+      ],
+      "sources": [
+        "public.player_notifications",
+        "public.player_push_outbox"
+      ],
+      "rule": "dispatch-disabled-in-TEST"
+    },
+    {
+      "name": "audit",
+      "keys": [
+        "eventId"
+      ],
+      "sources": [
+        "public.audit_log"
+      ],
+      "rule": "writes-idempotent-and-attributed"
+    }
+  ],
+  "rules": {
+    "dateTime": "utc-storage-budapest-display",
+    "effectiveDay": "Europe/Budapest",
+    "defaultLanguage": "hu-HU",
+    "permission": "server-validated-module-and-team-scope",
+    "api": "versioned-read-and-write-RPC; no-widened-direct-table-access",
+    "pii": "synthetic-or-deidentified-test-data-only",
+    "baseline": "current-TEST-is-synthetic-not-LIVE-schema-parity",
+    "stage22": "manual-plan-apply-not-a-PWA-release-certificate"
+  },
+  "phases": [
+    "00-schema-inventory-and-reproducibility",
+    "01-auth-and-scope",
+    "02-teams-and-roster",
+    "03-calendar-and-events",
+    "04-rsvp-and-attendance",
+    "05-mass-sports-and-passes",
+    "06-competition-results-and-standings",
+    "07-official-protocols-and-statistics",
+    "08-finances-and-medical",
+    "09-notifications-and-ics",
+    "10-settings-import-audit-and-release"
+  ],
+  "runtime": {
+    "connectedTestPwaHosted": false,
+    "managerSourceConfig": "demo",
+    "playerSourceConfig": "demo",
+    "cloudflarePagesNeededForMobileE2E": true
+  }
+}
