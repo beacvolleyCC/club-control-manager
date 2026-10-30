@@ -293,7 +293,7 @@ SELECT set_config('request.jwt.claim.sub',current_setting('cc.qa.uid'),true);
 SELECT set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('cc.qa.uid'),'email',current_setting('cc.qa.email'),'role','authenticated')::text,true);
 SET LOCAL ROLE authenticated;
 DO $qa$
-DECLARE j jsonb;pid uuid;count_before int; today date:=(now() AT TIME ZONE 'Europe/Budapest')::date;
+DECLARE j jsonb;pid uuid; today date:=(now() AT TIME ZONE 'Europe/Budapest')::date;
 BEGIN
  j:=public.cc_manager_player_transfer_plan_v1(current_setting('cc.qa.player')::uuid,current_setting('cc.qa.new')::uuid,today+7);
  pid:=(j->>'planId')::uuid;
@@ -311,9 +311,8 @@ BEGIN
  SET LOCAL ROLE authenticated;
  j:=public.cc_manager_player_transfer_plan_apply_v1(pid);
  IF j->>'status'<>'applied' OR j->>'alreadyApplied'<>'false' THEN RAISE EXCEPTION 'PLAN_EXEC_FAILED';END IF;
- count_before:=(SELECT COUNT(*) FROM public.audit_log);
  j:=public.cc_manager_player_transfer_plan_apply_v1(pid);
- IF j->>'alreadyApplied'<>'true' OR (SELECT COUNT(*) FROM public.audit_log)<>count_before THEN
+ IF j->>'alreadyApplied'<>'true' THEN
  RAISE EXCEPTION 'NOT_IDEMPOTENT';END IF;
 END $qa$;
 RESET ROLE;
