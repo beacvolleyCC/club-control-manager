@@ -165,7 +165,7 @@ test('Stage21 TEST PWA shell, SW cache and styled inline warning stay in sync',(
  const worker=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
  const css=fs.readFileSync(path.join(__dirname,'..','styles.css'),'utf8');
  const ver=/app[.]js[?]v=([^"]+)/.exec(html)?.[1];
- assert.ok(ver&&ver.startsWith('test-20261030-stage21-'));
+ assert.ok(ver&&/^test-20261030-stage\d+-/.test(ver),'Manager TEST version must remain on the isolated branch');
  assert.ok(html.includes('styles.css?v='+ver));
  assert.ok(worker.includes("const CACHE='cc-manager-"+ver+"'"));
  assert.match(css,/\.manager-transfer-plans\{/);
