@@ -17,9 +17,9 @@ test('login copy never asks user to type a numeric code for default email templa
  assert.match(html,/id="requestCodeBtn" type="button">Belépési link kérése/);
  assert.match(html,/Belépési link elküldve/);
  assert.match(html,/Sign in/);
- assert.match(html,/id="verifyCodeBtn" type="button" hidden/);
- assert.match(html,/id="loginCode"[^>]+>/);
- assert.match(html,/class="field" hidden/);
+ assert.doesNotMatch(html,/id="verifyCodeBtn"/);
+ assert.doesNotMatch(html,/id="loginCode"/);
+ assert.match(html,/id="loginCodeStep" class="login-step hidden"/);
  assert.match(html,/id="resendCodeBtn" type="button">Új link küldése/);
  assert.match(app,/E-mailben belépési linket küldtünk/);
 });
