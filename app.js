@@ -225,19 +225,22 @@
     if(/expired|invalid|otp|token/i.test(raw))return 'A kód érvénytelen vagy lejárt. Ha több kódot kértél, csak a legutóbbi használható.';
     return raw||'A belépés sikertelen.'
   }
+  // TEST login: Supabase Free default template sends a Magic Link, not a numeric OTP.
+  // Restrict the redirect to the isolated, designated Manager TEST origin.
+  function ccManagerMagicLinkRedirect_(){return "https://cc-manager-test-beac.elteroplabda.workers.dev/"}
   async function requestCode(){
     const email=text($('#loginEmail')?.value).toLowerCase();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){loginMessage('#loginMsg','Adj meg egy érvényes email címet.',true);return}
     const b=$('#requestCodeBtn');if(b)b.disabled=true;
     try{
-      loginMessage('#loginMsg','Kód küldése…');
-      const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
+      loginMessage('#loginMsg','Belépési link küldése…');
+      const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:ccManagerMagicLinkRedirect_()}});
       if(error)throw error;
       state.pendingEmail=email;
       if($('#loginEmailPreview'))$('#loginEmailPreview').textContent=email;
       if($('#loginCode'))$('#loginCode').value='';
       showLogin('loginCodeStep');
-      loginMessage('#loginCodeMsg','A kódot elküldtük. Mindig a legutóbb kapott kódot használd.')
+      loginMessage('#loginCodeMsg','E-mailben belépési linket küldtünk. A levélben a Sign in linket nyisd meg; a rendszer automatikusan visszatér a Manager TEST-be.')
     }catch(err){
       console.error('Manager OTP request failed',err);
       loginMessage('#loginMsg',err.message||'A kód küldése sikertelen. Ellenőrizd, hogy ez az email rendelkezik-e Manager-fiókkal.',true)
@@ -247,11 +250,11 @@
     if(!state.pendingEmail){showLogin('loginEmailStep');return}
     const b=$('#resendCodeBtn');if(b)b.disabled=true;
     try{
-      loginMessage('#loginCodeMsg','Új kód küldése…');
-      const {error}=await state.supabase.auth.signInWithOtp({email:state.pendingEmail,options:{shouldCreateUser:true}});
+      loginMessage('#loginCodeMsg','Új belépési link küldése…');
+      const {error}=await state.supabase.auth.signInWithOtp({email:state.pendingEmail,options:{shouldCreateUser:false,emailRedirectTo:ccManagerMagicLinkRedirect_()}});
       if(error)throw error;
       if($('#loginCode'))$('#loginCode').value='';
-      loginMessage('#loginCodeMsg','Új kódot küldtünk. A korábbi kód már nem használható.')
+      loginMessage('#loginCodeMsg','Új belépési linket küldtünk. A legutóbbi e-mailben lévő Sign in linket nyisd meg.')
     }catch(err){
       console.error('Manager OTP resend failed',err);
       loginMessage('#loginCodeMsg',err.message||'Nem sikerült új kódot küldeni.',true)
