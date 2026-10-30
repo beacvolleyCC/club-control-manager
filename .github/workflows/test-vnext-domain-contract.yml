@@ -1,0 +1,23 @@
+name: TEST vNext shared domain contract
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'vnext/**'
+      - 'tests/vnext-domain-contract-v1.test.cjs'
+      - '.github/workflows/test-vnext-domain-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run vNext contract invariants twice
+        run: |
+          node --test tests/vnext-domain-contract-v1.test.cjs
+          node --test tests/vnext-domain-contract-v1.test.cjs
