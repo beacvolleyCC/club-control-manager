@@ -1,0 +1,32 @@
+name: TEST Manager default Magic Link login QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'scripts/build-cloudflare-test.cjs'
+      - 'tests/manager-magiclink-login-20261030.test.cjs'
+      - '.github/workflows/test-manager-magiclink-login.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Manager TEST magic link code and PWA shell
+        run: |
+          node --check app.js
+          node --test tests/manager-magiclink-login-20261030.test.cjs
+          node --test tests/manager-magiclink-login-20261030.test.cjs
+      - name: Verify STAGING-only bundle still builds
+        run: node scripts/build-cloudflare-test.cjs
+      - name: Check built runtime still only uses authenticated TEST project
+        run: |
+          node -e "const fs=require('fs'),assert=require('node:assert/strict');const a=fs.readFileSync('dist-test/app.js','utf8');const c=fs.readFileSync('dist-test/config.js','utf8');assert(c.includes('szzoubvhlwnojtzqjebc.supabase.co'));assert(!c.includes('snqsxlyhontaepembaic'));assert(a.includes('emailRedirectTo:ccManagerMagicLinkRedirect_()'));assert(!a.includes('shouldCreateUser:true'));"
