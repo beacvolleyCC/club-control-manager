@@ -7,7 +7,7 @@ const worker=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 const builder=fs.readFileSync(path.join(root,'scripts/build-cloudflare-test.cjs'),'utf8');
 const target='https://cc-manager-test-beac.elteroplabda.workers.dev/';
 test('TEST Manager requests default magic links using only the exact isolated callback',()=>{
- assert.match(app,/function ccManagerMagicLinkRedirect_\(\)\{return 'https:\/\/cc-manager-test-beac\.elteroplabda\.workers\.dev\/'\}/);
+ assert.ok(app.includes('function ccManagerMagicLinkRedirect_(){return "https://cc-manager-test-beac.elteroplabda.workers.dev/"}'));
  assert.equal((app.match(/emailRedirectTo:ccManagerMagicLinkRedirect_\(\)/g)||[]).length,2);
  assert.equal((app.match(/shouldCreateUser:false,emailRedirectTo:ccManagerMagicLinkRedirect_\(\)/g)||[]).length,2);
  assert.doesNotMatch(app,/signInWithOtp\(\{email,options:\{shouldCreateUser:true/);
@@ -21,7 +21,7 @@ test('login copy never asks user to type a numeric code for default email templa
  assert.match(html,/id="loginCode"[^>]+>/);
  assert.match(html,/class="field" hidden/);
  assert.match(html,/id="resendCodeBtn" type="button">Új link küldése/);
- assert.match(app,/Belépési linket küldtünk/);
+ assert.match(app,/E-mailben belépési linket küldtünk/);
 });
 test('sign-in callback session detection and Manager scope checking remain enabled',()=>{
  assert.match(app,/detectSessionInUrl:true/);
