@@ -1,0 +1,24 @@
+name: TEST Stage22 manual transfer security
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/TEST_STAGE22_*.sql'
+      - 'tests/sql/TEST_STAGE22_*.sql'
+      - 'tests/manager-transfer-stage22-20261030.test.cjs'
+      - '.github/workflows/test-manager-transfer-stage22.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run six checks twice
+        run: |
+          node --test tests/manager-transfer-stage22-20261030.test.cjs
+          node --test tests/manager-transfer-stage22-20261030.test.cjs
