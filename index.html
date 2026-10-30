@@ -10,7 +10,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/cc-manager-test-192.png">
   <link rel="apple-touch-icon" href="./icons/cc-manager-test-180.png">
-  <link rel="stylesheet" href="./styles.css?v=test-20261030-stage21-transfer-plan-ui-v1">
+  <link rel="stylesheet" href="./styles.css?v=test-20261030-stage24-magiclink-login-v1">
   <link rel="stylesheet" href="./scoreboard.css">
   <link rel="stylesheet" href="./volleyball.css">
 </head>
@@ -28,15 +28,16 @@
         <h1>Belépés</h1>
         <p>Csak engedélyezett Manager-fiókkal lehet belépni.</p>
         <label class="field"><span>Email cím</span><input id="loginEmail" type="email" autocomplete="email" inputmode="email" placeholder="email@pelda.hu"></label>
-        <button class="button primary full" id="requestCodeBtn" type="button">Kód kérése</button>
+        <button class="button primary full" id="requestCodeBtn" type="button">Belépési link kérése</button>
         <div class="form-message" id="loginMsg" aria-live="polite"></div>
       </div>
       <div id="loginCodeStep" class="login-step hidden">
-        <h1>Belépési kód</h1>
+        <h1>Belépési link elküldve</h1>
         <p id="loginEmailPreview">–</p>
-        <label class="field"><span>Kód</span><input id="loginCode" class="otp-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="000000"></label>
-        <button class="button primary full" id="verifyCodeBtn" type="button">Belépés</button>
-        <button class="button quiet full" id="resendCodeBtn" type="button">Új kód küldése</button>
+        <p>Nyisd meg az e-mailben kapott <strong>Sign in</strong> linket. A link visszairányít a Manager TEST alkalmazásba.</p>
+        <label class="field" hidden><span>Kódos belépés (jelenleg nem használt)</span><input id="loginCode" class="otp-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="000000"></label>
+        <button class="button primary full" id="verifyCodeBtn" type="button" hidden>Kód ellenőrzése</button>
+        <button class="button quiet full" id="resendCodeBtn" type="button">Új link küldése</button>
         <button class="button quiet full" id="changeEmailBtn" type="button">Másik email</button>
         <div class="form-message" id="loginCodeMsg" aria-live="polite"></div>
       </div>
@@ -109,6 +110,6 @@
   <script src="./volleyball-ui.js"></script>
   <script src="./competition-context-catalog.js?v=20261015-lc1"></script>
   <script src="./scoreboard.js"></script>
-  <script src="./app.js?v=test-20261030-stage21-transfer-plan-ui-v1"></script>
+  <script src="./app.js?v=test-20261030-stage24-magiclink-login-v1"></script>
 </body>
 </html>
