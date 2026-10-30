@@ -27,12 +27,12 @@ Ez a dokumentum a 2026-10-28-i handover folytatása, és a 2026-10-30-i beszélg
 - `docs/handover/HANDOVER_20261028_CC_TEST_CONTINUATION.md` – backend/DB státusz, RLS, Cloudflare build, 11 pontos QA
 - Player `docs/TEST_RSVP_RELIABILITY_STAGE11_20261028.md` – optimista RSVP megbízhatóság és automatizált teszt
 - Player Issue #31 – valós Auth + RSVP end-to-end ellenőrzés
-- Manager Issue #81 – csapattagság `starts_on` ellenőrzés hiánya az RLS-segédlekérdezéseknél
+- Manager Issue #81 – **2026-10-29-én TEST-ben javítva és lezárva**; migráció: `20261029142152 cc_test_player_membership_effective_date_rls_fix_20261029`; 14/14 security teszt kétszer sikeresen futott.
 
 ## Biztonsági és funkcionális hiányok
 1. A Manager TEST sikeres bejelentkezése után a funkciók és RPC-hívások ellenőrzése szükséges.
 2. Player TEST publikálása, hitelesítés, RSVP pozitív mentés / reload, hibakezelés, offline és iOS PWA tesztek még hátravannak.
-3. Manager Issue #81: jövőbeli tagság kezdőnapját is ellenőrző, szűk TEST-only RLS-javítás; **nincs RLS-bypass vagy széles anon jog**.
+3. Manager Issue #81 **lezárva**; a TEST-only RLS-javítás 2026-10-29-én megtörtént. Az új változtatásoknál továbbra sincs RLS-bypass vagy széles anon jog.
 4. Player Issue #31: a korábbi 7/7 egységteszt és 6/6 workflow pass önmagában nem helyettesíti a valódi end-to-end tesztet.
 5. A TEST nem teljesen LIVE-paritású; a hiányzó Manager írási RPC-k és Player funkciók tételes átvizsgálása szükséges.
 6. A teljes LIVE játékosnévsor TEST-be történő átmásolása korábban nem történt meg; a szintetikus adatok és személyes adatok kezelése legyen elkülönítve.
@@ -44,11 +44,19 @@ Ez a dokumentum a 2026-10-28-i handover folytatása, és a 2026-10-30-i beszélg
 2. Ellenőrizd a Manager TEST képernyőit a sikeres belépést követően: csapatválasztó, naptár, események, jelenlét, meccs és tabella; minden backend-írást jogosultsággal együtt.
 3. Készíts/ellenőrizz külön Player TEST deploymentet, és csak ténylegesen létrejött HTTPS URL-t közölj. Ellenőrizd az e-mailes auth redirectet és callbacket, hogy ne jöjjön vissza az előző link-vs-kód hiba.
 4. Player TEST session, RSVP és böngésző/PWA végpontok ellenőrzése.
-5. Manager #81 biztonságos TEST javítása és negatív jogtesztjei; Player #31 csak sikeres end-to-end után zárható.
+5. Manager #81 már lezárt, az RLS-regressziós tesztet meg kell őrizni; Player #31 csak sikeres end-to-end után zárható.
 6. Új moduloknál 2026-10-30-tól az explicit Supabase public GRANT szükségességét is ellenőrizd.
 7. Minden módosítás után kétszeri ellenőrzés és a korábbi handoverben dokumentált 11 pontos QA. Költségkeret: **0 Ft**; ne kapcsolj be fizetős szolgáltatást/push vagy SMTP küldést engedély nélkül.
 
 ## Új beszélgetés indító
 **CC-FOLYTATÁS – 2026.10.30 HANDOVER**
 
-Folytassuk a Club Control fejlesztését a `beacvolleyCC/club-control-manager` és `beacvolleyCC/player_application` TEST ágakon. Olvasd el a `docs/handover/HANDOVER_20261030_CLOUDFLARE_TEST.md` és a `docs/handover/HANDOVER_20261028_CC_TEST_CONTINUATION.md` fájlokat. A Manager TEST Cloudflare Workers címe `https://cc-manager-test-beac.elteroplabda.workers.dev`, és a legutóbbi beszélgetésben sikeresen bejelentkeztünk az auth-link javítása után. Következő feladat a Player TEST publikálás és end-to-end ellenőrzés, illetve a Manager funkcióteszt. A LIVE main/GitHub Pages/Supabase projektet soha ne módosítsd külön engedély nélkül. Nyitott Player #31 és Manager #81. Friss HEAD/CI/Cloudflare célpont ellenőrzéssel kezdj, majd 2× és 11 pontos QA, 0 Ft-os keret.
+Folytassuk a Club Control fejlesztését a `beacvolleyCC/club-control-manager` és `beacvolleyCC/player_application` TEST ágakon. Olvasd el a `docs/handover/HANDOVER_20261030_CLOUDFLARE_TEST.md` és a `docs/handover/HANDOVER_20261028_CC_TEST_CONTINUATION.md` fájlokat. A Manager TEST Cloudflare Workers címe `https://cc-manager-test-beac.elteroplabda.workers.dev`, és a legutóbbi beszélgetésben sikeresen bejelentkeztünk az auth-link javítása után. Következő feladat a Player TEST publikálás és end-to-end ellenőrzés, illetve a Manager funkcióteszt. A LIVE main/GitHub Pages/Supabase projektet soha ne módosítsd külön engedély nélkül. Nyitott Player #31; Manager #81 TEST-ben már javítva és lezárva 2026-10-29-én. Friss HEAD/CI/Cloudflare célpont ellenőrzéssel kezdj, majd 2× és 11 pontos QA, 0 Ft-os keret.
+
+## 2026-10-30-i GitHub státuszellenőrzés (új munkamenet)
+
+- Manager TEST HEAD a handover-commit után: `c760513ce7ed96b46a776bf0a2a6077fab1680b3` (az itt végzett dokumentummódosítás után új SHA lesz). Az azonos SHA-hoz tartozó Manager PWA safety és import intake GitHub Actions sikeres.
+- Player TEST HEAD ellenőrzéskor: `6a2b83a987f699837f9d4f6f1ca9edfb76c41fd1`; ezen a HEAD-en sikeres: mobile isolation, archived future BB2 fixture, Magic Link authentication QA. Más workflow-k egy korábbi SHA-n futottak; teljes körű HEAD QA-t külön kell ellenőrizni.
+- A Player forrásában már létezik `wrangler.jsonc` Worker névvel: `cc-player-test-beac`, és külön izolált staging bundle build. **Új Worker telepítéshez a Players repo TEST ága szükséges, nem `main`.**
+- Új Player Workers telepítési útmutató: `beacvolleyCC/player_application/docs/TEST_CLOUDFLARE_WORKERS_INSTALL_20261030.md`.
+- Worker telepítés a Cloudflare Dashboardban nem került igazoltan végrehajtásra; CI siker != Cloudflare deploy siker. A Player URL csak sikeres deploy után tekinthető működőnek.
