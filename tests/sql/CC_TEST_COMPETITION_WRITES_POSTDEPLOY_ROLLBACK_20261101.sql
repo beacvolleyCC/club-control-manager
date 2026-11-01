@@ -73,6 +73,18 @@ RESET ROLE;
 -- Preserve historical note, even through neutral RSVP; test as DB owner in this rollback transaction.
 UPDATE public.availability SET note='Korábbi indok megőrizve'
 WHERE event_id=current_setting('cc.qa.event')::uuid AND player_id=current_setting('cc.qa.player')::uuid;
+-- Repeated status changes must keep the old reason exactly as stored.
+SET LOCAL ROLE authenticated;
+DO $note_roundtrip$
+DECLARE x jsonb; eid uuid:=current_setting('cc.qa.event')::uuid; pid uuid:=current_setting('cc.qa.player')::uuid;
+BEGIN
+ x:=public.cc_manager_competition_rsvp_v1(eid,pid,'not_going');
+ IF x->>'status'<>'not_going' THEN RAISE EXCEPTION 'RSVP_NOTE_RETURN_DECLINED_FAILED'; END IF;
+ x:=public.cc_manager_competition_rsvp_v1(eid,pid,'unknown');
+ IF x->>'status'<>'unknown' THEN RAISE EXCEPTION 'RSVP_NOTE_RETURN_NEUTRAL_FAILED'; END IF;
+END $note_roundtrip$;
+RESET ROLE;
+
 DO $preserve$
 BEGIN
  IF (SELECT status FROM public.availability
