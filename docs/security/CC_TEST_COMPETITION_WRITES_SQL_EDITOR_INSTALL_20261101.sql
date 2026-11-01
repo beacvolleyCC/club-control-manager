@@ -25,6 +25,7 @@ DECLARE
   v_team uuid; v_kind text; v_module text; v_start timestamptz; v_end timestamptz;
   v_key text; v_new boolean:=(p_event_id IS NULL); v_series uuid;
 BEGIN
+  IF (SELECT auth.uid()) IS NULL THEN RAISE EXCEPTION 'MANAGER_AUTH_REQUIRED' USING ERRCODE='42501'; END IF;
   IF coalesce(p_notify,false) THEN RAISE EXCEPTION 'TEST_NOTIFICATION_SENDING_DISABLED' USING ERRCODE='22023'; END IF;
   IF p_payload IS NULL OR jsonb_typeof(p_payload)<>'object' OR p_payload='{}'::jsonb
   THEN RAISE EXCEPTION 'EVENT_PAYLOAD_OBJECT_REQUIRED' USING ERRCODE='22023'; END IF;
@@ -114,6 +115,7 @@ RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
 AS $fn$
 DECLARE v_actor uuid; v_before public.events%rowtype; v_after public.events%rowtype; v_module text;
 BEGIN
+  IF (SELECT auth.uid()) IS NULL THEN RAISE EXCEPTION 'MANAGER_AUTH_REQUIRED' USING ERRCODE='42501'; END IF;
   IF coalesce(p_notify,false) THEN RAISE EXCEPTION 'TEST_NOTIFICATION_SENDING_DISABLED' USING ERRCODE='22023'; END IF;
   SELECT * INTO v_before FROM public.events WHERE id=p_event_id FOR UPDATE;
   IF NOT FOUND THEN RAISE EXCEPTION 'EVENT_NOT_FOUND' USING ERRCODE='22023'; END IF;
@@ -136,6 +138,7 @@ AS $fn$
 DECLARE v_event public.events%rowtype; v_status text:=lower(btrim(coalesce(p_status,'')));
         v_before jsonb; v_after jsonb; v_day date; v_actor uuid;
 BEGIN
+  IF (SELECT auth.uid()) IS NULL THEN RAISE EXCEPTION 'MANAGER_AUTH_REQUIRED' USING ERRCODE='42501'; END IF;
   SELECT * INTO v_event FROM public.events WHERE id=p_event_id;
   IF NOT FOUND OR v_event.status<>'active'
   THEN RAISE EXCEPTION 'EVENT_NOT_ACTIVE' USING ERRCODE='22023'; END IF;
@@ -169,6 +172,7 @@ RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
 AS $fn$
 DECLARE v_count int; v_item jsonb; v_ids jsonb:='[]'::jsonb; v_saved jsonb;
 BEGIN
+  IF (SELECT auth.uid()) IS NULL THEN RAISE EXCEPTION 'MANAGER_AUTH_REQUIRED' USING ERRCODE='42501'; END IF;
   IF coalesce(p_notify,false) THEN RAISE EXCEPTION 'TEST_NOTIFICATION_SENDING_DISABLED' USING ERRCODE='22023'; END IF;
   IF p_payloads IS NULL OR jsonb_typeof(p_payloads)<>'array'
   THEN RAISE EXCEPTION 'EVENT_SERIES_ARRAY_REQUIRED' USING ERRCODE='22023'; END IF;
