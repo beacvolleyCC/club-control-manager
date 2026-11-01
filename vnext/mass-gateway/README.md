@@ -15,16 +15,16 @@ TEST Supabase project: `szzoubvhlwnojtzqjebc`. This source must never be placed 
 - `tests/mass-gateway-test-20261101.test.mjs`: Node 22 mocked security tests (run **twice**).
 - GitHub Actions: `.github/workflows/test-mass-gateway-security-20261101.yml`.
 
-## Additional OTP SQL pending TEST installation
+## OTP SQL installed and twice integration-tested in TEST
 
-- Install candidate: `docs/security/CC_TEST_MASS_EMAIL_PROOF_SQL_EDITOR_20261101.sql`.
-- Postdeploy rollback QA: `tests/sql/CC_TEST_MASS_EMAIL_OTP_POSTDEPLOY_ROLLBACK_20261101.sql` (twice).
+- Installed in TEST: `docs/security/CC_TEST_MASS_EMAIL_PROOF_SQL_EDITOR_20261101.sql`.
+- Postdeploy rollback QA: `tests/sql/CC_TEST_MASS_EMAIL_OTP_POSTDEPLOY_ROLLBACK_20261101.sql` (**PASS twice**, 2026-11-01).
 - Static contract test: `tests/mass-email-otp-contract-20261101.test.cjs`.
 - GitHub Actions: `.github/workflows/test-mass-email-otp-20261101.yml`.
 
 The OTP SQL creates a **private** table with RLS, 5-minute expiry, 90-second resend cooldown, 5 incorrect-attempt limit and one-time consumption. Both RPCs must have `anon_execute=false`, `authenticated_execute=false` and `service_execute=true`.
 
-**Do not assume OTP functions are installed** until the SQL Editor results and twice-run DB rollback QA confirm them. The existing four public mass-service booking functions and three capacity/offer functions were previously installed and transaction-tested.
+Both TEST OTP RPCs were confirmed deployed with `anon=false`, `authenticated=false`, `service_role=true`; subsequent two-run rollback QA passed. Verified 0 residual OTP rows, 0 mail rows, 0 push rows. The existing four public mass-service booking functions and three capacity/offer functions were also previously installed and transaction-tested.
 
 ## Secrets and environment guard
 
@@ -39,12 +39,12 @@ The Worker checks exact Supabase TEST hostname, Turnstile hostname/action, Origi
 
 ## Release blockers
 
-1. Install and twice test the service-only OTP SQL in **TEST**; confirm zero leftover synthetic records after rollback.
+1. **Completed:** service-only OTP SQL installed and twice tested in TEST, with zero leftover synthetic records.
 2. Review and configure secret bindings, Turnstile host/action/sitekey, two rate-limit bindings, confirmed test mail sender and explicitly allowlisted recipient; verify email free-tier use before enabling any send.
 3. The booking API currently returns the newly generated cancellation capability to the **verified TEST browser** and does not insert a durable confirmation e-mail outbox record. Implement reliable confirmation delivery, retry/idempotency and recovery before public release; do not claim a booking confirmation email was delivered.
 4. Implement public-safe training catalog read (not Manager's private RPC), optional waiting-list removal, and scheduler endpoints with separate machine authorization.
 5. Stress-test **real simultaneous transactions** using independent connections; mocked Worker tests and single-transaction SQL rollback QA are not substitutes.
-6. Test actual Cloudflare deployment, Supabase test secrets, verified user mailbox, Turnstile and mobile Player together before enabling the public routes.
+6. **Wrangler dry-run compiled successfully** via `.github/workflows/test-mass-gateway-wrangler-build-20261101.yml`; actual Cloudflare version upload, secrets, verified user mailbox, Turnstile and mobile Player E2E are **not done**. `preview_urls=false`, `workers_dev=false`, no routes. Only the separate, manual `upload-mass-gateway-disabled-test-draft-20261101.yml` workflow is permitted to upload a disabled draft, and it has not been executed. GitHub `workflow_dispatch` may require registration on the repository's default branch before the UI exposes it; do not merge or touch the LIVE branch without authorization.
 7. Add free-first-training identity abuse prevention, SPORT7 fairness, bérlet validation, late-cancellation/no-show sanctions and notifications only after their own independent QA.
 8. Complete twice-run 11-point E2E QA and explicit release approval. **LIVE never changes without express authorization.**
 
@@ -55,3 +55,17 @@ The Worker checks exact Supabase TEST hostname, Turnstile hostname/action, Origi
 `node --test tests/mass-email-otp-contract-20261101.test.cjs`
 
 The GitHub Actions workflows run each twice, with mock Supabase/Turnstile/Resend responses. No test here sends a real e-mail or calls a real API; the SQL postdeploy tests run only when explicitly invoked against TEST and end in `ROLLBACK`.
+
+## Disabled-version upload controls (prepared, **not run**)
+
+The isolated script name is `cc-mass-gateway-test-beac`, never `cc-manager-test-beac` or `cc-player-test-beac`. Cloudflare configuration disables `workers_dev`, `preview_urls`, all routes and both public write and delivery flags. A draft version upload alone does not deploy it or send traffic.
+
+A GitHub Actions workflow, `.github/workflows/upload-mass-gateway-disabled-test-draft-20261101.yml`, is **manual-only** and requires:
+- TEST GitHub branch, exact typed confirmation `UPLOAD_DISABLED_TEST_DRAFT`, double-running all local QA, Wrangler dry-run.
+- GitHub Actions secrets `CLOUDFLARE_TEST_API_TOKEN` with **Workers Scripts Write** on the isolated account/Worker and `CLOUDFLARE_ACCOUNT_ID`. These secret values **have not been verified or set here**.
+- Cloudflare Worker secret bindings above must already be present when the CLI validates `secrets.required`; missing required bindings mean a safe failure.
+
+No Cloudflare API credential is available through the current tooling, and the upload has **not been invoked**. A newly created workflow on a non-default branch may not appear in the GitHub Actions "Run workflow" UI until registered from the default branch; doing that needs a separate TEST/LIVE isolation review. Alternatively use a local `npx wrangler@4 versions upload --config vnext/mass-gateway/wrangler.jsonc` after explicit credentials and disabled-config verification. **Never use `wrangler deploy` for this stage.**
+
+The rate limiter `namespace_id` values `10421` and `10422` are candidates from the prepared config: verify they do not collide with existing Worker rate-limit bindings in the Cloudflare account before any upload. The Worker rate limiting is location-local and approximate; database concurrency and independent strict controls remain required.
+
