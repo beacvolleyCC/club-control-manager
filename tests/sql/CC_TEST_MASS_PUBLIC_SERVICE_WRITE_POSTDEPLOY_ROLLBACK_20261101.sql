@@ -20,7 +20,9 @@ VALUES
 ('CC-TEST-PUBLIC-QA-WAIT','CC_TEST_PUBLIC_QA',(now() AT TIME ZONE 'Europe/Budapest')::date+9,
  '18:00','19:30','Középhaladó','TEST',1,1,0,true,true,'TÖMEGSPORT','CC_TEST_PUBLIC_QA',24,'{}'::jsonb),
 ('CC-TEST-PUBLIC-QA-PAST','CC_TEST_PUBLIC_QA',(now() AT TIME ZONE 'Europe/Budapest')::date-2,
- '18:00','19:30','Haladó','TEST',2,2,0,true,false,'TÖMEGSPORT','CC_TEST_PUBLIC_QA',24,'{}'::jsonb);
+ '18:00','19:30','Haladó','TEST',2,2,0,true,false,'TÖMEGSPORT','CC_TEST_PUBLIC_QA',24,'{}'::jsonb),
+('CC-TEST-PUBLIC-QA-FIRST','CC_TEST_PUBLIC_QA',(now() AT TIME ZONE 'Europe/Budapest')::date+10,
+ '17:30','19:00','Kezdő','TEST',1,1,0,true,true,'TÖMEGSPORT','CC_TEST_PUBLIC_QA',24,'{}'::jsonb);
 
 DO $acl$
 DECLARE f regprocedure;
@@ -120,6 +122,26 @@ BEGIN
   RAISE EXCEPTION 'MASS_ASSIGNMENT_PAYLOAD_INJECTION_ALLOWED';
  EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
 END $full_wait_accept$;
+
+DO $first_training$
+DECLARE x jsonb;
+BEGIN
+ x:=public.cc_vnext_mass_public_book_v1('CC-TEST-PUBLIC-QA-FIRST',
+ '{"name":"Minta Első Edző","email":"first@cc-test.invalid","firstTraining":true}'::jsonb,
+ 'sha256:'||repeat('5',64));
+ IF x->>'ok'<>'true' THEN RAISE EXCEPTION 'FIRST_TRAINING_BOOKING_FAILED'; END IF;
+ BEGIN
+  PERFORM public.cc_vnext_mass_public_book_v1('CC-TEST-PUBLIC-QA-WAIT',
+  '{"name":"Minta Első Edző","email":"first@cc-test.invalid","firstTraining":true}'::jsonb,
+  'sha256:'||repeat('6',64));
+  RAISE EXCEPTION 'FIRST_TRAINING_REUSE_ALLOWED';
+ EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
+ BEGIN
+  PERFORM public.cc_vnext_mass_public_wait_v1('CC-TEST-PUBLIC-QA-FULL',
+  '{"name":"Minta Első Edző","email":"first@cc-test.invalid","passNumber":"ELSŐ EDZÉS"}'::jsonb);
+  RAISE EXCEPTION 'FIRST_TRAINING_WAITLIST_REUSE_ALLOWED';
+ EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
+END $first_training$;
 
 DO $wait_decline$
 DECLARE x jsonb;offer jsonb;
