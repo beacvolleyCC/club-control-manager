@@ -180,3 +180,15 @@ Közvetlenül lekérdezett TEST sémarészlet:
 - Bérlet/fizetés kapcsolódó táblák: `mass_passes`, `mass_pass_month_overrides_b43`, `mass_pass_validity_overrides`, `player_fees`, `cc_player_fee_meta_v2382`, `cc_player_fee_audit_v2382`; ezek kanonikus forrását és felülírás-szabályait még vizsgálni kell.
 
 **Döntés:** TILOS a meglévő mass táblákat egyszerűen összevonni a verseny táblákkal, új FK-t/trigger-t telepíteni vagy legacy adatot eltávolítani addig, amíg az adatkapcsolati és írási RPC-k kompatibilitása, tényleges anomáliák és kapcsolókulcsok nincsenek ellenőrizve. Következő read-only audit: mass_bookings orphan/duplikátum arány (személyes adatok listázása nélkül), jogosultságvédett write RPC-k módosítás-időbélyeg és audit garanciái; verseny RSVP és Manager read-after-write konzisztencia; fizetés/bérlet adatmodell. Ezután tervezhető biztonságos, tranzakciós, fokozatos javítás a TEST környezetben.
+
+
+## 2026-11-01 – TEST adatintegritás: tömegsport, pénzügy, RSVP, audit (read-only)
+
+**Közvetlen SQL lekérdezési eredmények (név/e-mail és privát rekordok kiolvasása nélkül):**
+- `mass_bookings=0`, `mass_events=0`, `mass_athletes=0`. Az árva foglalások, hiányzó `athlete_id` és azonos e-mail+event duplikátum számok emiatt 0; **nem szabad** ebből valódi tömegsportos adatintegritási sikert állítani.
+- `availability=69`, ebből idegen eseménykapcsolat-hiány `0`, idegen játékoskapcsolat-hiány `0`. A versenysport RSVP relációk ezen pillanatképben épek; ez nem read-after-write E2E.
+- `player_fees=0`, `mass_passes=0`, `audit_log=0`, `attendance_change_audit=0`, `mass_live_write_audit=0`. Ezeknél a tényleges megőrzés, audit és felülírás viselkedés **még nem tesztelt**.
+- `mass_athletes`, `mass_bookings`, `mass_events`: csak PK constraint igazolható az adott listában; további FK nem látható. `player_fees`: PK + 4 check. `availability`: PK + 2 FK + 2 check.
+- A `pg_get_functiondef` szövegében a `cc_manager_competition_event_save_v1`, `cc_manager_competition_rsvp_v1` hivatkozik `audit_log`-ra és `updated_at`-ra. A `cc_manager_mass_booking_add_v1`, `...patch_v1`, `...remove_v1` hivatkozik `updated_at`-ra, de **nem** tartalmaz `audit_log` szöveget. Ez még nem bizonyítja, hogy más auditnapló nincs; meg kell vizsgálni a teljes írási útvonalat és a `mass_live_write_audit` használatát.
+
+**Kritikus következtetés:** TEST tömegsport és pénzügy adatállomány hiányában a paritás/adatmegőrzés csak mesterséges, tranzakciósan visszagörgetett és később célzott, jogosultságteszttel ellenőrzött adatokkal bizonyítható. Nem szabad 0 hibát „PASS”-ként feltüntetni üres táblán. A meglévő versenyadatokhoz ne nyúljunk. Következő kör: a tömegsportos író RPC-k teljes SQL auditja és célzott, lezárt/rollback-es szintetikus adatpróbák; szükség esetén szűk, minden bemeneti útra kiterjedő auditmigráció előkészítése, RLS/role teszttel. A tömegsport jelenlegi működő LIVE útvonalát nem cseréljük le. Semmi DML/DDL, LIVE módosítás, Worker deploy vagy e-mailküldés nem történt ebben a körben.
