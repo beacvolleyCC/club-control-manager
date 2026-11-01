@@ -13,6 +13,7 @@ test('gateway config targets ONLY separate disabled TEST Worker',()=>{
  assert.equal(config.name,'cc-mass-gateway-test-beac');
  assert.equal(config.main,'src/worker.mjs');
  assert.equal(config.workers_dev,false);
+ assert.equal(config.preview_urls,false);
  assert.equal(config.vars.TEST_ONLY,'true');
  assert.equal(config.vars.SUPABASE_URL,'https://szzoubvhlwnojtzqjebc.supabase.co');
  assert.equal(config.vars.PUBLIC_WRITES_ENABLED,'false');
