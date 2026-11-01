@@ -128,9 +128,7 @@ BEGIN
   EXCEPTION WHEN insufficient_privilege THEN NULL;
   END;
   BEGIN
-    PERFORM public.cc_vnext_competition_read_v1('roster',NULL,(
-      SELECT id FROM public.events WHERE team_id=current_setting('cc.qa.other')::uuid
-      AND status<>'cancelled' ORDER BY starts_at LIMIT 1));
+    PERFORM public.cc_vnext_competition_read_v1('roster',NULL,current_setting('cc.qa.other_event')::uuid);
     RAISE EXCEPTION 'VNEXT_CROSS_TEAM_ROSTER_ALLOWED';
   EXCEPTION WHEN insufficient_privilege THEN NULL;
   END;
