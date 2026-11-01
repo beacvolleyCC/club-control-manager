@@ -1,0 +1,25 @@
+name: TEST Manager mass writes contract
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/CC_TEST_MASS_MANAGER_WRITES_SQL_EDITOR_INSTALL_20261101.sql'
+      - 'tests/sql/CC_TEST_MASS_MANAGER_WRITES_POSTDEPLOY_ROLLBACK_20261101.sql'
+      - 'tests/manager-mass-writes-contract-20261101.test.cjs'
+      - '.github/workflows/test-manager-mass-writes-20261101.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run contract tests twice
+        run: |
+          node --test tests/manager-mass-writes-contract-20261101.test.cjs
+          node --test tests/manager-mass-writes-contract-20261101.test.cjs
