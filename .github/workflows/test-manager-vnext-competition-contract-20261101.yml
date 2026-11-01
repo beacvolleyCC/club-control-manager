@@ -1,0 +1,26 @@
+name: TEST Manager vNext competition read API contract
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/CC_TEST_VNEXT_COMPETITION_READ_FACADE_V1_CANDIDATE_20261101.sql'
+      - 'tests/sql/CC_TEST_VNEXT_COMPETITION_READ_POSTDEPLOY_ROLLBACK_20261101.sql'
+      - 'tests/manager-vnext-competition-read-contract-20261101.test.cjs'
+      - 'docs/architecture/CC_TEST_API_CONTRACT_INVENTORY_20261101.json'
+      - '.github/workflows/test-manager-vnext-competition-contract-20261101.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify contract and security twice
+        run: |
+          node --test tests/manager-vnext-competition-read-contract-20261101.test.cjs
+          node --test tests/manager-vnext-competition-read-contract-20261101.test.cjs
