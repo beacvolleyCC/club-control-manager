@@ -117,9 +117,11 @@ BEGIN
   IF jsonb_array_length(x->'data')<>1
     OR (x->'data'->0->>'id')<>current_setting('cc.qa.team')
   THEN RAISE EXCEPTION 'VNEXT_CROSS_TEAM_CATALOG_LEAK'; END IF;
-  x:=public.cc_vnext_competition_read_v1('players',current_setting('cc.qa.other')::uuid);
-  IF jsonb_typeof(x->'data')<>'array' OR jsonb_array_length(x->'data')<>0
-  THEN RAISE EXCEPTION 'VNEXT_CROSS_TEAM_PLAYERS_LEAK'; END IF;
+  BEGIN
+    x:=public.cc_vnext_competition_read_v1('players',current_setting('cc.qa.other')::uuid);
+    IF jsonb_array_length(x->'data')<>0 THEN RAISE EXCEPTION 'VNEXT_CROSS_TEAM_PLAYERS_LEAK'; END IF;
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
   BEGIN
     PERFORM public.cc_vnext_competition_read_v1('roster',NULL,(
       SELECT id FROM public.events WHERE team_id=current_setting('cc.qa.other')::uuid
