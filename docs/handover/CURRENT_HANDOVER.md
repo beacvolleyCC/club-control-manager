@@ -214,3 +214,14 @@ A következő körben ismét beolvastuk a központi handovert, a GitHub TEST ág
 A korábbi körben három TEST Supabase SQL-katalóguslekérdezést a hozzáférésvédelmi rendszer blokkolt; emiatt a booking create/patch/remove rollback próba még nem lett elindítva. Ezt a korlátot továbbra sem kerülhetjük meg. A `mass_live_write_audit` táblán a korábban ellenőrzött grant-listában csak `postgres` és `service_role` szerepelt; a teljes RLS/RPC jogosultsági ellenőrzés ettől még nyitott.
 
 **Következő végrehajtható, biztonságos mérföldkő:** TEST-only, kifejezetten mass bookinghoz készült rollback QA forgatókönyv készítése; tesztfiók szerepkörének és szükséges jogosultságainak jóváhagyott ellenőrzése után lehet kétszer lefuttatni. A QA mérje: esemény/résztvevő/foglalás létrehozás, note/passStatus patch, státuszos admin lemondás, három auditbejegyzés, korábbi/új értékek, és rollback utáni nulla maradék. Az audit nem feltétlenül egyetlen `audit_log` táblában van: a meglévő `mass_live_write_audit` a kanonikus booking audit célpont. A valós párhuzamosság külön, több kapcsolatból végzett tesztet igényel. A tömegsportos LIVE jelentkezési útvonal és a Cloudflare gateway állapota változatlan; Worker telepítés félretéve.
+
+
+## 2026-11-01 – Több lépéses DB QA: mass booking statikus preflight létrehozva és lefuttatva
+
+Új TEST-only SQL teszt:
+`tests/sql/CC_TEST_MASS_BOOKING_CONTRACT_PREFLIGHT_20261101.sql` commit `a5ebdb2d16886ef1e1c5bfa17efa479b5d3ce3d3`.
+A fájlt GitHub read-back módszerrel byte-for-byte visszaellenőriztük. A SQL script `BEGIN READ ONLY`, `DO`, `ROLLBACK` tranzakcióban (1) TEST sentinel, (2) booking add/patch/remove RPC-k létezése, (3) audit tábla létezése, (4) anon/authenticated közvetlen audit grant hiánya, (5) mass events/bookings RLS enabled, (6) három RPC SQL-szövegében audit, manager szerepkör kapu és updated_at jelenléte feltételeket ellenőrzi.
+
+A GitHubról visszaolvasott scriptet **TEST Supabase execute_sql-lel lefuttattuk**: hiba nélkül tért vissza (az SQL üzenete üres eredménytömb, a DO NOTICE üzenetet nem mutatja). Ez statikus szerződés-preflight, **nem E2E**, nem adatkonkurencia és nem audit-tranzakció teszt. A teszt mögé új szerver/gateway nem kerül.
+
+A booking add→patch→remove és audit rekordok egyetlen ROLLBACK-es, hitelesített Manager szerepkörű dinamikus tesztje még hátravan: az `SECURITY DEFINER` függvény belső manager authentikációját és szerepkörét nem szabad meghamisítani vagy megkerülni. A korábbi `mass_events`, `mass_bookings` és `mass_athletes` táblák üresek voltak. A teszt sikerét nem szabad ebből kijelenteni. LIVE nem érintett, Cloudflare mass Worker továbbra is félretéve.
