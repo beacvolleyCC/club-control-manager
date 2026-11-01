@@ -70,3 +70,45 @@ Ezek **régi pillanatképek**, nem jelenlegi HEAD-nek tekintendők.
 ## Új chat kezdő mondata
 
 **CC-FOLYTATÁS.** Olvasd el elsőként a `beacvolleyCC/club-control-manager` TEST ág `docs/handover/CURRENT_HANDOVER.md` fájlját és az abban hivatkozott korábbi handovert. Élő TEST GitHub/Supabase ellenőrzés után folytassuk a fejlesztést; minden munkakör végén ugyanebbe a fájlba írj vissza, és ellenőrizd a commitot. Kétszeri, 11 pontos QA. LIVE csak külön engedéllyel.
+
+
+## 2026-11-01: felhasználó által bemásolt teljes napi fejlesztési napló – kiegészítés
+
+**Forrásminőség:** a lenti időrendi eseményeket a felhasználó a korábbi fejlesztési chat szöveges naplójából adta meg. A GitHubon jelen körben külön ellenőriztük a `vnext/mass-gateway/README.md` és a `.github/workflows/upload-mass-gateway-disabled-test-draft-20261101.yml` meglétét és tartalmát. A naplóban szereplő pozitív teszteket ne jelöld automatikusan újonnan lefuttatottnak.
+
+### Player TEST belépés és RSVP felületi QA
+
+1. A korábbi Supabase Auth e-mailküldési limit után a Player TEST URL-en új belépési e-mailt kért a felhasználó; **visszajelzése: „bent vagyok”**, tehát a felhasználói szintű belépés sikeres volt.
+2. A felhasználó nem látott edzést; a korábbi chat ellenőrzése szerint a BB2 aktív csapattagnál a legutolsó mintaedzés 2026-10-30 volt, ezért létrejött egy elkülönített **TEST – BB2 jelentkezési próbaedzés** 2026-11-06 pénteken **20:00–22:00** időponttal. A felhasználó megerősítette, hogy most már van edzés és elkezdi tesztelni. A próbaedzés azonosítóját és jelenlegi DB létezését a következő körben célszerű read-only lekérdezéssel megvizsgálni.
+3. A felhasználó regressziót jelzett: az RSVP háromállapotú csúszka csak húzással működik, egyszerű kattintással/koppintással nem, noha korábban mindkettő ment. A korábbi chatben a TEST Player kódot úgy módosították, hogy pointer capture csak tényleges vízszintes húzáskor induljon. A napló szerint a kattintás, húzás és mobilos automatikus tesztek sikeresek; a Cloudflare legutóbbi buildjének telepítése nem volt külön igazolt. **A felhasználó a javítás utáni kattintás sikerét és a Jövök/Nem jövök/semleges RSVP tartós mentését ebben a naplóban még nem erősítette meg.**
+4. Ellenőrizendő RSVP: Jövök → reload → Nem jövök → reload → semleges → reload, majd indok/megjegyzés, tényleges TEST Supabase adatmentés és Manager TEST szinkron.
+
+**Player TEST URL (felhasználó által megadott, 2026-11-01-i):** https://cc-player-test-beac.elteroplabda.workers.dev/ . Ez a már használt Player PWA, NEM az alábbi mass gateway Worker.
+
+### Supabase TEST OTP
+
+- A napló szerint a két `cc_vnext_mass_email_start_v1`, `cc_vnext_mass_email_verify_v1` függvény a TEST DB-ben telepítve, a hozzáférések `anon=false, authenticated=false, service_role=true`.
+- Ötperces kódélettartam, 90 másodperces újrakérési korlát, maximum öt rossz próbálkozás, egyszer felhasználható kód.
+- Korábbi teszt szerint a teljes OTP SQL integráció kétszer PASS, transaction rollback után 0 OTP + 0 mail + 0 push sor. Ez a TEST mass-gateway README-ben is szerepel.
+- Telepítő: `docs/security/CC_TEST_MASS_EMAIL_PROOF_SQL_EDITOR_20261101.sql`
+- Dupla rollback teszt: `tests/sql/CC_TEST_MASS_EMAIL_OTP_POSTDEPLOY_ROLLBACK_20261101.sql`
+- **FONTOS: ez a tömegsportos e-mail proof/OTP, nem azonos a Player Supabase Auth Magic Link levelezésével.** A meglévő Resend TEST Auth SMTP bekötését külön kell feltárni; nincs igazoltan kész.
+
+### Cloudflare TEST mass gateway: kód és deployment
+
+A GitHubon ebben a körben a fájlok létezését és tartalmát közvetlenül ellenőriztük:
+- `vnext/mass-gateway/README.md` – státusz: source implemented, mocked-double-tested, NOT DEPLOYED.
+- `.github/workflows/upload-mass-gateway-disabled-test-draft-20261101.yml` – kézi GitHub Actions workflow, TEST ág + pontos `UPLOAD_DISABLED_TEST_DRAFT` megerősítés, két preflight, két Worker security teszt és Wrangler dry-run.
+- A workflow **`wrangler versions upload`**, nem `wrangler deploy` parancsot használ; az upload nem élesíti a forgalmat. A pontos Cloudflare hozzáférés és GitHub Actions secret-ek beállítása még ellenőrizendő.
+- Külön Worker azonosító: `cc-mass-gateway-test-beac`, `workers_dev:false`, **nincsenek routes**; a nyilvános írás és e-mail delivery letiltva marad, amíg a végpontteszt és jóváhagyás hiányzik.
+- A Worker szolgáltatásai: health; e-mail OTP start/verify; foglalás, várólista, lemondás, helyfelajánlás döntés. TEST-only környezetvizsgálat, Turnstile, rate limiting, jogosultság- és token-hash ellenőrzés, titkok szerveroldalon.
+- A korábbi napló sikeres kétszeres mocked security/CI teszteket, Wrangler `deploy --dry-run` fordítást és izolációs ellenőrzést dokumentál. Referencia GitHub Actions futás: https://github.com/beacvolleyCC/club-control-manager/actions/runs/41336412625 és https://github.com/beacvolleyCC/club-control-manager/actions/runs/41327682212 . **Ezeket a futásokat jelen körben külön nem auditáltuk.**
+- Titkokat ne másolj chatbe/GitHubba/PWA forrásba. Csak Cloudflare secret binding: kizárólag TEST Supabase secret, Turnstile, EMAIL_PROOF_SECRET, EMAIL_OTP_PEPPER és TEST Resend. 0 Ft keret, LIVE sértetlen.
+
+### A napló végén elért valós állapot / első következő teendő
+
+**Player:** bejelentkezés a felhasználó szerint sikeres, van próbaedzés; a kattintásjavítás valós PWA deployja és RSVP perzisztencia **nincs készre igazolva**.
+
+**Mass gateway:** a kód, a kétszeres automatikus ellenőrzés és a dry-run a korábbi chat szerint kész; a **külön Worker-verzió Cloudflare-re történő feltöltése nem történt meg**, és semmilyen publikus útvonalat, e-mailt vagy nyilvános írást nem szabad önkényesen engedélyezni.
+
+**Következő kör:** előbb a GitHub TEST branch aktuális HEAD/Actions és Player TEST deploy/kattintás megerősítése; majd a TEST tömegsportos Worker kézi *disabled draft upload* előfeltételei (GitHub workflow láthatóság, külön Cloudflare TEST jogosultság és secrets létezése, értékek kiolvasása nélkül), és csak biztonságos engedélyezett lépések. E-mail küldés/LIVE változtatás NEM.
