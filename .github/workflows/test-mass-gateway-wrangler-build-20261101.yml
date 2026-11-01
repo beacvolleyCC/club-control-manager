@@ -1,0 +1,39 @@
+name: TEST mass gateway Wrangler build (NO DEPLOY)
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'vnext/mass-gateway/**'
+      - 'tests/mass-gateway-deploy-preflight-20261101.test.mjs'
+      - 'tests/mass-gateway-test-20261101.test.mjs'
+      - '.github/workflows/test-mass-gateway-wrangler-build-20261101.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enforce separate TEST-only, disabled gateway configuration twice
+        run: |
+          node --test tests/mass-gateway-deploy-preflight-20261101.test.mjs
+          node --test tests/mass-gateway-deploy-preflight-20261101.test.mjs
+      - name: Recheck mocked Worker service tests twice
+        run: |
+          node --test tests/mass-gateway-test-20261101.test.mjs
+          node --test tests/mass-gateway-test-20261101.test.mjs
+      - name: Compile separate Cloudflare Worker WITHOUT deploying or requiring secrets
+        run: |
+          npx --yes wrangler@4 deploy --dry-run --config vnext/mass-gateway/wrangler.jsonc --outdir /tmp/cc-mass-gateway-test-build
+          test -d /tmp/cc-mass-gateway-test-build
+          test -n "$(find /tmp/cc-mass-gateway-test-build -maxdepth 1 -type f -name '*.js' -print -quit)"
+      - name: Assert build contains no production Supabase project ID
+        run: |
+          if grep -R -q 'snqsxlyhontaepembaic' /tmp/cc-mass-gateway-test-build; then
+            echo 'PRODUCTION_PROJECT_REFERENCE_IN_GATEWAY_BUNDLE'; exit 1
+          fi
