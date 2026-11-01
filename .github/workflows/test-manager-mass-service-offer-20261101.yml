@@ -1,0 +1,24 @@
+name: TEST mass server-only capacity and offer contract
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/CC_TEST_MASS_SERVICE_CAPACITY_OFFER_SQL_EDITOR_20261101.sql'
+      - 'tests/manager-mass-service-offer-contract-20261101.test.cjs'
+      - '.github/workflows/test-manager-mass-service-offer-20261101.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate service-only and transactional constraints twice
+        run: |
+          node --test tests/manager-mass-service-offer-contract-20261101.test.cjs
+          node --test tests/manager-mass-service-offer-contract-20261101.test.cjs
