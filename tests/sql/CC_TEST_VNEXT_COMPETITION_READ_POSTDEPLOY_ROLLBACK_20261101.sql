@@ -50,6 +50,11 @@ SELECT set_config('cc.qa.other',(
   SELECT t.id::text FROM public.teams t
   WHERE t.active AND t.id<>current_setting('cc.qa.team')::uuid ORDER BY t.name LIMIT 1
 ),true);
+SELECT set_config('cc.qa.other_event',(
+  SELECT e.id::text FROM public.events e
+  WHERE e.team_id=current_setting('cc.qa.other')::uuid AND e.status<>'cancelled'
+  ORDER BY e.starts_at DESC LIMIT 1
+),true);
 SELECT set_config('cc.qa.event',(
   SELECT e.id::text FROM public.events e
   WHERE e.team_id=current_setting('cc.qa.team')::uuid AND e.status<>'cancelled' ORDER BY e.starts_at DESC LIMIT 1
@@ -65,7 +70,7 @@ BEGIN
   IF current_setting('cc.qa.manager.uid',true) IS NULL
     OR current_setting('cc.qa.team',true) IS NULL
     OR current_setting('cc.qa.other',true) IS NULL
-    OR current_setting('cc.qa.event',true) IS NULL
+    OR current_setting('cc.qa.event',true) IS NULL OR current_setting('cc.qa.other_event',true) IS NULL
   THEN RAISE EXCEPTION 'VNEXT_QA_FIXTURE_MISSING'; END IF;
 END $fixtures$;
 
