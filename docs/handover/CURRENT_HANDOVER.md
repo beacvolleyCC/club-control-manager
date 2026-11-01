@@ -206,3 +206,11 @@ Közvetlenül lekérdezett TEST sémarészlet:
 - Az előző körben mért `mass_events=0`, `mass_bookings=0`, `mass_athletes=0`, `mass_live_write_audit=0` miatt az adatokon végzett teljes end-to-end műveleti igazolás **még hátravan**.
 
 **Következő végrehajtható munka:** read-only ellenőrzés a `mass_live_write_audit` szerkezetére, constraintjeire/hozzáféréseire és más write RPC-kre; majd tranzakción belüli ROLLBACK-es izolált create/patch/remove és audit teszt szintetikus eseménnyel és hitelesített manager szereppel. A jelenlegi működő architektúrát megőrizni; új gateway telepítése továbbra is FÉLRETÉVE. Nincs DB módosítás és LIVE írás ebben a körben.
+
+## 2026-11-01 22:09+01 – Biztonságos QA-előkészítés, hozzáférésvédelmi korlát
+
+A következő körben ismét beolvastuk a központi handovert, a GitHub TEST ágon a `tests/sql/CC_TEST_MASS_EMAIL_OTP_POSTDEPLOY_ROLLBACK_20261101.sql` mintatesztet és a hozzá tartozó telepítőt. A mintából igazolható a korábbi gyakorlat: TEST-project guard, `BEGIN`, egyszer használatos mesterséges cím, scope-alapú jogosultságteszt, változások ellenőrzése, `ROLLBACK`, maradéktalan visszaellenőrzés. **Ez a minta OTP-hez tartozik, nem helyettesíti a tömegsportos booking írási tesztet.**
+
+A korábbi körben három TEST Supabase SQL-katalóguslekérdezést a hozzáférésvédelmi rendszer blokkolt; emiatt a booking create/patch/remove rollback próba még nem lett elindítva. Ezt a korlátot továbbra sem kerülhetjük meg. A `mass_live_write_audit` táblán a korábban ellenőrzött grant-listában csak `postgres` és `service_role` szerepelt; a teljes RLS/RPC jogosultsági ellenőrzés ettől még nyitott.
+
+**Következő végrehajtható, biztonságos mérföldkő:** TEST-only, kifejezetten mass bookinghoz készült rollback QA forgatókönyv készítése; tesztfiók szerepkörének és szükséges jogosultságainak jóváhagyott ellenőrzése után lehet kétszer lefuttatni. A QA mérje: esemény/résztvevő/foglalás létrehozás, note/passStatus patch, státuszos admin lemondás, három auditbejegyzés, korábbi/új értékek, és rollback utáni nulla maradék. Az audit nem feltétlenül egyetlen `audit_log` táblában van: a meglévő `mass_live_write_audit` a kanonikus booking audit célpont. A valós párhuzamosság külön, több kapcsolatból végzett tesztet igényel. A tömegsportos LIVE jelentkezési útvonal és a Cloudflare gateway állapota változatlan; Worker telepítés félretéve.
