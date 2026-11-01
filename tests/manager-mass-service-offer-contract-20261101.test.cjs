@@ -23,7 +23,7 @@ test('locked FIFO offers, bounded expiry, SHA256-hash and no emails',()=>{
  assert.match(s,/interval '2 hours'/);
  assert.match(s,/OFFER_ALREADY_ACTIVE/);
  assert.match(s,/CAPACITY_FULL/);
- assert.match(s,/WAITLIST/);
+ assert.match(s,/mass_waitlist/);
  assert.match(s,/mailQueued',false/);
  assert.doesNotMatch(s,/INSERT INTO private\.cc_mass_mail_outbox|cc_mass_mail_claim|cc_push_enqueue/i);
  assert.doesNotMatch(s,/snqsxlyhontaepembaic|sb_secret_|http:\/\/|https:\/\//);
