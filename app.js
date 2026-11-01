@@ -1337,7 +1337,7 @@
       <span class="cc-compact-roster-person">
         <span class="cc-compact-roster-avatar">${avatarHtml(p,'table')}</span>
         <span class="cc-compact-roster-jersey">${jersey===null||jersey===undefined||text(jersey)===''?'–':esc(jersey)}</span>
-        <span class="cc-compact-roster-identity"><strong>${esc(name)}</strong><small>${esc(p.position||'Poszt nélkül')}</small>${(tone==='not-going'||text(p.attendanceStatus??p.attendance_status)==='absent')&&text(p.note)&&text(p.attendanceStatus??p.attendance_status)!=='present'?`<span class="cc-detail-decline-note">${esc(p.note)}</span>`:''}</span>
+        <span class="cc-compact-roster-identity"><strong>${esc(name)}</strong><small>${esc(p.position||'Poszt nélkül')}</small>${(tone==='not-going'||text(p.attendanceStatus??p.attendance_status)==='absent')&&text(p.note)&&text(p.attendanceStatus??p.attendance_status)!=='present'?`<span class="cc-detail-decline-note">${esc(p.note)}</span>`:''}${text(p.attendanceStatus??p.attendance_status)==='present'&&p.hasStoredNote===true&&editable&&eventEnd(findEventById(eventId))<=new Date()?\x60<button type="button" class="button quiet small" data-manager-clear-previous-note="${esc(p.playerId||p.id)}" title="Az előző indok törlése (már megjelent)">Korábbi indok törlése</button>\x60:''}</span>
       </span>
       <span class="cc-compact-roster-presence"><small class="cc-compact-roster-source">${preview.confirmed?'Rögzítve':'RSVP alapján'}</small>${ccCompetitionAttendanceSlider_(p,attendanceEditable)}</span>
       <span class="cc-compact-roster-actions">
@@ -1373,6 +1373,25 @@
 
   function ccBindCompetitionRoster_(host,eventId,editable,attendanceEditable,{returnToEvent=false}={}){
     if(!host)return;
+    Array.from(host.querySelectorAll('[data-manager-clear-previous-note]')).forEach(button=>{
+      button.addEventListener('click',async()=>{
+        const playerId=text(button.dataset.managerClearPreviousNote);
+        if(!playerId||!window.confirm('Törlöd a korábbi indokot? A játékos jelenléte és RSVP-állapota nem változik.'))return;
+        button.disabled=true;
+        try{
+          await rpc('cc_manager_competition_note_clear_v1',{p_event_id:eventId,p_player_id:playerId});
+          state.eventRosterCache.delete(eventId);
+          const rows=await loadEventRoster(eventId,{force:true});
+          const fresh=host.querySelector('[data-manager-clear-previous-note]');
+          if(returnToEvent){openEventDetail(eventId)}
+          else{
+            host.innerHTML=ccTrainingInlinePreviewHtml_(rows,eventId,editable,attendanceEditable);
+            ccBindCompetitionRoster_(host,eventId,editable,attendanceEditable);
+          }
+          status('Korábbi indok törölve.','success');
+        }catch(err){button.disabled=false;status(err.message||'Az indok törlése nem sikerült.','error')}
+      });
+    });
     Array.from(host.querySelectorAll('[data-roster-profile-open]')).forEach(button=>{
       button.addEventListener('click',()=>{
         ccPlayerReturnEventId_=returnToEvent?text(eventId):'';
