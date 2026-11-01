@@ -234,3 +234,7 @@ Közvetlen TEST Supabase katalogus-lekérdezés igazolta a következő függvén
 GitHub TEST tesztbővítés: `tests/sql/CC_TEST_MASS_BOOKING_CONTRACT_PREFLIGHT_20261101.sql` új grant/security ellenőrzéseket kapott; commit `1e10fc588dc201a16cbe3036ede468397395c70f`, read-back azonos. A scriptet a TEST DB-ben egymás után **kétszer** lefuttattuk, mindkét futás hiba nélkül zárult, üres eredménytérrel (a DO NOTICE-t a connector nem jeleníti meg). `BEGIN READ ONLY` és `ROLLBACK`, nem keletkezett adatváltozás.
 
 **Még nyitott:** explicit negatív jogosultsági próbák nem-Manager authenticated felhasználóval, izolált booking add→patch→remove→audit→ROLLBACK E2E, konkurens felhasználói műveletek, Manager/Player read-after-write paritás. Ezen funkciók készre nem jelenthetők. A LIVE érintetlen, a külön Cloudflare mass gateway továbbra is félretéve.
+
+## 2026-11-01 – QA folytatás
+
+A Manager jogosultságsegéd részletes kiolvasását a hozzáférésvédelem blokkolta. Az izolált foglalási E2E teszt még nem futott le; a TEST adatbázist nem módosítottuk. A kísérlet egy új QA tervfájl létrehozására szintén blokkolva lett, ezért nem tekinthető mentettnek. Következő lépés a megfelelő hitelesített TEST Manager környezetben végzett, visszagörgethető create/patch/remove/audit próba; SQL Editor admin jogosultság nem helyettesíti a valós felhasználói jogosultságot. LIVE érintetlen, külön Cloudflare gateway továbbra is félretéve.
