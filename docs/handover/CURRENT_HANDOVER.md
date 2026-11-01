@@ -244,3 +244,16 @@ A Manager jogosultságsegéd részletes kiolvasását a hozzáférésvédelem bl
 A TEST PostgreSQL katalógusában ellenőrizve: a tömegsportos Manager író útvonal `cc_manager_mass_booking_add_v1` a `mass_events` és `mass_bookings` táblákat használja. A `cc_manager_mass_event_detail_v1` és `cc_manager_mass_trainings_v1` olvasók szintén mindkettőt használják; `cc_manager_mass_attendance_snapshot_r1_v1` a `mass_bookings` táblát használja. A már meglévő `cc_manager_mass_booking_patch_v1` és `cc_manager_mass_booking_remove_v1` az előző SQL kódellenőrzés alapján ugyanazon foglalásokat módosítja. A versenysport oldalon `cc_manager_competition_rsvp_v1`, `cc_manager_competition_attendance_v1`, `cc_manager_competition_event_save_v1`, `cc_manager_competition_results_v1`, valamint a Player oldali `cc_player_competition_user_schedule_v1` létezik. A versenysport user_schedule SQL-szövege nem tartalmaz közvetlen `events`, `availability` stringet; lehet közvetett helper hívás, ezért további függvénylánc-vizsgálat szükséges.
 
 KÖVETKEZTETÉS: a tömegsport Manager read/write ugyanazon kanonikus táblákra mutat; ez statikus kapcsolódás, nem bizonyított E2E vagy realtime frissülés. Nyitott: Player és Manager közös állapot ellenőrzése hitelesített tesztekkel, cache invalidálás/refetch, audit és konkurens módosítások. LIVE változatlan, Worker telepítés félretéve.
+
+
+## 2026-11-01 – Versenysport Player RSVP vs külön importált menetrend: fontos forráskülönbség
+
+**Közvetlenül megvizsgált TEST PostgreSQL RPC teljes forráskódok:**
+- `public.cc_manager_competition_rsvp_v1(uuid,uuid,text)` a `public.events` adatot ellenőrzi, a csapattagság hatályosságát validálja, a `public.availability` soron `FOR UPDATE` + `INSERT ... ON CONFLICT DO UPDATE` módszerrel állítja a `going/not_going/unknown` állapotot; korábbi és új sorral `public.audit_log` auditot ír. Jogosultsághoz `auth.uid()` + `private.cc_manager_require_v1(...,'edit', team_id)` kell.
+- `public.cc_player_competition_user_schedule_v1()` **NEM AZ RSVP forrása**. A `public.cc_competition_user_schedule_v1` importált, 2026/27-es mérkőzésadataiból épít egy tagsághoz szűrt versenymenetrendet. Nem olvas `events`-et, `availability`-t vagy RSVP-t; ezt a funkciót ne tekintsük Player RSVP szinkron ellenőrzésnek.
+- `public.cc_player_bootstrap` SQL-katalógusellenőrzés alapján **egyaránt hivatkozik `events` és `availability` táblákra**, ezért ez a tényleges Player esemény/RSVP adatfolyam elsődleges vizsgálati célpontja.
+- `cc_player_bootstrap_filtered_v1` hivatkozik `events`-re, de nem közvetlenül `availability`-re; lehet közvetett helper/eredmény. A teljes függvényhívási láncot külön ellenőrizni kell.
+
+**Architektúrális feltétel:** külön kell választani a *saját, módosítható események + RSVP* kanonikus tábláit (`events` + `availability`) és az *importált külső versenymenetrend* forrását. A Player minden RSVP-t a kanonikus `availability` táblából / az abból épített jogosultságvédett API-ból olvasson; az importált menetrendet csak forrásazonosító/illesztés alapján szabad a saját eseményhez kötni, nem szabad vakon összemosni vagy felülírni. A Manager→Player statikus közös tábla kapcsolódás igazolható, de tényleges read-after-write E2E és cache/refetch még hiányzik.
+
+A vizsgálat read-only volt, LIVE/Worker változatlan.
