@@ -112,3 +112,17 @@ A GitHubon ebben a körben a fájlok létezését és tartalmát közvetlenül e
 **Mass gateway:** a kód, a kétszeres automatikus ellenőrzés és a dry-run a korábbi chat szerint kész; a **külön Worker-verzió Cloudflare-re történő feltöltése nem történt meg**, és semmilyen publikus útvonalat, e-mailt vagy nyilvános írást nem szabad önkényesen engedélyezni.
 
 **Következő kör:** előbb a GitHub TEST branch aktuális HEAD/Actions és Player TEST deploy/kattintás megerősítése; majd a TEST tömegsportos Worker kézi *disabled draft upload* előfeltételei (GitHub workflow láthatóság, külön Cloudflare TEST jogosultság és secrets létezése, értékek kiolvasása nélkül), és csak biztonságos engedélyezett lépések. E-mail küldés/LIVE változtatás NEM.
+
+
+## 2026-11-01 – következő kör: mass-gateway feltöltési preflight (read-only ellenőrzés)
+
+**Ezen körben közvetlenül ellenőrizve a GitHubon:**
+- A külön TEST Cloudflare Worker `vnext/mass-gateway/wrangler.jsonc` konfigurációja `cc-mass-gateway-test-beac`; `workers_dev=false`, `preview_urls=false`, `PUBLIC_WRITES_ENABLED=false`, `EMAIL_VERIFICATION_ENABLED=false`, `EMAIL_DELIVERY_ENABLED=false`, nincs `routes` mező.
+- Supabase csak a TEST `szzoubvhlwnojtzqjebc` projektre mutat, a megengedett origin a külön Player TEST URL.
+- Kötelező titoknevek deklarálva, a fájlban nem szerepelnek tényleges titokértékek. Két rate-limit binding beállítva; namespace ID-k egyediségét a valódi Cloudflare-fiókban **nem ellenőriztük**.
+- A kézi workflow csak a TEST branchről, pontos megerősítéssel futtatható; a feltöltési parancs `wrangler versions upload`, a build ellenőrzés `deploy --dry-run`; nincs automatikus deploy.
+- A `tests/mass-gateway-deploy-preflight-20261101.test.mjs` ténylegesen létezik és lefedi a fenti konfigurációs biztonsági feltételeket. **Ebben a körben a tesztet újra nem futtattuk**, csak a kódját olvastuk.
+- Fontos blokk: a `.github/workflows/upload-mass-gateway-disabled-test-draft-20261101.yml` fájl **megtalálható a TEST ágon, de a `main` ágon 404**. Így a GitHub Actions `workflow_dispatch` felülete nem tekinthető használhatónak, amíg az adott workflow-t a GitHub nem regisztrálja. **Nem másoltuk át a main ágra**, mert ott bármilyen módosításhoz külön LIVE-engedély szükséges.
+- GitHub Actions secrets/Cloudflare API token és fiók hozzáférése, script tényleges feltöltése **nem ellenőrzött**. A jelenlegi hozzáférhető eszközzel a Cloudflare feltöltés nem indítható közvetlenül. A `fetch_commit_workflow_runs` a dokumentációs commitra 0 PR-indítású futást adott; ez **nem általános Actions státusz-ellenőrzés**.
+
+**Következő gyakorlati lépés:** a Cloudflare TEST-fiókban a külön Worker jogosultságok és a titokbindingok meglétének vizsgálata, titokértékek kiolvasása nélkül. A workflow regisztráció vagy a külön helyi Wrangler `versions upload` útvonalát **csak a jogosultságok és a korlátok igazolása után** lehet kiválasztani. A `main`, LIVE Supabase, működő Manager/Player TEST PWA változatlan. Nem történt Worker feltöltés, nyilvános írás, email vagy push.
