@@ -53,3 +53,20 @@ test('health remains read-only and is not confused with authorized feature enabl
  assert.match(worker,/if\(request.method!=='POST'\)/);
  assert.match(worker,/if\(env.PUBLIC_WRITES_ENABLED!=='true'\|\|!configReady\(env\)\)/);
 });
+
+test('manual Cloudflare upload is explicit, TEST-only and cannot deploy automatically',()=>{
+ const flow=fs.readFileSync('.github/workflows/upload-mass-gateway-disabled-test-draft-20261101.yml','utf8');
+ assert.match(flow,/workflow_dispatch:/);
+ assert.doesNotMatch(flow,/^\s+push:/m);
+ assert.doesNotMatch(flow,/^\s+schedule:/m);
+ assert.match(flow,/inputs[.]confirm == 'UPLOAD_DISABLED_TEST_DRAFT'/);
+ assert.match(flow,/github[.]ref == 'refs\/heads\/test\/20261026-manager-document-intake'/);
+ assert.match(flow,/CLOUDFLARE_TEST_API_TOKEN/);
+ assert.match(flow,/CLOUDFLARE_ACCOUNT_ID/);
+ assert.match(flow,/wrangler@4 versions upload --config vnext\/mass-gateway\/wrangler[.]jsonc/);
+ const commands=flow.split('\n').filter(x=>/npx .*wrangler@4 /.test(x));
+ assert.equal(commands.length,2);
+ assert.ok(commands.some(x=>/deploy --dry-run/.test(x)));
+ assert.ok(commands.some(x=>/versions upload/.test(x)));
+ assert.ok(commands.every(x=>!(/\bdeploy\b/.test(x)&&!/--dry-run/.test(x))));
+});
