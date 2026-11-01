@@ -225,3 +225,12 @@ A fájlt GitHub read-back módszerrel byte-for-byte visszaellenőriztük. A SQL 
 A GitHubról visszaolvasott scriptet **TEST Supabase execute_sql-lel lefuttattuk**: hiba nélkül tért vissza (az SQL üzenete üres eredménytömb, a DO NOTICE üzenetet nem mutatja). Ez statikus szerződés-preflight, **nem E2E**, nem adatkonkurencia és nem audit-tranzakció teszt. A teszt mögé új szerver/gateway nem kerül.
 
 A booking add→patch→remove és audit rekordok egyetlen ROLLBACK-es, hitelesített Manager szerepkörű dinamikus tesztje még hátravan: az `SECURITY DEFINER` függvény belső manager authentikációját és szerepkörét nem szabad meghamisítani vagy megkerülni. A korábbi `mass_events`, `mass_bookings` és `mass_athletes` táblák üresek voltak. A teszt sikerét nem szabad ebből kijelenteni. LIVE nem érintett, Cloudflare mass Worker továbbra is félretéve.
+
+
+## 2026-11-01 – Mass booking RPC grant QA: megvalósított tesztbővítés
+
+Közvetlen TEST Supabase katalogus-lekérdezés igazolta a következő függvényeknél: `cc_manager_mass_booking_add_v1(text,jsonb)`, `cc_manager_mass_booking_patch_v1(text,jsonb)`, `cc_manager_mass_booking_remove_v1(text)`: `anon EXECUTE=false`, `authenticated EXECUTE=true`, `service_role EXECUTE=true`, `SECURITY DEFINER=true`. A már korábban ellenőrzött belső Manager `private.cc_manager_require_any_v1('mass.trainings','edit')` guard továbbra is kötelező. Ez nem jelenti azt, hogy valamennyi bejelentkezett felhasználó sikerrel módosíthatna; a belső guardot dinamikus negatív jogosultsági teszttel kell majd igazolni.
+
+GitHub TEST tesztbővítés: `tests/sql/CC_TEST_MASS_BOOKING_CONTRACT_PREFLIGHT_20261101.sql` új grant/security ellenőrzéseket kapott; commit `1e10fc588dc201a16cbe3036ede468397395c70f`, read-back azonos. A scriptet a TEST DB-ben egymás után **kétszer** lefuttattuk, mindkét futás hiba nélkül zárult, üres eredménytérrel (a DO NOTICE-t a connector nem jeleníti meg). `BEGIN READ ONLY` és `ROLLBACK`, nem keletkezett adatváltozás.
+
+**Még nyitott:** explicit negatív jogosultsági próbák nem-Manager authenticated felhasználóval, izolált booking add→patch→remove→audit→ROLLBACK E2E, konkurens felhasználói műveletek, Manager/Player read-after-write paritás. Ezen funkciók készre nem jelenthetők. A LIVE érintetlen, a külön Cloudflare mass gateway továbbra is félretéve.
