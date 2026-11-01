@@ -49,7 +49,7 @@ function toBytes64url(v){
 
 function base64url(bytes){
  let binary='';for(const b of bytes)binary+=String.fromCharCode(b);
- return btoa(binary).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
+ return btoa(binary).split('+').join('-').split('/').join('_').replace(/=+$/,'');
 }
 function otpCode(){
  // Uniform 8-digit code via rejection sampling, not Math.random().
@@ -86,7 +86,7 @@ async function sendTestOtp(email,code,env){
   'Content-Type':'application/json'},
   body:JSON.stringify({from:env.TEST_EMAIL_FROM,to:[email],
   subject:'Club Control TEST – e-mail ellenőrzés',
-  text:'Az ellenőrző kód: '+code+'\\nA kód 5 percig érvényes. Nem éles foglalás.'}),
+  text:'Az ellenőrző kód: '+code+String.fromCharCode(10)+'A kód 5 percig érvényes. Nem éles foglalás.'}),
   signal:AbortSignal.timeout(8000)
  });
  if(!response.ok)throw Error('MAIL_PROVIDER_REJECTED');
