@@ -1,0 +1,25 @@
+name: TEST Manager competition writes API contract
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/CC_TEST_COMPETITION_WRITES_SQL_EDITOR_INSTALL_20261101.sql'
+      - 'tests/sql/CC_TEST_COMPETITION_WRITES_POSTDEPLOY_ROLLBACK_20261101.sql'
+      - 'tests/manager-competition-write-vnext-contract-20261101.test.cjs'
+      - '.github/workflows/test-manager-competition-write-vnext-20261101.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify TEST write API and rollback invariants twice
+        run: |
+          node --test tests/manager-competition-write-vnext-contract-20261101.test.cjs
+          node --test tests/manager-competition-write-vnext-contract-20261101.test.cjs
