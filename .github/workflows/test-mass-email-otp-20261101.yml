@@ -1,0 +1,26 @@
+name: TEST mass email OTP SQL contract (no install)
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/CC_TEST_MASS_EMAIL_PROOF_SQL_EDITOR_20261101.sql'
+      - 'tests/sql/CC_TEST_MASS_EMAIL_OTP_POSTDEPLOY_ROLLBACK_20261101.sql'
+      - 'tests/mass-email-otp-contract-20261101.test.cjs'
+      - 'vnext/mass-gateway/**'
+      - '.github/workflows/test-mass-email-otp-20261101.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Double-check OTP schema and server-side email safety
+        run: |
+          node --test tests/mass-email-otp-contract-20261101.test.cjs
+          node --test tests/mass-email-otp-contract-20261101.test.cjs
