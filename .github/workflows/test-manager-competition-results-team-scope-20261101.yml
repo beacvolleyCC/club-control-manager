@@ -1,0 +1,24 @@
+name: TEST competition results team-scope security
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'docs/security/CC_TEST_COMPETITION_RESULTS_TEAM_SCOPE_FIX_20261101.sql'
+      - 'tests/sql/CC_TEST_COMPETITION_RESULTS_SCOPE_ROLLBACK_20261101.sql'
+      - 'tests/manager-competition-results-team-scope-20261101.test.cjs'
+      - '.github/workflows/test-manager-competition-results-team-scope-20261101.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-security:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run scope security assertions twice
+        run: |
+          node --test tests/manager-competition-results-team-scope-20261101.test.cjs
+          node --test tests/manager-competition-results-team-scope-20261101.test.cjs
