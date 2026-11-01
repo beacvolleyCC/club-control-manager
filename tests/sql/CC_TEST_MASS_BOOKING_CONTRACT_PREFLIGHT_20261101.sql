@@ -24,6 +24,14 @@ BEGIN
  SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
  WHERE n.nspname='public' AND p.proname IN
  ('cc_manager_mass_booking_add_v1','cc_manager_mass_booking_patch_v1','cc_manager_mass_booking_remove_v1')
+ AND (has_function_privilege('anon',p.oid,'EXECUTE')
+ OR NOT has_function_privilege('authenticated',p.oid,'EXECUTE')
+ OR NOT p.prosecdef)
+ ) THEN RAISE EXCEPTION 'MASS_MANAGER_RPC_EXECUTE_GRANTS_OR_SECURITY_INVALID'; END IF;
+ IF EXISTS (
+ SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+ WHERE n.nspname='public' AND p.proname IN
+ ('cc_manager_mass_booking_add_v1','cc_manager_mass_booking_patch_v1','cc_manager_mass_booking_remove_v1')
  AND (pg_get_functiondef(p.oid) NOT ILIKE '%mass_live_write_audit%'
  OR pg_get_functiondef(p.oid) NOT ILIKE '%cc_manager_require_any_v1%'
  OR pg_get_functiondef(p.oid) NOT ILIKE '%updated_at%')
