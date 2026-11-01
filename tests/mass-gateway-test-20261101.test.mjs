@@ -186,3 +186,105 @@ test('errors from Supabase never leak internal SQL, API keys or tokens',async()=
  assert.equal(t.includes('d'.repeat(64)),false);
  }finally{restore();}
 });
+
+const otpEnvironment=(overrides={})=>environment({
+ PUBLIC_WRITES_ENABLED:'true',EMAIL_VERIFICATION_ENABLED:'true',
+ EMAIL_DELIVERY_ENABLED:'true',EMAIL_OTP_PEPPER:'TEST-OTP-PEPPER-NEVER-PRODUCTION-32-CHARS',
+ RESEND_TEST_API_KEY:'re_FAKE_TEST_ONLY',
+ TEST_EMAIL_FROM:'CC TEST <verified@example.invalid>',
+ TEST_ALLOWED_EMAIL:'example@cc-test.invalid',...overrides
+});
+
+test('email OTP endpoints are blocked when test email delivery is disabled',async()=>{
+ const restore=mockFetch(async url=>{
+  if(!String(url).includes('siteverify'))throw Error('no database or email call expected');
+  return turnstileOk();
+ });
+ try{
+ const r=await handler.fetch(req('email/start',{
+  turnstileToken:challenge,email:'example@cc-test.invalid'
+ }),enabled());
+ assert.equal(r.status,503);
+ assert.equal((await body(r)).code,'EMAIL_SERVICE_DISABLED');
+ }finally{restore();}
+});
+test('OTP mail is sent only to allowlisted TEST identity, never to another mailbox',async()=>{
+ const restore=mockFetch(async url=>{
+  if(!String(url).includes('siteverify'))throw Error('no external call permitted');
+  return turnstileOk();
+ });
+ try{
+ const r=await handler.fetch(req('email/start',{
+  turnstileToken:challenge,email:'someone@else.invalid'
+ }),otpEnvironment());
+ assert.equal(r.status,503);
+ }finally{restore();}
+});
+test('valid OTP issue/verify signs a short-lived email proof with server HMAC',async()=>{
+ let otp='',calls=[];
+ const restore=mockFetch(async (url,opts)=>{
+  const loc=String(url);calls.push(loc);
+  if(loc.includes('siteverify'))return turnstileOk();
+  if(loc.includes('cc_vnext_mass_email_start_v1')){
+   const p=JSON.parse(opts.body);
+   assert.equal(p.p_email,'example@cc-test.invalid');
+   assert.match(p.p_code_hash,/^sha256:[0-9a-f]{64}$/);
+   return Response.json({ok:true,accepted:true});
+  }
+  if(loc.includes('api.resend.com/emails')){
+   assert.match(opts.headers.Authorization,/^Bearer re_FAKE_TEST_ONLY/);
+   const m=JSON.parse(opts.body);
+   assert.deepEqual(m.to,['example@cc-test.invalid']);
+   otp=m.text.match(/([0-9]{8})/)[1];
+   assert.match(m.subject,/TEST/);
+   return Response.json({id:'email-queued'});
+  }
+  if(loc.includes('cc_vnext_mass_email_verify_v1')){
+   const p=JSON.parse(opts.body);
+   assert.equal(p.p_email,'example@cc-test.invalid');
+   assert.match(p.p_code_hash,/^sha256:[0-9a-f]{64}$/);
+   assert.equal(opts.body.includes(otp),false);
+   return Response.json({ok:true,verified:true});
+  }
+  if(loc.includes('cc_vnext_mass_public_book_v1')){
+   const p=JSON.parse(opts.body);
+   assert.equal(p.p_person.email,'example@cc-test.invalid');
+   return Response.json({ok:true,bookingId:'verified-user-booked'});
+  }
+  throw Error('unexpected fetch:'+loc);
+ });
+ try{
+ const e=otpEnvironment();
+ const started=await handler.fetch(req('email/start',{
+  turnstileToken:challenge,email:'example@cc-test.invalid'
+ }),e);
+ assert.equal(started.status,200);
+ assert.equal((await body(started)).deliveryQueued,true);
+ assert.match(otp,/^[0-9]{8}$/);
+ const verified=await handler.fetch(req('email/verify',{
+  turnstileToken:challenge,email:'example@cc-test.invalid',code:otp
+ }),e);
+ assert.equal(verified.status,200);
+ const proofToken=(await body(verified)).emailProof;
+ assert.match(proofToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+ const booked=await handler.fetch(req('book',book({emailProof:proofToken})),e);
+ assert.equal(booked.status,200);
+ assert.equal((await body(booked)).data.bookingId,'verified-user-booked');
+ assert.ok(calls.some(c=>c.includes('resend.com')));
+ }finally{restore();}
+});
+test('incorrect 8-digit OTP is denied without minting an email proof',async()=>{
+ const restore=mockFetch(async url=>{
+  if(String(url).includes('siteverify'))return turnstileOk();
+  if(String(url).includes('cc_vnext_mass_email_verify_v1'))
+   return Response.json({ok:true,verified:false});
+  throw Error('Unexpected external request');
+ });
+ try{
+ const r=await handler.fetch(req('email/verify',{
+  turnstileToken:challenge,email:'example@cc-test.invalid',code:'12345678'
+ }),otpEnvironment());
+ assert.equal(r.status,422);
+ assert.equal((await body(r)).code,'EMAIL_CODE_INVALID');
+ }finally{restore();}
+});
