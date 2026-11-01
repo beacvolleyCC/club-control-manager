@@ -132,7 +132,7 @@ test('verified email can book via server secret, receives one-time 256-bit cance
   calls.push({url,options});return Response.json({ok:true,bookingId:'test-b',mailQueued:false});
  });
  try{
- const r=await handler.fetch(req('book',data),enabled());
+ const r=await handler.fetch(req('book',data),otpEnvironment());
  assert.equal(r.status,200);
  const result=await body(r);
  assert.match(result.cancellationToken,/^[a-f0-9]{64}$/);
@@ -152,7 +152,7 @@ test('verified email can queue; first training marker is set only on request',as
   calls.push(JSON.parse(opts.body));return Response.json({ok:true,position:1,waitlistId:'wait1'});
  });
  try{
- const r=await handler.fetch(req('wait',book({emailProof:await proof('example@cc-test.invalid'),firstTraining:true})),enabled());
+ const r=await handler.fetch(req('wait',book({emailProof:await proof('example@cc-test.invalid'),firstTraining:true})),otpEnvironment());
  assert.equal(r.status,200);
  assert.equal(calls[0].p_person.passNumber,'ELSŐ EDZÉS');
  }finally{restore();}
