@@ -147,3 +147,24 @@ A felhasználó Cloudflare Workers & Pages listáról képernyőképet adott. A 
 **Következő feladat:** API/paritás leltár a meglévő Club Control Manager és Player moduljaihoz: funkció → táblák/relációk → read/write RPC-k → RLS szerepkörök → hiányok → automatizált+end-to-end teszt; prioritás szerint a kritikus jelentkezés, lemondás, várólista, jelenlét, naptár, csapattagság, jogosultság, pénzügy, értesítések, versenymenetrend és tabella. Előbb adatbázis-készenléti kapu, csak utána frontend újraépítés. Ne javasolj új infrastruktúrát igazolt hiány nélkül.
 
 **Továbbra is:** minden kör végén tényleges GitHub handover update és visszaolvasás; kétszeres QA és 11 pontos ellenőrzés.
+
+
+## 2026-11-01 – DB-FIRST: közös adatforrás és módosítások megőrzése (felhasználói követelmény)
+
+**Nem alku tárgya:** egyetlen hiteles DB-adatforrás, amelybe bármely jogosult felület írhat a kijelölt API-n keresztül, és amelyből minden más Manager/Player/statisztika felület ugyanazt az állapotot olvassa. Másik modulban történt szerkesztés ne vesszen el, ne álljon vissza véletlenül és legyen auditálható (ki/mikor/mit/előtte-utána, a személyes adatok biztonságos kezelésével). A cache / realtime csak szinkronizációs mechanizmus, ne legyen külön igazságforrás. Írás sikere csak DB-commit után jelenjen meg véglegesnek; frissítés és újratöltés konzisztens legyen. Párhuzamos módosításokhoz tranzakció és ahol szükséges optimista verzióellenőrzés, valamint idempotencia szükséges.
+
+**Közvetlen read-only TEST DB katalógus-audit ezen körben:**
+- `public` 53 és `private` 6 = **59 base table**; mind az 59 táblán `relrowsecurity=true` (RLS bekapcsolt). Ez önmagában nem RLS policy teljeskörű működésbizonyítéka.
+- **43 FK** összesen, **24 táblán**. Ez nem mondja meg önmagában, mely további kapcsolatok kötelezőek.
+- Van `audit_log`, `attendance_change_audit`, `manager_team_transfer_audit`, `mass_live_write_audit`, `cc_competition_match_override_audit_v1`, `cc_player_fee_audit_v2382` stb. A táblák jelenléte nem garantálja a minden írásra kiterjedő auditot.
+- Az `events`, `availability`, `players`, `teams`, `team_memberships` táblákon 1-1 aktív saját trigger mutatkozott (korábbi ellenőrzés szerint `updated_at`); a `mass_athletes`, `mass_bookings`, `mass_events` táblákon **0 saját aktív trigger**. Ez nem bizonyítja, hogy RPC-k/alkalmazás nem írnak auditot, de ellenőrizni kell.
+- 131 public/private függvény korábbi read-only katalógus-audit alapján; a függvények megléte nem egyenlő alkalmazás-paritással.
+
+**Következő DB auditkapuk:**
+1. Konkrét entitás-forrás mátrix: players/team_memberships/events/availability, mass_athletes/mass_events/mass_bookings, díjak/bérletek, versenyeredmények, értesítések. Kijelölni a kanonikus táblát és az ugyanazt reprezentáló legacy/copy/cache adatot, az utóbbiak kezelési tervével.
+2. Minden Manager/Player íróműveletnél audit lefedettség: tranzakciós oldalon actor/time/before/after/operation/source; szabályos soft-delete vagy tartós történet szükség esetén; hibás írás nem hagyhat félállapotot.
+3. FK/unique/check/index és RLS policy pozitív és negatív teszt, fontos szerepkörök és területi szűrések.
+4. Konkurens szerkesztés, idempotens retry és gyors RSVP váltások tesztelése; cache/realtime/refetch után mindkét app ugyanazt látja.
+5. Regresszióval és kétszeri 11 pontos QA-val lehet csak modulonként újraépítésre késznek minősíteni.
+
+**Ebben a körben sem történt DB DDL/DML, sem LIVE, sem Cloudflare Worker deploy.** Kizárólag read-only TEST audit és dokumentáció. A fő fókusz a DB koherencia, nem új infrastruktúra.
