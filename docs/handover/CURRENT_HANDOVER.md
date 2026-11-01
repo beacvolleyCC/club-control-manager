@@ -168,3 +168,15 @@ A felhasználó Cloudflare Workers & Pages listáról képernyőképet adott. A 
 5. Regresszióval és kétszeri 11 pontos QA-val lehet csak modulonként újraépítésre késznek minősíteni.
 
 **Ebben a körben sem történt DB DDL/DML, sem LIVE, sem Cloudflare Worker deploy.** Kizárólag read-only TEST audit és dokumentáció. A fő fókusz a DB koherencia, nem új infrastruktúra.
+
+
+## 2026-11-01 – DB-first entitás és FK audit (read-only)
+
+Közvetlenül lekérdezett TEST sémarészlet:
+- Versenysport: `players` → `auth.users`, `team_memberships` → `players,teams`, `events` → `teams`, `availability` → `events,players`: összesen ezen kapcsolatok idegen kulcsokkal igazoltak.
+- Tömegsport: `mass_athletes`, `mass_events`, `mass_bookings` külön forrástáblák, `mass_bookings.event_id` és `athlete_id` text mezőkkel. A fenti 3 tömegsportos tábla, valamint a `player_fees` és `mass_passes` táblák `pg_constraint` lekérdezésében **0 FK** található. Ez szerkezeti kontrollhiány lehet, de nincs kimutatott tényleges hibás sor, és semmilyen módosítást nem végeztünk.
+- `mass_athletes`, `mass_events`, `mass_bookings` import/legacy azonosítókat és `updated_at` mezőt hordoznak. Korábbi trigger-audit: nincsen saját automatikus updated_at/audit trigger ezekhez. Ellenőrizni kell, hogy az RPC-k írják-e a timestamps és audit mezőket.
+- `audit_log`: actor_user_id, action, entity_type, entity_id, old_data, new_data, created_at. `attendance_change_audit`: régi/új státusz, actor_email, changed_at. A naplózás lefedettsége továbbra sincs készre igazolva.
+- Bérlet/fizetés kapcsolódó táblák: `mass_passes`, `mass_pass_month_overrides_b43`, `mass_pass_validity_overrides`, `player_fees`, `cc_player_fee_meta_v2382`, `cc_player_fee_audit_v2382`; ezek kanonikus forrását és felülírás-szabályait még vizsgálni kell.
+
+**Döntés:** TILOS a meglévő mass táblákat egyszerűen összevonni a verseny táblákkal, új FK-t/trigger-t telepíteni vagy legacy adatot eltávolítani addig, amíg az adatkapcsolati és írási RPC-k kompatibilitása, tényleges anomáliák és kapcsolókulcsok nincsenek ellenőrizve. Következő read-only audit: mass_bookings orphan/duplikátum arány (személyes adatok listázása nélkül), jogosultságvédett write RPC-k módosítás-időbélyeg és audit garanciái; verseny RSVP és Manager read-after-write konzisztencia; fizetés/bérlet adatmodell. Ezután tervezhető biztonságos, tranzakciós, fokozatos javítás a TEST környezetben.
