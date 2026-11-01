@@ -255,7 +255,7 @@ export default {
    if(!await limited(env,ip,route,email))return fail('RATE_LIMITED',429,origin);
    if(!await verifyTurnstile(input.turnstileToken,ip,env))return fail('BOT_CHECK_FAILED',403,origin);
    const result=await perform(route,input,env);
-   return json({ok:true,...result,deliveryQueued:false},200,origin);
+   return json({ok:true,deliveryQueued:false,...result},200,origin);
   }catch(e){
    if(e.message==='EMAIL_SERVICE_DISABLED')return fail('EMAIL_SERVICE_DISABLED',503,origin);
    if(['INVALID_INPUT','EMAIL_NOT_VERIFIED','EMAIL_CODE_INVALID'].includes(e.message))
