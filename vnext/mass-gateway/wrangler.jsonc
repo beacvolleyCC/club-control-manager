@@ -4,6 +4,7 @@
   "main": "src/worker.mjs",
   "compatibility_date": "2026-11-01",
   "workers_dev": false,
+  "preview_urls": false,
   "vars": {
     "TEST_ONLY": "true",
     "SUPABASE_URL": "https://szzoubvhlwnojtzqjebc.supabase.co",
