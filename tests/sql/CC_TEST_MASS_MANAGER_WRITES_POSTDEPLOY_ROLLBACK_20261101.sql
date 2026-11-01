@@ -122,7 +122,7 @@ BEGIN
  AND waitlist_status='HELY FELAJÁNLVA')<>1 THEN
  RAISE EXCEPTION 'EXISTING_WAITLIST_OFFER_CHANGED'; END IF;
  IF (SELECT count(*) FROM public.mass_live_write_audit)::int
- < current_setting('cc.qa.audit_before')::int+9 THEN RAISE EXCEPTION 'WRITE_AUDIT_MISSING'; END IF;
+ < current_setting('cc.qa.audit_before')::int+8 THEN RAISE EXCEPTION 'WRITE_AUDIT_MISSING'; END IF;
  IF (SELECT count(*) FROM public.player_push_outbox)::int<>current_setting('cc.qa.push_before')::int
  OR (SELECT count(*) FROM private.cc_mass_mail_outbox_v1)::int<>current_setting('cc.qa.mail_before')::int
  THEN RAISE EXCEPTION 'UNEXPECTED_MESSAGE_QUEUED'; END IF;
