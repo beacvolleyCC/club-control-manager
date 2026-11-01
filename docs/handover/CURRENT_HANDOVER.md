@@ -270,3 +270,9 @@ A TEST DB `pg_get_functiondef` olvasásával a teljes `cc_player_bootstrap()` é
 5. A korábbi `cc_player_competition_user_schedule_v1` kizárólag importált versenymenetrend, nem a saját CC RSVP forrása.
 
 **Következő javasolt TEST-only változás:** előbb read-only lekérdezéssel megmérni hány játékost érint a jövőben kezdődő tagság vagy többes aktív csapattagság, majd izolált szintetikus regressziós tesztet készíteni és célzott, visszafelé kompatibilis bootstrap-javítást végrehajtani. Nem módosítottuk a TEST DB-t vagy LIVE-ot; új gateway továbbra is félretéve.
+
+## 2026-11-01 – Player csapattagság előellenőrzés és új SQL QA
+
+Közvetlen TEST DB read-only mérés: jelenleg érvényes csapattagsággal 19 játékos, jövőben kezdődő aktív tagsággal 0 játékos, egyszerre több érvényes aktív csapattal 0 játékos. A bootstrap SQL két korábbi elvi szűrési hibalehetősége jelen pillanatban nem érint kimutatható TEST játékost, de későbbi átigazolás vagy többes tagság esetén releváns.
+
+Új git fájl: `tests/sql/CC_TEST_PLAYER_MEMBERSHIP_VISIBILITY_PREFLIGHT_20261101.sql` (commit `49502eaed5e80fcc8e5373978fba1cf5d01d6061`), GitHub readback ellenőrizve. `BEGIN READ ONLY` / `ROLLBACK`; TEST sentinel + aggregált tagsági baseline + bootstrap létezés. A TEST Supabase-ben hiba nélkül lefuttattuk (üres output, NOTICE a connectorban nem jelenik meg). **Ez baseline ellenőrzés, nem szintetikus future/multi-team regresszió és nem adatmegőrzési E2E.** A következő lépés egy izolált regressziós teszt a kezdődátumra és többes csapattagságra, majd csak a TEST bootstrap célzott módosítása szükség szerint. LIVE és a Cloudflare gateway érintetlen.
