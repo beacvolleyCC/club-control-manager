@@ -134,3 +134,16 @@ A TEST ágon létrejött: `docs/handover/MASS_GATEWAY_DISABLED_UPLOAD_CHECKLIST_
 ## 2026-11-01 21:05 Budapest – Cloudflare dashboard képernyőképes ellenőrzés
 
 A felhasználó Cloudflare Workers & Pages listáról képernyőképet adott. A látható négy alkalmazás: `cc-manager-test-beac`, `cc-player-test-beac`, `beac-volleyball-web-preview`, `beac-edzesek`. A keresett **`cc-mass-gateway-test-beac` nem szerepel a listában** (4/4 látható), ezért **ezen a fióklistán nem létezik telepített/nyilvántartott külön gateway Worker**. A képernyőkép Manager sorában a legutóbbi dokumentációs commit, Player sorában RSVP tap refresh tesztcommit látható; ez nem igazolja a Player RSVP E2E-t. Következő felhasználói lépés: `Create application` oldal opcióinak megtekintése, **deploy/publish nélkül**; semmilyen automatikusan publikus starter Worker létrehozására ne kattintson visszavonhatatlanul. A külön disabled-version `wrangler versions upload` útvonal továbbra is elsődleges biztonságos opció. Nem történt Worker létrehozás, deploy, küldés vagy LIVE módosítás.
+
+
+## 2026-11-01 – ARCHITEKTÚRA DÖNTÉS: egyszerűség és DB-first újraépítés
+
+**Felhasználói döntés (elsődleges, felülírja a korábbi Worker telepítési tervet):** A már működő tömegsportos jelentkezési folyamatot ne váltsuk le új közvetítőre pusztán azért, mert az elkészült. Új infrastruktúrát csak bizonyított biztonsági, teljesítmény- vagy üzemeltetési előny esetén vezessünk be. **A külön Cloudflare mass gateway Worker feltöltése/telepítése/engedélyezése FÉLRETÉVE.** A forrás és tesztek megmaradnak opcionális tartaléknak. Ne kérd a felhasználótól a Cloudflare gateway létrehozását vagy API tokenek beállítását a következő körökben.
+
+**Aktuális fő cél:** a TEST Supabase DB és a stabil, jogosultságvédett API-k végleges előkészítése, hogy a Manager és Player funkciókat a korábbinál átláthatóbb, megbízhatóbb struktúrán modulonként újra lehessen építeni. A meglévő jól működő funkciókat őrizzük meg, ne kreáljunk új hibaforrásokat. LIVE változatlan, csak külön jóváhagyással.
+
+**Új, 2026-11-01-i közvetlen TEST DB read-only ellenőrzés:** public schema 116 függvény (37 cc_manager_, 18 cc_player_, 10 cc_vnext_); private schema 15 függvény (5 cc_manager_). Összesen **131**, ebből 42 manager, 18 player, 10 vnext prefixel. Ezek csak katalógusbeli darabszámok: **nem** bizonyítanak funkcionális paritást és nem bizonyítják a biztonsági QA teljesülését. A korábbi migrációs lista 2026-11-01-i négy bejegyzésig visszaellenőrizhető.
+
+**Következő feladat:** API/paritás leltár a meglévő Club Control Manager és Player moduljaihoz: funkció → táblák/relációk → read/write RPC-k → RLS szerepkörök → hiányok → automatizált+end-to-end teszt; prioritás szerint a kritikus jelentkezés, lemondás, várólista, jelenlét, naptár, csapattagság, jogosultság, pénzügy, értesítések, versenymenetrend és tabella. Előbb adatbázis-készenléti kapu, csak utána frontend újraépítés. Ne javasolj új infrastruktúrát igazolt hiány nélkül.
+
+**Továbbra is:** minden kör végén tényleges GitHub handover update és visszaolvasás; kétszeres QA és 11 pontos ellenőrzés.
