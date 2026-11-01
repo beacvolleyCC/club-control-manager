@@ -1,0 +1,26 @@
+name: TEST mass gateway security (no deploy)
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'vnext/mass-gateway/**'
+      - 'tests/mass-gateway-test-20261101.test.mjs'
+      - '.github/workflows/test-mass-gateway-security-20261101.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gateway:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate source syntax
+        run: node --check vnext/mass-gateway/src/worker.mjs
+      - name: Double-run gateway security tests using mock services only
+        run: |
+          node --test tests/mass-gateway-test-20261101.test.mjs
+          node --test tests/mass-gateway-test-20261101.test.mjs
