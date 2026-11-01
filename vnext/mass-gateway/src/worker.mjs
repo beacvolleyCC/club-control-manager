@@ -5,7 +5,9 @@ const RPCS=Object.freeze({
  book:'cc_vnext_mass_public_book_v1',
  wait:'cc_vnext_mass_public_wait_v1',
  cancel:'cc_vnext_mass_public_cancel_v1',
- decide:'cc_vnext_mass_public_decide_v1'
+ decide:'cc_vnext_mass_public_decide_v1',
+ emailStart:'cc_vnext_mass_email_start_v1',
+ emailVerify:'cc_vnext_mass_email_verify_v1'
 });
 const encoder=new TextEncoder();
 function json(data,status=200,origin=''){
@@ -44,6 +46,52 @@ function toBytes64url(v){
  const binary=atob(base+'='.repeat((4-base.length%4)%4));
  return Uint8Array.from(binary,c=>c.charCodeAt(0));
 }
+
+function base64url(bytes){
+ let binary='';for(const b of bytes)binary+=String.fromCharCode(b);
+ return btoa(binary).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
+}
+function otpCode(){
+ // Uniform 8-digit code via rejection sampling, not Math.random().
+ const bound=Math.floor(2**32/100000000)*100000000;
+ let v;do{v=crypto.getRandomValues(new Uint32Array(1))[0];}while(v>=bound);
+ return String(v%100000000).padStart(8,'0');
+}
+async function otpHash(email,code,env){
+ const key=await crypto.subtle.importKey('raw',encoder.encode(env.EMAIL_OTP_PEPPER),
+  {name:'HMAC',hash:'SHA-256'},false,['sign']);
+ const signed=new Uint8Array(await crypto.subtle.sign('HMAC',key,
+  encoder.encode('cc-mass-otp:'+email+':'+code)));
+ return 'sha256:'+Array.from(signed,x=>x.toString(16).padStart(2,'0')).join('');
+}
+async function issueProof(email,env){
+ const body=base64url(encoder.encode(JSON.stringify({
+  aud:'cc-mass-test',scope:'mass',email,exp:Date.now()+10*60*1000
+ })));
+ const key=await crypto.subtle.importKey('raw',encoder.encode(env.EMAIL_PROOF_SECRET),
+  {name:'HMAC',hash:'SHA-256'},false,['sign']);
+ const signature=new Uint8Array(await crypto.subtle.sign('HMAC',key,encoder.encode(body)));
+ return body+'.'+base64url(signature);
+}
+function otpReady(env,email){
+ return env.EMAIL_VERIFICATION_ENABLED==='true'&&env.EMAIL_DELIVERY_ENABLED==='true'&&
+  typeof env.EMAIL_OTP_PEPPER==='string'&&env.EMAIL_OTP_PEPPER.length>=32&&
+  typeof env.RESEND_TEST_API_KEY==='string'&&env.RESEND_TEST_API_KEY.startsWith('re_')&&
+  typeof env.TEST_EMAIL_FROM==='string'&&env.TEST_EMAIL_FROM.includes('@')&&
+  typeof env.TEST_ALLOWED_EMAIL==='string'&&email===env.TEST_ALLOWED_EMAIL.trim().toLowerCase();
+}
+async function sendTestOtp(email,code,env){
+ const response=await fetch('https://api.resend.com/emails',{
+  method:'POST',headers:{Authorization:'Bearer '+env.RESEND_TEST_API_KEY,
+  'Content-Type':'application/json'},
+  body:JSON.stringify({from:env.TEST_EMAIL_FROM,to:[email],
+  subject:'Club Control TEST – e-mail ellenőrzés',
+  text:'Az ellenőrző kód: '+code+'\\nA kód 5 percig érvényes. Nem éles foglalás.'}),
+  signal:AbortSignal.timeout(8000)
+ });
+ if(!response.ok)throw Error('MAIL_PROVIDER_REJECTED');
+}
+
 async function proofValid(proof,email,env){
  try{
   if(typeof proof!=='string'||proof.length>1800)return false;
@@ -109,6 +157,30 @@ async function limited(env,ip,route,email){
 }
 async function perform(route,data,env){
  switch(route){
+ case 'emailStart':{
+  if(!allowedFields(data,['turnstileToken','email']))throw Error('INVALID_INPUT');
+  const email=cleanEmail(data.email);
+  if(!email)throw Error('INVALID_INPUT');
+  if(!otpReady(env,email))throw Error('EMAIL_SERVICE_DISABLED');
+  const code=otpCode();
+  const result=await rpc('emailStart',{p_email:email,
+   p_code_hash:await otpHash(email,code,env)},env);
+  if(!result.accepted)return {data:{ok:true,accepted:false},deliveryQueued:false};
+  await sendTestOtp(email,code,env);
+  return {data:{ok:true,accepted:true},deliveryQueued:true};
+ }
+ case 'emailVerify':{
+  if(!allowedFields(data,['turnstileToken','email','code']))throw Error('INVALID_INPUT');
+  const email=cleanEmail(data.email);
+  if(!email||typeof data.code!=='string'||!/^[0-9]{8}$/.test(data.code))
+    throw Error('INVALID_INPUT');
+  if(!otpReady(env,email))throw Error('EMAIL_SERVICE_DISABLED');
+  const result=await rpc('emailVerify',{
+   p_email:email,p_code_hash:await otpHash(email,data.code,env)
+  },env);
+  if(result.verified!==true)throw Error('EMAIL_CODE_INVALID');
+  return {data:{ok:true,verified:true},emailProof:await issueProof(email,env)};
+ }
  case 'cancel':{
   if(!allowedFields(data,['turnstileToken','token'])||!validRawToken(data.token))throw Error('INVALID_INPUT');
   return {data:await rpc('cancel',{p_cancellation_hash:await hashText(data.token)},env)};
@@ -168,6 +240,8 @@ export default {
   if(env.PUBLIC_WRITES_ENABLED!=='true'||!configReady(env))return fail('GATEWAY_DISABLED',503,origin);
   const route=({
    '/api/mass/v1/book':'book','/api/mass/v1/wait':'wait',
+   '/api/mass/v1/email/start':'emailStart',
+   '/api/mass/v1/email/verify':'emailVerify',
    '/api/mass/v1/cancel':'cancel','/api/mass/v1/offer/decide':'decide'
   })[pathname];
   if(!route)return fail('NOT_FOUND',404,origin);
@@ -176,14 +250,15 @@ export default {
   if(!ip||ip.length>64)return fail('MISSING_CLIENT_IP',403,origin);
   let input;
   try{input=await readBody(request)}catch{return fail('INVALID_REQUEST',400,origin);}
-  const email=route==='book'||route==='wait'?cleanEmail(input.email):'';
+  const email=['book','wait','emailStart','emailVerify'].includes(route)?cleanEmail(input.email):'';
   try{
    if(!await limited(env,ip,route,email))return fail('RATE_LIMITED',429,origin);
    if(!await verifyTurnstile(input.turnstileToken,ip,env))return fail('BOT_CHECK_FAILED',403,origin);
    const result=await perform(route,input,env);
    return json({ok:true,...result,deliveryQueued:false},200,origin);
   }catch(e){
-   if(['INVALID_INPUT','EMAIL_NOT_VERIFIED'].includes(e.message))
+   if(e.message==='EMAIL_SERVICE_DISABLED')return fail('EMAIL_SERVICE_DISABLED',503,origin);
+   if(['INVALID_INPUT','EMAIL_NOT_VERIFIED','EMAIL_CODE_INVALID'].includes(e.message))
     return fail(e.message,422,origin);
    // Never return PostgREST exceptions, token values, secrets or PII.
    return fail('REQUEST_NOT_COMPLETED',409,origin);
