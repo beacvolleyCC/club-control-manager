@@ -288,3 +288,20 @@ test('incorrect 8-digit OTP is denied without minting an email proof',async()=>{
  assert.equal((await body(r)).code,'EMAIL_CODE_INVALID');
  }finally{restore();}
 });
+
+test('different cancellation capabilities have independent identity rate-limit keys',async()=>{
+ const keys=[];
+ const env=enabled();
+ env.IDENTITY_LIMITER={limit:async({key})=>{keys.push(key);return {success:true};}};
+ const restore=mockFetch(async url=>String(url).includes('siteverify')
+  ?turnstileOk():Response.json({ok:true,cancelled:true}));
+ try{
+  for(const token of ['a'.repeat(64),'b'.repeat(64)]){
+   const r=await handler.fetch(req('cancel',{turnstileToken:challenge,token}),env);
+   assert.equal(r.status,200);
+  }
+  assert.equal(keys.length,2);
+  assert.notEqual(keys[0],keys[1]);
+  assert.ok(keys.every(k=>!k.includes('a'.repeat(64))&&!k.includes('b'.repeat(64))));
+ }finally{restore();}
+});
