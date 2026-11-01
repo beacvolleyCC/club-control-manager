@@ -331,3 +331,22 @@ Felhasználói követelmény: a működő CC rendszerben már sok befizetés és
 Közvetlen read-only TEST Supabase 2026-11-02: **mind a nyolc** vizsgált pénzügyi tábla 0 sor: `player_fees`, `mass_passes`, `cc_player_fee_meta_v2382`, `cc_player_fee_audit_v2382`, `cc_club_finance_settings_v1`, `cc_team_finance_settings_v1`, `mass_pass_month_overrides_b43`, `mass_pass_validity_overrides`. **Ez NEM azt jelenti, hogy a LIVE pénzügyi adatok elvesztek; azokat nem ellenőriztük, és nem módosítottuk.** A TEST pénzügyi adatmigráció még nincs kész. A TEST-ben meglévő, de üres struktúrákat sem szabad éles adatokként kezelni.
 
 Következő kötelező lépések: (1) eredeti pénzügyi adatok pontos forrásainak és export/backup lehetőségeinek azonosítása; a LIVE környezet csak külön jóváhagyással vizsgálható, (2) Manager pénzügyi RPC szerződéseinek teljes lekérdezése és TEST read/write paritás, (3) megismételhető, idempotens és az eredeti kézi módosításokat előnyben részesítő TEST import, (4) tételes darabszám, rekordkulcs, státusz, befizetési összeg, időpont, bérletérvényesség és audit egyezőség, (5) jogosultság- és read-after-write QA, (6) csak ezután modulátállítás. **Nincs adatmásolás, törlés, felülírás, LIVE írás vagy Cloudflare Worker telepítés ebben a körben.**
+
+
+## 2026-11-02 – P0 pénzügyi API-k szerződésének teljes frontend-leltára
+
+A Manager TEST `app.js` közvetlen GitHub fájlolvasásából összesen **10 pénzügyi és bérletes RPC** található. A TEST Supabase `pg_proc` read-only ellenőrzése alapján jelenleg **egy** létezik: `cc_manager_mass_passes_v1`; a nyolc `cc_manager_finance_*` RPC és a `cc_manager_pass_catalog_v1` hiányzik.
+
+A frontend RPC hívások és bemeneti paraméterek:
+- `cc_manager_finance_matrix_v1(p_team_id,p_season)` → `financeData`, amely `players`, `fees`, `meta`, `settings` mezőket tartalmazó adatra számít.
+- `cc_manager_finance_audit_v1(p_limit=150)` → audit sorok tömbje.
+- `cc_manager_finance_reconcile_beac_v1(p_season)` → egyeztetés; hiányzó függvény esetén a frontend `null` fallbacket alkalmaz.
+- `cc_manager_finance_override_set_v1(p_player_id,p_fee_type,p_period_key,p_season,p_status,p_payment_method,p_amount_huf,p_paid_at,p_paid_to,p_note,p_override_active)` → kézi státusz/összeg/mód/időpont és admin-zárolás; mentés után a mátrix újratöltése.
+- `cc_manager_finance_settings_get_v2(p_team_id,p_season)` → v1 fallback: `cc_manager_finance_settings_get_v1(p_season)`.
+- `cc_manager_finance_settings_set_v2(p_team_id,p_season,p_payload)` → v1 fallback: `cc_manager_finance_settings_set_v1(p_season,p_payload)`; a válaszból `row` objektum használata.
+- `cc_manager_pass_catalog_v1()` → bérletkatalógus tömb, és frontend fallback.
+- `cc_manager_mass_passes_v1(p_query,p_month)` → meglévő tömegsportos bérletolvasó.
+
+**Kritikus adatok védelme:** a TEST pénzügyi táblák korábbi ellenőrzés szerint üresek, a korábbi LIVE rendszerben viszont a felhasználó szerint sok befizetés és bérlet van. A hiányzó API-k pótlása NEM válthat ki adatimportot, törlést, nullázást vagy automatikus BEAC-reconcile-t. Előbb forrásinventár, visszaállítható backup, üzleti szerződés és összehasonlító read-only teszt, utána fokozatos TEST migráció. LIVE olvasása is csak explicit egyeztetéssel, LIVE írás szigorúan külön engedéllyel. A mostani körben kizárólag TEST és GitHub read-only audit, plusz e handover szerkesztése történt.
+
+**Következő két lépés:** (1) a pénzügyi `app.js` teljes `financeMatrix/financeSettings` rendering-szerződésének dokumentálása és a TEST SQL read API előkészítése, (2) a meglévő éles pénzügyi forrás feltárásának és import-egyezőségi eljárásnak előkészítése, adatérintés nélkül.
