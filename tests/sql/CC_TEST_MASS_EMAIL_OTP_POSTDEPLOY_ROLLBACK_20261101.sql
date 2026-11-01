@@ -10,7 +10,7 @@ BEGIN
  IF EXISTS(SELECT 1 FROM private.cc_mass_email_otp_v1
  WHERE email='cc-otp-qa-20261101@example.invalid')
  THEN RAISE EXCEPTION 'MAIL_QA_FIXTURE_COLLISION'; END IF;
- FORWARD_LOOP: BEGIN
+
  IF has_function_privilege('anon','public.cc_vnext_mass_email_start_v1(text,text)','execute')
  OR has_function_privilege('authenticated','public.cc_vnext_mass_email_start_v1(text,text)','execute')
  OR NOT has_function_privilege('service_role','public.cc_vnext_mass_email_start_v1(text,text)','execute')
@@ -18,7 +18,7 @@ BEGIN
  OR has_function_privilege('authenticated','public.cc_vnext_mass_email_verify_v1(text,text)','execute')
  OR NOT has_function_privilege('service_role','public.cc_vnext_mass_email_verify_v1(text,text)','execute')
  THEN RAISE EXCEPTION 'OTP_FUNCTION_GRANT_LEAK'; END IF;
- END FORWARD_LOOP;
+
 END $guard$;
 SELECT set_config('cc.qa.mail_before',(SELECT count(*)::text FROM private.cc_mass_mail_outbox_v1),true);
 SELECT set_config('cc.qa.push_before',(SELECT count(*)::text FROM public.player_push_outbox),true);
