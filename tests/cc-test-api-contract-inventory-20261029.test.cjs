@@ -6,7 +6,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const root=path.join(__dirname,'..');
-const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs/architecture/CC_TEST_API_CONTRACT_INVENTORY_20261029.json'),'utf8'));
+const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs/architecture/CC_TEST_API_CONTRACT_INVENTORY_20261101.json'),'utf8'));
 const managerSource=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const sourceNames=[...new Set([...managerSource.matchAll(/cc_manager_[a-z0-9_]+/g)].map(m=>m[0]))].sort();
 const unique=list=>new Set(list).size===list.length;
@@ -52,8 +52,12 @@ test('every captured public table had RLS enabled at audit time',()=>{
  assert.ok(unique(manifest.public_tables.map(x=>x.table)));
  assert.equal(manifest.public_tables.every(x=>x.rls_enabled===true),true);
 });
-test('module rebuild remains blocked on real E2E login and date-bounded membership security',()=>{
- assert.equal(manifest.release_blockers.some(x=>x.includes('#81')),true);
+test('Nov 1 contract inventory preserves completed #81 and remaining release blockers',()=>{
+ assert.equal(manifest.audit_date,'2026-11-01');
+ assert.match(manifest.validation_status.manager_issue_81,/corrected and closed/);
  assert.equal(manifest.release_blockers.some(x=>x.includes('#31')),true);
  assert.equal(manifest.release_blockers.some(x=>x.includes('Cloudflare')),true);
+ assert.equal(manifest.validation_status.test_public_tables,manifest.public_tables.length);
+ assert.equal(manifest.validation_status.test_public_cc_functions,manifest.database_public_apis.length);
+ assert.equal(manifest.source_tokens.manager.some(x=>x.name==='cc_manager_competition_note_clear_v1'&&x.db_callable),true);
 });
