@@ -10,13 +10,18 @@
     "ALLOWED_ORIGIN": "https://cc-player-test-beac.elteroplabda.workers.dev",
     "TURNSTILE_EXPECTED_HOSTNAME": "cc-player-test-beac.elteroplabda.workers.dev",
     "PUBLIC_WRITES_ENABLED": "false",
-    "EMAIL_VERIFICATION_ENABLED": "false"
+    "EMAIL_VERIFICATION_ENABLED": "false",
+    "EMAIL_DELIVERY_ENABLED": "false"
   },
   "secrets": {
     "required": [
       "SUPABASE_TEST_SECRET_KEY",
       "TURNSTILE_SECRET",
-      "EMAIL_PROOF_SECRET"
+      "EMAIL_PROOF_SECRET",
+      "EMAIL_OTP_PEPPER",
+      "RESEND_TEST_API_KEY",
+      "TEST_EMAIL_FROM",
+      "TEST_ALLOWED_EMAIL"
     ]
   },
   "ratelimits": [
