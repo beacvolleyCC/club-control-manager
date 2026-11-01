@@ -101,6 +101,45 @@ BEGIN
  EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
 END $series_cancel$;
 RESET ROLE;
+
+-- Restrict THIS test manager to BB2; other-team writes must fail.
+UPDATE public.manager_module_permissions
+SET team_id=current_setting('cc.qa.team')::uuid
+WHERE manager_id=(SELECT id FROM public.manager_accounts
+ WHERE auth_user_id=current_setting('cc.qa.manager_uid')::uuid)
+AND module_key IN ('competition.trainings','competition.matches') AND can_edit;
+SET LOCAL ROLE authenticated;
+DO $cross_team$
+BEGIN
+ BEGIN
+   PERFORM public.cc_manager_competition_event_save_v1(NULL,jsonb_build_object(
+     'teamId',current_setting('cc.qa.other'),'eventType','training',
+     'startsAt',(now()+interval '5 days')::text,'title','DENIED other team'),false);
+   RAISE EXCEPTION 'CROSS_TEAM_CREATE_ALLOWED';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+ END;
+ BEGIN
+   PERFORM public.cc_manager_competition_event_series_create_v1(jsonb_build_array(
+    jsonb_build_object('teamId',current_setting('cc.qa.other'),
+      'eventType','training','startsAt',(now()+interval '5 days')::text)),false);
+   RAISE EXCEPTION 'CROSS_TEAM_SERIES_ALLOWED';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+ END;
+END $cross_team$;
+RESET ROLE;
+SELECT set_config('request.jwt.claim.sub','',true);
+SELECT set_config('request.jwt.claims','',true);
+SET LOCAL ROLE authenticated;
+DO $no_session$
+BEGIN
+ BEGIN
+   PERFORM public.cc_manager_competition_event_save_v1(NULL,'{}'::jsonb,false);
+   RAISE EXCEPTION 'NO_SESSION_WRITE_ALLOWED';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+         WHEN invalid_parameter_value THEN RAISE EXCEPTION 'AUTH_NOT_CHECKED_BEFORE_PAYLOAD';
+ END;
+END $no_session$;
+RESET ROLE;
 DO $integrity$
 BEGIN
  IF (SELECT count(*) FROM public.events)::integer<>current_setting('cc.qa.events_before')::integer+3
