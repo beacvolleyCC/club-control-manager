@@ -112,7 +112,7 @@ BEGIN
  ) VALUES(v_booking_id,e.source_workbook_id,now(),e.id,v_name,v_email,nullif(v_pass,''),
   CASE WHEN upper(coalesce(e.session_type,''))='SPORT7' THEN 'SPORT7' ELSE 'ÚJ WEB' END,
   v_pass_status,'AKTÍV','NINCS RÖGZÍTVE',
-  v_start-coalesce(e.cancellation_hours,0)*interval '1 hour',
+  v_start-coalesce(e.cancellation_hours,0)::double precision*interval '1 hour',
   nullif(p_person->>'note',''),p_cancellation_hash,'ÚJ','CC-TEST-VNEXT',now());
  INSERT INTO public.mass_live_write_audit(source_workbook_id,operation,entity_type,entity_id,actor,payload)
  VALUES(e.source_workbook_id,'test.public_book','mass_booking',v_booking_id,'trusted-gateway',
@@ -147,6 +147,14 @@ BEGIN
  IF (upper(coalesce(e.session_type,''))='SPORT7' AND upper(v_pass)<>'SPORT7')
  OR (upper(coalesce(e.session_type,''))<>'SPORT7' AND upper(v_pass)='SPORT7')
  THEN RAISE EXCEPTION 'PUBLIC_WAIT_MODE_MISMATCH' USING ERRCODE='22023'; END IF;
+ IF upper(v_pass)='ELSŐ EDZÉS' AND (
+  EXISTS(SELECT 1 FROM public.mass_athletes a WHERE a.source_workbook_id=e.source_workbook_id
+   AND lower(coalesce(a.email,''))=v_email AND a.first_training_date IS NOT NULL)
+  OR EXISTS(SELECT 1 FROM public.mass_bookings b WHERE b.source_workbook_id=e.source_workbook_id
+   AND lower(coalesce(b.email,''))=v_email
+   AND (upper(coalesce(b.pass_number,''))='ELSŐ EDZÉS' OR upper(coalesce(b.pass_status,''))='ELSŐ EDZÉS')
+   AND (b.booking_status='AKTÍV' OR b.attendance='MEGJELENT'))
+ ) THEN RAISE EXCEPTION 'PUBLIC_WAIT_FIRST_TRAINING_USED' USING ERRCODE='22023'; END IF;
  IF EXISTS(SELECT 1 FROM public.mass_bookings b WHERE b.source_workbook_id=e.source_workbook_id
  AND b.event_id=e.id AND lower(coalesce(b.email,''))=v_email AND b.booking_status='AKTÍV')
  OR EXISTS(SELECT 1 FROM public.mass_waitlist w WHERE w.source_workbook_id=e.source_workbook_id
@@ -179,14 +187,15 @@ BEGIN
  WHERE w.source_workbook_id=e.source_workbook_id AND w.event_id=e.id
  AND w.waitlist_status='HELY FELAJÁNLVA' AND w.offer_expires_at>now();
  v_only:=lower(coalesce(e.legacy_row->>'managerWaitlistOnly','false')) IN ('true','1','yes','igen');
- IF NOT v_only AND v_total+v_reserved<greatest(coalesce(e.capacity,0),0)
+ IF NOT v_only AND v_wait=0 AND v_total+v_reserved<greatest(coalesce(e.capacity,0),0)
  AND v_new+v_reserved<greatest(coalesce(nullif(e.new_limit,0),e.capacity,0),0)
  THEN RAISE EXCEPTION 'PUBLIC_WAIT_CAPACITY_AVAILABLE' USING ERRCODE='22023'; END IF;
  v_wait_id:='CC-TEST-WAIT-'||gen_random_uuid()::text;
  INSERT INTO public.mass_waitlist(id,source_workbook_id,submitted_at,event_id,name,email,
   pass_number,pass_status,waitlist_status,note,migration_run_id,updated_at)
  VALUES(v_wait_id,e.source_workbook_id,now(),e.id,v_name,v_email,nullif(v_pass,''),
-  'ELLENŐRZÉSRE VÁR','VÁRAKOZIK',nullif(p_person->>'note',''),'CC-TEST-VNEXT',now());
+  CASE WHEN upper(v_pass)='ELSŐ EDZÉS' THEN 'ELSŐ EDZÉS' ELSE 'ELLENŐRZÉSRE VÁR' END,
+  'VÁRAKOZIK',nullif(p_person->>'note',''),'CC-TEST-VNEXT',now());
  INSERT INTO public.mass_live_write_audit(source_workbook_id,operation,entity_type,entity_id,actor,payload)
  VALUES(e.source_workbook_id,'test.public_wait','mass_waitlist',v_wait_id,'trusted-gateway',
  jsonb_build_object('eventId',e.id,'mailQueued',false));
@@ -213,8 +222,8 @@ BEGIN
  IF NOT FOUND OR v_b.cancellation_token<>p_cancellation_hash OR v_b.booking_status<>'AKTÍV'
  THEN RAISE EXCEPTION 'CANCEL_TOKEN_INVALID_OR_USED' USING ERRCODE='22023'; END IF;
  v_deadline:=coalesce(v_b.cancellation_deadline,
-  (e.event_date+e.start_time) AT TIME ZONE 'Europe/Budapest'
-  - coalesce(e.cancellation_hours,0)*interval '1 hour');
+  ((e.event_date+e.start_time) AT TIME ZONE 'Europe/Budapest')
+  - coalesce(e.cancellation_hours,0)::double precision*interval '1 hour');
  v_late:=now()>v_deadline;
  UPDATE public.mass_bookings SET booking_status=CASE WHEN v_late THEN 'KÉSŐN LEMONDVA' ELSE 'LEMONDVA' END,
  cancelled_at=now(),cancellation_type=CASE WHEN v_late THEN 'KÉSŐI' ELSE 'IDŐBEN' END,
@@ -276,6 +285,11 @@ BEGIN
  AND b.event_id=e.id AND lower(coalesce(b.email,''))=lower(coalesce(w.email,''))
  AND b.booking_status='AKTÍV')
  THEN RAISE EXCEPTION 'OFFER_ACCEPT_ALREADY_BOOKED' USING ERRCODE='23505'; END IF;
+ IF upper(coalesce(w.pass_number,'')) NOT IN ('','ELSŐ EDZÉS') AND EXISTS(
+  SELECT 1 FROM public.mass_bookings b WHERE b.source_workbook_id=e.source_workbook_id
+   AND b.event_id=e.id AND upper(coalesce(b.pass_number,''))=upper(w.pass_number)
+   AND b.booking_status='AKTÍV')
+ THEN RAISE EXCEPTION 'OFFER_ACCEPT_DUPLICATE_PASS' USING ERRCODE='23505'; END IF;
  IF EXISTS(SELECT 1 FROM public.mass_bookings b JOIN public.mass_events other
  ON other.source_workbook_id=b.source_workbook_id AND other.id=b.event_id
  WHERE b.source_workbook_id=e.source_workbook_id AND b.event_id<>e.id
@@ -301,7 +315,7 @@ BEGIN
  note,cancellation_token,capacity_bucket,migration_run_id,updated_at)
  VALUES(v_booking_id,e.source_workbook_id,now(),e.id,w.name,lower(w.email),w.pass_number,
  'VÁRÓLISTA',coalesce(w.pass_status,'ELLENŐRZÉSRE VÁR'),'AKTÍV',
- 'NINCS RÖGZÍTVE',v_start-coalesce(e.cancellation_hours,0)*interval '1 hour',
+ 'NINCS RÖGZÍTVE',v_start-coalesce(e.cancellation_hours,0)::double precision*interval '1 hour',
  nullif(w.note,''),p_cancellation_hash,'ÚJ','CC-TEST-VNEXT',now());
  UPDATE public.mass_waitlist SET waitlist_status='ELFOGADVA',token_hash='USED:'||p_offer_hash,
  updated_at=now() WHERE id=w.id;
