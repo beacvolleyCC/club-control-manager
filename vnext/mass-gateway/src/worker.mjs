@@ -206,7 +206,9 @@ async function perform(route,data,env){
     throw Error('INVALID_INPUT');
   const email=cleanEmail(data.email);
   if(!email)throw Error('INVALID_INPUT');
-  if(env.EMAIL_VERIFICATION_ENABLED!=='true'||!(await proofValid(data.emailProof,email,env)))
+  // Prevent booking while mailbox proof issuing/delivery is disabled,
+  // including if an older signed proof has not yet expired.
+  if(!otpReady(env,email)||!(await proofValid(data.emailProof,email,env)))
    throw Error('EMAIL_NOT_VERIFIED');
   const person={name:data.name.trim(),email,passNumber:data.passNumber||'',note:data.note||''};
   if(route==='book'){
