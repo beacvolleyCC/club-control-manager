@@ -257,3 +257,16 @@ KÖVETKEZTETÉS: a tömegsport Manager read/write ugyanazon kanonikus táblákra
 **Architektúrális feltétel:** külön kell választani a *saját, módosítható események + RSVP* kanonikus tábláit (`events` + `availability`) és az *importált külső versenymenetrend* forrását. A Player minden RSVP-t a kanonikus `availability` táblából / az abból épített jogosultságvédett API-ból olvasson; az importált menetrendet csak forrásazonosító/illesztés alapján szabad a saját eseményhez kötni, nem szabad vakon összemosni vagy felülírni. A Manager→Player statikus közös tábla kapcsolódás igazolható, de tényleges read-after-write E2E és cache/refetch még hiányzik.
 
 A vizsgálat read-only volt, LIVE/Worker változatlan.
+
+
+## 2026-11-01 – Player bootstrap teljes függvényvizsgálat: két konkrét hiány
+
+A TEST DB `pg_get_functiondef` olvasásával a teljes `cc_player_bootstrap()` és `cc_player_bootstrap_filtered_v1()` SQL-t ellenőriztük.
+
+1. `cc_player_bootstrap()` a saját `public.availability` állapotot és a roster alapján `yes/no/unknown` listákat állít elő `public.events` + `availability` táblákból. A Manager `cc_manager_competition_rsvp_v1` is `availability`-t írja: statikus egységes forrás IGAZOLT, E2E még nem.
+2. **Csapattag-szűrési hiba lehetősége:** a bootstrap csapatválasztása csak `tm.active`, `t.active`, `tm.ends_on IS NULL OR tm.ends_on >= current_date` feltételeket nézi, de **nem ellenőrzi `tm.starts_on <= current_date`-t**. Jövőbeli csapatváltásnál előre kiválaszthatja a későbbi csapatot.
+3. A bootstrap `ORDER BY tm.starts_on DESC LIMIT 1` révén **pontosan egy csapatot** választ, és `e.team_id=v_team.id` szerint listáz. Több, párhuzamosan aktív csapathoz jogosult játékosnál jogos események hiányozhatnak. A mostani termékpolitikával egyeztetett, csapatválasztó vagy többcsapatos megjelenítés szükséges; automatikus összevonás nélkül.
+4. `cc_player_bootstrap_filtered_v1` wrapper a `cc_player_bootstrap()` eredményéből szűri a tesztjelölésű neveket és roster tagokat. Az `events` elemeket átadja, csak a `yesNames/noNames/unknownNames` tömböket szűri; nem másodlagos RSVP forrás.
+5. A korábbi `cc_player_competition_user_schedule_v1` kizárólag importált versenymenetrend, nem a saját CC RSVP forrása.
+
+**Következő javasolt TEST-only változás:** előbb read-only lekérdezéssel megmérni hány játékost érint a jövőben kezdődő tagság vagy többes aktív csapattagság, majd izolált szintetikus regressziós tesztet készíteni és célzott, visszafelé kompatibilis bootstrap-javítást végrehajtani. Nem módosítottuk a TEST DB-t vagy LIVE-ot; új gateway továbbra is félretéve.
