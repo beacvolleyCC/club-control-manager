@@ -253,8 +253,13 @@ export default {
   let input;
   try{input=await readBody(request)}catch{return fail('INVALID_REQUEST',400,origin);}
   const email=['book','wait','emailStart','emailVerify'].includes(route)?cleanEmail(input.email):'';
+  // A token-based request gets its own hashed identity limit; never put
+  // all cancellations/offer decisions into one shared "none" bucket.
+  const identity=email||(
+   route==='cancel'&&validRawToken(input.token)?input.token:
+   route==='decide'&&validRawToken(input.offerToken)?input.offerToken:ip);
   try{
-   if(!await limited(env,ip,route,email))return fail('RATE_LIMITED',429,origin);
+   if(!await limited(env,ip,route,identity))return fail('RATE_LIMITED',429,origin);
    if(!await verifyTurnstile(input.turnstileToken,ip,env))return fail('BOT_CHECK_FAILED',403,origin);
    const result=await perform(route,input,env);
    return json({ok:true,deliveryQueued:false,...result},200,origin);
