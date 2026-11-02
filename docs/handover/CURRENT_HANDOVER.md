@@ -410,3 +410,7 @@ Hozzáadva `tests/sql/CC_TEST_FINANCE_E2E_READINESS_20261102.sql` (`0485a3e07f3b
 ## 2026-11-02 – TEST Manager finance E2E acceptance gate created
 
 Új tesztterv: `docs/qa/FINANCE_MANAGER_E2E_TEST_PLAN_20261102.md`, commit `ab08673cbad463e7e17300017fc60068753cfba6`, GitHub readback verified. Elkülönített TEST játékos és hitelesített TEST Manager session kell a tényleges create/read/update/audit/permission/idempotency/concurrency/cleanup tesztekhez. A terv ezeket tételesen dokumentálja, és megakadályozza, hogy statikus read-only QA alapján tévesen E2E-késznek jelöljük. Nincs LIVE módosítás, nem történt pénzügyi DML. Modul-újraírás előtt az üzleti folyamatok E2E és adatkonszisztencia ellenőrzései továbbra is szükségesek.
+
+## 2026-11-02 – TEST finance anonymous runtime negative checks
+
+A TEST Supabase `szzoubvhlwnojtzqjebc` adatbázisban `SET LOCAL ROLE anon` mellett három pénzügyi RPC hívási kísérlet ellenőrzése: `cc_manager_finance_override_set_v1` (nem létező teszt player ID), `cc_manager_finance_audit_v1(10)` és `cc_manager_finance_matrix_v1(NULL,'2026/27')`. Mindhárom `insufficient_privilege` miatt elutasítva, az ellenőrző blokkok sikeresek. Utólagos count: 0 finance override, 0 audit, 19 aktív TEST játékos. Fontos: ez adatbázis-szerepkör próba, **nem** teljes böngészős/authenticated Manager E2E. Éles rendszer érintetlen. Következő: valódi, elkülönített TEST játékos és hitelesített Manager-session mentés/olvasás/audit tesztje; addig nem szabad E2E késznek minősíteni.
