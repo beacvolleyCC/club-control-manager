@@ -406,3 +406,7 @@ A `cc_manager_finance_override_set_v1` TEST-only függvényben a SQL háromért�
 ## 2026-11-02 – TEST finance E2E readiness inventory
 
 Hozzáadva `tests/sql/CC_TEST_FINANCE_E2E_READINESS_20261102.sql` (`0485a3e07f3b810edc18980a69a7eb6d6076a3da`) read-only, kétszer tesztelt TEST Supabase ellenőrzés. Mindkét futás: 19 aktív TEST játékos, 1 aktív Manager-fiók, 0 pénzügyi override sor és 0 audit sor. `cc_manager_finance_matrix_v1(p_team_id uuid,p_season text)` és `cc_manager_finance_audit_v1(p_limit integer)` signature megfelel; három ellenőrzött RPC anon tiltása és override write RPC jelenléte igaz. Valódi Manager-auth E2E **még nincs elvégezve**, nem szabad egy tényleges játékoshoz tartozó pénzügyi rekordot ellenőrizetlenül létrehozni. Következő: dedikált TEST játékos + jogosult TEST Manager-session mellett create/update/read/audit, majd rollback/cleanup, duplikáció ellenőrzése. LIVE nem változott.
+
+## 2026-11-02 – TEST Manager finance E2E acceptance gate created
+
+Új tesztterv: `docs/qa/FINANCE_MANAGER_E2E_TEST_PLAN_20261102.md`, commit `ab08673cbad463e7e17300017fc60068753cfba6`, GitHub readback verified. Elkülönített TEST játékos és hitelesített TEST Manager session kell a tényleges create/read/update/audit/permission/idempotency/concurrency/cleanup tesztekhez. A terv ezeket tételesen dokumentálja, és megakadályozza, hogy statikus read-only QA alapján tévesen E2E-késznek jelöljük. Nincs LIVE módosítás, nem történt pénzügyi DML. Modul-újraírás előtt az üzleti folyamatok E2E és adatkonszisztencia ellenőrzései továbbra is szükségesek.
