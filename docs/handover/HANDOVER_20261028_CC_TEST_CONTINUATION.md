@@ -131,3 +131,11 @@ Folytassuk a BEAC Club Control fejlesztését. Előbb olvasd el a Manager TEST �
 
 ---
 **Az összes darabszám és SHA 2026-10-28-i ellenőrzött pillanatkép; mindig olvasd újra a friss adatokat.**
+
+
+## 2026-11-02 kiegészítés – LIVE tapasztalat és TEST feladat
+- Az októberi bérletek 2026-11-02–05 között a vasárnapi alkalmak kivételével átmenetileg elfogadandók. Az ismeretlen, még nem importált bérletszám jelentkezéskor ellenőrzésre váró lehet, nem automatikus tiltás.
+- A 2026-11-02 20:00 Haladó (`20261102-HA-01`) LIVE jelentkezése 18:00 után `BOOKING_CLOSED_2H` miatt „Technikai hiba” üzenetre futott. A felhasználó kifejezett kérésére **csak ennél az egy eseménynél** a 2 órás cutoff LIVE-kivételt kapott; a felhasználó utóbb visszaigazolta, hogy a jelentkezés működik. A többi edzés és az esemény kezdete utáni tiltás változatlan.
+- Új Manager GitHub **Issue #84**: https://github.com/beacvolleyCC/club-control-manager/issues/84 – a TEST publikus jelentkezési UI 2 órás határidőnél a jelentkezés lezárását és értelmes hibaüzenetet mutasson, a várólista csak jogosult konfigurációban legyen elérhető. A TEST-ben a `mass_waitlist` tábla létezik; a publikus API és frontend paritása nincs bizonyítva. Ez **terv, még nem implementált javítás**.
+- A Player TEST kódban a profil/fizetés 45 másodperces láthatóságfüggő pollinggal, az RSVP/menetrend pedig privát csatornás broadcast-fogadással működne. A TEST `supabase_realtime` publikációjában nem volt tábla és az events/availability táblákon nem volt broadcast trigger; teljes Manager→Player automatikus élőfrissítés még **nem igazolt**. A jogosultsági szabályok ellenőrzése nélkül ne aktiváld.
+- LIVE-on az itt leírt kivételen túl semmit ne módosíts külön engedély nélkül. Következő lépés: Issue #84 TEST implementációjának és a Realtime-jogosultsági architektúrának ellenőrzése, két kör QA-val.
