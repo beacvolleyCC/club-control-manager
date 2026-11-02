@@ -4706,6 +4706,24 @@
 
   function renderView(){renderModule();document.title=`${moduleMeta()?.[1]||'Manager'} – Club Control Manager`;ccScheduleTeamSelectorDecorate_();requestAnimationFrame(ccForceRootHorizontalZero_)}
 
+  // TEST: keep competition training/RSVP views in sync with changes made in Player.
+  let ccCompetitionSyncBusy_=false;
+  async function ccCompetitionSyncVisible_(){
+    if(document.hidden||!state.session||ccCompetitionSyncBusy_||state.area!=='competition'||!['overview','trainings'].includes(state.module)||document.querySelector('dialog[open]'))return;
+    ccCompetitionSyncBusy_=true;
+    const previous=JSON.stringify(state.rsvpMatrix);
+    try{
+      await Promise.all([loadRsvpMatrix(),loadActivityEvents()]);
+      if(document.hidden||state.area!=='competition'||!['overview','trainings'].includes(state.module))return;
+      // Avoid replacing an actively edited panel, and rerender only on RSVP change.
+      if(previous!==JSON.stringify(state.rsvpMatrix)&&!document.querySelector('dialog[open]'))renderView();
+    }catch(err){console.warn('TEST competition sync failed:',err)}
+    finally{ccCompetitionSyncBusy_=false}
+  }
+  window.setInterval(()=>{void ccCompetitionSyncVisible_()},45000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void ccCompetitionSyncVisible_()});
+  window.addEventListener('focus',()=>{void ccCompetitionSyncVisible_()});
+
   async function refresh(){if(!configured()){status('Manager PWA konfigurációs hiba.','error');return}try{await loadLiveData()}catch(_){}}
   function bindStaticUi(){
     ccInstallTeamSelectorDecorator_();
