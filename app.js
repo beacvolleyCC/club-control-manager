@@ -4561,12 +4561,19 @@
     try{
       const next=await rpc('cc_manager_finance_matrix_v1',{p_team_id:state.financeTeam||null,p_season:cfg.DEFAULT_SEASON});
       if(!ccSectionIs_('finance'))return;
-      if(JSON.stringify(next)!==JSON.stringify(state.financeData)){
+      const matrixChanged=JSON.stringify(next)!==JSON.stringify(state.financeData);
+      let auditChanged=false;
+      if(state.financeTab==='audit'){
+        const audit=await rpc('cc_manager_finance_audit_v1',{p_limit:150});
+        const nextAudit=Array.isArray(audit)?audit:[];
+        auditChanged=JSON.stringify(nextAudit)!==JSON.stringify(state.financeAudit);
+        if(auditChanged)state.financeAudit=nextAudit;
+      }
+      if(matrixChanged){
         state.financeData=next;
         state.financeSettings=next?.settings||state.financeSettings;
-        if(state.financeTab==='audit')await loadFinanceAudit_();
-        renderFinance();
       }
+      if(matrixChanged||auditChanged)renderFinance();
     }catch(err){console.warn('TEST finance background refresh failed:',err)}
     finally{ccFinanceSyncBusy_=false}
   }
