@@ -4711,12 +4711,13 @@
   async function ccCompetitionSyncVisible_(){
     if(document.hidden||!state.session||ccCompetitionSyncBusy_||state.area!=='competition'||!['overview','trainings'].includes(state.module)||document.querySelector('dialog[open]'))return;
     ccCompetitionSyncBusy_=true;
-    const previous=JSON.stringify(state.rsvpMatrix);
+    const previousMatrix=JSON.stringify(state.rsvpMatrix);
+    const previousEvents=JSON.stringify(state.activityEvents);
     try{
       await Promise.all([loadRsvpMatrix(),loadActivityEvents()]);
       if(document.hidden||state.area!=='competition'||!['overview','trainings'].includes(state.module))return;
-      // Avoid replacing an actively edited panel, and rerender only on RSVP change.
-      if(previous!==JSON.stringify(state.rsvpMatrix)&&!document.querySelector('dialog[open]'))renderView();
+      // Refresh for changed RSVP or training details; never overwrite an open editor.
+      if((previousMatrix!==JSON.stringify(state.rsvpMatrix)||previousEvents!==JSON.stringify(state.activityEvents))&&!document.querySelector('dialog[open]'))renderView();
     }catch(err){console.warn('TEST competition sync failed:',err)}
     finally{ccCompetitionSyncBusy_=false}
   }
