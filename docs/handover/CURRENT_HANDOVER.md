@@ -398,3 +398,7 @@ A felhasználó kifejezetten visszatért a TEST munkához; LIVE-hoz nem nyúltun
 ## 2026-11-02 – TEST finance override NULL input hardening
 
 A `cc_manager_finance_override_set_v1` TEST-only függvényben a SQL háromértékű logika miatt `p_fee_type NULL` és `p_status NULL` korábban nem esett a `NOT IN` validációs elutasító ágába. Sikeres TEST migráció `cc_test_finance_override_reject_null_enums_20261102`: mindkettőre explicit `IS NULL` vizsgálat került a meglévő `NOT IN` elé. Két egymástól független `pg_get_functiondef` readback igazolta a két új ellenőrzés és az audit insert meglétét. A változás csak függvénydefiníció, nem módosít pénzügyi sorokat. Hitelesített Manager E2E és rollback audit teszt továbbra is hátravan. LIVE érintetlen.
+
+## 2026-11-02 – TEST pénzügyi adatmegőrzési előfeltételek ellenőrizve
+
+Új read-only QA: `tests/sql/CC_TEST_FINANCE_DATA_INTEGRITY_20261102.sql` (commit `b2b3abb785f49cbeffdc6af76da8bf58dda13dd0`). TEST futás: 3/3 igaz – `cc_player_fee_meta_v2382` egyedi négymezős upsert indexe megvan (`player_id,fee_type,period_key,season`); pénzügyi beállítások audittriggerei aktívak; override RPC explicit NULL input elutasítás és audit insert látható. Az egyedi kulcs **unique index**, nem külön unique constraint, ezért a `pg_constraint`-lekérdezés 0 értéke félrevezető volt. TEST `cc_player_fee_meta_v2382` és `cc_player_fee_audit_v2382` 0 sor, nem történt pénzügyi DML. Hátravan valódi hitelesített Manager mentés/E2E, rollback, jogosultsági ellenőrzés szerepkörrel, reconcile és import paritás. LIVE érintetlen.
