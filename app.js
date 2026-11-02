@@ -4553,6 +4553,27 @@
     catch(err){const msg=text(err?.message||err);if(/cc_manager_finance_reconcile_beac_v1|does not exist|schema cache/i.test(msg))return null;console.warn('BEAC pénzügyi egyeztetés sikertelen:',err);return null}
   }
   async function loadFinanceData_(teamId=state.financeTeam||null){state.financeLoading=true;try{await ccFinanceReconcileBeac_();state.financeData=await rpc('cc_manager_finance_matrix_v1',{p_team_id:teamId||null,p_season:cfg.DEFAULT_SEASON});state.financeSettings=state.financeData?.settings||state.financeSettings}catch(err){state.financeData={error:text(err?.message||err),players:[],fees:[],meta:[]};throw err}finally{state.financeLoading=false}}
+  // TEST: sync visible finance view across independent Manager sessions without additional writes.
+  let ccFinanceSyncBusy_=false;
+  async function ccFinanceSyncVisible_(){
+    if(document.hidden||!state.session||!ccSectionIs_('finance')||state.financeLoading||ccFinanceSyncBusy_||document.querySelector('#entityDialog[open]'))return;
+    ccFinanceSyncBusy_=true;
+    try{
+      const next=await rpc('cc_manager_finance_matrix_v1',{p_team_id:state.financeTeam||null,p_season:cfg.DEFAULT_SEASON});
+      if(!ccSectionIs_('finance'))return;
+      if(JSON.stringify(next)!==JSON.stringify(state.financeData)){
+        state.financeData=next;
+        state.financeSettings=next?.settings||state.financeSettings;
+        if(state.financeTab==='audit')await loadFinanceAudit_();
+        renderFinance();
+      }
+    }catch(err){console.warn('TEST finance background refresh failed:',err)}
+    finally{ccFinanceSyncBusy_=false}
+  }
+  window.setInterval(()=>{void ccFinanceSyncVisible_()},30000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void ccFinanceSyncVisible_()});
+  window.addEventListener('focus',()=>{void ccFinanceSyncVisible_()});
+
   async function loadFinanceAudit_(){const d=await rpc('cc_manager_finance_audit_v1',{p_limit:150});state.financeAudit=Array.isArray(d)?d:[]}
   async function loadFinanceSettings_(teamId=state.financeSettingsTeam||state.financeTeam||''){
     try{state.financeSettings=await rpc('cc_manager_finance_settings_get_v2',{p_team_id:teamId||null,p_season:cfg.DEFAULT_SEASON})}
