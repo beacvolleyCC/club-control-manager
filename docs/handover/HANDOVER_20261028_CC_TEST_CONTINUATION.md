@@ -178,3 +178,27 @@ TEST Supabase-ben `public.cc_mass_registration_status_test_v1(text)` csak `CC-QA
 
 ### 2026-11-03 – várólista késői csatlakozás és helyfelajánlás (egyeztetés, NEM implementáció)
 Felhasználó kifejezetten jelezte: a közvetlen foglalás T−120-as zárása UTÁN is lehessen várólistára kerülni; 40 perces küszöböt javasolt az edzés előtti utolsó időszakhoz. LIVE read-only ellenőrzés: a `mass_waitlist` egyetlen `offered_at` és `offer_expires_at` párral rendelkező történeti sora **30 perces** ajánlatot igazol, de az általános szabály paraméterből származik, így az időtartam nem globális adatbázis-konstans. LIVE `cc_mass_waitlist_join_v0550b41` T−120-nál zár, `cc_mass_waitlist_offer_next_v0550b41` és `cc_mass_waitlist_offer_queue_v1` T−120 után nem ajánl fel, `cc_mass_waitlist_decide_v0550b41` T−120 után ELFOGADÁST is blokkol; mindet összehangoltan kell változtatni később. Felmerült beállítás: várólistára belépés edzéskezdet előtt T−40-ig; rövidebb, pl. 10 perces késői offer-válaszidő a 30 perces korai ajánlat mellett, az edzéshez közeli utolsó automatikus ajánlat és elfogadási cutoff külön meghatározandó. **Nem történt adatbázis- vagy frontend-módosítás, LIVE érintetlen, a pontos végső ütemezés még egyeztetés alatt.**
+
+### 2026-11-03 – TEST tömegsport Haladó szabályok + háromszintű RESET
+Felhasználói igény: minden releváns jelentkezési/várólistás/lemondási/ajánlati idősáv állítható legyen globálisan és edzésenként, **a helyfelajánlás és elfogadás NE zárjon automatikusan T−120-kor**. A mezők resetelhetők legyenek gyári/globális értékre.
+
+TEST Supabase-ben létrejött:
+- `private.cc_mass_advanced_rules_v1` (GLOBAL: `GLOBAL`; EVENT: event_id JSONB override), RLS ON, nincs anon/authenticated közvetlen tábla-hozzáférés.
+- `private.cc_mass_advanced_rules_audit_v1` (módosításnapló, RLS).
+- `private.cc_mass_advanced_defaults_v1()`, `private.cc_mass_advanced_validate_v1(jsonb)`, `private.cc_mass_advanced_effective_v1(text)` (utóbbi VOLATILE, friss írás utáni visszaolvasáshoz).
+- `public.cc_manager_mass_rules_get_v1(text)`, `public.cc_manager_mass_rules_patch_v1(text,text,jsonb)`, `public.cc_manager_mass_rules_reset_v1(text,text,text)`; Security Definer + `private.cc_manager_require_any_v1('mass.trainings','view'/'edit')`, anon EXECUTE tiltva, authenticated grant, szerepkör ellenőrzés a kódban. Per-field reset csak a megadott kulcsot távolítja el; full EVENT reset az összes egyedi felülírást eltávolítja (újra örököl), full GLOBAL reset minden globális felülírást töröl (vissza gyári). Naplózva. `null` a patchben egyetlen mező felülírását távolítja el.
+- Gyári defaultok: bookingCloseMinutes=120; waitlistCloseMinutes=40; lateCancelMinutes=360; cancellationCloseMinutes=-1; offerCloseMinutes=-1; acceptCloseMinutes=-1 (−1 = nincs külön automatikus zárás); offerValidMinutes=30; lateOfferWindowMinutes=60; lateOfferValidMinutes=10; waitlistLimit=5; waitlistEnabled=true; autoOfferEnabled=true.
+
+Manager TEST `app.js` UI:
+- Edzések fejlécében a Szűrők mellett `⚙ Szabályok` → globális lenyitható panel.
+- Meglévő edzés szerkesztése → `Haladó beállítások – egyedi szabályok` rész.
+- Mind a 12 mező látható, az edzésben egyedi/örökölt kapcsoló, mezőnkénti reset, minden szabály reset és külön mentés.
+- Globális szerkesztéskor a gyári értékkel egyező mezőhöz nem tárol fölösleges override-ot.
+- Figyelmeztető UI szöveg: **ezek jelenleg konfigurációs adatok, a foglalási/waitlist/lemondási/offer backendekhez MÉG NINCSENEK bekötve**, az állítás nem változtatja meg a meglévő aktív jelentkezési szabályokat.
+
+QA bizonyíték:
+- TEST SQL synthetic: GLOBAL booking 75 perc, EVENT 20 perc -> egy mező reset GLOBAL 75; egész EVENT reset 75 és boolean globális; egész GLOBAL reset 120. `private.cc_mass_advanced_rules_v1` a végén 0 aktív override. Anon nem hívhatja a get/patch/reset RPC-t.
+- GitHub TEST UI automata [run 41608095474](https://github.com/beacvolleyCC/club-control-manager/actions/runs/41608095474) SUCCESS; a forrás újabb figyelmeztető szöveggel és validált bemeneti min értékekkel frissült, a későbbi újrafutás is ellenőrizendő.
+- API contract inventory `docs/architecture/CC_TEST_API_CONTRACT_INVENTORY_20261101.json` frissítve + 3 új RPC, workflow watch frissítve; [run 41608229798](https://github.com/beacvolleyCC/club-control-manager/actions/runs/41608229798) SUCCESS.
+
+**Következő kötelező lépések**: konkrét TEST backend írós (booking, waitlist join, offer queue/next, decision, cancellation) RPC-k kössenek át az effektív szabály-resolverre; két sessionös konkurencia+időhatár QA; Manager signed-in API kör; valódi TEST Manager böngészős / iOS felületi QA; majd külön jóváhagyással LIVE. LIVE adatbázis/branch nem változott, semmilyen üzleti szabály nincs élesítve.
