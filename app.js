@@ -1957,6 +1957,71 @@
     const rows=mode==='all'?[...upcoming,...past.filter(e=>!seen.has(text(e.eventId||e.id)))]:upcoming;
     return rows.sort((a,b)=>eventStart(a)-eventStart(b));
   }
+  const ccMassRulesMeta_=[["bookingCloseMinutes","Rendes jelentkezés zárása","Perccel az edzés előtt","number"],["waitlistCloseMinutes","Várólista zárása","Perccel az edzés előtt","number"],["lateCancelMinutes","Késői lemondás","Perccel az edzés előtt","number"],["cancellationCloseMinutes","Lemondás teljes tiltása","-1: nincs automatikus zárás","number"],["offerCloseMinutes","Új helyfelajánlás zárása","-1: nincs automatikus zárás","number"],["acceptCloseMinutes","Hely elfogadásának zárása","-1: nincs automatikus zárás","number"],["offerValidMinutes","Helyfelajánlás érvényessége","Perc","number"],["lateOfferWindowMinutes","Késői felajánlás időablaka","Edzés előtti percek","number"],["lateOfferValidMinutes","Késői ajánlat érvényessége","Perc","number"],["waitlistLimit","Várólista limit","Fő","number"],["waitlistEnabled","Várólista engedélyezése","Kapcsoló","boolean"],["autoOfferEnabled","Automatikus helyfelajánlás","Kapcsoló","boolean"]];
+  function ccMassRulesPanelHtml_(data,scope){
+ const isGlobal=scope==='GLOBAL';
+ const stored=isGlobal?data.globalOverrides||{}:data.eventOverrides||{};
+ const values=isGlobal?data.globalEffective||{}:data.effective||{};
+ const fields=ccMassRulesMeta_.map(([key,label,hint,type])=>{
+  const own=Object.prototype.hasOwnProperty.call(stored,key), value=values[key];
+  const disabled=!isGlobal&&!own?'disabled':'';
+  const control=type==='boolean'
+   ? `<input data-cc-rule="${key}" type="checkbox" ${value?'checked':''} ${disabled}>`
+   : `<input data-cc-rule="${key}" type="number" step="1" min="${['cancellationCloseMinutes','offerCloseMinutes','acceptCloseMinutes'].includes(key)?-1:0}" value="${value}" ${disabled}>`;
+  const inherit=isGlobal?'':`<label style="display:flex;gap:5px;align-items:center"><input type="checkbox" data-cc-rule-custom="${key}" ${own?'checked':''}> Egyedi</label>`;
+  return `<div style="display:grid;grid-template-columns:minmax(160px,1fr) minmax(65px,100px) auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #ddd">
+  <span><strong>${label}</strong><small style="display:block">${hint}</small></span>${control}${inherit}
+  <button class="button quiet small" type="button" data-cc-rule-reset="${key}" ${own?'':'disabled'}>${isGlobal?'Gyári':'Öröklés'}</button></div>`;
+ }).join('');
+ return `<div class="cc-mass-advanced-fields" style="max-width:880px">
+ <p>${isGlobal?'Globális alapértékek. Az edzésenként egyedire állított mezők kivételek.':'A külön nem beállított mezők automatikusan a globális értékeket öröklik.'}</p>
+ ${fields}
+ <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+ <button type="button" class="button primary" data-cc-rule-save>Szabályok mentése</button>
+ <button type="button" class="button quiet" data-cc-rule-reset-all>${isGlobal?'Gyári alapértékek visszaállítása':'Globális alapértékek visszaállítása'}</button></div>
+ <small>A szabályok visszaállítása nem töröl jelentkezéseket.</small></div>`;
+}
+  async function ccMassRulesPanelLoad_(root,scope,eventId=null){
+ if(!root)return;
+ root.innerHTML='<p>Haladó szabályok betöltése…</p>';
+ try{
+  const info=await rpc('cc_manager_mass_rules_get_v1',{p_event_id:eventId});
+  root.innerHTML=ccMassRulesPanelHtml_(info,scope);
+  const reload=()=>ccMassRulesPanelLoad_(root,scope,eventId);
+  root.querySelectorAll('[data-cc-rule-custom]').forEach(toggle=>toggle.addEventListener('change',()=>{
+   const field=root.querySelector('[data-cc-rule="'+toggle.dataset.ccRuleCustom+'"]');
+   if(field)field.disabled=!toggle.checked;
+  }));
+  root.querySelector('[data-cc-rule-save]')?.addEventListener('click',async()=>{
+   try{
+    const patch={};
+    for(const [key,label,,type] of ccMassRulesMeta_){
+     const custom=root.querySelector('[data-cc-rule-custom="'+key+'"]');
+     if(scope==='EVENT'&&!custom?.checked){patch[key]=null;continue;}
+     const field=root.querySelector('[data-cc-rule="'+key+'"]');
+     const value=type==='boolean'?field.checked:Number(field.value);
+     if(type==='number'&&(!field.value.trim()||!Number.isSafeInteger(value)))throw new Error('Érvényes egész szám szükséges: '+label);
+     patch[key]=scope==='GLOBAL'&&value===info.defaults[key]?null:value;
+    }
+    await rpc('cc_manager_mass_rules_patch_v1',{p_scope:scope,p_event_id:eventId,p_patch:patch});
+    status('Haladó szabályok mentve.','success');
+    await reload();
+   }catch(err){status(text(err?.message||'A mentés sikertelen.'),'error')}
+  });
+  async function reset(key){
+   if(key===null&&!window.confirm(scope==='GLOBAL'
+     ?'Az összes globális szabályt visszaállítod a gyári értékekre?'
+     :'Az edzés összes egyedi szabályát törlöd, és visszaállítod a globális értékeket?'))return;
+   try{
+    await rpc('cc_manager_mass_rules_reset_v1',{p_scope:scope,p_event_id:eventId,p_key:key});
+    status('Szabályok visszaállítva.','success');
+    await reload();
+   }catch(err){status(text(err?.message||'A visszaállítás sikertelen.'),'error')}
+  }
+  root.querySelectorAll('[data-cc-rule-reset]').forEach(btn=>btn.addEventListener('click',()=>reset(btn.dataset.ccRuleReset)));
+  root.querySelector('[data-cc-rule-reset-all]')?.addEventListener('click',()=>reset(null));
+ }catch(err){root.innerHTML='<p class="migration-note error">A haladó szabályok nem tölthetők be: '+esc(err?.message||'Ismeretlen hiba')+'</p>';}
+}
   function renderMassTrainings(){if(!ccRouteIs_('mass','trainings'))return;
     state.massTrainingFiltersOpen=filterOpen_('mass.trainings',state.massTrainingFiltersOpen);
     const mode=state.massTrainingPeriod||'upcoming',rows=massVisibleTrainingRows_(state.massTrainings,state.massArchiveEvents,mode,localDateKey(new Date()),state.massTrainingDate),canEdit=canAction('mass.trainings','edit'),loadError=text(state.massLoadError),active=mode!=='upcoming'||!!state.massTrainingDate;
