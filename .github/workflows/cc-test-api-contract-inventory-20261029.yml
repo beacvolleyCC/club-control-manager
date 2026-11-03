@@ -5,6 +5,7 @@ on:
     paths:
       - 'app.js'
       - 'docs/architecture/CC_TEST_API_CONTRACT_INVENTORY_20261029.json'
+      - 'docs/architecture/CC_TEST_API_CONTRACT_INVENTORY_20261101.json'
       - 'tests/cc-test-api-contract-inventory-20261029.test.cjs'
       - '.github/workflows/cc-test-api-contract-inventory-20261029.yml'
   workflow_dispatch:
