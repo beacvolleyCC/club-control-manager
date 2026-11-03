@@ -18,7 +18,8 @@
     "All current TEST public tables report RLS enabled. RLS policy behavior and cross-team isolation still require authenticated negative tests.",
     "The test E2E happy path for Magic Link and RSVP yes/no/neutral was observed by the operator, including Manager overview + event details; note deletion/attendance and offline/simultaneous saves are NOT accepted yet.",
     "The Oct 29 audit_stage13 and audit_stage15 subdocuments below are retained historical records, not current measurements.",
-    "Cloudflare Manager and Player TEST URLs are accessible to the operator; current deployment SHA cannot be confirmed from GitHub alone."
+    "Cloudflare Manager and Player TEST URLs are accessible to the operator; current deployment SHA cannot be confirmed from GitHub alone.",
+    "2026-11-03 TEST update: Manager advanced mass settings get/patch/reset RPCs observed in TEST Supabase. User-specific authenticated Manager role check is required inside each RPC; UI tested only by CI syntax/contract, not browser E2E."
   ],
   "database_public_apis": [
     {
@@ -88,6 +89,27 @@
       "schema": "public",
       "name": "cc_manager_events_v1",
       "arguments": "p_from timestamp with time zone, p_to timestamp with time zone, p_kind text DEFAULT 'training'::text, p_team_id uuid DEFAULT NULL::uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_mass_rules_get_v1",
+      "arguments": "p_event_id text DEFAULT NULL::text",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_mass_rules_patch_v1",
+      "arguments": "p_scope text, p_event_id text, p_patch jsonb",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_mass_rules_reset_v1",
+      "arguments": "p_scope text, p_event_id text, p_key text DEFAULT NULL::text",
       "authenticated_execute": true,
       "anon_execute": false
     },
@@ -655,6 +677,24 @@
         "runtime_not_verified": true
       },
       {
+        "name": "cc_manager_mass_rules_get_v1",
+        "domain": "mass_sport",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_rules_patch_v1",
+        "domain": "mass_sport",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_rules_reset_v1",
+        "domain": "mass_sport",
+        "db_callable": true,
+        "runtime_not_verified": true
+      },
+      {
         "name": "cc_manager_mass_training_history_v1",
         "domain": "training_rsvp",
         "db_callable": false,
@@ -1160,7 +1200,7 @@
     "manager_issue_81": "TEST corrected and closed 2026-10-29; keep RLS regression QA",
     "player_issue_31": "manual hosted Auth+RSVP happy path passed; full E2E remains open",
     "test_public_tables": 53,
-    "test_public_cc_functions": 42,
+    "test_public_cc_functions": 45,
     "legacy_audit_objects_are_historical": true
   }
 }
