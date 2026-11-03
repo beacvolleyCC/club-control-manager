@@ -1,0 +1,21 @@
+name: TEST Manager mass advanced rules reset QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'app.js'
+      - 'tests/test-mass-rules-reset-ui.test.cjs'
+      - '.github/workflows/test-manager-mass-rules-reset-20261103.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  advanced-rules:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check app.js
+      - run: node --test tests/test-mass-rules-reset-ui.test.cjs
