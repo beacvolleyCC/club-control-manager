@@ -1967,14 +1967,14 @@
   const disabled=!isGlobal&&!own?'disabled':'';
   const control=type==='boolean'
    ? `<input data-cc-rule="${key}" type="checkbox" ${value?'checked':''} ${disabled}>`
-   : `<input data-cc-rule="${key}" type="number" step="1" min="${['cancellationCloseMinutes','offerCloseMinutes','acceptCloseMinutes'].includes(key)?-1:0}" value="${value}" ${disabled}>`;
+   : `<input data-cc-rule="${key}" type="number" step="1" min="${['cancellationCloseMinutes','offerCloseMinutes','acceptCloseMinutes'].includes(key)?-1:['offerValidMinutes','lateOfferValidMinutes','waitlistLimit'].includes(key)?1:0}" value="${value}" ${disabled}>`;
   const inherit=isGlobal?'':`<label style="display:flex;gap:5px;align-items:center"><input type="checkbox" data-cc-rule-custom="${key}" ${own?'checked':''}> Egyedi</label>`;
   return `<div style="display:grid;grid-template-columns:minmax(160px,1fr) minmax(65px,100px) auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #ddd">
   <span><strong>${label}</strong><small style="display:block">${hint}</small></span>${control}${inherit}
   <button class="button quiet small" type="button" data-cc-rule-reset="${key}" ${own?'':'disabled'}>${isGlobal?'Gyári':'Öröklés'}</button></div>`;
  }).join('');
  return `<div class="cc-mass-advanced-fields" style="max-width:880px">
- <p>${isGlobal?'Globális alapértékek. Az edzésenként egyedire állított mezők kivételek.':'A külön nem beállított mezők automatikusan a globális értékeket öröklik.'}</p>
+ <p>${isGlobal?'Globális alapértékek. Az edzésenként egyedire állított mezők kivételek.':'A külön nem beállított mezők automatikusan a globális értékeket öröklik.'}</p><p><strong>TEST előkészítés:</strong> a mentett szabályokat a foglalási és várólistás írási folyamatok még nem használják. Az adatbeállítás önmagában nem változtatja meg a jelenlegi jelentkezést.</p>
  ${fields}
  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
  <button type="button" class="button primary" data-cc-rule-save>Szabályok mentése</button>
