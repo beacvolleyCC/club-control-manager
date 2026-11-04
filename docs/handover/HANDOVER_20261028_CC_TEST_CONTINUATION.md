@@ -302,3 +302,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Supabase docs checked: Cron requires `pg_cron` extension. TEST `pg_available_extensions` query yielded no `pg_cron` entry; neither installed nor available in returned list. Do not claim an active midnight job.
 - Executed `select cc_internal.autofill_training_attendance((now() at time zone 'Europe/Budapest')::date)` on TEST: returned `updated_today=0`. This verifies callable function and no eligible current-day rows, NOT a positive-path synthetic fixture test.
 - Existing `player_push_outbox` exists, but coach identity mapping to `players.id` and notification routing not verified; no reminder messages have been inserted. Need identify coach recipient mapping and choose scheduler/deployment mechanism. LIVE untouched.
+
+
+### 2026-11-04 TEST midnight attendance follow-up
+- Added docs/implementation/attendance-midnight-test-plan.md (commit 6da397a).
+- Added docs/implementation/attendance-midnight-test.sql (commit 0cfdabb). SQL stages an hourly UTC cron tick guarded by Budapest local midnight, then calls existing TEST autofill for previous local day. It has NOT been applied or scheduled.
+- TEST coach assignment table is empty. Do not send reminders until recipient mapping is validated. No LIVE change.
