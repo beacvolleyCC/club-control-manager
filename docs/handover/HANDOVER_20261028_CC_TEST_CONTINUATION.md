@@ -289,3 +289,10 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - TEST Supabase `szzoubvhlwnojtzqjebc` ONLY: created schema `cc_internal`, function `cc_internal.autofill_training_attendance(p_day date)` as SECURITY INVOKER, search_path empty, no public/anon/authenticated execute grants.
 - Updates `availability.attendance_status` to `present` only for `going`, unmarked, completed, `events.status='active'`, `event_type='training'`, on supplied Budapest local calendar date. Sets `attendance_marked_by='system:midnight-autofill'`, timestamp, writes `attendance_change_audit`. Does not touch manual status, cancelled events, neutral/no RSVP. Date-specific and idempotent for already processed rows.
 - Function existence checked, no pending eligible historical TEST rows. This is NOT a running midnight scheduler. `pg_cron`/`pg_net` not present in TEST extension list; scheduler and coach reminder still TODO. No LIVE changes. Next: add scheduler with Budapest DST-aware date boundary, coach identity/notification routing, synthetic fixture test and UI readback before LIVE proposal.
+
+
+### 2026-11-04 Hunvolley/MRSZ játékosazonosító — elfogadott követelmény, még nincs implementálva
+- A versenyzők Manager játékosadatlapján külön Hunvolley/MRSZ játékoskód mező szükséges; nem azonos a CC `players.id` UUID-val és nem helyettesíti azt.
+- Jegyzőkönyvek későbbi feldolgozásakor az igazolási/játékosazonosító kódokat ki kell olvasni, ellenőrzött név/csapat egyeztetéssel a helyes játékoshoz rendelni; bizonytalan egyezés manuális jóváhagyásra kerül. Mezszám nem elsődleges azonosító.
+- Tárolandó a kód forrása és az egyeztetés státusza, elkerülendő a hibás automatikus párosítás. Később játékosadatlapról a megfelelő Hunvolley-profilra navigáció, kizárólag ellenőrzött URL-sémával.
+- Elsőként TEST adatmodell és Manager UI, ellenőrzés után LIVE. Most csak handover-követelmény került rögzítésre.
