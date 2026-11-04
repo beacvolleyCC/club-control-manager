@@ -296,3 +296,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Jegyzőkönyvek későbbi feldolgozásakor az igazolási/játékosazonosító kódokat ki kell olvasni, ellenőrzött név/csapat egyeztetéssel a helyes játékoshoz rendelni; bizonytalan egyezés manuális jóváhagyásra kerül. Mezszám nem elsődleges azonosító.
 - Tárolandó a kód forrása és az egyeztetés státusza, elkerülendő a hibás automatikus párosítás. Később játékosadatlapról a megfelelő Hunvolley-profilra navigáció, kizárólag ellenőrzött URL-sémával.
 - Elsőként TEST adatmodell és Manager UI, ellenőrzés után LIVE. Most csak handover-követelmény került rögzítésre.
+
+
+### 2026-11-04 TEST follow-up — scheduler feasibility and smoke test
+- Supabase docs checked: Cron requires `pg_cron` extension. TEST `pg_available_extensions` query yielded no `pg_cron` entry; neither installed nor available in returned list. Do not claim an active midnight job.
+- Executed `select cc_internal.autofill_training_attendance((now() at time zone 'Europe/Budapest')::date)` on TEST: returned `updated_today=0`. This verifies callable function and no eligible current-day rows, NOT a positive-path synthetic fixture test.
+- Existing `player_push_outbox` exists, but coach identity mapping to `players.id` and notification routing not verified; no reminder messages have been inserted. Need identify coach recipient mapping and choose scheduler/deployment mechanism. LIVE untouched.
