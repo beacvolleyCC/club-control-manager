@@ -308,3 +308,10 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Added docs/implementation/attendance-midnight-test-plan.md (commit 6da397a).
 - Added docs/implementation/attendance-midnight-test.sql (commit 0cfdabb). SQL stages an hourly UTC cron tick guarded by Budapest local midnight, then calls existing TEST autofill for previous local day. It has NOT been applied or scheduled.
 - TEST coach assignment table is empty. Do not send reminders until recipient mapping is validated. No LIVE change.
+
+
+### 2026-11-04 22:19 TEST attendance midnight scheduler ACTIVATED
+- TEST Supabase `szzoubvhlwnojtzqjebc`: migration `attendance_midnight_tick_test` installed `cc_internal.attendance_midnight_tick()`; smoke test at 22:19 Budapest returned `updated_count=0` as expected outside midnight.
+- Enabled `pg_cron` in TEST with migration `enable_test_pg_cron_for_attendance`. Created `cron.schedule('cc-test-attendance-midnight','5 * * * *','select cc_internal.attendance_midnight_tick()')`, job ID 1. Verified `cron.job`: active=true, schedule `5 * * * *`.
+- Hourly UTC cron tick is gated by Budapest local hour 00, processing previous local day once at 00:05. `autofill_training_attendance` only updates active completed trainings, going/unmarked attendance and logs audit; manual status retained.
+- First real midnight cron execution and positive-path synthetic fixture still need verification; coach recipient mapping and reminders not implemented. LIVE untouched.
