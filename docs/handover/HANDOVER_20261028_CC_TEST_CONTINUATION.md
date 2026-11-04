@@ -283,3 +283,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - `not_going` vagy `unknown` és jelöletlen jelenlét továbbra is ellenőrizetlen; az adott edzéshez rendelt edző(k) kapjanak értesítést a hiányzó jelenléti ellenőrzésről; deduplikált értesítés és megfelelő jogosultságkezelés szükséges.
 - Edzés után és az automatikus feldolgozást követően is lehessen a Managerben utólag javítani a jelenlétet; a statisztika frissüljön azonnal. Automatikus és manuális módosítások auditálása.
 - Időzítés, edző-hozzárendelés, notification pipeline, idempotencia és TEST QA megvalósítandó; LIVE-ba csak külön jóváhagyott, ellenőrzött patch kerülhet.
+
+
+### 2026-11-04 TEST implementation — attendance autofill phase 1
+- TEST Supabase `szzoubvhlwnojtzqjebc` ONLY: created schema `cc_internal`, function `cc_internal.autofill_training_attendance(p_day date)` as SECURITY INVOKER, search_path empty, no public/anon/authenticated execute grants.
+- Updates `availability.attendance_status` to `present` only for `going`, unmarked, completed, `events.status='active'`, `event_type='training'`, on supplied Budapest local calendar date. Sets `attendance_marked_by='system:midnight-autofill'`, timestamp, writes `attendance_change_audit`. Does not touch manual status, cancelled events, neutral/no RSVP. Date-specific and idempotent for already processed rows.
+- Function existence checked, no pending eligible historical TEST rows. This is NOT a running midnight scheduler. `pg_cron`/`pg_net` not present in TEST extension list; scheduler and coach reminder still TODO. No LIVE changes. Next: add scheduler with Budapest DST-aware date boundary, coach identity/notification routing, synthetic fixture test and UI readback before LIVE proposal.
