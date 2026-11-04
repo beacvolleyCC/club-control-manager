@@ -4311,7 +4311,7 @@ async function ccMassAthleteHistoryLoad_(id){
     if(meta)return{...meta,source:auto?'beac_import':'manager_unlocked',base:null,meta,manualLocked:false};
     return null
   }
-  function financeStatus_(fee){const st=text(fee?.status);return st==='paid'?'paid':st==='waived'||st==='prior_paid'?'waived':fee?'due':'empty'}
+  function financeStatus_(fee){const st=text(fee?.status);return st==='paid'||st==='prior_paid'?'paid':st==='waived'?'waived':fee?'due':'empty'}
   function financeStatusSymbol_(fee){const st=financeStatus_(fee);return st==='paid'?'✓':st==='waived'?'–':st==='due'?'!':'·'}
   function financeMethodShort_(m){return({online:'ON',cash:'KP',revolut:'REV',transfer:'UT',other:'•'})[text(m)]||''}
   function financeCellHtml_(player,type,period,label){const fee=financeEffective_(player.playerId,type,period),st=financeStatus_(fee),method=financeMethodShort_(fee?.paymentMethod),editable=canAction('competition.fees','edit');return `<button type="button" class="finance-cell ${st} ${editable?'':'view-only'}" data-finance-player="${esc(player.playerId)}" data-finance-type="${esc(type)}" data-finance-period="${esc(period)}" title="${esc(label)}${editable?'':' · csak megtekintés'}" ${editable?'':'disabled'}><b>${financeStatusSymbol_(fee)}</b>${method?`<small>${esc(method)}</small>`:''}</button>`}
