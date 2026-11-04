@@ -7071,3 +7071,53 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 @media(max-width:700px){
   #entityDialog.cc-protocol-dialog .cc-protocol-team table{min-width:370px}
 }
+
+
+/* CC attendance-confirmation hotfix (TEST 2026-11-04).
+ * Confirmed coach attendance wins over the prior RSVP tone, including RSVP=none.
+ * Unconfirmed RSVP previews deliberately keep their original colors. */
+:is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="yes"]{
+  background:#c2e9ce!important;border-color:#55a873!important;color:#174f31!important
+}
+:is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="no"]{
+  background:#f3c8c8!important;border-color:#d77d80!important;color:#852b31!important
+}
+:is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="yes"] .slider-zone{
+  color:#174f31!important
+}
+:is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="no"] .slider-zone{
+  color:#852b31!important
+}
+:is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="yes"] .slider-thumb{
+  background:#91d5a7!important
+}
+:is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="no"] .slider-thumb{
+  background:#eaa6a6!important
+}
+.dark :is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="yes"]{
+  background:#185432!important;border-color:#3d995e!important;color:#effff2!important
+}
+.dark :is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="no"]{
+  background:#68292c!important;border-color:#b05d5d!important;color:#fff0f0!important
+}
+.dark :is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="yes"] .slider-zone{color:#effff2!important}
+.dark :is(.cc-compact-roster-row,.cc-inline-player).is-confirmed .cc-competition-attendance-slider[data-slider-unconfirmed="0"][data-slider-state="no"] .slider-zone{color:#fff0f0!important}
+
+/* Mass-sport training presence: a saved yes/no has an unmistakable tone,
+ * whether the state was set by a tap, drag, or restored from a DB read. */
+.legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="yes"]{
+  background:#c2e9ce!important;border-color:#55a873!important
+}
+.legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="no"]{
+  background:#f3c8c8!important;border-color:#d77d80!important
+}
+.legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="yes"] .slider-zone{color:#174f31!important}
+.legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="no"] .slider-zone{color:#852b31!important}
+.dark .legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="yes"]{
+  background:#185432!important;border-color:#3d995e!important
+}
+.dark .legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="no"]{
+  background:#68292c!important;border-color:#b05d5d!important
+}
+.dark .legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="yes"] .slider-zone{color:#effff2!important}
+.dark .legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="no"] .slider-zone{color:#fff0f0!important}
