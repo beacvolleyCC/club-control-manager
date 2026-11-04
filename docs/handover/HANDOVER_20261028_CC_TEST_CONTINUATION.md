@@ -261,3 +261,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - LIVE Supabase `snqsxlyhontaepembaic`, `cc_player_fee_meta_v2382`: 4 meglévő szeptemberi `beac_pass` due→paid; Bus Krisztina 2026-10 új `beac_pass` paid (id 1484). Öt státusz visszaellenőrizve SELECT-tel.
 - Kolba Kata helyes aktuális mezszáma 23 (felhasználó megerősítette); nem kellett módosítani.
 - Más pénzügyi tételekhez, tömegsporthoz, két téves vásárláshoz nem nyúltunk. A `paid_at` mező a négy korábbi sorban nem lett feltöltve, mert a vásárlás tényleges időpontját külön kellene leképezni; nem állítjuk, hogy ezt pótoltuk.
+
+
+### 2026-11-04 részvételi statisztika audit — folyamatban, csak olvasás
+- Következő prioritás: Manager versenyedzés-részvételi statisztika, kezdő dátum 2026-09-29; manuális `availability.attendance_status` elsőbbség, jelöletlen nem automatikus hiányzás, törölt események kizárásának ellenőrzése.
+- LIVE olvasási lekérdezés: 2026-09-29 és aktuális idő között `events` training active 25 esemény / 357 availability rekord / 343 jelölt attendance; training cancelled 9 esemény / 44 rekord / 16 jelölt attendance. Match active 6, cancelled 3; ezeket nem szabad edzésstatisztikába keverni.
+- Ezen körben semmilyen attendance vagy esemény LIVE adatot nem módosítottunk. Következő lépés: játékosonkénti számláló és forráskód képlet ellenőrzése, törölt események/hiányzó availability kezelése, TEST fix és QA.
