@@ -15,12 +15,12 @@ const state={massAthletes:[
 const text=x=>String(x??'').trim();
 const num=x=>Number(x||0);
 const esc=x=>String(x??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
-const module=new Function('state','text','num','esc',code.slice(start,end)+'\nreturn {peers:ccMassAthleteNamePeers_,html:ccMassAthleteHistoryRowsHtml_};')(state,text,num,esc);
+const auditUi=new Function('state','text','num','esc',code.slice(start,end)+'\nreturn {peers:ccMassAthleteNamePeers_,html:ccMassAthleteHistoryRowsHtml_};')(state,text,num,esc);
 test('same-name profiles are flagged, not silently merged',()=>{
- const peers=module.peers(state.massAthletes[0]);
+ const peers=auditUi.peers(state.massAthletes[0]);
  assert.equal(peers.length,1);
  assert.equal(peers[0].athleteId,'A-2');
- const html=module.html({events:[],totals:{}},state.massAthletes[0]);
+ const html=auditUi.html({events:[],totals:{}},state.massAthletes[0]);
  assert.match(html,/azonos nevű adatlap/);
  assert.match(html,/data-mass-athlete-peer="A-2"/);
  assert.doesNotMatch(html,/data-mass-athlete-peer="A-3"/);
@@ -33,7 +33,7 @@ test('dated attendance audit separates confirmed, missing, cancelled and future'
   {eventDate:'2026-10-16',level:'Haladó',attendance:'NINCS RÖGZÍTVE',bookingStatus:'LEMONDVA',future:false},
   {eventDate:'2026-11-10',level:'Haladó',attendance:'NINCS RÖGZÍTVE',bookingStatus:'AKTÍV',future:true}
  ]};
- const html=module.html(data,state.massAthletes[2]);
+ const html=auditUi.html(data,state.massAthletes[2]);
  assert.match(html,/2026\.09\.29-től/);
  assert.match(html,/13\.10\.2026\./);
  assert.match(html,/Megjelent/);
