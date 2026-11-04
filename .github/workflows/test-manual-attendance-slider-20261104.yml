@@ -1,0 +1,23 @@
+name: TEST Manager manual attendance slider colors
+on:
+  push:
+    branches:
+      - test/20261026-manager-document-intake
+    paths:
+      - styles.css
+      - app.js
+      - tests/manager-manual-attendance-colors.test.cjs
+      - .github/workflows/test-manual-attendance-slider-20261104.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  attendance-visual:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check app.js
+      - run: node --test tests/manager-manual-attendance-colors.test.cjs
