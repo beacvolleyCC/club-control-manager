@@ -1,0 +1,21 @@
+name: TEST Manager athlete attendance audit QA
+on:
+  push:
+    branches: [test/20261026-manager-document-intake]
+    paths:
+      - 'app.js'
+      - 'tests/mass-athlete-attendance-audit.test.cjs'
+      - '.github/workflows/test-mass-athlete-attendance-audit-20261104.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  athlete-history:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check app.js
+      - run: node --test tests/mass-athlete-attendance-audit.test.cjs
