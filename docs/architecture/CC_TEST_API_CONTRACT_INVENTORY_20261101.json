@@ -19,7 +19,8 @@
     "The test E2E happy path for Magic Link and RSVP yes/no/neutral was observed by the operator, including Manager overview + event details; note deletion/attendance and offline/simultaneous saves are NOT accepted yet.",
     "The Oct 29 audit_stage13 and audit_stage15 subdocuments below are retained historical records, not current measurements.",
     "Cloudflare Manager and Player TEST URLs are accessible to the operator; current deployment SHA cannot be confirmed from GitHub alone.",
-    "2026-11-03 TEST update: Manager advanced mass settings get/patch/reset RPCs observed in TEST Supabase. User-specific authenticated Manager role check is required inside each RPC; UI tested only by CI syntax/contract, not browser E2E."
+    "2026-11-03 TEST update: Manager advanced mass settings get/patch/reset RPCs observed in TEST Supabase. User-specific authenticated Manager role check is required inside each RPC; UI tested only by CI syntax/contract, not browser E2E.",
+    "2026-11-04 TEST: cc_manager_mass_athlete_history_v1 returns a date-scoped, permission-guarded per-athlete attendance audit from 2026-09-29. Historical inventory remains an audit snapshot; current endpoint privileges separately rechecked in TEST. Browser E2E pending."
   ],
   "database_public_apis": [
     {
@@ -89,6 +90,13 @@
       "schema": "public",
       "name": "cc_manager_events_v1",
       "arguments": "p_from timestamp with time zone, p_to timestamp with time zone, p_kind text DEFAULT 'training'::text, p_team_id uuid DEFAULT NULL::uuid",
+      "authenticated_execute": true,
+      "anon_execute": false
+    },
+    {
+      "schema": "public",
+      "name": "cc_manager_mass_athlete_history_v1",
+      "arguments": "p_athlete_id text",
       "authenticated_execute": true,
       "anon_execute": false
     },
@@ -578,6 +586,12 @@
         "name": "cc_manager_finance_settings_set_v2",
         "domain": "payments",
         "db_callable": false,
+        "runtime_not_verified": true
+      },
+      {
+        "name": "cc_manager_mass_athlete_history_v1",
+        "domain": "mass_sport",
+        "db_callable": true,
         "runtime_not_verified": true
       },
       {
@@ -1200,7 +1214,7 @@
     "manager_issue_81": "TEST corrected and closed 2026-10-29; keep RLS regression QA",
     "player_issue_31": "manual hosted Auth+RSVP happy path passed; full E2E remains open",
     "test_public_tables": 53,
-    "test_public_cc_functions": 45,
+    "test_public_cc_functions": 46,
     "legacy_audit_objects_are_historical": true
   }
 }
