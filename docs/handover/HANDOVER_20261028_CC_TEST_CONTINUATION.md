@@ -274,3 +274,12 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - LIVE read-only: `availability` külön `status` (RSVP) és `attendance_status` (present/absent) mezőt tartalmaz; globálisan 25 `unknown`+`present`, 2 `going`+`absent` rekord. Ezek teljes adatbázisra vonatkozó számok, nem kizárólag 2026-09-29 utáni edzések.
 - 2026-09-29 utáni training eseményeknél több azonos napon, azonos csapatnál aktív/törölt pár található (pl. 2026-10-12, 10-13, 10-16, 10-30). Az aktív 25 esemény teljes időszaki száma, nem csapatonkénti; azonos nap eseményazonosító alapján kezelendő, a törölt események jelenléte nem számolható automatikusan.
 - Semmilyen LIVE jelenléti adat nem változott; a pontos játékosonkénti nevező és a frontend számlálás vizsgálata következik TEST-ben.
+
+
+### 2026-11-04 elfogadott jelenléti automatizálási szabály (TERV, még nincs implementálva)
+- Budapest helyi idő szerint az edzés napjának végén, 00:00-kor feldolgozás: csak ténylegesen lezajlott, `events.status='active'`, `event_type='training'` események; `cancelled` eseményeket teljesen kihagyni, akár van rajtuk RSVP/jelenlét.
+- Ha `availability.status='going'` és `attendance_status IS NULL`, automatikusan `present` (automatikus eredet auditálása, idempotens feldolgozás).
+- Már manuálisan megjelölt `present`/`absent` rekordot tilos felülírni.
+- `not_going` vagy `unknown` és jelöletlen jelenlét továbbra is ellenőrizetlen; az adott edzéshez rendelt edző(k) kapjanak értesítést a hiányzó jelenléti ellenőrzésről; deduplikált értesítés és megfelelő jogosultságkezelés szükséges.
+- Edzés után és az automatikus feldolgozást követően is lehessen a Managerben utólag javítani a jelenlétet; a statisztika frissüljön azonnal. Automatikus és manuális módosítások auditálása.
+- Időzítés, edző-hozzárendelés, notification pipeline, idempotencia és TEST QA megvalósítandó; LIVE-ba csak külön jóváhagyott, ellenőrzött patch kerülhet.
