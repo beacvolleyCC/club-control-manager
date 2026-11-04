@@ -253,3 +253,11 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - **Munkafegyelem:** minden munkakör után handover frissítése, külön TEST/LIVE státusszal és ellenőrzési eredménnyel. LIVE módosítás csak kifejezett felhatalmazással, ellenőrzéssel.
 
 - **2026-11-04 kiegészítő versenybérlet-audit:** `mass_passes.product ILIKE '%verseny%'` alapján 2026-09: 39 import, 33 `players` email egyezés és mind a 33 `cc_player_fee_meta_v2382` `paid`; 2026-10: 20/19/19; 2026-11: 6/6/6; 2026-12: 6/6/6. Összesen 71 importált versenybérlet, 64 játékoshoz kötött és fizetett, 7 párosítatlan vásárlás 6 különböző e-mail-címhez (6 szeptember, 1 október). A 7 egyikénél sincs `player_email` + hónap alapján pénzügyi meta-egyezés. Azonosítás és csapattagság ellenőrzése szükséges, nem szabad ismeretlen játékosra jóváírni. Adatírás nem történt.
+
+
+### 2026-11-04 LIVE versenybérlet egyeztetés — végrehajtva
+- BEAC-import: 71 versenybérlet vásárlás, ebből 2 nem versenyző téves vásárlása (Sztanojev Flóra, Ezgi Bükelek); import rekordok megőrizve, nem kerültek versenyzőhöz.
+- 5 vásárlás egyértelműen azonosítva eltérő vásárlói e-mail alapján: Ferenc Petra Alexandra 2026-09; Bus Krisztina Katalin 2026-09 és 2026-10; Kolba Kata 2026-09; Papp Laura Dorottya 2026-09.
+- LIVE Supabase `snqsxlyhontaepembaic`, `cc_player_fee_meta_v2382`: 4 meglévő szeptemberi `beac_pass` due→paid; Bus Krisztina 2026-10 új `beac_pass` paid (id 1484). Öt státusz visszaellenőrizve SELECT-tel.
+- Kolba Kata helyes aktuális mezszáma 23 (felhasználó megerősítette); nem kellett módosítani.
+- Más pénzügyi tételekhez, tömegsporthoz, két téves vásárláshoz nem nyúltunk. A `paid_at` mező a négy korábbi sorban nem lett feltöltve, mert a vásárlás tényleges időpontját külön kellene leképezni; nem állítjuk, hogy ezt pótoltuk.
