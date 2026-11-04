@@ -267,3 +267,10 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Következő prioritás: Manager versenyedzés-részvételi statisztika, kezdő dátum 2026-09-29; manuális `availability.attendance_status` elsőbbség, jelöletlen nem automatikus hiányzás, törölt események kizárásának ellenőrzése.
 - LIVE olvasási lekérdezés: 2026-09-29 és aktuális idő között `events` training active 25 esemény / 357 availability rekord / 343 jelölt attendance; training cancelled 9 esemény / 44 rekord / 16 jelölt attendance. Match active 6, cancelled 3; ezeket nem szabad edzésstatisztikába keverni.
 - Ezen körben semmilyen attendance vagy esemény LIVE adatot nem módosítottunk. Következő lépés: játékosonkénti számláló és forráskód képlet ellenőrzése, törölt események/hiányzó availability kezelése, TEST fix és QA.
+
+
+### 2026-11-04 folytatás: BEAC-import V2 és jelenléti forrásellenőrzés
+- V2 Manager → Pénzügyek → BEAC-import: Excel-sorok beillesztése és XLSX/CSV feltöltés, előnézet, név/e-mail/korábban jóváhagyott alias alapján párosítás, hónap és termék felismerése, duplikációvédelem, kivételek manuális jóváhagyása, auditált könyvelés; eredeti Excel maradhat átmeneti forrásként. Ez követelmény, nem implementált funkció.
+- LIVE read-only: `availability` külön `status` (RSVP) és `attendance_status` (present/absent) mezőt tartalmaz; globálisan 25 `unknown`+`present`, 2 `going`+`absent` rekord. Ezek teljes adatbázisra vonatkozó számok, nem kizárólag 2026-09-29 utáni edzések.
+- 2026-09-29 utáni training eseményeknél több azonos napon, azonos csapatnál aktív/törölt pár található (pl. 2026-10-12, 10-13, 10-16, 10-30). Az aktív 25 esemény teljes időszaki száma, nem csapatonkénti; azonos nap eseményazonosító alapján kezelendő, a törölt események jelenléte nem számolható automatikusan.
+- Semmilyen LIVE jelenléti adat nem változott; a pontos játékosonkénti nevező és a frontend számlálás vizsgálata következik TEST-ben.
