@@ -390,3 +390,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Applied migration `cc_match_sheet_read_view_access_20261106`: `cc_manager_match_sheet_read_v1` now checks `private.cc_manager_can_v1('competition.matches','view',event.team_id)` rather than edit; write RPCs still check edit.
 - Verified read RPC function definition contains view check; authenticated EXECUTE yes, anon EXECUTE no.
 - Still open: true authenticated role/team positive-negative tests; complete RPC save/read/revisions/conflicts; Manager/Player TEST UI integration. LIVE untouched.
+
+### 2026-11-06 – TEST real-auth prerequisite audit
+- Inspected `private.cc_manager_current_account_v1`: requires auth.uid(), JWT email, active manager_accounts row with matching auth_user_id and email. No synthetic SQL session should be presented as real user authentication.
+- Confirmed only ONE active TEST manager account has auth_user_id linked; `competition.matches` currently has one can_view and one can_edit permission entry (same entry possible). Cannot yet establish distinct real manager role/team positive/negative QA.
+- Need second isolated TEST Manager Auth identity and explicit permission assignment, then authenticated read/write/deny tests. Preserve existing permissions. Manager/Player UI not yet wired; LIVE unchanged.
