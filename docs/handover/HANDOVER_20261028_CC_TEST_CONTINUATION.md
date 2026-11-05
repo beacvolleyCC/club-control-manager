@@ -359,3 +359,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 ### 2026-11-05 – TEST roster save verified after interrupted call
 - Confirmed `public.cc_manager_match_sheet_roster_save_v1` exists despite previous interrupted response. Verified SECURITY DEFINER, authenticated EXECUTE yes, anon EXECUTE no, transaction advisory lock and revision table reference. Do not reapply blindly.
 - Still requires real-session functional test, input validation review (including jersey uniqueness, player-team affiliation, boolean/JSON types), dedicated permission and integration tests. LIVE unchanged.
+
+### 2026-11-05 – TEST roster validation review
+- Inspected actual definition of `cc_manager_match_sheet_roster_save_v1`; gaps: missing strict jersey/flag input validation and local player/team affiliation checks. Existing unique(event_id,side,jersey_no) protects duplicate nonnull jerseys at DB level.
+- Added TEST helper `public.cc_match_roster_validate_v1(jsonb)` with array length, side/name, jersey bounds/uniqueness, and boolean flag checks. Revoked execute from anon/authenticated. Positive SQL validation test passed.
+- IMPORTANT: helper is NOT YET WIRED into roster save RPC; do not claim the existing write endpoint is hardened. Need integrate helper into save RPC, validate player references/team membership, test negative cases and real manager session. LIVE unchanged.
