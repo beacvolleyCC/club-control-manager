@@ -380,3 +380,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Applied TEST migration `cc_match_sheet_use_matches_permissions_20261106`: four match-sheet Manager RPCs (read, metadata save, roster save, sets save) now authorize with `competition.matches` instead of `competition.players`. Verified all four function definitions contain new key and no old key.
 - TEST match-sheet tables currently empty (0 sheets, 0 roster, 0 sets); TEST events contain dedicated MINTA matches suitable for isolated QA.
 - Not yet completed: authenticated per-manager positive/negative permission QA; full RPC save/read/revision/concurrency QA; Manager/Player UI wiring. No LIVE changes.
+
+### 2026-11-06 – TEST isolated database roundtrip smoke test
+- Ran a single SQL transaction against MINTA match `30000000-0000-4000-8000-000000000006`: inserted sheet, roster row, set row and revision row, then asserted roster and set rows readable.
+- Deliberately raised `EXPECTED_QA_ROLLBACK` to abort the transaction. Tool surfaced expected SQL error; verified separately that all four match-sheet tables remain at zero rows (sheet/roster/sets/revisions). No persistent test data.
+- This proves basic table-level write/read and rollback, NOT Manager authenticated RPC roundtrip, authorization, concurrency or UI integration. All remain open. LIVE unchanged.
