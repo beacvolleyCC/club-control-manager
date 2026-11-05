@@ -321,3 +321,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Post-deployment inspection confirmed all three conditions in the installed function. No authenticated Manager end-to-end UI test yet.
 - `cron.job_run_details` job 1 shows `succeeded` at 2026-11-04 23:05 UTC (= Nov 5 00:05 Budapest), and again at 00:05 UTC; this confirms scheduling and SQL execution, not positive-path autofill effects. Coach notification mapping/dispatch still pending.
 - LIVE unchanged. SQL Editor manual cron check no longer required merely to establish scheduler execution.
+
+### 2026-11-05 – TEST midnight attendance transactional positive-path QA; coach routing audit; LIVE read-only
+- Ran TEST SQL inside `BEGIN; DO ...; ROLLBACK;` using a preexisting training/RSVP row as temporary fixture. Assertions in transaction: first autofill returns exactly 1; repeated autofill returns 0; exactly one matching audit entry; manual `absent` override survives subsequent autofill. SQL completed without exception. Post-rollback audit count remains 0. No lasting changes to existing attendance/events.
+- TEST pending attendance on past active training RSVP rows: 12 (this includes statuses other than `going`); existing autofill eligible `going`/unmarked rows: 0 at earlier check.
+- Coach notification **not delivered / not implemented**: `cc_coach_event_availability_v1` contains 0 rows, and TEST has 1 manager account; no reliable coach→manager recipient mapping. Do not guess a recipient or send notifications until mapping and dedupe are implemented.
+- LIVE read-only: 166 active training events since 2026-09-29 (includes future), 345 explicitly marked attendance rows for active trainings in that period. These totals are not unique completed sessions and do not establish correctness of every player statistic. No LIVE write.
