@@ -4066,7 +4066,7 @@ async function ccMassAthleteHistoryLoad_(id){
   function renderPlayers(){if(!ccRouteIs_('competition','players'))return;
     state.playerFiltersOpen=filterOpen_('competition.players',state.playerFiltersOpen);
     const rows=playerRows(),active=teamFilterIds_('players').length>0||!!state.playerSearch||state.playerMedical!=='all',canEdit=canAnyAction('competition.players','edit');
-    $('#viewContent').innerHTML=`<div class="page-intro cc-page-header-panel cc-player-page-header"><div><h2>Játékosok</h2><p>Egységes névsor · vezetéknév szerinti magyar ABC · csapatonként vagy összesítve.</p></div><div class="filter-head-actions cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="playerFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.playerFiltersOpen?'open':''} ${active?'has-filter':''}" id="playerFiltersToggle" aria-expanded="${state.playerFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canEdit?'':'<span class="read-only-badge">MEGTEKINTÉS</span>'}</div></div>
+    $('#viewContent').innerHTML=`<div class="page-intro cc-page-header-panel cc-player-page-header"><div><h2>Játékosok</h2><p>Egységes névsor · vezetéknév szerinti magyar ABC · csapatonként vagy összesítve.</p></div><div class="filter-head-actions cc-icon-toolbar">${active?'<button class="filter-reset cc-toolbar-reset" id="playerFilterReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.playerFiltersOpen?'open':''} ${active?'has-filter':''}" id="playerFiltersToggle" aria-expanded="${state.playerFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${canEdit?'<button id="ccAddCompetitionPlayer" type="button" class="primary">+ Új játékos</button>':'<span class="read-only-badge">MEGTEKINTÉS</span>'}</div></div>
       <div class="filter-panel legacy-player-toolbar cc-player-filter-toolbar" id="playerFiltersPanel" ${state.playerFiltersOpen?'':'hidden'}>
         <input id="playerSearch" class="legacy-player-search" type="search" value="${esc(state.playerSearch)}" placeholder="Keresés név, email, igazolási szám, poszt vagy mezszám alapján…" autocomplete="off">
         <div class="legacy-player-team-tabs multi" aria-label="Csapatszűrő">${teamMultiFilterHtml_('players')}</div>
@@ -4077,6 +4077,19 @@ async function ccMassAthleteHistoryLoad_(id){
       </div>
       <article class="panel legacy-player-surface cc-player-directory-surface"><div class="legacy-player-summary"><span><b>${rows.length}</b> játékos</span><span>${state.playerListMode==='grouped'?'Csapatonkénti névsor':'Összesített lista'} · A–Z</span></div>${playerGroupedListHtml_(rows)}</article>`;
     bindPlayerListActions_();
+    $('#ccAddCompetitionPlayer')?.addEventListener('click',async()=>{
+      const name=window.prompt('Új játékos teljes neve:');if(!name?.trim())return;
+      const email=window.prompt('Játékos e-mail-címe:');if(!email?.trim())return;
+      const teams=(state.teams||[]).filter(t=>t.id);
+      if(!teams.length){window.alert('Nincs elérhető csapat.');return}
+      const choices=teams.map((t,i)=>String(i+1)+'. '+(t.name||t.teamName||t.id)).join('\n');
+      const index=Number(window.prompt('Melyik csapatba kerüljön?\n'+choices,'1'))-1;
+      if(!Number.isInteger(index)||!teams[index])return;
+      const jerseyNo=window.prompt('Mezszám (nem kötelező):','');
+      const position=window.prompt('Poszt (nem kötelező):','');
+      try{await rpc('cc_manager_player_create_v1',{p_payload:{name:name.trim(),email:email.trim(),teamId:teams[index].id,jerseyNo:jerseyNo?.trim()||'',position:position?.trim()||''}});await loadPlayers();renderPlayers();status('Játékos hozzáadva.','success')}
+      catch(err){window.alert('Nem sikerült hozzáadni: '+(err.message||err))}
+    });
   }
   function playerOverviewHtml_(p){
     return `<div class="entity-hero">${avatarHtml(p,'large')}<div><b>${esc(p.name||p.displayName||'Játékos')}</b><span>${esc(p.teamName||'Nincs aktív csapat')}${p.position?' · '+esc(p.position):''}${p.jerseyNo!=null?' · #'+esc(p.jerseyNo):''}</span></div></div>
