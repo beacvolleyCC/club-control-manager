@@ -385,3 +385,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Ran a single SQL transaction against MINTA match `30000000-0000-4000-8000-000000000006`: inserted sheet, roster row, set row and revision row, then asserted roster and set rows readable.
 - Deliberately raised `EXPECTED_QA_ROLLBACK` to abort the transaction. Tool surfaced expected SQL error; verified separately that all four match-sheet tables remain at zero rows (sheet/roster/sets/revisions). No persistent test data.
 - This proves basic table-level write/read and rollback, NOT Manager authenticated RPC roundtrip, authorization, concurrency or UI integration. All remain open. LIVE unchanged.
+
+### 2026-11-06 – TEST match sheet read view permission
+- Applied migration `cc_match_sheet_read_view_access_20261106`: `cc_manager_match_sheet_read_v1` now checks `private.cc_manager_can_v1('competition.matches','view',event.team_id)` rather than edit; write RPCs still check edit.
+- Verified read RPC function definition contains view check; authenticated EXECUTE yes, anon EXECUTE no.
+- Still open: true authenticated role/team positive-negative tests; complete RPC save/read/revisions/conflicts; Manager/Player TEST UI integration. LIVE untouched.
