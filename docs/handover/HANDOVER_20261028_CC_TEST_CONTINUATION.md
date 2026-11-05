@@ -370,3 +370,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Migration `cc_roster_validation_bridge_20261105`: private-to-clients helper bridge, no client EXECUTE grant.
 - Migration `cc_roster_save_wire_validation_20261105`: integrated `cc_match_roster_validate_v1(p_roster)` into roster save RPC. Verified definition includes validator call.
 - Still open: real Manager auth/permission tests, invalid payload and rollback tests, read-after-write and concurrency tests, full player/team/date affiliation edge cases, final dedicated match-sheet permission. No user data changed and LIVE untouched.
+
+### 2026-11-05 – TEST negative validator QA and permission grants
+- Verified four match sheet Manager RPCs (`read`, metadata save, sets save, roster save): authenticated EXECUTE true, anon EXECUTE false.
+- Ran SQL negative validator checks with exception assertions: duplicate home jersey, empty player name, nonboolean libero flag, jersey 1000 all correctly rejected. No match data modified.
+- Remaining: real Manager session permissions, full create/save/read/update/revision/concurrency test; TEST Manager UI is not yet wired to these new RPCs, so browser-only UI testing is not yet possible. Need dedicated TEST-only QA route or safe authenticated RPC invocation without exposing credentials. LIVE unchanged.
