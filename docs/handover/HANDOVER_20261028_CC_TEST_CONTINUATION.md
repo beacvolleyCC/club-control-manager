@@ -355,3 +355,7 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Migration `cc_manager_match_sheet_metadata_save_v1_20261105` created `public.cc_manager_match_sheet_save_v1(event_id,payload,expected_updated_at)`: metadata-only upsert, optimistic concurrency, serialized event lock, revision before/after snapshot, existing `competition.players/edit` team permission. Verified SECURITY DEFINER, authenticated EXECUTE, anon denied.
 - Migration `cc_match_sheet_sets_atomic_save_20261105` created `public.cc_manager_match_sheet_sets_save_v1(event_id,sets,expected_updated_at)`: checks permission, existing sheet, concurrency, set number uniqueness/range, points bounds and lineup JSON array shape; replaces set rows atomically, bumps sheet timestamp, logs revision. Verified function exists, authenticated EXECUTE, anon denied.
 - NOT YET end-to-end tested with actual manager session; do not claim full validation. Roster save, player read projection, dedicated match-sheet permission and realtime still pending. LIVE untouched.
+
+### 2026-11-05 – TEST roster save verified after interrupted call
+- Confirmed `public.cc_manager_match_sheet_roster_save_v1` exists despite previous interrupted response. Verified SECURITY DEFINER, authenticated EXECUTE yes, anon EXECUTE no, transaction advisory lock and revision table reference. Do not reapply blindly.
+- Still requires real-session functional test, input validation review (including jersey uniqueness, player-team affiliation, boolean/JSON types), dedicated permission and integration tests. LIVE unchanged.
