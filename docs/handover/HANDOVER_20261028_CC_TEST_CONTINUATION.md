@@ -315,3 +315,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Enabled `pg_cron` in TEST with migration `enable_test_pg_cron_for_attendance`. Created `cron.schedule('cc-test-attendance-midnight','5 * * * *','select cc_internal.attendance_midnight_tick()')`, job ID 1. Verified `cron.job`: active=true, schedule `5 * * * *`.
 - Hourly UTC cron tick is gated by Budapest local hour 00, processing previous local day once at 00:05. `autofill_training_attendance` only updates active completed trainings, going/unmarked attendance and logs audit; manual status retained.
 - First real midnight cron execution and positive-path synthetic fixture still need verification; coach recipient mapping and reminders not implemented. LIVE untouched.
+
+### 2026-11-05 – TEST competition attendance aggregate fixed and cron verified
+- TEST Supabase `szzoubvhlwnojtzqjebc`: `public.cc_manager_players_v2` replaced in-place via SQL, preserving the original function and access checks. The `availability` → `events` join now requires `e.status='active'`, `e.starts_at >= '2026-09-29T00:00:00+02'::timestamptz`, `e.ends_at <= now()`. Applies to training and match counters, which remain separate. Does not edit availability rows.
+- Post-deployment inspection confirmed all three conditions in the installed function. No authenticated Manager end-to-end UI test yet.
+- `cron.job_run_details` job 1 shows `succeeded` at 2026-11-04 23:05 UTC (= Nov 5 00:05 Budapest), and again at 00:05 UTC; this confirms scheduling and SQL execution, not positive-path autofill effects. Coach notification mapping/dispatch still pending.
+- LIVE unchanged. SQL Editor manual cron check no longer required merely to establish scheduler execution.
