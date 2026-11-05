@@ -375,3 +375,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Verified four match sheet Manager RPCs (`read`, metadata save, sets save, roster save): authenticated EXECUTE true, anon EXECUTE false.
 - Ran SQL negative validator checks with exception assertions: duplicate home jersey, empty player name, nonboolean libero flag, jersey 1000 all correctly rejected. No match data modified.
 - Remaining: real Manager session permissions, full create/save/read/update/revision/concurrency test; TEST Manager UI is not yet wired to these new RPCs, so browser-only UI testing is not yet possible. Need dedicated TEST-only QA route or safe authenticated RPC invocation without exposing credentials. LIVE unchanged.
+
+### 2026-11-06 – TEST match-sheet permission correction
+- Applied TEST migration `cc_match_sheet_use_matches_permissions_20261106`: four match-sheet Manager RPCs (read, metadata save, roster save, sets save) now authorize with `competition.matches` instead of `competition.players`. Verified all four function definitions contain new key and no old key.
+- TEST match-sheet tables currently empty (0 sheets, 0 roster, 0 sets); TEST events contain dedicated MINTA matches suitable for isolated QA.
+- Not yet completed: authenticated per-manager positive/negative permission QA; full RPC save/read/revision/concurrency QA; Manager/Player UI wiring. No LIVE changes.
