@@ -401,3 +401,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Executed `cc_manager_match_sheet_roster_save_v1` with no Manager Auth session and asserted SQLSTATE 42501; passed. No data changes.
 - Existing TEST manager linkage count remains one. Full positive authenticated API roundtrip and UI integration still open.
 - Attempted to inspect GitHub TEST branch root `package.json`, received 404; repository layout needs discovery before any UI changes. LIVE unchanged.
+
+### 2026-11-06 – Manager TEST frontend repository structure discovered
+- GitHub TEST branch root contains `index.html`, `app.js`, `config.js`, `styles.css` and supporting vanilla JS files, not root `package.json`; previous 404 was not repository failure.
+- `index.html` loads config, volleyball-core/ui, competition-context-catalog, scoreboard, app.js. `app.js` is large (~584KB), so UI integration needs focused inspection.
+- IMPORTANT: committed `config.js` currently sets `DATA_MODE:'demo'`, `SUPABASE_URL:''`, `SUPABASE_PUBLISHABLE_KEY:''` despite TEST CSP listing TEST Supabase origin. Do not assume the deployed Manager TEST actually uses authenticated Supabase API without checking runtime config/overrides. Do not put secrets in repo. LIVE unchanged.
+- Remaining: inspect app.js auth/runtime configuration and actual deployed TEST behavior; then safe isolated match-sheet UI integration and authenticated RPC QA.
