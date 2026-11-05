@@ -327,3 +327,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - TEST pending attendance on past active training RSVP rows: 12 (this includes statuses other than `going`); existing autofill eligible `going`/unmarked rows: 0 at earlier check.
 - Coach notification **not delivered / not implemented**: `cc_coach_event_availability_v1` contains 0 rows, and TEST has 1 manager account; no reliable coach→manager recipient mapping. Do not guess a recipient or send notifications until mapping and dedupe are implemented.
 - LIVE read-only: 166 active training events since 2026-09-29 (includes future), 345 explicitly marked attendance rows for active trainings in that period. These totals are not unique completed sessions and do not establish correctness of every player statistic. No LIVE write.
+
+### 2026-11-05 – TEST coach missing-attendance infrastructure
+- Created `cc_internal.pending_training_attendance` SECURITY INVOKER view for completed active trainings from 2026-09-29 with unmarked attendance, including unrecorded going count. TEST returned 6 affected events.
+- Created private `cc_internal.training_attendance_coach_recipients` table with explicit team_id→manager_id FK mapping, active flag and unique composite PK. It intentionally has 0 rows; do not guess a coach from the sole manager account. No notifications dispatched.
+- Next: verified coach assignments, notification dedupe/outbox design and delivery tests, then Manager/Player integration. LIVE unchanged.
