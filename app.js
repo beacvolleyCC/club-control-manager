@@ -1495,8 +1495,8 @@
   function bindMassLegacyRows(){
     $$('[data-mass-detail]').forEach(b=>{b.addEventListener('click',()=>openMassEventDetail(b.dataset.massDetail));b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMassEventDetail(b.dataset.massDetail)}})});
     $$('[data-mass-gate]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleMassRegistrationGate(b.dataset.massGate,b.dataset.close==='1')}));
-    $('[data-mass-roster-toggle]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleMassInlineRoster_(b.dataset.massRosterToggle,b)}));
-    $('[data-mass-attendance-open]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openMassEventDetail(b.dataset.massAttendanceOpen)}));
+    $$('[data-mass-roster-toggle]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleMassInlineRoster_(b.dataset.massRosterToggle,b)}));
+    $$('[data-mass-attendance-open]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openMassEventDetail(b.dataset.massAttendanceOpen)}));
   }
   function overviewMatrixWidth_(){
     const selected=teamFilterIds_('overview'),teamIds=selected.length?selected:state.teams.map(t=>text(t.id)),events=matrixFilteredEvents(),map=matrixResponseMap(),f=state.matrixFilters||{};let maxColumns=0;
