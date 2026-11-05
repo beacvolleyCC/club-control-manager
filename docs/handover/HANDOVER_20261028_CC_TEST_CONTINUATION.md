@@ -395,3 +395,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Inspected `private.cc_manager_current_account_v1`: requires auth.uid(), JWT email, active manager_accounts row with matching auth_user_id and email. No synthetic SQL session should be presented as real user authentication.
 - Confirmed only ONE active TEST manager account has auth_user_id linked; `competition.matches` currently has one can_view and one can_edit permission entry (same entry possible). Cannot yet establish distinct real manager role/team positive/negative QA.
 - Need second isolated TEST Manager Auth identity and explicit permission assignment, then authenticated read/write/deny tests. Preserve existing permissions. Manager/Player UI not yet wired; LIVE unchanged.
+
+### 2026-11-06 – TEST unauthenticated match-sheet RPC negative checks
+- Executed `cc_manager_match_sheet_read_v1` with no Manager Auth session and asserted SQLSTATE 42501; passed.
+- Executed `cc_manager_match_sheet_roster_save_v1` with no Manager Auth session and asserted SQLSTATE 42501; passed. No data changes.
+- Existing TEST manager linkage count remains one. Full positive authenticated API roundtrip and UI integration still open.
+- Attempted to inspect GitHub TEST branch root `package.json`, received 404; repository layout needs discovery before any UI changes. LIVE unchanged.
