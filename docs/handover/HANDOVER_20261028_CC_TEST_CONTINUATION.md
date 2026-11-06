@@ -425,3 +425,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Discovered `scripts/build-cloudflare-test.cjs`: source `config.js` is intentionally DEMO and asserted as such, while `dist-test/config.js` is overwritten at build time with STAGING-only `DATA_MODE:'supabase'`, URL `https://szzoubvhlwnojtzqjebc.supabase.co` and a public publishable key. Banner switches DEMO to STAGING. The publishable key is browser-public, not a secret.
 - `.github/workflows/test-cloudflare-workers-static-assets.yml` verifies build contract and generated connected TEST bundle; `.github/workflows/test-cloudflare-pages-static.yml` runs bundle QA. These workflows verify build, NOT necessarily deploy; cannot assert current workers.dev deployment without Cloudflare access.
 - Correction to prior diagnosis: source demo mode is intentional, not proof of a broken deployment. No modifications to app or LIVE.
+
+### 2026-11-06 – Match-sheet TEST frontend RPC adapter prepared
+- Added `match-sheet-api.js` on TEST branch (`7fe0d42`): UMD browser/CommonJS adapter for read, sheet save, roster save, sets save; strict event ID, payload/array and optimistic lock timestamp validation; propagates Supabase RPC errors; no embedded credentials.
+- Added `tests/match-sheet-api-20261106.test.cjs` (`721e1ae`): mock-client contract cases for correct RPC names/arguments, timestamps, error propagation, and invalid inputs.
+- NOTE: tests committed but not executed in this session; module not yet included in `index.html` or wired to Meccsek UI. No deployment; LIVE untouched. Next integrate TEST-only script into build allowlist, UI and run QA.
