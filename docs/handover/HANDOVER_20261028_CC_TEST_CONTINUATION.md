@@ -420,3 +420,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - `app.js` initializes `state.mode` from config, and its boot path explicitly calls `useDemo()` and returns when TEST_ONLY and demo. In supabase mode, `configured()` additionally requires exact TEST Supabase URL, TEST project ref and `sb_publishable_` key, then initializes Supabase Auth and `loadLiveData()`.
 - Attempts to fetch deployed workers.dev `/config.js` via available HTTP clients were inaccessible; deployed configuration cannot be confirmed. No Cloudflare connector is available in this session. Do not assume deployed app matches repo or overwrite config blindly.
 - No frontend deployment or LIVE changes. Next: obtain deploy configuration through authorized Cloudflare access or verify browser runtime, then connect TEST-only match sheet UI.
+
+### 2026-11-06 – Manager TEST Cloudflare build config explained
+- Discovered `scripts/build-cloudflare-test.cjs`: source `config.js` is intentionally DEMO and asserted as such, while `dist-test/config.js` is overwritten at build time with STAGING-only `DATA_MODE:'supabase'`, URL `https://szzoubvhlwnojtzqjebc.supabase.co` and a public publishable key. Banner switches DEMO to STAGING. The publishable key is browser-public, not a secret.
+- `.github/workflows/test-cloudflare-workers-static-assets.yml` verifies build contract and generated connected TEST bundle; `.github/workflows/test-cloudflare-pages-static.yml` runs bundle QA. These workflows verify build, NOT necessarily deploy; cannot assert current workers.dev deployment without Cloudflare access.
+- Correction to prior diagnosis: source demo mode is intentional, not proof of a broken deployment. No modifications to app or LIVE.
