@@ -482,3 +482,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Manager TEST static Pages build `42220676357` failed in `tests/match-sheet-api-20261106.test.cjs` because synchronous adapter input validation was tested using `assert.rejects`. Fixed to `assert.throws` (`a089d47`).
 - Latest Manager TEST static build and import smoke CI succeeded at `a089d47`; Player TEST static Pages, mobile isolation and archived fixture checks succeeded at `1cfdf5a`.
 - TEST `cc_match_sheets_v1` currently contains 0 sheets (0 verified). Thus Manager→DB→Player end-to-end behavior and role-denial paths are NOT yet validated; deployed browser testing also outstanding. LIVE untouched.
+
+
+### 2026-11-06 – Player match-sheet contract tests
+- TEST Supabase `events` contains 12 rows, including event `30000000-0000-4000-8000-000000000001` on team `10000000-0000-4000-8000-000000000001`. No sheet was created or altered; role-authenticated E2E is still pending.
+- Player TEST repo new `tests/match-sheet-player-20261106.test.cjs` (`1c38527`): dedicated Player read-only RPC, textContent rendering, authenticated Supabase UI gate. Added to TEST CI (`b8b8855`). GitHub TEST PLAYER static Pages build, mobile isolation and BB2 regression all succeeded at `b8b8855`.
+- Still need actual user-session tests for permitted team, denied team, unauthenticated, draft, verified; and deployed browser verification. LIVE untouched.
