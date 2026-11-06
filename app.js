@@ -3925,8 +3925,8 @@ async function ccMassAthleteHistoryLoad_(id){
     if(!configured()||!state.session||!window.CCMatchSheetApi){status('A TEST jegyzőkönyv kapcsolat nem érhető el.','error');return}
     let d=document.getElementById('ccMatchSheetViewer');
     if(!d){d=document.createElement('dialog');d.id='ccMatchSheetViewer';document.body.appendChild(d)}
-    d.innerHTML='<div style="padding:24px;max-width:700px;min-width:min(80vw,320px)"><button type="button" data-sheet-close class="button quiet small">Bezárás</button><h2>CC jegyzőkönyv · TEST</h2><div data-sheet-content role="status">Betöltés…</div></div>';
-    d.querySelector('[data-sheet-close]').addEventListener('click',()=>d.close());d.showModal();
+    d.innerHTML='<div style="padding:24px;max-width:700px;min-width:min(80vw,320px)"><button type="button" data-sheet-close class="button quiet small">Bezárás</button><button type="button" data-sheet-refresh class="button quiet small">Frissítés</button><h2>CC jegyzőkönyv · TEST</h2><div data-sheet-content role="status">Betöltés…</div></div>';
+    d.querySelector('[data-sheet-close]').addEventListener('click',()=>d.close());d.querySelector('[data-sheet-refresh]').addEventListener('click',()=>{d.close();void ccOpenMatchSheetViewer_(id)});d.showModal();
     const host=d.querySelector('[data-sheet-content]');
     try{
       const data=await window.CCMatchSheetApi.read(state.supabase,id);
