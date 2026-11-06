@@ -436,3 +436,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - `scripts/build-cloudflare-test.cjs` allowlists/copies adapter, checks TEST HTML references it and includes it in forbidden privileged credential scan (commit `f4c76cd`).
 - `.github/workflows/test-cloudflare-pages-static.yml` now watches adapter and its test file, runs `node --check match-sheet-api.js` and `node --test tests/match-sheet-api-20261106.test.cjs` (commit `04f294e`).
 - No workflow run result verified yet, no deployment asserted. Adapter is loaded but not yet invoked by Manager Meccsek UI. LIVE untouched.
+
+### 2026-11-06 – TEST Manager match sheet read-only UI
+- Updated `app.js` (`fb7b6c6`): adds a `CC jegyzőkönyv` button to authorized match cards in competition Meccsek and a standalone read-only dialog.
+- Dialog checks route event + `competition.matches/view` team permission and configured authenticated TEST Supabase; reads `window.CCMatchSheetApi.read`, displays sheet metadata, set scores and roster, handles empty sheet and RPC errors; output text HTML-escaped.
+- No write controls yet, no RSVP/event editor changes, no LIVE changes. GitHub source committed, not deployed/verified in browser. Need CI syntax/build and real Manager TEST session QA next.
