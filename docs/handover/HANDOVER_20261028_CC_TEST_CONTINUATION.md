@@ -488,3 +488,10 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - TEST Supabase `events` contains 12 rows, including event `30000000-0000-4000-8000-000000000001` on team `10000000-0000-4000-8000-000000000001`. No sheet was created or altered; role-authenticated E2E is still pending.
 - Player TEST repo new `tests/match-sheet-player-20261106.test.cjs` (`1c38527`): dedicated Player read-only RPC, textContent rendering, authenticated Supabase UI gate. Added to TEST CI (`b8b8855`). GitHub TEST PLAYER static Pages build, mobile isolation and BB2 regression all succeeded at `b8b8855`.
 - Still need actual user-session tests for permitted team, denied team, unauthenticated, draft, verified; and deployed browser verification. LIVE untouched.
+
+
+### 2026-11-06 – PRIORITY: weekly mass training bookings vs BEAC current-month passes
+- New TEST Supabase protected RPC `cc_manager_mass_weekly_pass_matches_v1()` (authenticated; requires `mass.passes` view AND `mass.trainings` view; anon denied). Current Budapest ISO week Monday–Sunday, current `YYYY-MM`; compares active mass booking name+email (normalized case/whitespace) against BEAC pass email and linked mass athlete name; returns pass purchase date, submission date, and purchasedAfterRegistration. Read-only, no pass/booking mutation.
+- Manager TEST `app.js`: BEAC import weekly match section (`edd31ed`), initial data load (`9f76651`), refresh support. The UI is not verified in deployed browser. Existing pass import list retained.
+- CI at `9f76651`: Manager PWA safety, import smoke, Stage21 UI, attendance and other suites passed; `CC TEST API contracts and modular rebuild audit` failed (requires separate investigation, not yet attributed to this change).
+- Clarify future scope: if matching on exact name+email in import records lacks an athlete name, do not silently match on email alone; report no match. Need QA with actual registrations, dates and mismatches. LIVE unchanged.
