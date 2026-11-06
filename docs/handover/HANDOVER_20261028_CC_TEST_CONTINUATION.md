@@ -459,3 +459,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - `match-sheet-base-editor.js` supports null sheet / initial create via version-locked save RPC (`3b6fa36`); Manager viewer mounts it for authorized users when no sheet exists (`2441744`).
 - Added `match-sheet-sets-editor.js` (`63035e9`), loaded by TEST HTML (`4f941a8`), mounted only for authorized Manager edits on existing sheets (`9a64fea`). Validates up to five set scores and preserves existing lineup/extra data when editing scores.
 - Cloudflare TEST build copies/scans/checks the new editor (`676294e`). GitHub source read-back verified. CI, deploy, browser session and actual RPC end-to-end QA not yet verified. Roster editor, Player integration and automated tests remain pending. LIVE unchanged.
+
+
+### 2026-11-06 – TEST match-sheet roster editor and CI checks
+- Added `match-sheet-roster-editor.js` (`120b2fb`): home/away roster editing, player name, jersey number, position, captain/libero flags, add/remove, duplicate jersey validation, preserves linked IDs and source fields, version-locked roster RPC.
+- Included in TEST HTML (`b151ed8`), Manager permission-gated viewer (`67cb6da`), Cloudflare bundle (`e52a19c`).
+- Added RPC adapter contract tests (`df8f70a`) and configured TEST GitHub workflow to check syntax and run them (`648e410`). Workflow result and browser end-to-end behavior not yet verified; Player display still pending. LIVE unchanged.
