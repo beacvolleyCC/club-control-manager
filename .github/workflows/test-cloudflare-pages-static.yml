@@ -10,6 +10,8 @@ on:
       - 'tests/cloudflare-test-bundle-20261026.test.cjs'
       - 'index.html'
       - 'app.js'
+      - 'match-sheet-api.js'
+      - 'tests/match-sheet-api-20261106.test.cjs'
       - 'sw.js'
       - 'config.js'
       - 'manifest.webmanifest'
@@ -29,6 +31,8 @@ jobs:
           node-version: '22'
       - run: |
           node --check app.js
+          node --check match-sheet-api.js
+          node --test tests/match-sheet-api-20261106.test.cjs
           node --check sw.js
           node --check scripts/build-cloudflare-test.cjs
           node --test tests/cloudflare-test-bundle-20261026.test.cjs
