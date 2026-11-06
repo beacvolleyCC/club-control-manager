@@ -470,3 +470,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 ### 2026-11-06 – Player TEST read-only match-sheet RPC
 - Created `public.cc_player_match_sheet_read_v1(uuid)` on TEST Supabase `szzoubvhlwnojtzqjebc`. SECURITY DEFINER, authenticated-only EXECUTE; anon denied. Checks `auth.uid()`, active linked player and active team membership for event team; returns only verified sheet with whitelisted public fields, sets and roster. SQL read-back verified EXECUTE permissions. No LIVE changes.
 - Player TEST source branch `test/20261026-isolated-player-mobile` currently uses source DEMO config and its index intentionally omits Supabase client; do not assert Player UI integration. Next verify generated Cloudflare TEST bundle, integrate read-only UI with event UUID and authentication, test allowed/denied teams and draft/verified sheets. Browser and end-to-end tests outstanding.
+
+
+### 2026-11-06 – Player TEST match-sheet UI integration
+- Player TEST `beacvolleyCC/player_application` branch `test/20261026-isolated-player-mobile`: new `match-sheet-player.js` (`39daac9`), HTML include (`d970324`), match detail action with UUID/auth/Supabase guards (`3be2118`), TEST staging bundle include (`7a841d5`), CI syntax check (`1cfdf5a`).
+- Uses protected `cc_player_match_sheet_read_v1` RPC, renders verified sheet/set/roster via DOM textContent. No Player edit rights.
+- GitHub Actions for `7a841d5` showed successful TEST Pages build, Workers readiness, mobile isolation, auth and RSVP checks. CI for latest `1cfdf5a` was in progress when checked. Deployment and browser end-to-end validation not yet verified. LIVE untouched.
