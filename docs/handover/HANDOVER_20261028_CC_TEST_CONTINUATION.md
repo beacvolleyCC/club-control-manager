@@ -495,3 +495,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Manager TEST `app.js`: BEAC import weekly match section (`edd31ed`), initial data load (`9f76651`), refresh support. The UI is not verified in deployed browser. Existing pass import list retained.
 - CI at `9f76651`: Manager PWA safety, import smoke, Stage21 UI, attendance and other suites passed; `CC TEST API contracts and modular rebuild audit` failed (requires separate investigation, not yet attributed to this change).
 - Clarify future scope: if matching on exact name+email in import records lacks an athlete name, do not silently match on email alone; report no match. Need QA with actual registrations, dates and mismatches. LIVE unchanged.
+
+
+### 2026-11-06 – Mass training roster BEAC import reconciliation priority
+- User requests BEAC import purchase date and pass number next to individual mass training booking; Manager should be able to approve pass status, and later correct/replace booking pass number.
+- Manager TEST `app.js` `e4f8512`: in `openMassEventDetail`, maps weekly matching rows by event ID + normalized name/email, displays import month, purchase date, pass number, and post-registration purchase indicator next to editable booking. Corrected pass-status select `ELLENŐRIZENDŐ` to DB-supported `ELLENŐRZÉSRE VÁR`.
+- Existing `cc_manager_mass_booking_patch_v1` permits ONLY `passStatus` and `note`; **passNumber is not yet editable**. Need separately authorized, audited pass-number update RPC and UI with explicit confirmation and conflict handling; never silently overwrite. Only TEST changes. CI for `e4f8512` was running when checked. Weekly matching is only current week and only on existing imported pass records.
