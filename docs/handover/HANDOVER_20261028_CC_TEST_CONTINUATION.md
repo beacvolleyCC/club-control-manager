@@ -430,3 +430,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Added `match-sheet-api.js` on TEST branch (`7fe0d42`): UMD browser/CommonJS adapter for read, sheet save, roster save, sets save; strict event ID, payload/array and optimistic lock timestamp validation; propagates Supabase RPC errors; no embedded credentials.
 - Added `tests/match-sheet-api-20261106.test.cjs` (`721e1ae`): mock-client contract cases for correct RPC names/arguments, timestamps, error propagation, and invalid inputs.
 - NOTE: tests committed but not executed in this session; module not yet included in `index.html` or wired to Meccsek UI. No deployment; LIVE untouched. Next integrate TEST-only script into build allowlist, UI and run QA.
+
+### 2026-11-06 – Manager TEST match-sheet adapter included in build
+- `index.html` now loads `match-sheet-api.js` before `app.js` (commit `1d88887`).
+- `scripts/build-cloudflare-test.cjs` allowlists/copies adapter, checks TEST HTML references it and includes it in forbidden privileged credential scan (commit `f4c76cd`).
+- `.github/workflows/test-cloudflare-pages-static.yml` now watches adapter and its test file, runs `node --check match-sheet-api.js` and `node --test tests/match-sheet-api-20261106.test.cjs` (commit `04f294e`).
+- No workflow run result verified yet, no deployment asserted. Adapter is loaded but not yet invoked by Manager Meccsek UI. LIVE untouched.
