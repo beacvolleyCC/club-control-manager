@@ -414,3 +414,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Assertions passed: 1 roster row, 1 set, exactly 3 revisions, stale updatedAt rejected with SQLSTATE 40001.
 - Deliberate `EXPECTED_QA_ROLLBACK` inside nested exception block rolled back all writes. Post-test direct counts: sheets=0, roster=0, sets=0, revisions=0.
 - This is simulated JWT context via SQL, not end-to-end browser/API authentication. Need actual TEST deployed config and browser auth test before UI integration is considered validated. LIVE unchanged.
+
+### 2026-11-06 – TEST frontend connection path inspected
+- Confirmed `config.js` checked into TEST branch has `DATA_MODE:'demo'`, empty `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
+- `app.js` initializes `state.mode` from config, and its boot path explicitly calls `useDemo()` and returns when TEST_ONLY and demo. In supabase mode, `configured()` additionally requires exact TEST Supabase URL, TEST project ref and `sb_publishable_` key, then initializes Supabase Auth and `loadLiveData()`.
+- Attempts to fetch deployed workers.dev `/config.js` via available HTTP clients were inaccessible; deployed configuration cannot be confirmed. No Cloudflare connector is available in this session. Do not assume deployed app matches repo or overwrite config blindly.
+- No frontend deployment or LIVE changes. Next: obtain deploy configuration through authorized Cloudflare access or verify browser runtime, then connect TEST-only match sheet UI.
