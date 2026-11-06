@@ -501,3 +501,10 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - User requests BEAC import purchase date and pass number next to individual mass training booking; Manager should be able to approve pass status, and later correct/replace booking pass number.
 - Manager TEST `app.js` `e4f8512`: in `openMassEventDetail`, maps weekly matching rows by event ID + normalized name/email, displays import month, purchase date, pass number, and post-registration purchase indicator next to editable booking. Corrected pass-status select `ELLENŐRIZENDŐ` to DB-supported `ELLENŐRZÉSRE VÁR`.
 - Existing `cc_manager_mass_booking_patch_v1` permits ONLY `passStatus` and `note`; **passNumber is not yet editable**. Need separately authorized, audited pass-number update RPC and UI with explicit confirmation and conflict handling; never silently overwrite. Only TEST changes. CI for `e4f8512` was running when checked. Weekly matching is only current week and only on existing imported pass records.
+
+
+### 2026-11-06 – BEAC pass matching on both mass athlete and training detail
+- TEST DB: `cc_manager_mass_booking_pass_number_set_v1(text,text,text)` added: requires `mass.trainings` edit, validates nonempty 1–100 chars, blocks cancelled bookings, writes old/new pass number and reason (`manual` or `beac_import`) to `mass_live_write_audit`; authenticated EXECUTE only, anon revoked. Does not automatically approve pass status.
+- Manager TEST training detail (`e77d650`): import purchase date/month/number display; buttons to adopt imported number or manually edit booking pass number, explicit confirmation and RPC audit. Existing pass status selector handles approval.
+- Manager TEST athlete detail (`e3bef5b`): displays imported purchase date/month/number by exact normalized name+email. **Athlete profile currently displays import data but does not yet have direct pass-number edit buttons**; edits happen at booking level in training detail, not globally. Avoid implying otherwise.
+- Needs CI, deployed browser and actual authenticated end-to-end QA; inspect cross-week matches, name variations, duplicate passes, audit correctness. LIVE untouched.
