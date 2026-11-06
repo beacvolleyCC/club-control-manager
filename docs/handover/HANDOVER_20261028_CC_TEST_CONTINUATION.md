@@ -453,3 +453,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Base editor changes home/away team names and venue, preserves other sheet fields, calls existing version-locked `CCMatchSheetApi.save` RPC and refreshes viewer on success. Conflict shown explicitly.
 - TEST Cloudflare build allowlist, credential scan and HTML reference assertion updated (`4d50ab5`). Missing-sheet text clarified (`616b855`).
 - Caveat: only existing sheets editable; create flow, roster/set editors, Player reader, automated tests, CI and deployed browser QA remain outstanding. LIVE untouched.
+
+
+### 2026-11-06 – TEST match-sheet creation + set score editor
+- `match-sheet-base-editor.js` supports null sheet / initial create via version-locked save RPC (`3b6fa36`); Manager viewer mounts it for authorized users when no sheet exists (`2441744`).
+- Added `match-sheet-sets-editor.js` (`63035e9`), loaded by TEST HTML (`4f941a8`), mounted only for authorized Manager edits on existing sheets (`9a64fea`). Validates up to five set scores and preserves existing lineup/extra data when editing scores.
+- Cloudflare TEST build copies/scans/checks the new editor (`676294e`). GitHub source read-back verified. CI, deploy, browser session and actual RPC end-to-end QA not yet verified. Roster editor, Player integration and automated tests remain pending. LIVE unchanged.
