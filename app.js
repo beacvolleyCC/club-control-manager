@@ -3934,6 +3934,7 @@ async function ccMassAthleteHistoryLoad_(id){
       if(!data?.sheet){host.textContent='Még nincs mentett CC-jegyzőkönyv.';return}
       const safe=v=>esc(text(v??'—'));
       const sets=Array.isArray(data.sets)?data.sets:[],roster=Array.isArray(data.roster)?data.roster:[];
+      const editable=canAction('competition.matches','edit',eventTeamId(match));
       host.innerHTML=`<p><strong>${safe(data.sheet.home_team_name)} – ${safe(data.sheet.away_team_name)}</strong></p><p>Állapot: ${safe(data.sheet.match_status)} · Helyszín: ${safe(data.sheet.venue)}</p><h3>Szettek</h3><p>${sets.map(x=>safe(x.set_no)+'. '+safe(x.home_points)+':'+safe(x.away_points)).join(' · ')||'Nincs adat'}</p><h3>Játékoskeret</h3><ul>${roster.map(x=>'<li>'+safe(x.side)+' · #'+safe(x.jersey_no)+' '+safe(x.player_name)+'</li>').join('')||'<li>Nincs adat</li>'}</ul>`;
     }catch(error){if(d.open){host.textContent='Betöltési hiba: '+text(error?.message||error);status('Jegyzőkönyv betöltési hiba.','error')}}
   }
