@@ -2189,8 +2189,8 @@
       const data=await loadMassEventDetail(eventId,{force}),e=data?.event||{},editable=canAction('mass.trainings','edit');
       let bookings=(Array.isArray(data?.bookings)?data.bookings:[]).slice();
       const wait=(Array.isArray(data?.waitlist)?data.waitlist:[]).slice().sort(massPersonSort_),cancelled=Array.isArray(data?.cancelled)?data.cancelled:[];
-      const weeklyMatches=Array.isArray(state.massWeeklyPassMatches?.matches)?state.massWeeklyPassMatches.matches:[],matchedByBooking=new Map(weeklyMatches.filter(m=>text(m.eventId)===text(eventId)).map(m=>[text(m.email).trim().toLowerCase()+'|'+text(m.name).trim().toLocaleLowerCase('hu-HU'),m]));
-      const matchForBooking=r=>matchedByBooking.get(text(r.email).trim().toLowerCase()+'|'+text(r.name).trim().toLocaleLowerCase('hu-HU'));
+      const weeklyMatches=Array.isArray(state.massWeeklyPassMatches?.matches)?state.massWeeklyPassMatches.matches:[],matchKey=r=>text(r.email).trim().toLowerCase()+'|'+text(r.name).trim().replace(/\s+/g,' ').toLocaleLowerCase('hu-HU'),matchedByBooking=new Map(weeklyMatches.filter(m=>text(m.eventId)===text(eventId)).map(m=>[matchKey(m),m]));
+      const matchForBooking=r=>matchedByBooking.get(matchKey(r));
       const allBookings=bookings.slice(),present=allBookings.filter(r=>massAttendanceModel_(r.attendance).key==='present').length,noshow=allBookings.filter(r=>massAttendanceModel_(r.attendance).key==='noshow').length,pending=Math.max(0,allBookings.length-present-noshow),gate=text(e.registrationMode)==='WAITLIST_ONLY';
       if(ui.pass==='needs-check')bookings=bookings.filter(r=>massPassInfo_(r,e).needsCheck);else if(ui.pass==='valid')bookings=bookings.filter(r=>massPassInfo_(r,e).valid&&!massPassInfo_(r,e).needsCheck);else if(ui.pass==='missing')bookings=bookings.filter(r=>!massPassInfo_(r,e).passNumber&&!massPassInfo_(r,e).exempt);
       bookings.sort((a,b)=>ui.sort==='surname-desc'?-comparePlayersBySurname_(a,b):comparePlayersBySurname_(a,b));
