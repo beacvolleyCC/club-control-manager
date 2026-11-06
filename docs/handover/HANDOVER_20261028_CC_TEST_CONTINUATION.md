@@ -446,3 +446,10 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 ### 2026-11-06 – Manager TEST match-sheet viewer manual refresh
 - Manager TEST `app.js` commit `d867444c6cc149d2263b493317e51a1e11ec89de`: `CC jegyzőkönyv` viewer now has a `Frissítés` button that closes/reopens the same viewer and reissues the authenticated read RPC.
 - Source read-back verified the button and handler are present. Browser/deploy/CI not yet verified. No edit/save UI yet; Player integration pending. LIVE untouched.
+
+
+### 2026-11-06 – TEST match sheet base editor connected
+- Created `match-sheet-base-editor.js` (commit `72a3fd1`), included in TEST `index.html` (`2e6e0d8`) and permission-gated Manager match-sheet viewer (`4e1b513`).
+- Base editor changes home/away team names and venue, preserves other sheet fields, calls existing version-locked `CCMatchSheetApi.save` RPC and refreshes viewer on success. Conflict shown explicitly.
+- TEST Cloudflare build allowlist, credential scan and HTML reference assertion updated (`4d50ab5`). Missing-sheet text clarified (`616b855`).
+- Caveat: only existing sheets editable; create flow, roster/set editors, Player reader, automated tests, CI and deployed browser QA remain outstanding. LIVE untouched.
