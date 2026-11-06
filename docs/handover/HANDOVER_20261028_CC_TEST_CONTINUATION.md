@@ -441,3 +441,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Updated `app.js` (`fb7b6c6`): adds a `CC jegyzőkönyv` button to authorized match cards in competition Meccsek and a standalone read-only dialog.
 - Dialog checks route event + `competition.matches/view` team permission and configured authenticated TEST Supabase; reads `window.CCMatchSheetApi.read`, displays sheet metadata, set scores and roster, handles empty sheet and RPC errors; output text HTML-escaped.
 - No write controls yet, no RSVP/event editor changes, no LIVE changes. GitHub source committed, not deployed/verified in browser. Need CI syntax/build and real Manager TEST session QA next.
+
+
+### 2026-11-06 – Manager TEST match-sheet viewer manual refresh
+- Manager TEST `app.js` commit `d867444c6cc149d2263b493317e51a1e11ec89de`: `CC jegyzőkönyv` viewer now has a `Frissítés` button that closes/reopens the same viewer and reissues the authenticated read RPC.
+- Source read-back verified the button and handler are present. Browser/deploy/CI not yet verified. No edit/save UI yet; Player integration pending. LIVE untouched.
