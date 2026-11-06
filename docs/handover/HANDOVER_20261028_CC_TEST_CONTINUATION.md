@@ -465,3 +465,8 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Added `match-sheet-roster-editor.js` (`120b2fb`): home/away roster editing, player name, jersey number, position, captain/libero flags, add/remove, duplicate jersey validation, preserves linked IDs and source fields, version-locked roster RPC.
 - Included in TEST HTML (`b151ed8`), Manager permission-gated viewer (`67cb6da`), Cloudflare bundle (`e52a19c`).
 - Added RPC adapter contract tests (`df8f70a`) and configured TEST GitHub workflow to check syntax and run them (`648e410`). Workflow result and browser end-to-end behavior not yet verified; Player display still pending. LIVE unchanged.
+
+
+### 2026-11-06 – Player TEST read-only match-sheet RPC
+- Created `public.cc_player_match_sheet_read_v1(uuid)` on TEST Supabase `szzoubvhlwnojtzqjebc`. SECURITY DEFINER, authenticated-only EXECUTE; anon denied. Checks `auth.uid()`, active linked player and active team membership for event team; returns only verified sheet with whitelisted public fields, sets and roster. SQL read-back verified EXECUTE permissions. No LIVE changes.
+- Player TEST source branch `test/20261026-isolated-player-mobile` currently uses source DEMO config and its index intentionally omits Supabase client; do not assert Player UI integration. Next verify generated Cloudflare TEST bundle, integrate read-only UI with event UUID and authentication, test allowed/denied teams and draft/verified sheets. Browser and end-to-end tests outstanding.
