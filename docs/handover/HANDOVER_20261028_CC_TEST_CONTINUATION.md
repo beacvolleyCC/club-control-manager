@@ -407,3 +407,10 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - `index.html` loads config, volleyball-core/ui, competition-context-catalog, scoreboard, app.js. `app.js` is large (~584KB), so UI integration needs focused inspection.
 - IMPORTANT: committed `config.js` currently sets `DATA_MODE:'demo'`, `SUPABASE_URL:''`, `SUPABASE_PUBLISHABLE_KEY:''` despite TEST CSP listing TEST Supabase origin. Do not assume the deployed Manager TEST actually uses authenticated Supabase API without checking runtime config/overrides. Do not put secrets in repo. LIVE unchanged.
 - Remaining: inspect app.js auth/runtime configuration and actual deployed TEST behavior; then safe isolated match-sheet UI integration and authenticated RPC QA.
+
+### 2026-11-06 – TEST match-sheet complete RPC transaction QA
+- On TEST Supabase only, used the existing linked Manager account identity in transaction-local simulated `request.jwt.claims` / `request.jwt.claim.sub` (NOT a real authenticated browser/API session).
+- Exercised `cc_manager_match_sheet_save_v1` -> `cc_manager_match_sheet_roster_save_v1` -> `cc_manager_match_sheet_sets_save_v1` -> `cc_manager_match_sheet_read_v1` on MINTA event `30000000-0000-4000-8000-000000000006`.
+- Assertions passed: 1 roster row, 1 set, exactly 3 revisions, stale updatedAt rejected with SQLSTATE 40001.
+- Deliberate `EXPECTED_QA_ROLLBACK` inside nested exception block rolled back all writes. Post-test direct counts: sheets=0, roster=0, sets=0, revisions=0.
+- This is simulated JWT context via SQL, not end-to-end browser/API authentication. Need actual TEST deployed config and browser auth test before UI integration is considered validated. LIVE unchanged.
