@@ -476,3 +476,9 @@ QA: [TEST athlete audit tests 41810782788](https://github.com/beacvolleyCC/club-
 - Player TEST `beacvolleyCC/player_application` branch `test/20261026-isolated-player-mobile`: new `match-sheet-player.js` (`39daac9`), HTML include (`d970324`), match detail action with UUID/auth/Supabase guards (`3be2118`), TEST staging bundle include (`7a841d5`), CI syntax check (`1cfdf5a`).
 - Uses protected `cc_player_match_sheet_read_v1` RPC, renders verified sheet/set/roster via DOM textContent. No Player edit rights.
 - GitHub Actions for `7a841d5` showed successful TEST Pages build, Workers readiness, mobile isolation, auth and RSVP checks. CI for latest `1cfdf5a` was in progress when checked. Deployment and browser end-to-end validation not yet verified. LIVE untouched.
+
+
+### 2026-11-06 – CI failure diagnosed and fixed
+- Manager TEST static Pages build `42220676357` failed in `tests/match-sheet-api-20261106.test.cjs` because synchronous adapter input validation was tested using `assert.rejects`. Fixed to `assert.throws` (`a089d47`).
+- Latest Manager TEST static build and import smoke CI succeeded at `a089d47`; Player TEST static Pages, mobile isolation and archived fixture checks succeeded at `1cfdf5a`.
+- TEST `cc_match_sheets_v1` currently contains 0 sheets (0 verified). Thus Manager→DB→Player end-to-end behavior and role-denial paths are NOT yet validated; deployed browser testing also outstanding. LIVE untouched.
