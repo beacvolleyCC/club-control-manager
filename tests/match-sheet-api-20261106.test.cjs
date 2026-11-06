@@ -24,7 +24,7 @@ test('RPC errors are not swallowed',async()=>{
 });
 test('invalid input rejected before RPC',async()=>{
  const db={rpc:async()=>{throw Error('must not call')}};
- await assert.rejects(()=>api.read(db,'bad-id'),/Invalid event ID/);
- await assert.rejects(()=>api.saveRoster(db,id,{},at),/Roster must be an array/);
- await assert.rejects(()=>api.saveSets(db,id,[],'bad'),/updatedAt timestamp/);
+ assert.throws(()=>api.read(db,'bad-id'),/Invalid event ID/);
+ assert.throws(()=>api.saveRoster(db,id,{},at),/Roster must be an array/);
+ assert.throws(()=>api.saveSets(db,id,[],'bad'),/updatedAt timestamp/);
 });
