@@ -50,3 +50,8 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - A `mass_live_write_audit` táblában `operation LIKE '%booking_pass_number_set%'` feltétellel LIVE=0, TEST=0 rekord. Ez nem bizonyítja, hogy a bérletszám RPC hibás; csak azt, hogy ezen a néven nincs rögzített tényleges javítási audit. A valódi mentés tesztje hátravan.
 - Korábbi 0 LIVE Manager-fiók/jogosultság következtetés **téves**, a fenti pontos számok felülírják.
 - #86 ág mainhez képest eltérő; alkalmazáskód merge és deploy továbbra sem történt. A #86-os app.js változás és a #87-es történeti rendezés ugyanazon fájlt érinti, ezért a mainre történő egyszerű fájlfelülírás tilos.
+
+## 2026-11-07 – TEST integrációs ág létrehozva
+- A `test/20261107-pr86-integration-qa` ág létrejött a mainről; QA kapu dokumentum: `docs/qa/PR86_TEST_INTEGRATION_GATE_20261107.md`, commit `36cd98e830384fd4c0ac98d9f91df6184bd1c6e5`. Ez elkülönített TEST-előkészítés, **nem** #86 kódösszevezetés és **nem** LIVE deploy.
+- Ellenőrizve: a main és #86 `app.js` különbsége a múltbeli edzésrendezésnél már az állapotobjektumban kezdődik; index.html és sw.js cache-verzió is eltér. A fájlok teljes felülírása nem elfogadható.
+- Következő: célzott hunk-átültetés az integrációs ágra, kódszintű regresszió, majd TEST autentikált UI ellenőrzés; a régi versenysportos teszt külön izolálandó.
