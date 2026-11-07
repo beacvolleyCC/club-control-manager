@@ -55,3 +55,10 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - A `test/20261107-pr86-integration-qa` ág létrejött a mainről; QA kapu dokumentum: `docs/qa/PR86_TEST_INTEGRATION_GATE_20261107.md`, commit `36cd98e830384fd4c0ac98d9f91df6184bd1c6e5`. Ez elkülönített TEST-előkészítés, **nem** #86 kódösszevezetés és **nem** LIVE deploy.
 - Ellenőrizve: a main és #86 `app.js` különbsége a múltbeli edzésrendezésnél már az állapotobjektumban kezdődik; index.html és sw.js cache-verzió is eltér. A fájlok teljes felülírása nem elfogadható.
 - Következő: célzott hunk-átültetés az integrációs ágra, kódszintű regresszió, majd TEST autentikált UI ellenőrzés; a régi versenysportos teszt külön izolálandó.
+
+## 2026-11-07 – #86 kódösszevezetés ténylegesen elkészült a TEST integrációs ágon
+- Ág: `test/20261107-pr86-integration-qa`. A #86 base→head `app.js` diffje pontosan **1 megváltozott sor** (2205); az eredeti sor egyetlen egyezéssel megtalálható volt a mainből származó TEST-ágban, ezért célzottan átemeltük. Commit: `7f780e36e3f8f4dd1a53d6dd95a578e16d94da96`.
+- `index.html` PWA app.js cache query frissült: `da78ada209bf83ccdcd9f0176366e9b6d41c35f3`. `sw.js` CACHE frissült: `d15e3fc716d4367e8ec48240ad130b8dfa7ff6bb`. Verzió: `20261107-roster-details-integration-v1`.
+- 7 statikus, forrásalapú ellenőrzés PASS: HTML és SW cache-verzió, mass/competition múltbeli rendezési állapot, mismatch figyelmeztetés, lenyitott részletek beszúrási pontja, régi kompakt-soros injektálás hiánya. Ezek **nem** JS parser-, böngésző-, DB-, UI- vagy CI-tesztek.
+- A #86 eredeti PR továbbra is külön, elavult ágon OPEN; az új integrációs ágat kell ellenőrizni és szükség esetén külön PR-rel kiadni. LIVE merge/deploy és Supabase adatírás nem történt.
+- Következő: JS szintaktika/CI, a `flagged.replace` DOM-beszúrás működésének böngészős regressziója, auth Manager TEST fixture, versenysportos teszthiba reprodukció, csak ezután LIVE release.
