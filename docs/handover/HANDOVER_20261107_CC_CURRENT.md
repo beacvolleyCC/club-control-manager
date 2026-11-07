@@ -74,3 +74,9 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - Napló: `tests/league-context-ui.test.cjs:56` hibás regexe a régi `const rawRows=showPhoto?...:externalSelection?[]:` kódsorrendet várja; a jelenlegi alkalmazás a `canonicalPartial?canonicalRows:` ággal kezd. A tabella kontextus-izolációs szabályának változása helyett elavult forrásszöveg-elvárás bizonyított.
 - A TEST integrációs ágon a regexet a valós, kibővült kódsorrendhez igazítottuk; commit `a33f192fe2fa3ef9c0286797d8789c361aa369b9`. A teszt továbbra is ellenőrzi a `externalSelection?[]:`, `hasRealRank`, `_ccUnranked:true`, meccskontextus és league picker védelmeket.
 - Az új commit workflow eredménye a lekérdezéskor még nem állt rendelkezésre. **Nincs állítás új CI sikerről vagy LIVE deployról.**
+
+## 2026-11-07 – második PR #88 CI-hiba diagnózis és tesztjavítás
+- PR #88 `a33f192f` commit: 7 workflow, 6 success, 1 failure (competition roster QA run `42381529364`). A JS parser ismét PASS.
+- A `tests/league-matches-page.test.cjs` izolált `new Function` harness nem definiálta a production kódban létező `let ccLeagueMatchScope_='all'` változót, ezért `ReferenceError` keletkezett. Másik elavult assertion a régi `const scope=hasBeac?...:` kódrendet várta; production most `options.onlyBeac` és `options.forceAll` explicit felülírásokat is támogat.
+- TEST branch tesztjavítás commit: `5fd92c326cfc0118ec01624e25f09b1219c6c18a`. Harnessben scope inicializálva, regex a valós explicit prioritáshoz igazítva. App production kódhoz ebben a commitban nem nyúltunk.
+- Az új commit CI státusza a lekérdezés pillanatában még üres; következő körben ellenőrizni kell. LIVE változatlan.
