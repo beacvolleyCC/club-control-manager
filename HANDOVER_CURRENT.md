@@ -1,3 +1,13 @@
+# Kötelező munkafolyamat – handover és beszélgetéshossz (2026-11-07)
+
+- **Minden érdemi változtatás után ugyanabban a munkakörben frissíteni kell a handovert** (kód, adatbázis, konfiguráció, teszt, PR, merge, deploy, döntés, feladatstátusz). Ha nincs tényleges változás, nem kell üres frissítést készíteni.
+- A handoverben rögzítendő: mi változott; repository/ág/PR/commit; TEST vagy LIVE; ellenőrzések eredménye; adatbázis-írás vagy annak hiánya; nyitott hibák; következő konkrét lépés; rollback, ha releváns.
+- A `HANDOVER_CURRENT.md` mindig mutasson a legfrissebb részletes átadásra, és a változás ne csak a beszélgetésben maradjon meg. A dokumentációfrissítés nem helyettesíti a teszteket és a deploy ellenőrzését.
+- **Beszélgetéshossz figyelése:** amikor a beszélgetés kezd túl hosszúvá válni, a felhasználót időben, külön figyelmeztetni kell; ekkor friss handover és rövid, másolható `CC-FOLYTATÁS` indító összefoglaló készüljön az új beszélgetéshez.
+- A dokumentációs módosítás önmagában nem engedélyez LIVE alkalmazás- vagy adatbázis-módosítást.
+
+---
+
 # CLUB CONTROL — AKTUÁLIS HANDOVER (2026-10-22)
 
 **Aktuális elsődleges átadás:** [docs/handover/HANDOVER_20261022_CC_CURRENT.md](docs/handover/HANDOVER_20261022_CC_CURRENT.md). **Folytatási kulcs:** `CC-FOLYTATÁS`.
