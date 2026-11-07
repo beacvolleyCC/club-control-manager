@@ -37,3 +37,10 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - A korábbi versenysportos teszthiba pontos fájlja és reprodukciója még nincs azonosítva, ezért nem jelölhető javítottnak.
 - A BEAC audit adatforrás ellenőrzése metaadat- és oszlopvizsgálat volt, **nem valós mentés–visszaolvasás teszt**; sem LIVE, sem TEST adatsort nem módosítottunk.
 - Következő: #86 diff és célzott CI + régi teszt izolálás; TEST fixture előkészítése külön izolált rekordokkal; auth/RPC grant és audit payload kulcsok ellenőrzése; csak ezután kiadási döntés.
+
+## 2026-11-07 – #86 divergens ág és bérletszám-RPC audit
+- GitHub compare: #86 branch a mainhez képest **diverged**, 4 commit előtte, 5 mögötte; merge-base e059a31e. A PR saját diffje az eredeti base-hez képest `app.js`, `index.html`, `sw.js` fájlokat érinti. A jelenlegi mainhez rebase/merge-konfliktus vizsgálat és új QA szükséges; **nincs élesítés**.
+- `cc_manager_mass_booking_pass_number_set_v1` definíciót mindkét DB-ben lekérdeztük: `SECURITY DEFINER`, üres search_path; a művelet `private.cc_manager_require_any_v1('mass.trainings','edit')` jogosultságot követel; a bérletszámot 1–100 karakterre és a reason mezőt manual/beac_import értékre korlátozza; lemondott foglalást tilt; sorzárral UPDATE-eli a bookingot, majd audit rekordot ír a korábbi/új passNumber és reason adatokkal.
+- RPC EXECUTE: `anon=false`, `authenticated=true` mindkét DB-ben; ez nem helyettesíti a belső permission helper hitelesített vizsgálatát.
+- Környezeti eltérés: TEST audit operation `test.booking_pass_number_set`, LIVE `live.booking_pass_number_set`. A definíciók ezt a különbséget szándékosan tartalmazzák. A LIVE manager_accounts becsült 0 sora miatt a jogosultságellenőrzés felhasználói tesztje különösen fontos.
+- A vizsgálat kizárólag SELECT/metadata volt; tényleges passNumber mentés, audit INSERT, UI teszt és deploy **nem történt**.
