@@ -95,3 +95,10 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - `dc3c109` CI: 7 futás, 6 success és 1 failure (`Manager competition training roster QA`, run `42382135984`). A `tests/mass-archive-access.test.cjs` két tesztje `state is not defined` hibával bukott, mert az izolált `new Function` helper nem kapta meg a production által használt `state.massTrainingPastSort` változót.
 - TEST integrációs ágon tesztjavítás `4e167f3d01ec26790b1e47f7a18560448ef1db08`: a harness `{massTrainingPastSort:'newest'}` állapotot kap. Production változatlan.
 - Új CI eredmény lekérdezéskor még nem állt rendelkezésre; hitelesített böngészős és TEST DB write/readback továbbra sem igazolt. LIVE érintetlen.
+
+## 2026-11-07 – PR #88 zöld CI és TEST E2E kapu
+- PR #88 integrációs head `bf8804b0ef6ff54ad85a4fffd04b771039c57a2d`: mind a 7 workflow sikeres, beleértve a Manager competition training roster QA run `42384744115` futását. A CI nem igazol authenticated TEST böngészős vagy RPC mentési működést.
+- Az integrációs branch `main`-hez képest 13 ahead / 8 behind volt; merge előtt összevezetés és új CI szükséges.
+- TEST-ben a bérletszám RPC definíciója és `anon=false`, `authenticated=true` EXECUTE jogosultsága ismét ellenőrizve; a `test.booking_pass_number_set` audit műveletből továbbra is 0 rekord volt. Valós authenticated mentés/audit/böngészős teszt nem történt.
+- Részletes E2E teszt- és rollback protokoll hozzáadva a `docs/qa/PR86_TEST_INTEGRATION_GATE_20261107.md` dokumentumhoz a TEST ágon, commit `952a6057b09de757a572f3ea3677354ef54f1065`. LIVE DB, alkalmazás és deploy változatlan.
+- Következő: hitelesített TEST Manager munkamenet és izolált booking fixture; RPC mentés/readback/audit/negatív jogosultsági esetek; main integráció, új CI, TEST deploy/UI, végül LIVE release gate.
