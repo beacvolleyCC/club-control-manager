@@ -1,3 +1,9 @@
+# Aktuális átadás – 2026-11-07
+
+**Elsődleges, friss handover:** [docs/handover/HANDOVER_20261107_CC_CURRENT.md](docs/handover/HANDOVER_20261107_CC_CURRENT.md). A régebbi átadások történeti előzmények. Folytatási kulcs: `CC-FOLYTATÁS`.
+
+---
+
 # Kötelező munkafolyamat – handover és beszélgetéshossz (2026-11-07)
 
 - **Minden érdemi változtatás után ugyanabban a munkakörben frissíteni kell a handovert** (kód, adatbázis, konfiguráció, teszt, PR, merge, deploy, döntés, feladatstátusz). Ha nincs tényleges változás, nem kell üres frissítést készíteni.
