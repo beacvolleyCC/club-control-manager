@@ -40,3 +40,9 @@ A #86 merge csak akkor engedhető, ha az integrált kód, regresszió, authentic
 8. Main-ág összevezetése után teljes CI újrafuttatás, Cloudflare TEST build/deploy, bejelentkezett képernyőpróba és rollback-útvonal ellenőrzése. Csak ezután lehet külön LIVE release döntést hozni.
 
 **Jelen állapot:** 1–8 lépés nem bizonyított; a zöld CI nem jelent E2E vagy LIVE kiadási engedélyt.
+
+## 2026-11-07 – hitelesített TEST Manager mentés és audit: PASS
+- Felhasználó TEST Manager UI-n QA synthetic foglalás részleteit megnyitotta; látható volt a kompakt `!`, a részletes panel és a `Bérletszám javítása` vezérlő. UI screenshot alapján a prompt megnyílt a TEST Worker domainen. Teljes mobil/PWA regresszió nem történt.
+- Felhasználó a TEST UI-ban `QA-TEST-20261107-01` értéket mentette. Utána közvetlen TEST Supabase SELECT: `mass_bookings.id='QA-NEWBUCKET-BOOKING-1'`, `pass_number='QA-TEST-20261107-01'`, `booking_status='AKTÍV'`, `updated_at='2026-11-07 15:52:52.602585+00'`. **PASS**.
+- TEST audit SELECT: `mass_live_write_audit.operation='test.booking_pass_number_set'`, `entity_id='QA-NEWBUCKET-BOOKING-1'`, `actor='elteroplabda@gmail.com'`, `payload.before.passNumber=null`, `payload.after.passNumber='QA-TEST-20261107-01'`, `payload.reason='manual'`, `created_at='2026-11-07 15:52:52.602585+00'`. **PASS**.
+- A TEST foglalásban a QA bérletszám jelenleg megmaradt; visszaállítás külön kontrollált lépés, nem végeztük el. Jogosulatlan felhasználó negatív teszt, teljes böngészős regresszió, main összevezetés, új CI, TEST release build és LIVE deploy **még hátravan**.
