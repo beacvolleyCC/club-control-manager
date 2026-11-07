@@ -1,0 +1,45 @@
+name: V2 TEST automatic Cloudflare Pages deploy
+on:
+  push:
+    branches:
+      - v2/architecture-foundation-20261107
+    paths:
+      - 'v2/**'
+      - '.github/workflows/v2-test-auto-deploy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: club-control-v2-test-pages
+  cancel-in-progress: true
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    environment: v2-test-preview
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: v2/package-lock.json
+      - name: Install
+        working-directory: v2
+        run: npm ci --no-audit --no-fund
+      - name: Validate V2
+        working-directory: v2
+        run: npm run typecheck && npm test && npm run build
+      - name: Require isolated Cloudflare deployment credentials
+        env:
+          CF_TOKEN: ${{ secrets.V2_CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.V2_CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CF_TOKEN" || { echo "::error::Missing V2_CLOUDFLARE_API_TOKEN"; exit 1; }
+          test -n "$CF_ACCOUNT" || { echo "::error::Missing V2_CLOUDFLARE_ACCOUNT_ID"; exit 1; }
+      - name: Deploy only to Club Control V2 TEST Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.V2_CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.V2_CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.45.0'
+          command: pages deploy v2/dist --project-name club-control-v2-test-preview --branch v2-preview
