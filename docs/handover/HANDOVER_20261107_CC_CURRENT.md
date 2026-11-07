@@ -102,3 +102,10 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - TEST-ben a bérletszám RPC definíciója és `anon=false`, `authenticated=true` EXECUTE jogosultsága ismét ellenőrizve; a `test.booking_pass_number_set` audit műveletből továbbra is 0 rekord volt. Valós authenticated mentés/audit/böngészős teszt nem történt.
 - Részletes E2E teszt- és rollback protokoll hozzáadva a `docs/qa/PR86_TEST_INTEGRATION_GATE_20261107.md` dokumentumhoz a TEST ágon, commit `952a6057b09de757a572f3ea3677354ef54f1065`. LIVE DB, alkalmazás és deploy változatlan.
 - Következő: hitelesített TEST Manager munkamenet és izolált booking fixture; RPC mentés/readback/audit/negatív jogosultsági esetek; main integráció, új CI, TEST deploy/UI, végül LIVE release gate.
+
+## 2026-11-07 – TEST authenticated UI/RPC/audit bizonyított, PR #88 új CI zöld
+- Felhasználó a TEST Manager UI-n a `QA synthetic` jelentkezőnél `QA-TEST-20261107-01` bérletszámot mentett. Supabase TEST SELECT megerősítette: `mass_bookings.id='QA-NEWBUCKET-BOOKING-1'`, `pass_number='QA-TEST-20261107-01'`, `booking_status='AKTÍV'`, `updated_at='2026-11-07 15:52:52.602585+00'`.
+- Az audit SELECT ugyanahhoz a foglaláshoz `operation='test.booking_pass_number_set'`, `actor='elteroplabda@gmail.com'`, `before.passNumber=null`, `after.passNumber='QA-TEST-20261107-01'`, `reason='manual'` adatokat adott. Valós authenticated TEST mentés, DB readback és audit: **PASS**. Teljes mobil/UI és negatív jogosultsági tesztek nem történtek meg.
+- A részletes QA bizonyíték a TEST branch `docs/qa/PR86_TEST_INTEGRATION_GATE_20261107.md` fájljában, commit `8e8b3d873bf21ee95963a68fa17b1346acaaae7c`.
+- A `8e8b3d8` commit 7/7 GitHub Actions workflow **success**, roster QA run `42388583507`. Branch/main compare: **diverged**, 15 ahead / 9 behind, merge-base `304d88e15c607ae88bf21c59f99402dd0ee17130`. Ez még nem merge-készség vagy LIVE deploy bizonyítéka.
+- LIVE továbbra is változatlan. Következő: UI frissítés utáni vizuális readback, jogosulatlan negatív próba, PR ág mainnel konfliktusmentes összevezetése, ismételt CI, TEST build/deploy, majd LIVE release döntés.
