@@ -80,3 +80,8 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - A `tests/league-matches-page.test.cjs` izolált `new Function` harness nem definiálta a production kódban létező `let ccLeagueMatchScope_='all'` változót, ezért `ReferenceError` keletkezett. Másik elavult assertion a régi `const scope=hasBeac?...:` kódrendet várta; production most `options.onlyBeac` és `options.forceAll` explicit felülírásokat is támogat.
 - TEST branch tesztjavítás commit: `5fd92c326cfc0118ec01624e25f09b1219c6c18a`. Harnessben scope inicializálva, regex a valós explicit prioritáshoz igazítva. App production kódhoz ebben a commitban nem nyúltunk.
 - Az új commit CI státusza a lekérdezés pillanatában még üres; következő körben ellenőrizni kell. LIVE változatlan.
+
+## 2026-11-07 – PR #88 CI harmadik hiba, csapatszűrés fixture
+- `5fd92c3` commit 7 Actions futás: 6 success, 1 failure, JS parse PASS. A `league-matches-page.test.cjs:36` assertion a férfi B csoportot várta, miközben a fixture `selectedTeamIds:[]` (Összes BEAC csapat) állapotot adott, és a production kód szándékosan mind a 4 ismert csoportot rendereli.
+- A TEST ágon a kizárólag férfi B csoportot ellenőrző teszt fixture explicit férficsapat szűrést kapott (`selectedTeamIds:['10000000-0000-4000-8000-000000000003']`). Commit `9ad028549495b87e4cc90bd057e64766d71f2121`. Production kód változatlan. Az összes csapat nézetét külön teszttel is érdemes védeni.
+- Új commit CI eredmény a lekérdezéskor még nem volt elérhető. LIVE változatlan.
