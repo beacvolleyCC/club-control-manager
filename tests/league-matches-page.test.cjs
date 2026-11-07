@@ -19,7 +19,7 @@ function harness(opts={}){
  const ctx={rows:[],table:[],fixture:[]};
  const api=new Function('teamFilterIds_','text','state','ccMrszMenGroup_','ccCurrentLeague_','ccMrszPhotoState_',
    'ccLeagueContextSelectHtml_','esc','ccMrszMainPhotoTableHtml_','ccMrszLeagueFixturePanelHtml_','ccMrszCoverageLabel_',
-   'let ccMatchesSelectedGroup_="";'+code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_,ccMatchesTeamSelectHtml_};')(
+   'let ccLeagueMatchScope_="all";let ccMatchesSelectedGroup_="";'+code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_,ccMatchesTeamSelectHtml_};')(
    ()=>opts.selectedTeamIds||[],x=>String(x??''),state,opts.menGroup||'B',
    fallback=>selection||fallback,photo,label=>'<select id="ccLeagueContextSelect"><option>'+label+'</option></select>',
    x=>String(x??''),t=>{ctx.table.push(t.competitionLabel);return '<article class="ms-standings-card">TABLE:'+t.competitionLabel+'</article>'},
@@ -82,7 +82,7 @@ test('one shared scope and result provenance are visible in league scoreboard bu
  assert.ok(source.includes("ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac'"));
  assert.ok(source.includes("meta:'',"));
  assert.ok(source.includes('const hasBeac=matches'));
- assert.ok(source.includes("const scope=hasBeac?ccLeagueMatchScope_:'all'"));
+ assert.ok(source.includes("const scope=options.onlyBeac?'beac':options.forceAll?'all':hasBeac?ccLeagueMatchScope_:'all'"));
  assert.ok(source.includes('const reason=ccMrszMatchReviewReason_(m,tableRows,table?.partial===false,conflicts)'));
  assert.ok(source.includes("const noTableNote='';"));
 });
