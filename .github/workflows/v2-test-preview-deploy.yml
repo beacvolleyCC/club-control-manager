@@ -1,0 +1,35 @@
+name: V2 isolated TEST preview deploy
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_isolated_preview:
+        description: 'Type DEPLOY-V2-TEST to confirm isolated preview only'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  deploy:
+    if: ${{ inputs.confirm_isolated_preview == 'DEPLOY-V2-TEST' }}
+    runs-on: ubuntu-latest
+    environment: v2-test-preview
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        working-directory: v2
+        run: npm install --no-audit --no-fund
+      - name: Validate
+        working-directory: v2
+        run: npm run typecheck && npm test && npm run build
+      - name: Deploy only to isolated Cloudflare Pages project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.V2_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.V2_CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Missing isolated V2 deploy secrets"; exit 1
+          fi
+          npx --yes wrangler@4 pages deploy v2/dist --project-name club-control-v2-test-preview --branch v2-preview
