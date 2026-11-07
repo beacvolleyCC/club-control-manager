@@ -68,3 +68,9 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - Az adott head SHA-hoz a GitHub Actions PR workflow run lekérdezése **üres listát** adott; nincs bizonyított CI siker. A 7 korábbi statikus forrásellenőrzés nem azonos CI/JS parser/böngészős teszttel.
 - Az eredeti #86 PR nem zárult és nem merge-öltük. LIVE alkalmazás, Cloudflare és DB nem változott.
 - Következő: GitHub PR #88 konfliktus/CI okának felderítése; valódi JS parser és régi versenysportos regressziós teszt; TEST Manager hitelesített képernyőpróba; BEAC bérletszám mentés/audit fixture. Release gate továbbra is zárt.
+
+## 2026-11-07 – PR #88 CI hiba izolálva, teszt javítva
+- GitHub Actions head `d15e3fc7`: 7 workflow run; **6 success, 1 failure**. A bukó `Manager competition training roster QA` (run `42381416631`, job `128429633427`) `Parse Manager JavaScript` lépése **PASS**, de a következő QA lépés **FAIL**.
+- Napló: `tests/league-context-ui.test.cjs:56` hibás regexe a régi `const rawRows=showPhoto?...:externalSelection?[]:` kódsorrendet várja; a jelenlegi alkalmazás a `canonicalPartial?canonicalRows:` ággal kezd. A tabella kontextus-izolációs szabályának változása helyett elavult forrásszöveg-elvárás bizonyított.
+- A TEST integrációs ágon a regexet a valós, kibővült kódsorrendhez igazítottuk; commit `a33f192fe2fa3ef9c0286797d8789c361aa369b9`. A teszt továbbra is ellenőrzi a `externalSelection?[]:`, `hasRealRank`, `_ccUnranked:true`, meccskontextus és league picker védelmeket.
+- Az új commit workflow eredménye a lekérdezéskor még nem állt rendelkezésre. **Nincs állítás új CI sikerről vagy LIVE deployról.**
