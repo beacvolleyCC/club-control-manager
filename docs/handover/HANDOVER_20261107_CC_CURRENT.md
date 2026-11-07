@@ -90,3 +90,8 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - A `9ad0285` commit workflow: 7 futás, 6 success, 1 failure. Bukás: `Manager competition training roster QA` run `42381994551`, `tests/mass-today-visibility.test.cjs:34`: `ReferenceError: state is not defined`.
 - Production `massVisibleTrainingRows_` helyesen használja `state.massTrainingPastSort`-ot, a teszt izolált `new Function` környezete azonban nem injektálta a `state` függőséget. TEST ág tesztjavítás `dc3c10955f079ebcf78b30651472b6969ebd1fe5`: `state={massTrainingPastSort:'newest'}` átadása. Production változatlan.
 - A javítás utáni workflow-k még nem voltak elérhetők lekérdezéskor. LIVE változatlan; a DB mentés/audit hitelesített tesztje még nem futott.
+
+## 2026-11-07 – archív tömegsport teszt izolált state javítás
+- `dc3c109` CI: 7 futás, 6 success és 1 failure (`Manager competition training roster QA`, run `42382135984`). A `tests/mass-archive-access.test.cjs` két tesztje `state is not defined` hibával bukott, mert az izolált `new Function` helper nem kapta meg a production által használt `state.massTrainingPastSort` változót.
+- TEST integrációs ágon tesztjavítás `4e167f3d01ec26790b1e47f7a18560448ef1db08`: a harness `{massTrainingPastSort:'newest'}` állapotot kap. Production változatlan.
+- Új CI eredmény lekérdezéskor még nem állt rendelkezésre; hitelesített böngészős és TEST DB write/readback továbbra sem igazolt. LIVE érintetlen.
