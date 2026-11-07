@@ -67,7 +67,10 @@ test('snapshot choice shows actual known rows and discloses missing male B group
  ccMrszPhotoState_:{loaded:true,tables:[{competitionLabel:'Férfi Budapest I. osztály – A csoport',rows:[{position:1,teamName:'MAFC',played:1}]}]},
  ccStandingsPhotoTeamRows_:x=>x.rows,
  ccMrszCoverageLabel_:snapshot=>snapshot?'MRSZ · mentett tabella':'MRSZ · nincs tabella',
- standingsForContext_:()=>[{teamName:'Férfi csapat',position:null,played:0,tablePoints:0}]
+ standingsForContext_:()=>[{teamName:'Férfi csapat',position:null,played:0,tablePoints:0}],
+ ccOverviewLeagueInsights_:{},
+ ccEnsureOverviewLeagueInsight_:()=>{},
+ ccLeagueInsightRows_:()=>[]
  };
  vm.createContext(ctx);
  vm.runInContext(functions+'\nthis.get=ccOverviewStandingsModel_;',ctx);
@@ -77,7 +80,7 @@ test('snapshot choice shows actual known rows and discloses missing male B group
  assert.equal(fallback.rows.length,1);
  assert.equal(fallback.rows[0].position,null);
  assert.equal(fallback.rows[0].played,null);
- assert.match(fallback.source,/nincs/);
+ assert.match(fallback.source,/hiteles helyezés és mérleg nincs/);
 });
 test('match screen binds one selected league table, preserves BEAC event details and overview A/B controls',()=>{
  const match=slice('  function renderCompetitionMatchCards_(){','  function renderEventList(');
@@ -87,4 +90,15 @@ test('match screen binds one selected league table, preserves BEAC event details
  const bind=slice('  function bindOverviewStandings_(){','  function standingsSection_(');
  for(const key of ['data-overview-standings-team','data-overview-open-standings','data-overview-men-group'])
    assert.ok(bind.includes(key));
+});
+
+
+test('manager startup preserves valid auth session if bootstrap fails',()=>{
+ const boot=slice('  async function boot(){','  boot();');
+ assert.ok(boot.includes('state.session=session||null'));
+ assert.ok(boot.includes('if(!session){showLogin(\'loginEmailStep\');return}'));
+ const catchBlock=boot.slice(boot.lastIndexOf('}catch(err){'));
+ assert.ok(catchBlock.includes('if(state.session){'),'valid session must not be treated as logged out');
+ assert.ok(catchBlock.includes('hideLogin();'),'auth overlay should close on bootstrap failure');
+ assert.ok(catchBlock.includes("showLogin('loginEmailStep')"),'missing session should still request authentication');
 });
