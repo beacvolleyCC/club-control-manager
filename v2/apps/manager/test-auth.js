@@ -4,6 +4,7 @@ const el=id=>document.getElementById(id);
 const status=(s,error=false)=>{el('authStatus').textContent=s;el('authStatus').setAttribute('role',error?'alert':'status');};
 let accessToken=null;
 let publishableKey=null;
+export function getTestSession(){return accessToken && publishableKey ? {accessToken,publishableKey} : null;}
 async function authRequest(path,body){
  const response=await fetch(host+'/auth/v1/'+path,{method:'POST',headers:{apikey:publishableKey,'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
  const data=await response.json().catch(()=>({}));
@@ -25,15 +26,13 @@ el('verifyOtp').addEventListener('click',async()=>{
   const data=await authRequest('verify',{email,token,type:'email'});
   if(!data.access_token)throw new Error('Nem érkezett munkamenet-token');
   accessToken=data.access_token;
-  el('testKey').value=publishableKey;
-  el('testToken').value=accessToken;
   el('authOtp').value='';
   status('TEST bejelentkezés sikeres. Az adatok lekérdezhetők.');
- }catch(e){accessToken=null;el('testToken').value='';status(e.message,true);}finally{el('verifyOtp').disabled=false;}
+ }catch(e){accessToken=null;status(e.message,true);}finally{el('verifyOtp').disabled=false;}
 });
 el('logoutTest').addEventListener('click',()=>{
  accessToken=null;publishableKey=null;
- for(const id of ['testToken','testKey','authKey','authOtp'])el(id).value='';
+ for(const id of ['authKey','authOtp'])el(id).value='';
  for(const id of ['testTeams','testEvents'])el(id).replaceChildren();
  status('TEST munkamenet törölve a felületről.');
 });
