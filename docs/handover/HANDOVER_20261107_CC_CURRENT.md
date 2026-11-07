@@ -28,3 +28,12 @@ Minden érdemi kód-, DB-, konfiguráció-, PR-, teszt-, deploy- vagy státuszv�
 
 ## Következő indító kulcs
 CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadást; kezdj #86 read-only diff/CI és TEST schema/contract inventory ellenőrzéssel.
+
+## 2026-11-07 – négyfeladatos párhuzamos READ-ONLY vizsgálat
+- Supabase projektek azonosítva: LIVE `snqsxlyhontaepembaic`, TEST `szzoubvhlwnojtzqjebc`; mindkettő ACTIVE_HEALTHY. Azonos nevű projektet ne tévesszünk össze.
+- TEST-ben `manager_accounts` 1, `manager_module_permissions` 14, `teams` 3, `players` 19, `events` 12, `availability` 69, `mass_bookings` 1, `mass_passes` 0, `mass_live_write_audit` 0 (list_tables becslések). LIVE-ban `manager_accounts` 0, `manager_module_permissions` 0, `players` 47, `availability` 879, `mass_bookings` 1061, `mass_passes` 363, `mass_live_write_audit` 1552. Az eltérés kritikus: a TEST nem reprezentálja a LIVE tömegsportos bérlet-/jelentkezés-forgalmat; a TEST #86 teljes end-to-end QA-hoz kontrollált fixture kell.
+- TEST-ben megtalálható `cc_manager_mass_booking_pass_number_set_v1(p_booking_id text,p_pass_number text,p_reason text)` és `cc_manager_mass_event_detail_v1`; LIVE-ban a bérlet-/audit táblák léteznek. A DB-függvények tényleges definíciója, grants és auth-policy még részletes ellenőrzést igényel. A vizsgált publikus Manager RPC-k többsége SECURITY DEFINER: jogosultság- és EXECUTE-audit kiemelten fontos.
+- A #86 GitHub PR OPEN, `mergeable:false` értékkel érkezett; head `1037d502b6ac7649a53e6ad6cbd0904697c417ae`, base `e059a31e`. A main azóta változott. Nincs bizonyított merge-kész állapot, célzott teszt vagy sikeres deploy; emiatt **nem történt LIVE merge**.
+- A korábbi versenysportos teszthiba pontos fájlja és reprodukciója még nincs azonosítva, ezért nem jelölhető javítottnak.
+- A BEAC audit adatforrás ellenőrzése metaadat- és oszlopvizsgálat volt, **nem valós mentés–visszaolvasás teszt**; sem LIVE, sem TEST adatsort nem módosítottunk.
+- Következő: #86 diff és célzott CI + régi teszt izolálás; TEST fixture előkészítése külön izolált rekordokkal; auth/RPC grant és audit payload kulcsok ellenőrzése; csak ezután kiadási döntés.
