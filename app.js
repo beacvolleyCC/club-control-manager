@@ -4519,7 +4519,14 @@ async function ccMassAthleteHistoryLoad_(id){
     }catch(err){
       console.error(err);
       status(err.message||'Manager indítási hiba.','error');
-      showLogin('loginEmailStep')
+      if(state.session){
+        // A bootstrap/API hiba nem jelent kijelentkezést: a meglevő sessiont megtartjuk.
+        hideLogin();
+        renderChrome();
+        renderView();
+      }else{
+        showLogin('loginEmailStep');
+      }
     }
   }
 
