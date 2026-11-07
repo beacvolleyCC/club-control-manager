@@ -34,5 +34,6 @@ el('logoutTest').addEventListener('click',()=>{
  accessToken=null;publishableKey=null;
  for(const id of ['authKey','authOtp'])el(id).value='';
  for(const id of ['testTeams','testEvents'])el(id).replaceChildren();
+ window.dispatchEvent(new Event('cc:v2-test-clear'));
  status('TEST munkamenet törölve a felületről.');
 });
