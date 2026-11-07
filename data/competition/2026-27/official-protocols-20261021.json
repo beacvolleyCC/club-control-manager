@@ -1,0 +1,387 @@
+{
+  "season": "2026/27",
+  "evidence": "two user-uploaded official MRSZ PDF score sheets; visually double-reviewed 2026-10-22",
+  "deployment": "staged_only",
+  "matches": [
+    {
+      "sourceKey": "mrsz:2026/27:protocol:2686",
+      "canonicalFixtureSourceKey": "20261001:fixture:39",
+      "fileSha256": "b72d1dd8d4e1a6db04a5ddc7fc7c2ea0c021a4a67d755bdaea85aef3b890c9c1",
+      "data": {
+        "matchCode": 2686,
+        "season": "2026/27",
+        "source": "mrsz_official_protocol_pdf",
+        "originalFile": "mtk-panorama_bb1.pdf",
+        "leagueKey": "womenI",
+        "competitionLabel": "Női Budapest I. osztály",
+        "homeName": "MTK Budapest",
+        "awayName": "Panoráma SE",
+        "homeSourceTeamId": "1092",
+        "awaySourceTeamId": "753",
+        "startsAt": "2026-10-21T21:00:00+02:00",
+        "venue": "MTK RÖPLABDA CSARNOK BUDAPEST SZAMOS UTCA 2/C",
+        "homeSets": 3,
+        "awaySets": 1,
+        "status": "played",
+        "setScores": [
+          {
+            "set": 1,
+            "home": 25,
+            "away": 20
+          },
+          {
+            "set": 2,
+            "home": 25,
+            "away": 9
+          },
+          {
+            "set": 3,
+            "home": 20,
+            "away": 25
+          },
+          {
+            "set": 4,
+            "home": 25,
+            "away": 15
+          }
+        ],
+        "referee": {
+          "name": "HERR ZSUZSANNA",
+          "registrationId": 27000
+        },
+        "scorekeeper": {
+          "name": "SELMECZI VANDA",
+          "registrationId": 21008
+        },
+        "officials": {
+          "home": [
+            {
+              "name": "PUENTES RIVERY YULIEL",
+              "designation": "vezetőedző",
+              "registrationId": 58769
+            }
+          ],
+          "away": [
+            {
+              "name": "RÉDEY LUCA JULIANNA",
+              "designation": "vezetőedző",
+              "registrationId": 23161
+            }
+          ]
+        },
+        "rosters": {
+          "home": [
+            {
+              "name": "JUHOS ROZÁLIA",
+              "jersey": 1,
+              "designation": "Cs",
+              "registrationId": 21301
+            },
+            {
+              "name": "SVIGRUHA ESZTER",
+              "jersey": 4,
+              "designation": "K",
+              "registrationId": 26251
+            },
+            {
+              "name": "KISS VIRÁG BARBARA",
+              "jersey": 5,
+              "designation": "K",
+              "registrationId": 21303,
+              "captain": true
+            },
+            {
+              "name": "EHMANN KATA",
+              "jersey": 7,
+              "designation": "Cs",
+              "registrationId": 21570
+            },
+            {
+              "name": "CZENE DORKA",
+              "jersey": 8,
+              "designation": "Cs",
+              "registrationId": 31340
+            },
+            {
+              "name": "CSÓKA ESZTER LUCA",
+              "jersey": 10,
+              "designation": "K",
+              "registrationId": 53808
+            },
+            {
+              "name": "PUSKÁS IVETT",
+              "jersey": 11,
+              "designation": null,
+              "registrationId": 21232
+            },
+            {
+              "name": "SOÓS BRIGITTA",
+              "jersey": 12,
+              "designation": "Cs",
+              "registrationId": 27270
+            },
+            {
+              "name": "RÓNYAI ERIKA",
+              "jersey": 14,
+              "designation": "K",
+              "registrationId": 25162
+            },
+            {
+              "name": "FÖLDI LUCA",
+              "jersey": 23,
+              "designation": "K",
+              "registrationId": 22178
+            },
+            {
+              "name": "DEÁK DORKA PANNA",
+              "jersey": 27,
+              "designation": "K",
+              "registrationId": 58742
+            },
+            {
+              "name": "DELI-GERMANN OLGA",
+              "jersey": 13,
+              "designation": "Cs",
+              "registrationId": 21482,
+              "libero": "L1"
+            }
+          ],
+          "away": [
+            {
+              "name": "BAGDI ZITA",
+              "jersey": 7,
+              "designation": "K",
+              "registrationId": 26110
+            },
+            {
+              "name": "FERENCZ ÉVA",
+              "jersey": 9,
+              "designation": "K",
+              "registrationId": 24058
+            },
+            {
+              "name": "HORVÁTH BARBARA",
+              "jersey": 14,
+              "designation": "K",
+              "registrationId": 22396
+            },
+            {
+              "name": "MOLNÁR FLÓRA",
+              "jersey": 16,
+              "designation": "K",
+              "registrationId": 71563
+            },
+            {
+              "name": "RÉDEY LUCA JULIANNA",
+              "jersey": 17,
+              "designation": "K",
+              "registrationId": 23161,
+              "captain": true
+            },
+            {
+              "name": "HORVÁTH JÚLIA DOROTTYA",
+              "jersey": 18,
+              "designation": "K",
+              "registrationId": 34055
+            },
+            {
+              "name": "KOVÁCS ANDREA",
+              "jersey": 20,
+              "designation": "Cs",
+              "registrationId": 21911
+            }
+          ]
+        },
+        "canonicalFixtureSourceKey": "20261001:fixture:39"
+      }
+    },
+    {
+      "sourceKey": "mrsz:2026/27:protocol:2700",
+      "canonicalFixtureSourceKey": "brsz:2026/27:menB:userofficial:01",
+      "fileSha256": "e0dbe1e1e9b83d7324ad396b34d00879f7a07352084845008e81b8020a7c0736",
+      "data": {
+        "matchCode": 2700,
+        "season": "2026/27",
+        "source": "mrsz_official_protocol_pdf",
+        "originalFile": "mozdulj-vasarhelyi_bb1.pdf",
+        "leagueKey": "menB",
+        "competitionLabel": "Férfi Budapest I. osztály – B csoport",
+        "homeName": "Mozdulj SE",
+        "awayName": "MAFC-Vásárhelyi",
+        "homeSourceTeamId": "1213",
+        "awaySourceTeamId": "45",
+        "startsAt": "2026-10-21T20:00:00+02:00",
+        "venue": "MOZDULJ SPORTCSARNOK BUDAPEST MONORI ÚT 15",
+        "homeSets": 3,
+        "awaySets": 2,
+        "status": "played",
+        "setScores": [
+          {
+            "set": 1,
+            "home": 25,
+            "away": 18
+          },
+          {
+            "set": 2,
+            "home": 25,
+            "away": 23
+          },
+          {
+            "set": 3,
+            "home": 21,
+            "away": 25
+          },
+          {
+            "set": 4,
+            "home": 18,
+            "away": 25
+          },
+          {
+            "set": 5,
+            "home": 15,
+            "away": 11
+          }
+        ],
+        "referee": {
+          "name": "VIG DIÁNA",
+          "registrationId": 42098
+        },
+        "officials": {
+          "home": [
+            {
+              "name": "HACKL SZILVIA",
+              "designation": "vezetőedző",
+              "registrationId": 21345
+            }
+          ],
+          "away": []
+        },
+        "rosters": {
+          "home": [
+            {
+              "name": "BORSOS DÁVID",
+              "jersey": 2,
+              "designation": "Cs",
+              "registrationId": 75227
+            },
+            {
+              "name": "NÉMETI BENCE",
+              "jersey": 6,
+              "designation": "K",
+              "registrationId": 80471
+            },
+            {
+              "name": "BALÁZSI KRISZTIÁN",
+              "jersey": 7,
+              "designation": null,
+              "registrationId": 61342
+            },
+            {
+              "name": "ONTKÓ ÁRON",
+              "jersey": 9,
+              "designation": "K",
+              "registrationId": 31787
+            },
+            {
+              "name": "TEMLEITNER LEÓ LEVENTE",
+              "jersey": 10,
+              "designation": "K",
+              "registrationId": 75229
+            },
+            {
+              "name": "STARK SÁNDOR",
+              "jersey": 12,
+              "designation": "K",
+              "registrationId": 77930,
+              "captain": true
+            },
+            {
+              "name": "LÁSZLÓ KÁROLY",
+              "jersey": 17,
+              "designation": "K",
+              "registrationId": 75202
+            },
+            {
+              "name": "KOMÁN HUNOR",
+              "jersey": 18,
+              "designation": "K",
+              "registrationId": 82845
+            },
+            {
+              "name": "GÁLIK ANDRÁS MÁRTON",
+              "jersey": 28,
+              "designation": null,
+              "registrationId": 76211
+            },
+            {
+              "name": "RAB LEVENTE RÓBERT",
+              "jersey": 8,
+              "designation": "Cs",
+              "registrationId": 75203,
+              "libero": "L1"
+            }
+          ],
+          "away": [
+            {
+              "name": "SCHULCZ ISTVÁN",
+              "jersey": 1,
+              "designation": "K",
+              "registrationId": 20407
+            },
+            {
+              "name": "DOBOS VIKTOR",
+              "jersey": 2,
+              "designation": "K",
+              "registrationId": 23320,
+              "captain": true
+            },
+            {
+              "name": "MELICHER PÉTER",
+              "jersey": 4,
+              "designation": "K",
+              "registrationId": 20174
+            },
+            {
+              "name": "VARGA DÁNIEL",
+              "jersey": 6,
+              "designation": "Cs",
+              "registrationId": 66302
+            },
+            {
+              "name": "CSIZMADIA PÉTER DR.",
+              "jersey": 7,
+              "designation": "K",
+              "registrationId": 23321
+            },
+            {
+              "name": "SÓS GERGELY",
+              "jersey": 8,
+              "designation": "K",
+              "registrationId": 23314
+            },
+            {
+              "name": "ECKERT ISTVÁN",
+              "jersey": 9,
+              "designation": "K",
+              "registrationId": 20550
+            },
+            {
+              "name": "SZEBELLÉDY BALÁZS LAJOS",
+              "jersey": 11,
+              "designation": "Cs",
+              "registrationId": 22913
+            },
+            {
+              "name": "FARNADY ERNŐ",
+              "jersey": 14,
+              "designation": "Cs",
+              "registrationId": 22046,
+              "libero": "L1"
+            }
+          ]
+        },
+        "canonicalFixtureSourceKey": "brsz:2026/27:menB:userofficial:01"
+      }
+    }
+  ]
+}

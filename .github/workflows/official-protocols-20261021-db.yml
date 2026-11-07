@@ -1,0 +1,118 @@
+name: Official protocols canonical PostgreSQL QA
+on:
+  push:
+    branches: [feat/20261022-official-protocols-2686-2700]
+  pull_request:
+    paths:
+      - 'sql/official_protocols_20261021_identity_safe_migration.sql'
+      - 'tests/official-protocols-20261021/**'
+      - 'sql/official_protocols_20261021_manual_rollback.sql'
+      - 'sql/official_protocols_20261021_source_conflict_audit.sql'
+      - 'data/competition/2026-27/official-protocols-20261021.json'
+      - '.github/workflows/official-protocols-20261021-db.yml'
+jobs:
+  dual-db:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: cc_fixture_only
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: cc_fixture_only
+    steps:
+      - uses: actions/checkout@v4
+      # Verify two draft PRs in combination without merging or deploying.
+      # Pinned to the reviewed Manager #76 branch head; update when #76 changes.
+      - uses: actions/checkout@v4
+        with:
+          ref: b97ed731be1eb51f40f06eb06cb2bc2eeea9417c
+          path: qa-manager
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: beacvolleyCC/player_application
+          ref: 55eb674f22104cdbc84768c71a4040396ac44cd5
+          path: qa-player
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Chromium automation driver (runner-installed Chrome)
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright-core@1.56.1
+          (command -v google-chrome || command -v google-chrome-stable) || exit 1
+      - name: Check combined Manager #76 fixture code syntax and scope UX
+        run: |
+          node --check qa-manager/app.js
+          (cd qa-manager && node --test tests/authoritative-fixtures-and-match-toggle-20261025.test.cjs)
+      - name: Two independent clean 298-match baselines, run + rerun
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pass in 1 2; do
+            createdb "cc_protocols_pass_${pass}"
+            export PGDATABASE="cc_protocols_pass_${pass}"
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/bootstrap.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-view.sql
+          psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-stats-functions.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-fixtures.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+            test "$(psql -XAt -c 'select count(*) from private.cc_canonical_competition_matches_v1')" = 298
+            test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            export CC_PROTOCOL_CANONICAL_JSON_FILE="/tmp/cc-protocol-canonical-consumer-${pass}.json"
+            psql -XAt -c "select coalesce(jsonb_agg(x.v),'[]'::jsonb) from jsonb_array_elements(private.cc_competition_canonical_payload_v1()) x(v) where x.v->>'matchCode' in ('2686','2700')" > "$CC_PROTOCOL_CANONICAL_JSON_FILE"
+            node --test tests/official-protocols-20261021/manager-render-projected-protocol.test.cjs
+            CC_MANAGER_APP_FILE=qa-manager/app.js node --test tests/official-protocols-20261021/manager-render-projected-protocol.test.cjs
+            CC_PLAYER_APP_FILE=qa-player/app.js node --test tests/official-protocols-20261021/player-render-pg17-canonical.test.cjs
+            node --test tests/official-protocols-20261021/chromium-mobile-protocol-layout.test.cjs
+            # Seven synthetic JWT identities exercise the actual SQL role switch
+            # before any further migration/rollback; no production credentials.
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/authenticated-protocol-access.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_manual_rollback.sql
+            test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+            psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/verify.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+            echo "CC canonical independent pass ${pass}: 298/15 stable, rerun idempotent, reversible"
+          done
+      - name: Drift blocks atomic update, no result partially written
+        shell: bash
+        run: |
+          set -euo pipefail
+          createdb cc_protocols_invalid
+          export PGDATABASE=cc_protocols_invalid
+          psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/bootstrap.sql
+          psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-view.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/current-canonical-stats-functions.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-fixtures.sql
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+          psql -X -v ON_ERROR_STOP=1 -c "update public.cc_competition_mrsz_screenshot_v1 set data=jsonb_set(data,'{awayName}','\"DIFFERENT\"') where source_key='brsz:2026/27:menB:userofficial:01'"
+          if psql -X -v ON_ERROR_STOP=1 -f sql/official_protocols_20261021_identity_safe_migration.sql > /tmp/cc-invalid.out 2>&1; then
+            echo "ERROR: drift unexpectedly accepted"; exit 1
+          fi
+          grep -q 'CC_PROTOCOL_FIXTURE_DRIFT' /tmp/cc-invalid.out
+          test "$(psql -XAt -c "select count(*) from private.cc_canonical_competition_matches_v1 where match_status='played'")" = 13
+            psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+          test "$(psql -XAt -c "select count(*) from public.cc_competition_mrsz_screenshot_v1 where data ? 'officialProtocolEvidence'")" = 0
+          psql -X -v ON_ERROR_STOP=1 -f tests/official-protocols-20261021/legacy-conflict-guard.sql
+          echo "CC canonical rejection: atomic rollback confirmed"
