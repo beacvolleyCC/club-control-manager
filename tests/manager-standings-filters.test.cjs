@@ -91,3 +91,14 @@ test('match screen binds one selected league table, preserves BEAC event details
  for(const key of ['data-overview-standings-team','data-overview-open-standings','data-overview-men-group'])
    assert.ok(bind.includes(key));
 });
+
+
+test('manager startup preserves valid auth session if bootstrap fails',()=>{
+ const boot=slice('  async function boot(){','  boot();');
+ assert.ok(boot.includes('state.session=session||null'));
+ assert.ok(boot.includes('if(!session){showLogin(\'loginEmailStep\');return}'));
+ const catchBlock=boot.slice(boot.lastIndexOf('}catch(err){'));
+ assert.ok(catchBlock.includes('if(state.session){'),'valid session must not be treated as logged out');
+ assert.ok(catchBlock.includes('hideLogin();'),'auth overlay should close on bootstrap failure');
+ assert.ok(catchBlock.includes("showLogin('loginEmailStep')"),'missing session should still request authentication');
+});
