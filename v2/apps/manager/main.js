@@ -11,8 +11,8 @@ function render(){
  const sourcePlayers=liveTestData?[]:players;
  const selected=byId('teamFilter').value;
  const period=byId('periodFilter').value,chosenDay=byId('dateFilter').value,sort=byId('sortFilter').value;
- const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
- const dayOf=e=>e.startsAt?new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(e.startsAt)):'';
+ const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const dayOf=e=>e.startsAt?new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(e.startsAt)):'';
  const visible=sourceEvents.filter(e=>(selected==='all'||e.teamId===selected)&&(!chosenDay||dayOf(e)===chosenDay)&&(period==='all'||(period==='past'?dayOf(e)<today:dayOf(e)>=today))).sort((a,b)=>(sort==='oldest'?1:-1)*(new Date(a.startsAt)-new Date(b.startsAt)));
  byId('stats').innerHTML=[['Edzések',visible.length],['Játékosok',liveTestData?liveTestData.players.length:sourcePlayers.length],['Csapatok',sourceTeams.length]].map(([k,v])=>'<div class="stat"><span>'+esc(k)+'</span><strong>'+v+'</strong></div>').join('');
  byId('eventList').innerHTML=visible.map(e=>row(e.name+' · '+date(e.startsAt),e.venue||'Helyszín nincs megadva',sourceTeams.find(t=>t.id===e.teamId)?.name||'–')).join('')||'<p class="empty">Nincs edzés a szűrésben.</p>';
