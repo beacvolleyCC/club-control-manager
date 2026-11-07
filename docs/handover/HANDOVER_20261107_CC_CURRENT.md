@@ -62,3 +62,9 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - 7 statikus, forrásalapú ellenőrzés PASS: HTML és SW cache-verzió, mass/competition múltbeli rendezési állapot, mismatch figyelmeztetés, lenyitott részletek beszúrási pontja, régi kompakt-soros injektálás hiánya. Ezek **nem** JS parser-, böngésző-, DB-, UI- vagy CI-tesztek.
 - A #86 eredeti PR továbbra is külön, elavult ágon OPEN; az új integrációs ágat kell ellenőrizni és szükség esetén külön PR-rel kiadni. LIVE merge/deploy és Supabase adatírás nem történt.
 - Következő: JS szintaktika/CI, a `flagged.replace` DOM-beszúrás működésének böngészős regressziója, auth Manager TEST fixture, versenysportos teszthiba reprodukció, csak ezután LIVE release.
+
+## 2026-11-07 – #88 DRAFT PR létrehozva
+- A #86 javításának mainre célzott TEST-integrációjához új **draft PR #88** nyílt: https://github.com/beacvolleyCC/club-control-manager/pull/88. Head: `test/20261107-pr86-integration-qa`, head SHA `d15e3fc716d4367e8ec48240ad130b8dfa7ff6bb`; base main. GitHub jelenleg `mergeable:false` állapotot jelzett (nem tekinthető merge-késznek).
+- Az adott head SHA-hoz a GitHub Actions PR workflow run lekérdezése **üres listát** adott; nincs bizonyított CI siker. A 7 korábbi statikus forrásellenőrzés nem azonos CI/JS parser/böngészős teszttel.
+- Az eredeti #86 PR nem zárult és nem merge-öltük. LIVE alkalmazás, Cloudflare és DB nem változott.
+- Következő: GitHub PR #88 konfliktus/CI okának felderítése; valódi JS parser és régi versenysportos regressziós teszt; TEST Manager hitelesített képernyőpróba; BEAC bérletszám mentés/audit fixture. Release gate továbbra is zárt.
