@@ -10,9 +10,12 @@ function render(){
  const sourceEvents=liveTestData?.events??events;
  const sourcePlayers=liveTestData?[]:players;
  const selected=byId('teamFilter').value;
- const visible=sourceEvents.filter(e=>selected==='all'||e.teamId===selected).sort((a,b)=>new Date(a.startsAt)-new Date(b.startsAt));
+ const period=byId('periodFilter').value,chosenDay=byId('dateFilter').value,sort=byId('sortFilter').value;
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const dayOf=e=>e.startsAt?new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(e.startsAt)):'';
+ const visible=sourceEvents.filter(e=>(selected==='all'||e.teamId===selected)&&(!chosenDay||dayOf(e)===chosenDay)&&(period==='all'||(period==='past'?dayOf(e)<today:dayOf(e)>=today))).sort((a,b)=>(sort==='oldest'?1:-1)*(new Date(a.startsAt)-new Date(b.startsAt)));
  byId('stats').innerHTML=[['Edzések',visible.length],['Játékosok',liveTestData?liveTestData.players.length:sourcePlayers.length],['Csapatok',sourceTeams.length]].map(([k,v])=>'<div class="stat"><span>'+esc(k)+'</span><strong>'+v+'</strong></div>').join('');
- byId('eventList').innerHTML=visible.map(e=>row(e.name,date(e.startsAt)+' · '+e.venue,sourceTeams.find(t=>t.id===e.teamId)?.name||'–')).join('')||'<p class="empty">Nincs edzés a szűrésben.</p>';
+ byId('eventList').innerHTML=visible.map(e=>row(e.name+' · '+date(e.startsAt),e.venue||'Helyszín nincs megadva',sourceTeams.find(t=>t.id===e.teamId)?.name||'–')).join('')||'<p class="empty">Nincs edzés a szűrésben.</p>';
 }
 function updateTeamFilter(){const selected=byId('teamFilter').value;const source=liveTestData?.teams??teams;byId('teamFilter').innerHTML='<option value="all">Összes csapat</option>'+source.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('');if(source.some(t=>t.id===selected))byId('teamFilter').value=selected;}
 updateTeamFilter();
@@ -36,3 +39,11 @@ window.addEventListener('cc:v2-test-clear',()=>{
  byId('teamList').innerHTML=teams.map(t=>row(t.name,t.area==='competition'?'Versenysport':'Tömegsport',t.id)).join('');
  updateTeamFilter();render();
 });
+
+// V2 shell navigation – preview only, no database writes.
+byId('headerDate').textContent=new Intl.DateTimeFormat('hu-HU',{dateStyle:'long',timeZone:'Europe/Budapest'}).format(new Date());
+byId('filterToggle').addEventListener('click',()=>{const panel=byId('filterPanel');panel.hidden=!panel.hidden;byId('filterToggle').setAttribute('aria-expanded',String(!panel.hidden));});
+for(const id of ['periodFilter','dateFilter','sortFilter'])byId(id).addEventListener('change',render);
+byId('newEvent').addEventListener('click',()=>{byId('newEventPanel').hidden=false;byId('newEventPanel').scrollIntoView({behavior:'smooth'});});
+byId('closeNewEvent').addEventListener('click',()=>{byId('newEventPanel').hidden=true;});
+byId('settingsNav').addEventListener('click',()=>{const panel=byId('settingsPanel');panel.hidden=!panel.hidden;if(!panel.hidden)panel.scrollIntoView({behavior:'smooth'});});
