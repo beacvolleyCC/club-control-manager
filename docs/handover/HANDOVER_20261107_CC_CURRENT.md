@@ -85,3 +85,8 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - `5fd92c3` commit 7 Actions futás: 6 success, 1 failure, JS parse PASS. A `league-matches-page.test.cjs:36` assertion a férfi B csoportot várta, miközben a fixture `selectedTeamIds:[]` (Összes BEAC csapat) állapotot adott, és a production kód szándékosan mind a 4 ismert csoportot rendereli.
 - A TEST ágon a kizárólag férfi B csoportot ellenőrző teszt fixture explicit férficsapat szűrést kapott (`selectedTeamIds:['10000000-0000-4000-8000-000000000003']`). Commit `9ad028549495b87e4cc90bd057e64766d71f2121`. Production kód változatlan. Az összes csapat nézetét külön teszttel is érdemes védeni.
 - Új commit CI eredmény a lekérdezéskor még nem volt elérhető. LIVE változatlan.
+
+## 2026-11-07 – PR #88 CI: mass past sort harness javítva
+- A `9ad0285` commit workflow: 7 futás, 6 success, 1 failure. Bukás: `Manager competition training roster QA` run `42381994551`, `tests/mass-today-visibility.test.cjs:34`: `ReferenceError: state is not defined`.
+- Production `massVisibleTrainingRows_` helyesen használja `state.massTrainingPastSort`-ot, a teszt izolált `new Function` környezete azonban nem injektálta a `state` függőséget. TEST ág tesztjavítás `dc3c10955f079ebcf78b30651472b6969ebd1fe5`: `state={massTrainingPastSort:'newest'}` átadása. Production változatlan.
+- A javítás utáni workflow-k még nem voltak elérhetők lekérdezéskor. LIVE változatlan; a DB mentés/audit hitelesített tesztje még nem futott.
