@@ -4,7 +4,11 @@ const el=id=>document.getElementById(id);
 const status=(s,error=false)=>{el('authStatus').textContent=s;el('authStatus').setAttribute('role',error?'alert':'status');};
 let accessToken=null;
 let publishableKey=null;
-export function getTestSession(){return accessToken && publishableKey ? {accessToken,publishableKey} : null;}
+let expiresAt=0;
+let sessionVersion=0;
+export function getSessionVersion(){return sessionVersion;}
+function clearSession(){accessToken=null;expiresAt=0;sessionVersion++;window.dispatchEvent(new Event('cc:v2-test-clear'));}
+export function getTestSession(){if(accessToken && Date.now()>=expiresAt){clearSession();status('A TEST munkamenet lejárt. Jelentkezz be újra.',true);}return accessToken && publishableKey ? {accessToken,publishableKey} : null;}
 async function authRequest(path,body){
  const response=await fetch(host+'/auth/v1/'+path,{method:'POST',headers:{apikey:publishableKey,'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
  const data=await response.json().catch(()=>({}));
@@ -25,15 +29,17 @@ el('verifyOtp').addEventListener('click',async()=>{
  try{
   const data=await authRequest('verify',{email,token,type:'email'});
   if(!data.access_token)throw new Error('Nem érkezett munkamenet-token');
+  clearSession();
   accessToken=data.access_token;
+  expiresAt=Date.now()+Math.max(0,Number(data.expires_in)||0)*1000;
+  if(!Number.isFinite(expiresAt)||expiresAt<=Date.now())throw new Error('Hiányzó vagy érvénytelen lejárati idő');
   el('authOtp').value='';
   status('TEST bejelentkezés sikeres. Az adatok lekérdezhetők.');
- }catch(e){accessToken=null;status(e.message,true);}finally{el('verifyOtp').disabled=false;}
+ }catch(e){clearSession();status(e.message,true);}finally{el('verifyOtp').disabled=false;}
 });
 el('logoutTest').addEventListener('click',()=>{
- accessToken=null;publishableKey=null;
+ clearSession();publishableKey=null;
  for(const id of ['authKey','authOtp'])el(id).value='';
  for(const id of ['testTeams','testEvents'])el(id).replaceChildren();
- window.dispatchEvent(new Event('cc:v2-test-clear'));
  status('TEST munkamenet törölve a felületről.');
 });
