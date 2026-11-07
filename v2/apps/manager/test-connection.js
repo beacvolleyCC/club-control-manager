@@ -22,6 +22,7 @@ $('connectTest').addEventListener('click',async()=>{
   // Never blend fixture data with live TEST responses.
   renderRows('testTeams',teams,t=>[t.name,t.active?'Aktív':'Inaktív']);
   renderRows('testEvents',events,e=>[e.title||'Esemény',e.starts_at?new Intl.DateTimeFormat('hu-HU',{dateStyle:'short',timeStyle:'short',timeZone:'Europe/Budapest'}).format(new Date(e.starts_at))+' · '+(e.venue||''):'Nincs időpont']);
+  window.dispatchEvent(new CustomEvent('cc:v2-test-data',{detail:{teams,events}}));
   setStatus('TEST lekérdezés kész: '+teams.length+' csapat, '+events.length+' esemény. Csak a session által engedélyezett sorok.');
- }catch(err){$('testTeams').replaceChildren();$('testEvents').replaceChildren();setStatus('TEST kapcsolat sikertelen: '+err.message,true);}finally{$('connectTest').disabled=false;}
+ }catch(err){window.dispatchEvent(new Event('cc:v2-test-clear'));$('testTeams').replaceChildren();$('testEvents').replaceChildren();setStatus('TEST kapcsolat sikertelen: '+err.message,true);}finally{$('connectTest').disabled=false;}
 });
