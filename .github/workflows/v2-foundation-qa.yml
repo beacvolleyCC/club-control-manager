@@ -27,3 +27,11 @@ jobs:
         run: npm run typecheck
       - name: Run foundation contract tests
         run: npm test
+      - name: Build isolated preview
+        run: npm run build
+      - name: Upload Manager and Player preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: club-control-v2-preview
+          path: v2/dist
+          if-no-files-found: error
