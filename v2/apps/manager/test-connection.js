@@ -12,6 +12,10 @@ function renderRows(target,rows,make){const el=$(target);el.replaceChildren();fo
 $('connectTest').addEventListener('click',async()=>{
  const session=getTestSession();
  if(!session){setStatus('Előbb jelentkezz be a TEST fiókoddal.',true);return;}
+ // SECURITY GATE: current REST table policies authorize player membership, not Manager permissions.
+ // Keep Manager TEST data mode disabled until a server-side manager-scoped endpoint is verified.
+ setStatus('A Manager TEST adatnézet jogosultsági ellenőrzésig zárolva. A játékos-RLS nem helyettesíti a Manager jogosultságokat.',true);
+ return;
  const {publishableKey:key,accessToken:token}=session;
  $('connectTest').disabled=true;setStatus('TEST adatok lekérése…');
  try{
