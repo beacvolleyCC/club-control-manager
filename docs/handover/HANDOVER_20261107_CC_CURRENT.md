@@ -44,3 +44,9 @@ CC-FOLYTATÁS – olvasd a HANDOVER_CURRENT.md-t és ezt a 2026-11-07-es átadá
 - RPC EXECUTE: `anon=false`, `authenticated=true` mindkét DB-ben; ez nem helyettesíti a belső permission helper hitelesített vizsgálatát.
 - Környezeti eltérés: TEST audit operation `test.booking_pass_number_set`, LIVE `live.booking_pass_number_set`. A definíciók ezt a különbséget szándékosan tartalmazzák. A LIVE manager_accounts becsült 0 sora miatt a jogosultságellenőrzés felhasználói tesztje különösen fontos.
 - A vizsgálat kizárólag SELECT/metadata volt; tényleges passNumber mentés, audit INSERT, UI teszt és deploy **nem történt**.
+
+## 2026-11-07 – pontos SQL COUNT korrekció
+- A `list_tables` rows mező **becslés**, nem használható jogosultsági táblák tényleges ürességének bizonyítására. Közvetlen `COUNT(*)` alapján: LIVE manager_accounts=3, manager_module_permissions=27, mass_bookings=1061, mass_passes=363; TEST manager_accounts=1, manager_module_permissions=14, mass_bookings=1, mass_passes=0.
+- A `mass_live_write_audit` táblában `operation LIKE '%booking_pass_number_set%'` feltétellel LIVE=0, TEST=0 rekord. Ez nem bizonyítja, hogy a bérletszám RPC hibás; csak azt, hogy ezen a néven nincs rögzített tényleges javítási audit. A valódi mentés tesztje hátravan.
+- Korábbi 0 LIVE Manager-fiók/jogosultság következtetés **téves**, a fenti pontos számok felülírják.
+- #86 ág mainhez képest eltérő; alkalmazáskód merge és deploy továbbra sem történt. A #86-os app.js változás és a #87-es történeti rendezés ugyanazon fájlt érinti, ezért a mainre történő egyszerű fájlfelülírás tilos.
