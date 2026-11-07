@@ -458,7 +458,7 @@
         const main=$('#mainContent');if(!main)return;
         let preview=$('#ccV2PreviewFrame');
         if(!preview){preview=document.createElement('iframe');preview.id='ccV2PreviewFrame';preview.title='Club Control V2 – Teszt';preview.src='./v2/apps/manager/index.html';preview.style.cssText='display:block;width:100%;min-height:78vh;border:0;border-radius:12px;background:#fff';main.appendChild(preview);}
-        for(const child of main.children)if(child!==preview)child.hidden=true;
+        for(const child of main.children)if(child!==preview){child.dataset.v2WasHidden=child.hidden?'1':'0';child.hidden=true;}
         preview.hidden=false;preview.style.display='block';
         $('#legacySecondaryNav').hidden=true;
         primary.querySelectorAll('.legacy-primary-tab').forEach(tab=>tab.classList.toggle('active',tab===testTab));
@@ -466,7 +466,7 @@
       primary.querySelectorAll('[data-main-section]').forEach(tab=>tab.addEventListener('click',()=>{
         const preview=$('#ccV2PreviewFrame');if(!preview)return;
         preview.hidden=true;preview.style.display='none';
-        const main=$('#mainContent');for(const child of main.children)if(child!==preview)child.hidden=false;
+        const main=$('#mainContent');for(const child of main.children)if(child!==preview){child.hidden=child.dataset.v2WasHidden==='1';delete child.dataset.v2WasHidden;}
       }));
     }
     const secondary=$('#legacySecondaryNav');
