@@ -137,3 +137,10 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - `cc_v2_player_read_v1(10)` JWT nélkül: `PLAYER_NOT_LINKED` hibával elutasítva, adatok nem kerültek vissza.
 - `cc_v2_manager_read_v1(now(),now()+interval '7 days',null,'')` JWT nélkül: SQLSTATE 42501 `MANAGER_AUTH_REQUIRED` hibával elutasítva.
 - Ez **negatív auth smoke test**, nem teljes valós JWT E2E vagy csapatszintű jogosultságteszt. TEST jelenleg 1 aktív auth-linked player, 1 Manager; canonical identity/booking/waitlist linkek 0. LIVE érintetlen.
+
+
+## 2026-11-09 – tömegsportos migráció ellenőrző API TEST
+- `cc_v2_mass_reconciliation_read_api_20261109` migration sikeres (első DDL-kísérlet szintaktikai hiba miatt nem települt; javított verzió sikeres).
+- `public.cc_v2_mass_reconciliation_v1()` JSONB: source counts és verifiedLinks counts `mass_athletes`, `mass_events`, `mass_bookings`, `mass_waitlist` forrásokra. SECURITY DEFINER, `private.cc_manager_require_any_v1('mass.overview','view')` kapu; anon EXECUTE=false, authenticated=true.
+- TEST forrásrekordok: 0 mass_athletes, 6 mass_events, 1 mass_bookings, 7 mass_waitlist; mapping tables korábbi ellenőrzés szerint üresek. A funkció telepítve és ACL ellenőrizve; pozitív Manager JWT E2E még hátra.
+- Nem történt automatikus migráció, sem legacy rekordmódosítás. LIVE érintetlen.
