@@ -59,3 +59,11 @@ Read-only TEST SQL eredmények:
 - **Felülvizsgálandó, potenciális csapatközi hozzáférési kockázat:** `cc_manager_finance_override_set_v1` a forrás alapján `private.cc_manager_require_any_v1('competition.fees','edit')` hívást használ, de a módosítandó játékos csapattagságát a látható kódban nem köti a Manager engedélyezett csapatához. Ez nem bizonyított exploit, de a csapatszintű jogosultsági modellhez kritikus negatív teszt és célzott javítási terv kell. A TEST-ben nem hajtottunk végre írást.
 - Adatminőség: 0 lejárt aktív csapattagság; 0 fordított időpontú `events`; 0 fordított időpontú `mass_events`; 0 null státuszú `availability`; 0 belső csapat nélküli `competition_source_matches`.
 - Nyitott: a többi 52+ Manager RPC és Player RPC tételes jogosultsági útvonalának elemzése; Manager szerepkörrel való tényleges negatív végpontteszt; V1 write útvonalak összevetése; teljes identity/event matching.
+
+
+## 2026-11-08 – TEST jogosultsági javítás telepítve
+- Supabase migration: `cc_finance_override_team_permission_guard_20261108` — sikeres.
+- `public.cc_manager_finance_override_set_v1`: az eredeti `require_any('competition.fees','edit')` mellett most ellenőrzi a tényleges Manager `manager_module_permissions` jogosultságát és a kiválasztott `players.id` játékos aktív `team_memberships` csapattagságát. A `team_id IS NULL` globális jog továbbra is működik.
+- Jogosulatlan játékosra `42501 MANAGER_PERMISSION_DENIED:competition.fees:edit:player` hibát dob, még az írás előtt.
+- Telepített függvény definíciójának read-back ellenőrzése: `guard_installed=true`, `team_match=true`, `global_permission=true`.
+- **Nem teljesen validált:** csapatjogosult, másik csapatra jogosulatlan, klubszintű és inaktív admin valós auth/JWT negatív és pozitív tesztje hiányzik. TEST adatváltozásos tesztet nem futtattunk; LIVE nem módosult.
