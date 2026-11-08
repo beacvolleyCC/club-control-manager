@@ -76,3 +76,12 @@ Read-only TEST SQL eredmények:
 - `cc_manager_finance_settings_get_v2` nem null csapat esetén `private.cc_manager_require_v1('competition.fees','view',p_team_id)` ellenőrzést végez.
 - Migration: `cc_finance_settings_team_and_global_permissions_20261108`, sikeres; read-back: v1 global guard, v2 team edit guard, v2 team view guard mind jelen.
 - Nem futott valódi admin szerepkörös E2E; a `finance_matrix` és `finance_audit` szűrést külön, üzleti adatmegjelenítési szabályok szerint kell tervezni és tesztelni. LIVE érintetlen.
+
+
+## 2026-11-08 – 6. kör: finance matrix/audit TEST scope guard
+- Migration `cc_finance_matrix_and_audit_scope_guard_20261108` succeeded.
+- `cc_manager_finance_audit_v1`: full audit log now requires `competition.fees` view permission with `team_id IS NULL`; team-only Manager gets `42501 FINANCE_GLOBAL_AUDIT_VIEW_REQUIRED`. Team-specific audit endpoint is future work.
+- `cc_manager_finance_matrix_v1`: requires scoped team permission when p_team_id supplied; player rows filtered by Manager fees:view team scope; fee/meta rows filtered by permitted memberships **and conservative cross-team guard**: if a player has another active membership outside Manager's permitted teams, shared fee/meta rows are excluded to avoid cross-team exposure.
+- Source readback checks: global audit guard, matrix team filter and shared-player guard all present.
+- Trade-off: cross-team shared players may show roster row but no fee/meta to team-only Manager. Requires product policy for fee ownership and multi-team visibility; global Manager unaffected.
+- **Validation still pending:** actual JWT-role positive/negative calls, UI compatibility, multi-team cases. LIVE untouched.
