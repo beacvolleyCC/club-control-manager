@@ -152,3 +152,10 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - A mass_bookings 1/1 és mass_waitlist 7/7 hivatkozás létező mass_events sorra mutat.
 - Következtetés: jelenleg **nem indokolt** a mass_events automatikus hozzárendelése a competition events rekordjaihoz. A mass és competition események külön tartományt képviselhetnek; egységes V2 frontend API-ban külön source/type kezelés kell, vagy explicit hitelesített mapping.
 - Sem adatírás, sem automatikus link-feltöltés nem történt. Következő: mass domain read adapter, guest/athlete identity modell, explicit match review, E2E.
+
+
+## 2026-11-09 – mass Manager read adapter + notification rollback smoke test
+- TEST migration `cc_v2_mass_manager_read_adapter_20261109` applied: `cc_v2_manager_mass_read_v1(date,date)` wraps existing permission-checked `cc_manager_mass_trainings_v1`, returns `schemaVersion=1`, `domain=mass`, `sourceSystem=mass_events`, trainings. Date range validated (max 366 days).
+- Verified ACL: anon EXECUTE=false; authenticated=true. Versioned SQL: `v2/database/migrations/20261109_cc_v2_mass_manager_read_adapter.sql`.
+- Transactional smoke test: UPDATE player_notifications.player_id=itself on one existing row triggered sync, matching links remained 6/6, ROLLBACK. No persistent legacy data change.
+- Booking links and canonical waitlist still 0. This is **not** full mass booking/guest migration, nor positive JWT E2E. LIVE untouched.
