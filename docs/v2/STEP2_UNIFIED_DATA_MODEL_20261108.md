@@ -42,3 +42,23 @@ F. V1 írási utak fokozatos kiváltása csak adat- és működés-egyezőség u
 - Migrációs visszaállítás és történeti audit megőrzése.
 
 **Nem történt adatbázis-módosítás.** A dokumentum tervezési döntési alap, nem kész migráció.
+
+
+## V2 továbblépési döntési kapu — 2026-11-08
+Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljének részletes kidolgozásához**, de nem elegendő adatátíró migráció vagy LIVE cutover engedélyezéséhez. A két munka párhuzamosan haladhat; a nyitott biztonsági audit külön blokkoló feltétel marad.
+
+### Első végrehajtható V2 csomag (TEST, adatvesztés nélkül)
+1. `identity_external_links`: `source_system`, `external_id`, `player_id UUID FK`, `match_method`, `verified_at`, `created_at`; UNIQUE(source_system, external_id). Nem automatikus email-összefésülés.
+2. `event_external_links`: `source_system`, `external_id`, `event_id UUID FK`, `verified_at`, `created_at`; UNIQUE(source_system, external_id). A külső verseny-meccs linkek külön provenance-t őriznek.
+3. Read-only reconciliation riport: legacy és canonical darabszámok, unmatched/ambiguous mapping, duplikált külső kulcsok; csak aggregált értékek, PII nélkül.
+4. Manager/Player adapter először kizárólag read-only; az eredeti V1 táblák és write RPC-k érintetlenek.
+5. Negatív JWT/jogosultsági tesztek, majd V1–V2 shadow-read összevetés a következő kapuhoz.
+
+### Nyitott, migrációt blokkoló döntések
+- A `mass_athletes` TEST-ben üres: valódi legacy identity backfill egyezőség nem igazolható.
+- Több csapatban aktív játékos pénzügyi rekordjainak tulajdonosa és megoszthatósága még nincs modellezve.
+- Vendég/anonim tömegsport résztvevő identitás és első edzés deduplikáció.
+- Jelentkezés/várólista és pénzügy adatforrás-prioritás; audit/rollback.
+- Az RPC szerepkörös végponttesztje hiányzik.
+
+**Státusz:** V2 modell részletes tervezése elkezdhető; schema migration még nincs telepítve ezen döntés alapján. LIVE nem érinthető.
