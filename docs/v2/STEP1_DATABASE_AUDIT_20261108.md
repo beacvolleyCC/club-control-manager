@@ -85,3 +85,11 @@ Read-only TEST SQL eredmények:
 - Source readback checks: global audit guard, matrix team filter and shared-player guard all present.
 - Trade-off: cross-team shared players may show roster row but no fee/meta to team-only Manager. Requires product policy for fee ownership and multi-team visibility; global Manager unaffected.
 - **Validation still pending:** actual JWT-role positive/negative calls, UI compatibility, multi-team cases. LIVE untouched.
+
+
+## 2026-11-08 – 7. kör: jogosultsági teszt-előkészítés
+- TEST read-only schema check: `manager_accounts` uses nullable `auth_user_id`, `email`, `active`; `manager_module_permissions` uses `manager_id`, nullable `team_id`, `can_view/can_edit/can_notify`; `team_memberships` uses `player_id/team_id/starts_on/ends_on/active`.
+- `private.cc_manager_current_account_v1` requires both `auth.uid()` and JWT email, matched to active Manager's `auth_user_id` and email. Cannot test true role isolation by merely inserting Manager rows without matching auth identity.
+- Four **synthetic read-only SQL predicate** cases checked (global allowed, own team allowed, other team denied, no permission denied): 4/4 pass. These do NOT execute actual RPC or JWT authentication; not security E2E proof.
+- Actual TEST counts: 1 active Manager, 0 team-scoped finance Managers, 0 players with concurrent active multi-team memberships. Need isolated auth test identities and fixture lifecycle, and cleanup plan before actual positive/negative RPC testing.
+- Do not alter LIVE. Next: real authenticated actor tests and investigate other RPC team-scope outliers.
