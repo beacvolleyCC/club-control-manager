@@ -71,3 +71,12 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - `public.cc_v2_reconciliation_summary()`: SECURITY DEFINER, Manager `competition.players:view` ellenőrzés, aggregált legacy/canonical/mapping darabszámok; EXECUTE csak authenticated (PUBLIC/anon revoked).
 - Read-back: 2 UNIQUE, 2 FK, 2 RLS ON; mapping rows 0/0. Legacy táblákhoz és meglévő adatokhoz nem nyúltunk.
 - **Nyitott:** összerendelések feltöltése hiteles forrásból, read API Manager/Player eltérő hozzáféréssel, end-to-end auth/permission tesztek, legacy booking/waitlist/finance modellezése, frontend szerződés és adatminőségi ellenőrzés. Ez az első lépés alapja, nem a teljes V2 adatbázis készre jelentése. LIVE érintetlen.
+
+
+## 2026-11-08 – második additív TEST migráció: booking + waitlist
+- `cc_v2_booking_waitlist_canonical_foundation_20261108` sikeres.
+- `cc_v2_booking_links`: legacy source/external ID UNIQUE → `availability(event_id,player_id)` összetett FK, verified provenance.
+- `cc_v2_waitlist`: canonical `event_id` és `player_id` UUID FK; `waiting/offered/accepted/expired/cancelled` állapotok, offer/accept időrendi CHECK és event/player UNIQUE.
+- `cc_v2_waitlist_links`: legacy waitlist external ID UNIQUE → canonical waitlist UUID FK.
+- Mindhárom új tábla RLS ON, anon/authenticated közvetlen hozzáférés visszavonva; read-back: FK/UNIQUE/RLS OK.
+- **Nem kész:** waitlist tranzakciós offer/accept, capacity, idempotencia, mass booking státusz-mapping, auth nélküli vendég identity, pénzügy, értesítések, tényleges adat-backfill, Manager/Player közös API és E2E. Meglévő rekordok változatlanok; LIVE érintetlen.
