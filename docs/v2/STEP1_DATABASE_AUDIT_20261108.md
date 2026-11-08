@@ -50,3 +50,12 @@ Read-only TEST SQL eredmények:
 - `public.cc_mass_registration_status_test_v1(p_event_id text)` `SECURITY DEFINER`, kizárólag `source_workbook_id='CC-QA-SYNTHETIC'` aktív/publikus eseményt olvas; státuszt és aggregált férőhelyadatokat ad. Nem bizonyított jogosulatlan adatfeltárás; a teszt RPC szükségességét élesítés előtt külön értékelni kell.
 - `player_notifications`: 6/6 `player_id` érték a `players.id::text`-hez illeszkedik. `player_fees` és `player_push_outbox` üres, ezért e kapcsolatok minősége még nem igazolt.
 - A két függvény kódját átnéztük, de nincs helyettesítője a szerepkör szerinti valódi végpont- és RLS-teszteknek.
+
+
+## 2026-11-08 – 4. kör: Manager/Player RPC-k és adatminőség
+- 57 `cc_manager_%` és 20 `cc_player_%` publikus függvény található. A Manager SECURITY DEFINER függvények közül 0 anonim EXECUTE jogosultságú.
+- `cc_manager_teams_v1`, `cc_manager_events_v1`, `cc_manager_players_v2` ellenőrzött forrása csapat/modul alapú `private.cc_manager_require_*` ellenőrzést és soronkénti permission szűrést tartalmaz.
+- `cc_player_notifications_v1` az `auth.uid()` és `players.auth_user_id` összerendelést ellenőrzi, majd saját `player_id` alapján szűr.
+- **Felülvizsgálandó, potenciális csapatközi hozzáférési kockázat:** `cc_manager_finance_override_set_v1` a forrás alapján `private.cc_manager_require_any_v1('competition.fees','edit')` hívást használ, de a módosítandó játékos csapattagságát a látható kódban nem köti a Manager engedélyezett csapatához. Ez nem bizonyított exploit, de a csapatszintű jogosultsági modellhez kritikus negatív teszt és célzott javítási terv kell. A TEST-ben nem hajtottunk végre írást.
+- Adatminőség: 0 lejárt aktív csapattagság; 0 fordított időpontú `events`; 0 fordított időpontú `mass_events`; 0 null státuszú `availability`; 0 belső csapat nélküli `competition_source_matches`.
+- Nyitott: a többi 52+ Manager RPC és Player RPC tételes jogosultsági útvonalának elemzése; Manager szerepkörrel való tényleges negatív végpontteszt; V1 write útvonalak összevetése; teljes identity/event matching.
