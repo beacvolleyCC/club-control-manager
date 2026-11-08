@@ -29,3 +29,15 @@ Forrás: kizárólag olvasó SQL a TEST Supabase projekten: `szzoubvhlwnojtzqjeb
 
 ## Döntés
 Nincs automatikus táblatörlés vagy átnevezés; a V2 kompatibilitási rétegen keresztül csatlakozik. Migráció csak külön jóváhagyás és adatvesztésmentes egyeztetés után.
+
+
+## 2026-11-08 – tényleges audit futás, 2. kör
+Read-only TEST SQL eredmények:
+- public: 60 tábla, mindegyiken RLS ON; 60 PK, 56 FK, 18 UNIQUE, 108 CHECK, 157 index.
+- public: 141 függvény, ebből 84 SECURITY DEFINER; 48 függvényre van effektív anon EXECUTE. private: 23 függvény, ebből 12 SECURITY DEFINER; 1 függvényre effektív anon EXECUTE. Az EXECUTE önmagában nem bizonyítja a jogosulatlan adatelérést.
+- Külön figyelmet igénylő anon+SECURITY DEFINER függvények: `public.cc_mass_registration_status_test_v1`, `private.cc_finance_settings_audit_v1`. A private séma API-elérhetősége ettől külön ellenőrizendő.
+- RLS policy-k csak hét public táblán látszanak: `availability` (3), `player_settings` (3), `events`, `player_private`, `players`, `team_memberships`, `teams` (1-1). Más táblák közvetlen klienselérését külön kell ellenőrizni; RLS ON + policy hiánya általában default deny, de privileged RPC-k ettől eltérhetnek.
+- `players`: 19 rekord, 19 különböző email, 0 hiányzó email. `mass_athletes`: 0 rekord; nem alkalmas az identitás-összerendelés érdemi tesztelésére.
+- `mass_bookings` → `mass_events` hiányzó hivatkozás: 0; `mass_waitlist` → `mass_events` hiányzó hivatkozás: 0.
+- `competition_source_matches`: 9 rekord `linked_event_id IS NULL`; ezt külön meg kell különböztetni a szándékosan külső forrásban maradó meccsektől.
+- Következő: két SECURITY DEFINER függvény forrás- és GRANT auditja; összes RPC, trigger, adatminőségi és role-szimulációs teszt.
