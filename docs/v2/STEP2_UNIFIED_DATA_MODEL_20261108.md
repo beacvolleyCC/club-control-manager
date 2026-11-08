@@ -97,3 +97,11 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - TEST migration `cc_v2_exact_uuid_backfill_notifications_finance_20261108` sikeres. Csak pontos UUID-egyezéses `INSERT ... ON CONFLICT DO NOTHING` a három kapcsolati táblába; sem email, sem név alapján nem történt összefésülés.
 - Utóellenőrzés: `cc_v2_notification_links` 6, `player_notifications` 6, unmatched 0; fee links 0, push links 0.
 - Korlát: újonnan érkező rekordok automatikus szinkronja még nincs megvalósítva; API és valódi role/JWT E2E nincs kész. LIVE változatlan.
+
+
+## 2026-11-08 – értesítési kapcsolat automatikus szinkronja TEST
+- Migration `cc_v2_notification_link_auto_sync_20261108` sikeres.
+- `private.cc_v2_sync_notification_link()` SECURITY DEFINER trigger-függvény: `player_notifications` INSERT vagy `player_id` UPDATE után pontos UUID egyezés alapján upsert a `cc_v2_notification_links` táblába; nem egyező player_id esetén a korábbi linket eltávolítja.
+- Trigger `cc_v2_notification_link_sync` read-back igazolt; a korábbi 6/6 link megmaradt.
+- A trigger-függvény közvetlen EXECUTE jogosultsága PUBLIC/anon/authenticated szerepköröktől visszavonva.
+- Még nincs tranzakciós INSERT/UPDATE negatív teszt, illetve push/fee automatikus szinkron, Manager/Player read API vagy teljes frontend-ready állapot. LIVE érintetlen.
