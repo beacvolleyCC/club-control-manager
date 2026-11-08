@@ -129,3 +129,11 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - `public.cc_v2_player_read_v1(p_notification_limit integer default 50)`: JSONB schemaVersion=1, bootstrap (`cc_player_bootstrap_filtered_v1`), notifications (`cc_player_notifications_v1`).
 - SQL STABLE SECURITY INVOKER; meglévő Player bootstrap és auth.uid-hoz kötött értesítés RPC. Read-back: anon EXECUTE false, authenticated true, SECURITY DEFINER false.
 - A Manager `cc_v2_manager_read_v1` mellett most Player read belépési pont is létezik, de a valódi JWT E2E, teljes V2 adatcontract, mass booking/waitlist és frontend-integráció még nyitott. LIVE érintetlen.
+
+
+## 2026-11-08 – V2 read API negatív jogosultsági smoke test TEST
+- Metadata: `cc_v2_manager_read_v1`, `cc_v2_player_read_v1`, `cc_v2_reconciliation_summary` anon EXECUTE=false, authenticated=true.
+- SQL `SET LOCAL ROLE authenticated` JWT nélkül: `auth.uid()` null.
+- `cc_v2_player_read_v1(10)` JWT nélkül: `PLAYER_NOT_LINKED` hibával elutasítva, adatok nem kerültek vissza.
+- `cc_v2_manager_read_v1(now(),now()+interval '7 days',null,'')` JWT nélkül: SQLSTATE 42501 `MANAGER_AUTH_REQUIRED` hibával elutasítva.
+- Ez **negatív auth smoke test**, nem teljes valós JWT E2E vagy csapatszintű jogosultságteszt. TEST jelenleg 1 aktív auth-linked player, 1 Manager; canonical identity/booking/waitlist linkek 0. LIVE érintetlen.
