@@ -67,3 +67,12 @@ Read-only TEST SQL eredmények:
 - Jogosulatlan játékosra `42501 MANAGER_PERMISSION_DENIED:competition.fees:edit:player` hibát dob, még az írás előtt.
 - Telepített függvény definíciójának read-back ellenőrzése: `guard_installed=true`, `team_match=true`, `global_permission=true`.
 - **Nem teljesen validált:** csapatjogosult, másik csapatra jogosulatlan, klubszintű és inaktív admin valós auth/JWT negatív és pozitív tesztje hiányzik. TEST adatváltozásos tesztet nem futtattunk; LIVE nem módosult.
+
+
+## 2026-11-08 – 5. kör: pénzügyi API-k és TEST javítás
+- Tételes forrásellenőrzés: `cc_manager_finance_matrix_v1` globális csapatszűrés nélkül adhat vissza játékosokat, díjakat és metaadatokat, ha a Managernek bármely csapatra van fees:view joga; `cc_manager_finance_audit_v1` globális auditadatokat ad vissza ugyanilyen általános jogosultsággal. **Nyitott adatfeltárási kockázatok; nem javítottuk őket ebben a körben.**
+- `cc_manager_finance_settings_set_v1` klubszintű íráshoz most megköveteli a `manager_module_permissions.team_id IS NULL` és `can_edit` jogosultságot, különben `42501 FINANCE_GLOBAL_EDIT_REQUIRED`.
+- `cc_manager_finance_settings_set_v2` nem null csapat esetén `private.cc_manager_require_v1('competition.fees','edit',p_team_id)` ellenőrzést végez. Null csapat esetén a v1 globális ellenőrzésre támaszkodik.
+- `cc_manager_finance_settings_get_v2` nem null csapat esetén `private.cc_manager_require_v1('competition.fees','view',p_team_id)` ellenőrzést végez.
+- Migration: `cc_finance_settings_team_and_global_permissions_20261108`, sikeres; read-back: v1 global guard, v2 team edit guard, v2 team view guard mind jelen.
+- Nem futott valódi admin szerepkörös E2E; a `finance_matrix` és `finance_audit` szűrést külön, üzleti adatmegjelenítési szabályok szerint kell tervezni és tesztelni. LIVE érintetlen.
