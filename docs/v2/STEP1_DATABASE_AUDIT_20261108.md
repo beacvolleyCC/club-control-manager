@@ -41,3 +41,12 @@ Read-only TEST SQL eredmények:
 - `mass_bookings` → `mass_events` hiányzó hivatkozás: 0; `mass_waitlist` → `mass_events` hiányzó hivatkozás: 0.
 - `competition_source_matches`: 9 rekord `linked_event_id IS NULL`; ezt külön meg kell különböztetni a szándékosan külső forrásban maradó meccsektől.
 - Következő: két SECURITY DEFINER függvény forrás- és GRANT auditja; összes RPC, trigger, adatminőségi és role-szimulációs teszt.
+
+
+## 2026-11-08 – 3. kör: trigger, GRANT és cross-module audit
+- `information_schema.triggers`: 15 trigger-event bejegyzés (egy trigger több műveletre is szerepelhet). Többségük updated_at; két finance settings audit trigger INSERT/UPDATE eseményekkel, és meccs roster guard.
+- `information_schema.role_table_grants`: az `authenticated` szerepkörnek explicit tábla GRANT hét táblán: availability (INSERT/SELECT/UPDATE), events (SELECT), player_private (SELECT), player_settings (INSERT/SELECT/UPDATE), players (SELECT), team_memberships (SELECT), teams (SELECT). A többi tábla RPC-k vagy privilegizált backend útján érhető el, nem következik közvetlen elérhetőség.
+- `private.cc_finance_settings_audit_v1()` trigger-függvény; `SECURITY DEFINER`, `search_path=''`, audit_log-ba ír, nem általános lekérdező RPC. Az effektív anon EXECUTE jogosultság ettől még minimális privilégium szempontból felülvizsgálandó.
+- `public.cc_mass_registration_status_test_v1(p_event_id text)` `SECURITY DEFINER`, kizárólag `source_workbook_id='CC-QA-SYNTHETIC'` aktív/publikus eseményt olvas; státuszt és aggregált férőhelyadatokat ad. Nem bizonyított jogosulatlan adatfeltárás; a teszt RPC szükségességét élesítés előtt külön értékelni kell.
+- `player_notifications`: 6/6 `player_id` érték a `players.id::text`-hez illeszkedik. `player_fees` és `player_push_outbox` üres, ezért e kapcsolatok minősége még nem igazolt.
+- A két függvény kódját átnéztük, de nincs helyettesítője a szerepkör szerinti valódi végpont- és RLS-teszteknek.
