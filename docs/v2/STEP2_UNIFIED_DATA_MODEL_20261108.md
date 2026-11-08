@@ -122,3 +122,10 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - SQL STABLE SECURITY INVOKER, meglévő Manager RPC jogosultságokra támaszkodik. Function EXECUTE readback: anon false, authenticated true, security definer false.
 - Ez nem Player API; nem tartalmaz még booking/waitlist/finance/push adatkészletet, nem teljes V2 frontend contract. JWT/E2E még hátravan.
 - LIVE érintetlen.
+
+
+## 2026-11-08 – első V2 Player közös read API TEST
+- Migration `cc_v2_player_composed_read_api_20261108` sikeres.
+- `public.cc_v2_player_read_v1(p_notification_limit integer default 50)`: JSONB schemaVersion=1, bootstrap (`cc_player_bootstrap_filtered_v1`), notifications (`cc_player_notifications_v1`).
+- SQL STABLE SECURITY INVOKER; meglévő Player bootstrap és auth.uid-hoz kötött értesítés RPC. Read-back: anon EXECUTE false, authenticated true, SECURITY DEFINER false.
+- A Manager `cc_v2_manager_read_v1` mellett most Player read belépési pont is létezik, de a valódi JWT E2E, teljes V2 adatcontract, mass booking/waitlist és frontend-integráció még nyitott. LIVE érintetlen.
