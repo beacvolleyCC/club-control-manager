@@ -90,3 +90,10 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - Provenance: match_method, verified_at, created_at; mindhárom RLS ON, közvetlen anon/authenticated tábla GRANT visszavonva. Read-back: mindhárom 2 FK, RLS ON, 0 RLS policy (default deny).
 - Nem történt automatikus összerendelés vagy legacy adatátírás. A fee meta/audit és BEAC import forrásprioritás, push idempotencia, Manager/Player API és JWT/E2E még nyitott.
 - **Frontend-ready státusz: NEM.** Az új táblák kapcsolati alapok, nem teljes migrált adatkészlet. LIVE érintetlen.
+
+
+## 2026-11-08 – ellenőrzött UUID-egyezéses TEST backfill
+- Előellenőrzés: `player_notifications` 6/6 pontos `players.id::text` UUID egyezés, 0 unmatched; `player_fees` 0 sor, `player_push_outbox` 0 sor.
+- TEST migration `cc_v2_exact_uuid_backfill_notifications_finance_20261108` sikeres. Csak pontos UUID-egyezéses `INSERT ... ON CONFLICT DO NOTHING` a három kapcsolati táblába; sem email, sem név alapján nem történt összefésülés.
+- Utóellenőrzés: `cc_v2_notification_links` 6, `player_notifications` 6, unmatched 0; fee links 0, push links 0.
+- Korlát: újonnan érkező rekordok automatikus szinkronja még nincs megvalósítva; API és valódi role/JWT E2E nincs kész. LIVE változatlan.
