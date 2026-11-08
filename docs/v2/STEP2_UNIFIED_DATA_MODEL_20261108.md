@@ -144,3 +144,11 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - `public.cc_v2_mass_reconciliation_v1()` JSONB: source counts és verifiedLinks counts `mass_athletes`, `mass_events`, `mass_bookings`, `mass_waitlist` forrásokra. SECURITY DEFINER, `private.cc_manager_require_any_v1('mass.overview','view')` kapu; anon EXECUTE=false, authenticated=true.
 - TEST forrásrekordok: 0 mass_athletes, 6 mass_events, 1 mass_bookings, 7 mass_waitlist; mapping tables korábbi ellenőrzés szerint üresek. A funkció telepítve és ACL ellenőrizve; pozitív Manager JWT E2E még hátra.
 - Nem történt automatikus migráció, sem legacy rekordmódosítás. LIVE érintetlen.
+
+
+## 2026-11-09 – legacy mass event megfeleltetés előellenőrzés
+- TEST read-only: mass_events=6, canonical events=12.
+- Dátum szerinti mass↔canonical párok=1; dátum+kezdési idő pontos párok=0 (Europe/Budapest).
+- A mass_bookings 1/1 és mass_waitlist 7/7 hivatkozás létező mass_events sorra mutat.
+- Következtetés: jelenleg **nem indokolt** a mass_events automatikus hozzárendelése a competition events rekordjaihoz. A mass és competition események külön tartományt képviselhetnek; egységes V2 frontend API-ban külön source/type kezelés kell, vagy explicit hitelesített mapping.
+- Sem adatírás, sem automatikus link-feltöltés nem történt. Következő: mass domain read adapter, guest/athlete identity modell, explicit match review, E2E.
