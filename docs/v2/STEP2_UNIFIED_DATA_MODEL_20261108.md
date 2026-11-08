@@ -114,3 +114,11 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - SECURITY DEFINER triggerfüggvények EXECUTE joga PUBLIC/anon/authenticated szerepköröktől visszavonva.
 - Trigger definitions read-back ellenőrizve. INSERT/UPDATE/rollback E2E még nincs végrehajtva. A fee és push TEST forrástáblák az előző ellenőrzéskor üresek voltak.
 - Következő: közös, jogosultságkezelt read API, tényleges adatforgalmi tesztek, legacy mass/guest és finance meta/audit integráció. LIVE érintetlen.
+
+
+## 2026-11-08 – első V2 Manager közös read API TEST
+- Migration `cc_v2_manager_composed_read_api_20261108` sikeres.
+- `public.cc_v2_manager_read_v1(p_from timestamptz,p_to timestamptz,p_team_id uuid default null,p_player_query text default '')` JSONB: schemaVersion=1, players (existing `cc_manager_players_v2`), trainings/matches (existing `cc_manager_events_v1`).
+- SQL STABLE SECURITY INVOKER, meglévő Manager RPC jogosultságokra támaszkodik. Function EXECUTE readback: anon false, authenticated true, security definer false.
+- Ez nem Player API; nem tartalmaz még booking/waitlist/finance/push adatkészletet, nem teljes V2 frontend contract. JWT/E2E még hátravan.
+- LIVE érintetlen.
