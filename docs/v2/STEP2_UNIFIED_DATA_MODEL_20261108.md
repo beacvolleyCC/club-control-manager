@@ -105,3 +105,12 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - Trigger `cc_v2_notification_link_sync` read-back igazolt; a korábbi 6/6 link megmaradt.
 - A trigger-függvény közvetlen EXECUTE jogosultsága PUBLIC/anon/authenticated szerepköröktől visszavonva.
 - Még nincs tranzakciós INSERT/UPDATE negatív teszt, illetve push/fee automatikus szinkron, Manager/Player read API vagy teljes frontend-ready állapot. LIVE érintetlen.
+
+
+## 2026-11-08 – díj és push kapcsolatok automatikus szinkronja TEST
+- Migration `cc_v2_fee_push_link_auto_sync_20261108` sikeres.
+- `private.cc_v2_sync_fee_link()` + `cc_v2_fee_link_sync`: player_fees INSERT/UPDATE(player_id) → exact UUID link upsert/remove.
+- `private.cc_v2_sync_push_link()` + `cc_v2_push_link_sync`: player_push_outbox INSERT/UPDATE(player_id) → exact UUID link upsert/remove.
+- SECURITY DEFINER triggerfüggvények EXECUTE joga PUBLIC/anon/authenticated szerepköröktől visszavonva.
+- Trigger definitions read-back ellenőrizve. INSERT/UPDATE/rollback E2E még nincs végrehajtva. A fee és push TEST forrástáblák az előző ellenőrzéskor üresek voltak.
+- Következő: közös, jogosultságkezelt read API, tényleges adatforgalmi tesztek, legacy mass/guest és finance meta/audit integráció. LIVE érintetlen.
