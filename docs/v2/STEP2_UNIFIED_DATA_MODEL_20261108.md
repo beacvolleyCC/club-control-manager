@@ -62,3 +62,12 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - Az RPC szerepkörös végponttesztje hiányzik.
 
 **Státusz:** V2 modell részletes tervezése elkezdhető; schema migration még nincs telepítve ezen döntés alapján. LIVE nem érinthető.
+
+
+## 2026-11-08 – első additív TEST adatbázis-migráció végrehajtva
+- Supabase TEST migration: `cc_v2_canonical_external_mapping_foundation_20261108` — sikeres.
+- `public.cc_v2_identity_links`: source_system + external_id UNIQUE; player_id UUID FK players.id; match_method, verified_at, created_at; RLS ON, anon/authenticated közvetlen tábla-jog visszavonva.
+- `public.cc_v2_event_links`: source_system + external_id UNIQUE; event_id UUID FK events.id; match_method, verified_at, created_at; RLS ON, anon/authenticated közvetlen tábla-jog visszavonva.
+- `public.cc_v2_reconciliation_summary()`: SECURITY DEFINER, Manager `competition.players:view` ellenőrzés, aggregált legacy/canonical/mapping darabszámok; EXECUTE csak authenticated (PUBLIC/anon revoked).
+- Read-back: 2 UNIQUE, 2 FK, 2 RLS ON; mapping rows 0/0. Legacy táblákhoz és meglévő adatokhoz nem nyúltunk.
+- **Nyitott:** összerendelések feltöltése hiteles forrásból, read API Manager/Player eltérő hozzáféréssel, end-to-end auth/permission tesztek, legacy booking/waitlist/finance modellezése, frontend szerződés és adatminőségi ellenőrzés. Ez az első lépés alapja, nem a teljes V2 adatbázis készre jelentése. LIVE érintetlen.
