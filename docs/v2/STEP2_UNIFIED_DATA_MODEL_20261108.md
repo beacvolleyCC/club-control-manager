@@ -80,3 +80,13 @@ Az 1. lépés strukturális leltára elegendő a **2. lépés logikai modelljén
 - `cc_v2_waitlist_links`: legacy waitlist external ID UNIQUE → canonical waitlist UUID FK.
 - Mindhárom új tábla RLS ON, anon/authenticated közvetlen hozzáférés visszavonva; read-back: FK/UNIQUE/RLS OK.
 - **Nem kész:** waitlist tranzakciós offer/accept, capacity, idempotencia, mass booking státusz-mapping, auth nélküli vendég identity, pénzügy, értesítések, tényleges adat-backfill, Manager/Player közös API és E2E. Meglévő rekordok változatlanok; LIVE érintetlen.
+
+
+## 2026-11-08 – harmadik additív TEST migráció: finance/notifications
+- Supabase TEST migration `cc_v2_finance_notification_canonical_links_20261108` sikeres.
+- `cc_v2_fee_links`: legacy `player_fees.id` BIGINT FK és `players.id` UUID FK; fee_id UNIQUE.
+- `cc_v2_notification_links`: `player_notifications.id` UUID PK/FK és `players.id` UUID FK.
+- `cc_v2_push_outbox_links`: `player_push_outbox.id` UUID PK/FK és `players.id` UUID FK.
+- Provenance: match_method, verified_at, created_at; mindhárom RLS ON, közvetlen anon/authenticated tábla GRANT visszavonva. Read-back: mindhárom 2 FK, RLS ON, 0 RLS policy (default deny).
+- Nem történt automatikus összerendelés vagy legacy adatátírás. A fee meta/audit és BEAC import forrásprioritás, push idempotencia, Manager/Player API és JWT/E2E még nyitott.
+- **Frontend-ready státusz: NEM.** Az új táblák kapcsolati alapok, nem teljes migrált adatkészlet. LIVE érintetlen.
