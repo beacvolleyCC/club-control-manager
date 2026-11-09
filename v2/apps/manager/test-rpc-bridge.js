@@ -20,6 +20,7 @@ export async function loadManagerTestPreview(session,{signal}={}){
  });
  if(!response.ok)throw new Error('TEST Manager access denied ('+response.status+')');
  const data=await response.json();
+ if(signal?.aborted)throw new DOMException('TEST request cancelled','AbortError');
  if(data?.schemaVersion!==1||!Array.isArray(data.trainings)||!Array.isArray(data.matches)||!Array.isArray(data.players))
   throw new Error('Unexpected TEST Manager API response');
  const events=[...data.trainings,...data.matches];
