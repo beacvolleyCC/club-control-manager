@@ -1012,7 +1012,7 @@
     // Compute points from those same wins/losses to keep points consistent.
     return (ccMrszPhotoState_.canonicalTeamStats||[]).filter(r=>text(r.competitionLabel)===league)
       .map(r=>({...r,sourceTeamId:'canonical:'+text(r.teamKey),focus:ccIsBeacLeagueTeam_(r.teamName),
-        tablePoints:2*(Number(r.wins)||0)+(Number(r.losses)||0),_ccUnranked:true}))
+        tablePoints:2*(Number(r.wins)||0)+(Number(r.losses)||0)-(Number(r.forfeits)||0),_ccUnranked:true}))
       .sort((a,b)=>b.tablePoints-a.tablePoints||Number(b.wins)-Number(a.wins)||(Number(b.setsFor)-Number(b.setsAgainst))-(Number(a.setsFor)-Number(a.setsAgainst))||text(a.teamName).localeCompare(text(b.teamName),'hu'))
       .map((r,i)=>({...r,position:i+1}));
   }
