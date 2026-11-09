@@ -47,3 +47,22 @@ for(const id of ['periodFilter','dateFilter','sortFilter'])byId(id).addEventList
 byId('newEvent').addEventListener('click',()=>{byId('newEventPanel').hidden=false;byId('newEventPanel').scrollIntoView({behavior:'smooth'});});
 byId('closeNewEvent').addEventListener('click',()=>{byId('newEventPanel').hidden=true;});
 byId('settingsNav').addEventListener('click',()=>{const panel=byId('settingsPanel');panel.hidden=!panel.hidden;if(!panel.hidden)panel.scrollIntoView({behavior:'smooth'});});
+
+let activeTestRequest=null;
+window.addEventListener('cc:v2-authenticated-test-session',async event=>{
+ activeTestRequest?.abort();
+ const controller=new AbortController();
+ activeTestRequest=controller;
+ try{
+  const {loadManagerTestPreview}=await import('./test-rpc-bridge.js');
+  await loadManagerTestPreview(event.detail,{signal:controller.signal});
+ }catch(error){
+  if(controller.signal.aborted)return;
+  byId('testDataMode').textContent='TEST API HIBA · DEMO';
+  console.error('V2 TEST preview load failed:',error);
+ }
+});
+window.addEventListener('cc:v2-authenticated-test-signout',()=>{
+ activeTestRequest?.abort();
+ window.dispatchEvent(new Event('cc:v2-test-clear'));
+});
