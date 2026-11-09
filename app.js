@@ -21,7 +21,7 @@
   const LEGACY_MAIN_SECTIONS=['competition','mass','calendar','planning','finance','settings'];
   const ADMIN_MODULES=[
     {group:'Tömegsport',items:[['mass.overview','Áttekintés'],['mass.trainings','Edzések'],['mass.calendar','Naptár'],['mass.athletes','Sportolók'],['mass.passes','Bérletek']]},
-    {group:'Versenysport',items:[['competition.overview','Áttekintés'],['competition.trainings','Edzések'],['competition.matches','Meccsek'],['competition.calendar','Naptár'],['competition.teams','Csapatok'],['competition.players','Játékosok'],['competition.fees','Pénzügyek'],['competition.competition','Versenyadatok']]},
+    {group:'Versenysport',items:[['competition.overview','Áttekintés'],['competition.trainings','Edzések'],['competition.planning','Edzéstervező'],['competition.matches','Meccsek'],['competition.calendar','Naptár'],['competition.teams','Csapatok'],['competition.players','Játékosok'],['competition.fees','Pénzügyek'],['competition.competition','Versenyadatok']]},
     {group:'Rendszer',items:[['settings','Beállítások / adminok']]}
   ];
 
@@ -189,7 +189,7 @@
   function can(key){return canAction(key,'view')}
   function canAnyAction(key,action='view'){const rows=state.permissions||[];if(rows.some(x=>x==='*'))return true;return rows.some(x=>typeof x==='object'&&text(x?.moduleKey)===key&&(action==='edit'?x.canEdit===true:action==='notify'?x.canNotify===true:x.canView===true))}
   function canRoute(area,module){
-    if(module==='planning')return can('competition.trainings')||can('mass.trainings');
+    if(module==='planning')return can('competition.planning');
     if(area==='competition'&&module==='notifications') return canAnyAction('competition.players','notify');
     if(area==='competition'&&(module==='standings'||module==='courts'||module==='history')) return can('competition.matches');
     if(area==='mass'&&module==='archive')return can('mass.trainings')||can('mass.calendar');
@@ -199,7 +199,7 @@
     if(section==='competition')return AREAS.competition.modules.some(m=>m[0]!=='calendar'&&canRoute('competition',m[0]));
     if(section==='mass')return AREAS.mass.modules.some(m=>!['calendar','archive','passes'].includes(m[0])&&canRoute('mass',m[0]));
     if(section==='calendar')return can('competition.calendar')||can('mass.calendar');
-    if(section==='planning')return can('competition.trainings')||can('mass.trainings');
+    if(section==='planning')return can('competition.planning');
     if(section==='finance')return can('competition.fees');
     if(section==='settings')return can('settings');
     return false;
@@ -1515,8 +1515,8 @@
     if(!ccMrszPhotoState_.loaded&&!ccMrszPhotoState_.loading)void ccLoadMrszPhotoSnapshot_();
     const overviewFilterActive=teamFilterIds_('overview').length>0;
     const now=Date.now(),matchUntil=now+31*864e5,overviewFallback=Array.isArray(state.overview?.nextEvents)?state.overview.nextEvents:[],events=effectiveCompetitionEvents(state.activityEvents.length?state.activityEvents:overviewFallback).filter(e=>!isEventPast(e)&&teamFilterMatch_('overview',eventTeamId(e))),matches=events.filter(e=>eventType(e)==='match'&&(eventStart(e)?.getTime()||0)<matchUntil);
-    $('#viewContent').innerHTML=`<div class="page-intro overview-player-intro overview-context-intro cc-page-header-panel cc-overview-page-header"><div><h2>Versenysport áttekintés</h2><p>Jelenlét, következő meccsek és aktuális bajnoki állás.</p></div><div class="page-actions cc-overview-team-toolbar">${overviewTeamSwitchHtml_()}</div></div><div class="parity-overview-grid manager-overview-main" style="--overview-matrix-w:${overviewMatrixWidth_()}px"><article class="panel parity-matrix-card">${renderMatrix()}</article><article class="panel next-matches-card"><div class="panel-head"><div><h3>Következő meccsek</h3><p>${state.overviewTeam?esc(teamById(state.overviewTeam)?.name||'Kiválasztott csapat'):'Összes csapat'} · következő 1 hónap</p></div><button class="button quiet small" id="allMatchesBtn" type="button">Összes</button></div><div class="cc-event-card-list overview-event-card-list">${matches.slice(0,8).map(e=>ccEventCardHtml_(e,'match')).join('')||emptyInline('Nincs közelgő meccs.')}</div></article></div><section class="overview-standings-section"><div class="overview-section-title"><h3>Tabella</h3><p>${state.overviewTeam?esc(teamById(state.overviewTeam)?.name||'Kiválasztott csapat'):'Összes csapat'} · legutóbbi rögzített állás</p></div>${standingsSection_('overview')}</section>`;
-    $('#allMatchesBtn')?.addEventListener('click',()=>{state.eventTeam=text(state.overviewTeam);state.teamFilters.events=[...teamFilterIds_('overview')];setRoute('competition','matches')});bindOverviewTeamSwitch_();bindMatrix();bindEventDetailActions();bindOverviewStandings_();
+    $('#viewContent').innerHTML=`<div class="page-intro overview-player-intro overview-context-intro cc-page-header-panel cc-overview-page-header"><div><h2>Versenysport áttekintés</h2><p>Jelenlét és következő meccsek.</p></div><div class="page-actions cc-overview-team-toolbar">${overviewTeamSwitchHtml_()}</div></div><div class="parity-overview-grid manager-overview-main" style="--overview-matrix-w:${overviewMatrixWidth_()}px"><article class="panel parity-matrix-card">${renderMatrix()}</article><article class="panel next-matches-card"><div class="panel-head"><div><h3>Következő meccsek</h3><p>${state.overviewTeam?esc(teamById(state.overviewTeam)?.name||'Kiválasztott csapat'):'Összes csapat'} · következő 1 hónap</p></div><button class="button quiet small" id="allMatchesBtn" type="button">Összes</button></div><div class="cc-event-card-list overview-event-card-list">${matches.slice(0,8).map(e=>ccEventCardHtml_(e,'match')).join('')||emptyInline('Nincs közelgő meccs.')}</div></article></div>${can('competition.competition')?`<section class="overview-standings-section"><div class="overview-section-title"><h3>Tabella</h3><p>${state.overviewTeam?esc(teamById(state.overviewTeam)?.name||'Kiválasztott csapat'):'Összes csapat'} · legutóbbi rögzített állás</p></div>${standingsSection_('overview')}</section>`:''}`;
+    $('#allMatchesBtn')?.addEventListener('click',()=>{state.eventTeam=text(state.overviewTeam);state.teamFilters.events=[...teamFilterIds_('overview')];setRoute('competition','matches')});bindOverviewTeamSwitch_();bindMatrix();bindEventDetailActions();if(can('competition.competition'))bindOverviewStandings_();
   }
 
   function notificationRecipientById(id){return (state.notificationRecipients||[]).find(p=>text(p.playerId)===text(id))||null}
