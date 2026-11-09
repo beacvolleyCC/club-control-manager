@@ -3062,12 +3062,12 @@ async function ccMassAthleteHistoryLoad_(id){
     const players=Array.isArray(side?.players)?side.players:[];
     const staff=Array.isArray(side?.staff)?side.staff:[];
     const name=ccMrszProtocolPersonHtml_({name:side?.name||label,profileUrl:side?.profileUrl});
-    const rows=players.map(p=>'<tr><td class="cc-protocol-jersey">'+esc(text(p?.number)||'–')+'</td>'
+    const rows=players.map(p=>'<tr><td>'+esc(text(p?.code||p?.playerCode||p?.federationId)||'–')+'</td><td class="cc-protocol-jersey">'+esc(text(p?.number)||'–')+'</td>'
       +'<td>'+(p?.designation==='K'?'<strong class="cc-protocol-starter">'+ccMrszProtocolPersonHtml_(p)+'</strong>':ccMrszProtocolPersonHtml_(p))+'</td><td>'+ccMrszProtocolBadgesHtml_(p)+'</td></tr>').join('');
     const staffHtml=staff.length?'<div class="cc-protocol-staff"><h4>Stáb</h4>'+staff.map(p=>
       '<div><span>'+esc(text(p?.role)||'Stábtag')+'</span><b>'+ccMrszProtocolPersonHtml_(p)+'</b></div>').join('')+'</div>':'';
-    return '<section class="cc-protocol-team"><h3>'+name+'</h3><div class="cc-protocol-table-scroll"><table><thead><tr><th>Mez</th><th>Játékos</th><th></th></tr></thead><tbody>'
-      +(rows||'<tr><td colspan="3">A névsor még nincs rögzítve.</td></tr>')+'</tbody></table></div>'+staffHtml+'</section>';
+    return '<section class="cc-protocol-team"><h3>'+name+'</h3><div class="cc-protocol-table-scroll"><table><thead><tr><th>Játékoskód</th><th>Mez</th><th>Játékos</th><th></th></tr></thead><tbody>'
+      +(rows||'<tr><td colspan="4">A névsor még nincs rögzítve.</td></tr>')+'</tbody></table></div>'+staffHtml+'</section>';
   }
 
   function ccMrszProtocolHtml_(m){
