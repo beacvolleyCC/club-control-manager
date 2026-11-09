@@ -1014,8 +1014,8 @@
       if(text(m.competitionLabel)!==league||text(m.status)!=='played')continue;
       const h=Number(m.homeSets),a=Number(m.awaySets);
       if(!((h===3&&a>=0&&a<=2)||(a===3&&h>=0&&h<=2)))continue;
-      points.set(key(m.homeName),(points.get(key(m.homeName))||0)+(h===3?(a===2?2:3):(h===2?1:0)));
-      points.set(key(m.awayName),(points.get(key(m.awayName))||0)+(a===3?(h===2?2:3):(a===2?1:0)));
+      points.set(key(m.homeName),(points.get(key(m.homeName))||0)+(h===3?2:(String(m.status).toLowerCase().includes('forfeit')||m.walkover===true||m.noShow===true?0:1)));
+      points.set(key(m.awayName),(points.get(key(m.awayName))||0)+(a===3?2:(String(m.status).toLowerCase().includes('forfeit')||m.walkover===true||m.noShow===true?0:1)));
     }
     return (ccMrszPhotoState_.canonicalTeamStats||[]).filter(r=>text(r.competitionLabel)===league)
       .map(r=>({...r,sourceTeamId:'canonical:'+text(r.teamKey),focus:ccIsBeacLeagueTeam_(r.teamName),tablePoints:points.get(key(r.teamName))||0,_ccUnranked:true}))
