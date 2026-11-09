@@ -15,6 +15,7 @@ export async function loadPlayerTestPreview(session,{signal}={}){
  });
  if(!response.ok)throw new Error('TEST Player access denied ('+response.status+')');
  const data=await response.json();
+ if(signal?.aborted)throw new DOMException('TEST request cancelled','AbortError');
  if(data?.schemaVersion!==1||!data.bootstrap||!Array.isArray(data.bootstrap.events))
   throw new Error('Unexpected TEST Player API response');
  const events=data.bootstrap.events.map(e=>({
