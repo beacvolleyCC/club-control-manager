@@ -58,6 +58,7 @@ window.addEventListener('cc:v2-authenticated-test-session',async event=>{
   await loadManagerTestPreview(event.detail,{signal:controller.signal});
  }catch(error){
   if(controller.signal.aborted)return;
+  window.dispatchEvent(new Event('cc:v2-test-clear'));
   byId('testDataMode').textContent='TEST API HIBA · DEMO';
   console.error('V2 TEST preview load failed:',error);
  }
