@@ -16,7 +16,7 @@ function render(items,test=false){
 render(events);
 let controller=null;
 window.addEventListener('cc:v2-player-test-data',event=>{
- if(Array.isArray(event.detail?.events))render(event.detail.events,true);
+ if(Array.isArray(event.detail?.events)){render(event.detail.events,true);document.getElementById('playerDataMode').textContent='TEST ADATOK · csak olvasás';}
 });
 window.addEventListener('cc:v2-authenticated-test-session',async event=>{
  controller?.abort();controller=new AbortController();
@@ -27,9 +27,10 @@ window.addEventListener('cc:v2-authenticated-test-session',async event=>{
  }catch(error){
   if(current.signal.aborted)return;
   render(events);
+  document.getElementById('playerDataMode').textContent='TEST API HIBA · DEMO';
   console.error('V2 Player TEST preview failed:',error);
  }
 });
 window.addEventListener('cc:v2-authenticated-test-signout',()=>{
- controller?.abort();render(events);
+ controller?.abort();render(events);document.getElementById('playerDataMode').textContent='DEMO ADATOK';
 });
