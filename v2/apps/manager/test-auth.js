@@ -3,7 +3,8 @@ const host='https://szzoubvhlwnojtzqjebc.supabase.co';
 const el=id=>document.getElementById(id);
 const status=(s,error=false)=>{el('authStatus').textContent=s;el('authStatus').setAttribute('role',error?'alert':'status');};
 let accessToken=null;
-let publishableKey=null;
+let publishableKey='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB';
+el('authKey').value=publishableKey;
 let expiresAt=0;
 let sessionVersion=0;
 let authAttemptVersion=0;
@@ -43,8 +44,9 @@ el('verifyOtp').addEventListener('click',async()=>{
  }catch(e){if(attempt===authAttemptVersion){clearSession();status(e.message,true);}}finally{el('verifyOtp').disabled=false;}
 });
 el('logoutTest').addEventListener('click',()=>{
- clearSession();publishableKey=null;
+ clearSession();publishableKey='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB';
  for(const id of ['authKey','authOtp'])el(id).value='';
  for(const id of ['testTeams','testEvents'])el(id).replaceChildren();
+ el('authKey').value=publishableKey;
  status('TEST munkamenet törölve a felületről.');
 });
