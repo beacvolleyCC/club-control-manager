@@ -7,7 +7,7 @@ let publishableKey=null;
 let expiresAt=0;
 let sessionVersion=0;
 export function getSessionVersion(){return sessionVersion;}
-function clearSession(){accessToken=null;expiresAt=0;sessionVersion++;window.dispatchEvent(new Event('cc:v2-test-clear'));}
+function clearSession(){accessToken=null;expiresAt=0;sessionVersion++;window.dispatchEvent(new Event('cc:v2-test-clear'));window.dispatchEvent(new Event('cc:v2-authenticated-test-signout'));}
 export function getTestSession(){if(accessToken && Date.now()>=expiresAt){clearSession();status('A TEST munkamenet lejárt. Jelentkezz be újra.',true);}return accessToken && publishableKey ? {accessToken,publishableKey} : null;}
 async function authRequest(path,body){
  const response=await fetch(host+'/auth/v1/'+path,{method:'POST',headers:{apikey:publishableKey,'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
@@ -35,6 +35,7 @@ el('verifyOtp').addEventListener('click',async()=>{
   if(!Number.isFinite(expiresAt)||expiresAt<=Date.now())throw new Error('Hiányzó vagy érvénytelen lejárati idő');
   el('authOtp').value='';
   status('TEST bejelentkezés sikeres. Az adatok lekérdezhetők.');
+  window.dispatchEvent(new CustomEvent('cc:v2-authenticated-test-session',{detail:{url:host,publishableKey,accessToken}}));
  }catch(e){clearSession();status(e.message,true);}finally{el('verifyOtp').disabled=false;}
 });
 el('logoutTest').addEventListener('click',()=>{
