@@ -179,15 +179,15 @@
   function canAction(key,action='view'){
     const rows=state.permissions||[];
     if(rows.some(x=>x==='*'))return true;
-    const direct=rows.find(x=>typeof x==='object'&&text(x?.moduleKey)===key);
-    if(direct){if(action==='edit')return direct.canEdit===true;if(action==='notify')return direct.canNotify===true;return direct.canView===true}
+    const direct=rows.filter(x=>typeof x==='object'&&text(x?.moduleKey)===key);
+    if(direct.length){if(action==='edit')return direct.some(x=>x.canEdit===true);if(action==='notify')return direct.some(x=>x.canNotify===true);return direct.some(x=>x.canView===true||x.canEdit===true||x.canNotify===true)}
     if(action!=='view')return false;
     const p=permissionSet();if(p.has(key))return true;
     const legacy={'competition.overview':'overview','competition.calendar':'calendar','competition.teams':'teams','competition.players':'players','competition.competition':'competition','settings':'settings'};
     return !!legacy[key]&&p.has(legacy[key])
   }
   function can(key){return canAction(key,'view')}
-  function canAnyAction(key,action='view'){const rows=state.permissions||[];if(rows.some(x=>x==='*'))return true;return rows.some(x=>typeof x==='object'&&text(x?.moduleKey)===key&&(action==='edit'?x.canEdit===true:action==='notify'?x.canNotify===true:x.canView===true))}
+  function canAnyAction(key,action='view'){return canAction(key,action)}
   function canRoute(area,module){
     if(module==='planning')return can('competition.planning');
     if(area==='competition'&&module==='notifications') return canAnyAction('competition.players','notify');
