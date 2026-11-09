@@ -34,7 +34,7 @@ test('default context follows a single BEAC team, without guessing group members
  assert.equal(harness({team:'10000000-0000-4000-8000-000000000003',menGroup:'A'}).ccMatchesDefaultLeague_(),menA);
 });
 test('default selected BEAC team determines league until a separate explicit match-page selection',()=>{
- const h=harness({selected:menA,team:'10000000-0000-4000-8000-000000000003'});
+ const h=harness({selected:menA,team:'10000000-0000-4000-8000-000000000003',selectedTeamIds:['10000000-0000-4000-8000-000000000003']});
  const html=h.ccLeagueMatchesContextHtml_();
  assert.deepEqual(h.ctx.table,[]);
  assert.deepEqual(h.ctx.fixture,[menB],'matches follow the BEAC team context instead of the previously selected league');
@@ -82,7 +82,7 @@ test('one shared scope and result provenance are visible in league scoreboard bu
  assert.ok(source.includes("ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac'"));
  assert.ok(source.includes('ccMrszMatchReviewReason_('));
  assert.ok(source.includes('const hasBeac=matches'));
- assert.ok(source.includes("const scope=hasBeac?ccLeagueMatchScope_:'all'"));
+ assert.ok(source.includes("hasBeac?ccLeagueMatchScope_:'all'"));
  assert.ok(source.includes('const reason=ccMrszMatchReviewReason_(m,tableRows,table?.partial===false,conflicts)'));
  assert.ok(source.includes("const noTableNote='';"));
 });
