@@ -2,7 +2,8 @@
 const HOST='https://szzoubvhlwnojtzqjebc.supabase.co';
 const $=id=>document.getElementById(id);
 const status=(message,error=false)=>{const node=$('playerAuthStatus');node.textContent=message;node.setAttribute('role',error?'alert':'status');};
-let publicKey='',accessToken='',expiry=0,requestVersion=0;
+let publicKey='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB',accessToken='',expiry=0,requestVersion=0;
+$('playerAuthKey').value=publicKey;
 function signout(){
  requestVersion++;accessToken='';expiry=0;
  window.dispatchEvent(new Event('cc:v2-authenticated-test-signout'));
@@ -46,8 +47,9 @@ $('playerVerifyOtp').addEventListener('click',async()=>{
  finally{button.disabled=false}
 });
 $('playerLogout').addEventListener('click',()=>{
- signout();publicKey='';
+ signout();publicKey='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB';
  $('playerAuthKey').value='';$('playerAuthOtp').value='';
+ $('playerAuthKey').value=publicKey;
  status('TEST munkamenet törölve.');
 });
 document.addEventListener('visibilitychange',()=>{
