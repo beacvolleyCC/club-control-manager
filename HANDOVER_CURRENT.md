@@ -1,3 +1,9 @@
+# Club Control – AKTUÁLIS FŐÁGI HANDOVER (2026-11-10)
+
+**Elsőként olvasd:** [docs/handover/HANDOVER_20261110_CC_CURRENT.md](docs/handover/HANDOVER_20261110_CC_CURRENT.md). A V2 külön branch handovere az új dokumentumban hivatkozva. **Folytatási kulcs:** `CC-FOLYTATÁS`. Az alábbi régebbi tartalom történeti előzmény, nem írja felül a november 10-i ellenőrzött státuszt.
+
+---
+
 # Aktuális átadás – 2026-11-07
 
 **Elsődleges, friss handover:** [docs/handover/HANDOVER_20261107_CC_CURRENT.md](docs/handover/HANDOVER_20261107_CC_CURRENT.md). A régebbi átadások történeti előzmények. Folytatási kulcs: `CC-FOLYTATÁS`.
