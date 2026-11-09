@@ -176,11 +176,16 @@
   async function rpc(name,args={}){if(!state.supabase)throw new Error('Supabase nincs inicializálva.');const {data,error}=await state.supabase.rpc(name,args);if(error)throw error;return normalizeRpc(data)}
 
   function permissionSet(){return new Set((state.permissions||[]).filter(x=>typeof x==='string'||x?.canView===true).map(x=>typeof x==='string'?x:text(x?.moduleKey)).filter(Boolean))}
-  function canAction(key,action='view'){
+  function canAction(key,action='view',teamId=null){
     const rows=state.permissions||[];
     if(rows.some(x=>x==='*'))return true;
     const direct=rows.filter(x=>typeof x==='object'&&text(x?.moduleKey)===key);
-    if(direct.length){if(action==='edit')return direct.some(x=>x.canEdit===true);if(action==='notify')return direct.some(x=>x.canNotify===true);return direct.some(x=>x.canView===true||x.canEdit===true||x.canNotify===true)}
+    if(direct.length){
+      const scoped=teamId?direct.filter(x=>!x.teamId||text(x.teamId)===text(teamId)):direct;
+      if(action==='edit')return scoped.some(x=>x.canEdit===true);
+      if(action==='notify')return scoped.some(x=>x.canNotify===true);
+      return scoped.some(x=>x.canView===true||x.canEdit===true||x.canNotify===true);
+    }
     if(action!=='view')return false;
     const p=permissionSet();if(p.has(key))return true;
     const legacy={'competition.overview':'overview','competition.calendar':'calendar','competition.teams':'teams','competition.players':'players','competition.competition':'competition','settings':'settings'};
