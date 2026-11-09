@@ -2453,6 +2453,20 @@ async function ccMassAthleteHistoryLoad_(id){
       text(m.sourceMatchKey)==='ui20261018:menB:beac:pdse:1'&&!!ccManagerVerifiedOfficialReport_(m));
     return matches.length===1?matches[0]:null;
   }
+  function ccManagerCanonicalMatchForEvent_(e,league){
+    if(eventType(e)!=='match')return null;
+    const day=ccMrszLocalKickoff_(e?.startsAt||e?.starts_at).date;
+    if(!day)return null;
+    const eventTitle=ccMrszNormPairName_(e?.title);
+    const opponent=ccMrszNormPairName_(ccEventOpponent_(e));
+    const candidates=(ccMrszPhotoState_.canonicalMatches||[]).filter(m=>{
+      if(text(m.competitionLabel)!==league||ccMrszLocalKickoff_(m.startsAt).date!==day)return false;
+      const home=ccMrszNormPairName_(m.homeName),away=ccMrszNormPairName_(m.awayName);
+      const isBeac=home.includes('beac')||away.includes('beac')||home.includes('budapestiegyetemiatletikaiclub')||away.includes('budapestiegyetemiatletikaiclub');
+      return isBeac&&(opponent?(home.includes(opponent)||away.includes(opponent)):eventTitle.includes(home)||eventTitle.includes(away));
+    });
+    return candidates.length===1?candidates[0]:null;
+  }
   function ccManagerScoreboardCard_(e){
     const id=text(e.eventId||e.id),teamId=eventTeamId(e),
       teamName=text(e.teamName||teamById(teamId)?.name||'BEAC'),
@@ -2461,10 +2475,11 @@ async function ccMassAthleteHistoryLoad_(id){
       home=segments.length>=2?segments[0]:(ha==='away'?opponent:teamName),
       away=segments.length>=2?segments.slice(1).join(' – '):(ha==='away'?teamName:opponent),
       recorded=competitionResultByEvent_(id),verified=ccManagerOfficialResultForEvent_(e),
-      result=recorded?.homeSets!=null&&recorded?.awaySets!=null?recorded:(verified||recorded),
       league=teamId==='10000000-0000-4000-8000-000000000001'?'Női Budapest I. osztály'
         :teamId==='10000000-0000-4000-8000-000000000002'?'Női Budapest II. osztály – B csoport'
         :'Férfi Budapest I. osztály – B csoport',
+      canonical=ccManagerCanonicalMatchForEvent_(e,league),
+      result=canonical||recorded||verified,
       count=num(e.yesCount),roster=ccTeamRosterSize_(teamId),
       meta=count+' jövök'+(roster?' / '+roster+' kerettag':'');
     return ccMatchScoreboardHtml_({
