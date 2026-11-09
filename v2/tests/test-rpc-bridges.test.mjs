@@ -59,3 +59,26 @@ test('Both TEST bridges reject malformed response versions',async()=>{
   await assert.rejects(loadPlayerTestPreview(session),/Unexpected TEST Player API response/);
  }finally{restore();w.restore()}
 });
+
+test('Cancelled Manager request never publishes stale TEST data',async()=>{
+ const w=mockWindow();
+ const controller=new AbortController();
+ const restore=withFetch(async()=>({
+  ok:true,json:async()=>{controller.abort();return {schemaVersion:1,trainings:[],matches:[],players:[]}}
+ }));
+ try{
+  await assert.rejects(loadManagerTestPreview(session,{signal:controller.signal}),/cancelled/);
+  assert.equal(w.events.length,0);
+ }finally{restore();w.restore()}
+});
+test('Cancelled Player request never publishes stale TEST data',async()=>{
+ const w=mockWindow();
+ const controller=new AbortController();
+ const restore=withFetch(async()=>({
+  ok:true,json:async()=>{controller.abort();return {schemaVersion:1,bootstrap:{events:[]}}}
+ }));
+ try{
+  await assert.rejects(loadPlayerTestPreview(session,{signal:controller.signal}),/cancelled/);
+  assert.equal(w.events.length,0);
+ }finally{restore();w.restore()}
+});
