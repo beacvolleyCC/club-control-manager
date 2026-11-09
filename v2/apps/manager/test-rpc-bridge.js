@@ -23,12 +23,12 @@ export async function loadManagerTestPreview(session,{signal}={}){
  if(signal?.aborted)throw new DOMException('TEST request cancelled','AbortError');
  if(data?.schemaVersion!==1||!Array.isArray(data.trainings)||!Array.isArray(data.matches)||!Array.isArray(data.players))
   throw new Error('Unexpected TEST Manager API response');
- const events=[...data.trainings,...data.matches];
+ const events=[...data.trainings.map(e=>({...e,kind:'training'})),...data.matches.map(e=>({...e,kind:'match'}))];
  const teamMap=new Map();
  for(const e of events)if(e.teamId)teamMap.set(String(e.teamId),{id:String(e.teamId),name:String(e.teamName||'Csapat')});
  const normalized={
   teams:[...teamMap.values()],
-  events:events.map(e=>({eventId:e.eventId,teamId:e.teamId,title:e.title||e.eventType,startsAt:e.startsAt,venue:e.venue||''})),
+  events:events.map(e=>({eventId:e.eventId,teamId:e.teamId,title:(e.kind==='match'?'Meccs: ':'Edzés: ')+(e.title||e.eventType||'Esemény'),startsAt:e.startsAt,venue:e.venue||''})),
   players:data.players.map(p=>({playerId:p.playerId??p.id,displayName:p.displayName??p.name,position:p.position,teamId:p.teamId}))
  };
  window.dispatchEvent(new CustomEvent('cc:v2-test-data',{detail:normalized}));
