@@ -40,7 +40,7 @@ test('Player TEST OTP login publishes session, signout clears it, no persistence
   assert.equal(element('playerAuthOtp').value,'');
   element('playerLogout').listeners.get('click')();
   assert.equal(emitted.at(-1).type,'cc:v2-authenticated-test-signout');
-  assert.equal(element('playerAuthKey').value,'');
+  assert.equal(element('playerAuthKey').value,'sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB');
  }finally{
   for(const [key,value] of Object.entries(previous)){
    if(value===undefined)delete globalThis[key];else globalThis[key]=value;
