@@ -88,7 +88,7 @@ test('Manager Meccsek shows BEAC match roster before secondary federation fixtur
  assert.equal(section.split('ccLeagueMatchesContextHtml_()').length-1,1);
  assert.ok(!section.includes("standingsSection_('events')"));
  assert.ok(!section.includes('${ccMrszPhotoPanelHtml_()}'));
- assert.ok(section.indexOf('ccCompetitionEventWithRosterHtml_')<section.indexOf('ccLeagueMatchesContextHtml_()'));
+ assert.ok(section.indexOf('ccLeagueMatchesContextHtml_()')<section.indexOf('ccCompetitionEventWithRosterHtml_'),'Canonical league matches must precede separate team attendance events');
  assert.ok(!section.includes('ccLeagueFixturePanelHtml_()'));
 });
 test('desktop and phone scoreboard styling remains responsive',()=>{
