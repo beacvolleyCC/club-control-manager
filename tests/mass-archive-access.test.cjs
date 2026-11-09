@@ -5,10 +5,10 @@ const app=fs.readFileSync(path.join(__dirname,'..','app.js'),'utf8');
 const sql=fs.readFileSync(path.join(__dirname,'..','supabase/migrations/20261015211000_cc_manager_mass_training_history_v1.sql'),'utf8');
 const a=app.indexOf('  function massVisibleTrainingRows_('),b=app.indexOf('  function renderMassTrainings(',a);
 assert.ok(a>0&&b>a);
-const select=new Function('localDateKey','eventStart','text',app.slice(a,b)+';return massVisibleTrainingRows_;')(
+const select=new Function('localDateKey','eventStart','text','state',app.slice(a,b)+';return massVisibleTrainingRows_;')(
  d=>d instanceof Date?d.toISOString().slice(0,10):'',
  x=>x.startsAt?new Date(x.startsAt):null,
- x=>String(x??'')
+ x=>String(x??''),{massTrainingPastSort:'newest'}
 );
 const live=[
  {eventId:'20261015-HA-01',level:'Haladó',startsAt:'2026-10-15T18:00:00+02:00'},
