@@ -4,8 +4,8 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const src=fs.readFileSync(path.join(__dirname,'..','app.js'),'utf8');
 const from=src.indexOf('  function massVisibleTrainingRows_('),to=src.indexOf('  function renderMassTrainings()',from);
 assert.ok(from>=0&&to>from,'Current-day list helper exists in real Manager app');
-const select=new Function('localDateKey','eventStart','text',src.slice(from,to)+';return massVisibleTrainingRows_;')(
- d=>d instanceof Date?d.toISOString().slice(0,10):'',x=>x.startsAt?new Date(x.startsAt):null,x=>String(x??'')
+const select=new Function('localDateKey','eventStart','text','state',src.slice(from,to)+';return massVisibleTrainingRows_;')(
+ d=>d instanceof Date?d.toISOString().slice(0,10):'',x=>x.startsAt?new Date(x.startsAt):null,x=>String(x??''),{massTrainingPastSort:'newest'}
 );
 const live=[
  {eventId:'20261015-HA-01',level:'Haladó',startsAt:'2026-10-15T18:00:00+02:00',endsAt:'2026-10-15T20:00:00+02:00'},
