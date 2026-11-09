@@ -47,3 +47,38 @@ test('Player TEST OTP login publishes session, signout clears it, no persistence
   }
  }
 });
+
+test('Player logout while OTP verification is pending discards late session',async()=>{
+ const previous={document:globalThis.document,window:globalThis.window,fetch:globalThis.fetch,Event:globalThis.Event,CustomEvent:globalThis.CustomEvent};
+ const nodes=new Map(),emitted=[];
+ const element=id=>{
+  if(!nodes.has(id))nodes.set(id,{value:'',disabled:false,textContent:'',listeners:new Map(),
+   setAttribute(){},addEventListener(name,handler){this.listeners.set(name,handler)}});
+  return nodes.get(id);
+ };
+ globalThis.document={getElementById:element,addEventListener(){}};
+ globalThis.window={dispatchEvent(event){emitted.push(event)}};
+ globalThis.Event=class{constructor(type){this.type=type}};
+ globalThis.CustomEvent=class extends globalThis.Event{constructor(type,options){super(type);this.detail=options.detail}};
+ let resolveVerify;
+ globalThis.fetch=async url=>{
+  if(url.endsWith('/otp'))return {ok:true,json:async()=>({})};
+  if(url.endsWith('/verify'))return new Promise(resolve=>{resolveVerify=()=>resolve({ok:true,json:async()=>({access_token:'late-token',expires_in:3600})})});
+  throw new Error('Unexpected auth endpoint');
+ };
+ try{
+  await import('../apps/player/test-auth.js?logout-race-regression');
+  element('playerAuthEmail').value='example@example.test';
+  await element('playerSendOtp').listeners.get('click')();
+  element('playerAuthOtp').value='123456';
+  const pending=element('playerVerifyOtp').listeners.get('click')();
+  element('playerLogout').listeners.get('click')();
+  resolveVerify();await pending;
+  assert.equal(emitted.filter(e=>e.type==='cc:v2-authenticated-test-session').length,0);
+  assert.equal(emitted.at(-1).type,'cc:v2-authenticated-test-signout');
+ }finally{
+  for(const [key,value] of Object.entries(previous)){
+   if(value===undefined)delete globalThis[key];else globalThis[key]=value;
+  }
+ }
+});
