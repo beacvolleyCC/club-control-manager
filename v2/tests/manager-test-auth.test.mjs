@@ -40,3 +40,38 @@ test('Manager TEST OTP connects composed API and clears session on logout',async
   }
  }
 });
+
+test('Manager logout during pending OTP verification never restores session',async()=>{
+ const previous={document:globalThis.document,window:globalThis.window,fetch:globalThis.fetch,Event:globalThis.Event,CustomEvent:globalThis.CustomEvent};
+ const nodes=new Map(),events=[];
+ const node=id=>{
+  if(!nodes.has(id))nodes.set(id,{value:'',disabled:false,textContent:'',listeners:new Map(),
+   setAttribute(){},replaceChildren(){},addEventListener(name,handler){this.listeners.set(name,handler)}});
+  return nodes.get(id);
+ };
+ globalThis.document={getElementById:node};
+ globalThis.window={dispatchEvent(event){events.push(event)}};
+ globalThis.Event=class{constructor(type){this.type=type}};
+ globalThis.CustomEvent=class extends globalThis.Event{constructor(type,options){super(type);this.detail=options.detail}};
+ let finishVerify;
+ globalThis.fetch=async(url)=>{
+  if(url.endsWith('/otp'))return {ok:true,json:async()=>({})};
+  if(url.endsWith('/verify'))return new Promise(resolve=>{finishVerify=()=>resolve({ok:true,json:async()=>({access_token:'late-token',expires_in:3600})})});
+  throw new Error('Unexpected auth endpoint');
+ };
+ try{
+  const auth=await import('../apps/manager/test-auth.js?manager-logout-race');
+  node('authKey').value='test-public-key';node('authEmail').value='example@example.test';
+  await node('sendOtp').listeners.get('click')();
+  node('authOtp').value='123456';
+  const pending=node('verifyOtp').listeners.get('click')();
+  node('logoutTest').listeners.get('click')();
+  finishVerify();await pending;
+  assert.equal(auth.getTestSession(),null);
+  assert.equal(events.filter(e=>e.type==='cc:v2-authenticated-test-session').length,0);
+ }finally{
+  for(const [key,value] of Object.entries(previous)){
+   if(value===undefined)delete globalThis[key];else globalThis[key]=value;
+  }
+ }
+});
