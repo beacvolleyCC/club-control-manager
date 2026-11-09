@@ -19,7 +19,7 @@ function harness(opts={}){
  const ctx={rows:[],table:[],fixture:[]};
  const api=new Function('teamFilterIds_','text','state','ccMrszMenGroup_','ccCurrentLeague_','ccMrszPhotoState_',
    'ccLeagueContextSelectHtml_','esc','ccMrszMainPhotoTableHtml_','ccMrszLeagueFixturePanelHtml_','ccMrszCoverageLabel_',
-   'let ccMatchesSelectedGroup_="";'+code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_,ccMatchesTeamSelectHtml_};')(
+   'let ccMatchesSelectedGroup_="",ccLeagueMatchScope_="beac";'+code+';return {ccMatchesDefaultLeague_,ccLeagueMatchesContextHtml_,ccMatchesTeamSelectHtml_};')(
    ()=>opts.selectedTeamIds||[],x=>String(x??''),state,opts.menGroup||'B',
    fallback=>selection||fallback,photo,label=>'<select id="ccLeagueContextSelect"><option>'+label+'</option></select>',
    x=>String(x??''),t=>{ctx.table.push(t.competitionLabel);return '<article class="ms-standings-card">TABLE:'+t.competitionLabel+'</article>'},
@@ -80,7 +80,7 @@ test('match-page markup retains real BEAC roster while dropping parallel league 
 });
 test('one shared scope and result provenance are visible in league scoreboard builder',()=>{
  assert.ok(source.includes("ccLeagueMatchScope_=button.dataset.leagueMatchScope==='all'?'all':'beac'"));
- assert.ok(source.includes("meta:'',"));
+ assert.ok(source.includes('ccMrszMatchReviewReason_('));
  assert.ok(source.includes('const hasBeac=matches'));
  assert.ok(source.includes("const scope=hasBeac?ccLeagueMatchScope_:'all'"));
  assert.ok(source.includes('const reason=ccMrszMatchReviewReason_(m,tableRows,table?.partial===false,conflicts)'));
@@ -115,7 +115,7 @@ test('full standings never narrow to a hidden persisted player selection',()=>{
 
 test('BEAC event-id roster precedes read-only federation fixtures on match page',()=>{
  const section=source.slice(source.indexOf('  function renderCompetitionMatchCards_()'),source.indexOf('  function renderEventList('));
- assert.ok(section.indexOf("ccCompetitionEventWithRosterHtml_(e,'match')")<section.indexOf('ccLeagueMatchesContextHtml_()'));
+ assert.ok(section.indexOf('ccLeagueMatchesContextHtml_()')<section.indexOf("ccCompetitionEventWithRosterHtml_(e,'match')"),'canonical fixtures should precede separate attendance events');
  assert.ok(section.includes('ccBindTrainingRosterToggles_()'));
  assert.ok(source.includes("await loadEventRoster(id)"));
  assert.ok(source.includes('data-training-roster-toggle='));
