@@ -26,7 +26,7 @@ test('Manager TEST bridge maps permission-filtered events and players',async()=>
  try{
   const data=await loadManagerTestPreview(session);
   assert.equal(data.events.length,1);
-  assert.equal(data.players[0].id,'p1');
+  assert.equal(data.players[0].playerId,'p1');
   assert.equal(w.events.length,1);
   assert.equal(w.events[0].type,'cc:v2-test-data');
  }finally{restore();w.restore()}
