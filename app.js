@@ -3080,7 +3080,7 @@ async function ccMassAthleteHistoryLoad_(id){
     const teams=Array.isArray(p.teams)?p.teams:[];
     const officials=Array.isArray(p.officials)?p.officials:[];
     const matchCode=text(m?.matchCode);
-    const verifiedUrl=ccMrszProfileUrl_(p?.sourceUrl||m?.sourceUrl);
+    const verifiedUrl=ccMrszProfileUrl_(p?.sourceUrl||m?.protocolUrl||m?.sourceUrl);
     return '<div class="cc-protocol-report">'
 
       +'<div class="cc-protocol-meta"><span>'+esc(text(m?.competitionLabel))+'</span><span>'+esc(kickoff.date+' · '+kickoff.time)+'</span>'
@@ -3092,7 +3092,7 @@ async function ccMassAthleteHistoryLoad_(id){
       +(officials.length?'<section class="cc-protocol-officials"><h3>Hivatalos személyek</h3><div>'+officials.map(o=>
         '<div><span>'+esc(text(o?.role)||'Hivatalos személy')+'</span><strong>'+ccMrszProtocolPersonHtml_(o)+'</strong></div>').join('')+'</div></section>':'')
       +(text(p?.notes)?'<p class="cc-protocol-notes">'+esc(p.notes)+'</p>':'')
-      +(verifiedUrl?'<p><a class="button quiet small" href="'+esc(verifiedUrl)+'" target="_blank" rel="noopener noreferrer">Eredeti Hunvolley-jegyzőkönyv ↗</a></p>':'')
+      +(verifiedUrl?'<p style="display:flex;justify-content:flex-end;margin-top:16px"><a class="button quiet small" href="'+esc(verifiedUrl)+'" target="_blank" rel="noopener noreferrer">Eredeti Hunvolley-jegyzőkönyv ↗</a></p>':'')
 
       +'</div>';
   }
