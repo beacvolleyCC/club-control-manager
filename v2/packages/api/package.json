@@ -1,0 +1,10 @@
+{
+  "name": "@club-control/api",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./contracts": "./src/contracts.ts",
+    "./v2-test-rpc": "./src/v2-test-rpc-client.ts"
+  }
+}

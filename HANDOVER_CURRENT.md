@@ -1,3 +1,9 @@
+# Club Control – AKTUÁLIS HANDOVER (2026-11-10)
+
+**A V2 ág friss, ellenőrzött átadása:** [v2/HANDOVER_2026-11-10.md](v2/HANDOVER_2026-11-10.md). A `v2/architecture-foundation-20261107` külön fejlesztési ág, nem LIVE. **Folytatás:** `CC-FOLYTATÁS`. A 2026-11-07-i blokk alább történeti előzmény.
+
+---
+
 # Aktuális átadás – 2026-11-07
 
 **Elsődleges, friss handover:** [docs/handover/HANDOVER_20261107_CC_CURRENT.md](docs/handover/HANDOVER_20261107_CC_CURRENT.md). A régebbi átadások történeti előzmények. Folytatási kulcs: `CC-FOLYTATÁS`.

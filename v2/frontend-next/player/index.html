@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#162535"><title>Club Control V2 – Új Player</title>
+<link rel="stylesheet" href="../shared/tokens.css"><link rel="stylesheet" href="./player.css"></head>
+<body><a class="skip-link" href="#playerView">Ugrás a tartalomra</a>
+<div class="player-shell">
+<header class="player-header"><div class="player-header-inner">
+<div class="player-brand"><span class="player-mark" aria-hidden="true">BEAC</span><div><strong>Club Control</strong><small>RÖPLABDA · PLAYER V2</small></div></div>
+<button id="playerMenuToggle" class="player-menu-toggle" type="button" aria-controls="playerNav" aria-expanded="false">Menü</button>
+<nav id="playerNav" class="player-nav" aria-label="Player főmenü">
+<a href="#home" data-view="home" aria-current="page">Áttekintés</a>
+<a href="#trainings" data-view="trainings">Edzések</a>
+<a href="#matches" data-view="matches">Meccsek</a>
+<a href="#standings" data-view="standings">Tabella</a>
+<a href="#notifications" data-view="notifications">Értesítések</a>
+<a href="#profile" data-view="profile">Profil</a>
+</nav></div></header>
+<div class="player-body">
+<div class="page-heading"><div><p class="player-eyebrow">BEAC Röplabda · fejlesztői előnézet</p><h1 id="playerTitle">Áttekintés</h1><p class="cc-muted" id="playerDescription">Az új Player szerkezete.</p></div>
+<span class="cc-tag player-environment" id="playerDataStatus" role="status">DEMO UI · nincs adatkapcsolat</span></div>
+<main id="playerView" tabindex="-1" aria-label="Player tartalom"></main>
+<p class="player-footnote">V2 külön TEST fejlesztési ág. Ez a felület nem a LIVE Player, nem mutat valódi edzést vagy eredményt, és semmit nem ment.</p>
+</div></div>
+<script type="module" src="./main.js"></script></body></html>

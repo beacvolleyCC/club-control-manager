@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+const html=readFileSync(new URL('../apps/manager/index.html',import.meta.url),'utf8');const js=readFileSync(new URL('../apps/manager/main.js',import.meta.url),'utf8');const css=readFileSync(new URL('../apps/manager/styles.css',import.meta.url),'utf8');
+test('Manager shell has brand, date, two enabled modules and nested navigation',()=>{for(const id of ['clubName','headerDate','settingsNav','filterToggle','filterPanel','newEventPanel'])assert.ok(html.includes('id="'+id+'"'));assert.match(html,/Tömegsport/);assert.match(html,/Sportolók/);assert.doesNotMatch(html,/class="sidebar"/);});
+test('filter drawer supports past, day and sort with local date keys',()=>{assert.match(html,/value="past"/);assert.match(html,/type="date" lang="hu-HU"/);assert.match(js,/sv-SE/);assert.match(js,/sort==='oldest'/);});
+test('settings and event editor are non-writing previews',()=>{assert.match(html,/id="clubNamePreview"[^>]*disabled/);assert.match(html,/id="newEventPanel" hidden/);assert.doesNotMatch(js,/fetch\s*\(/);});
+test('desktop date hidden on narrow screens',()=>assert.match(css,/@media\(max-width:650px\)[\s\S]*\.app-header time\{display:none\}/));

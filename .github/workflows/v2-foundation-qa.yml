@@ -1,0 +1,37 @@
+name: Club Control V2 foundation QA
+on:
+  pull_request:
+    paths:
+      - 'v2/**'
+      - '.github/workflows/v2-foundation-qa.yml'
+  push:
+    branches:
+      - 'v2/**'
+    paths:
+      - 'v2/**'
+      - '.github/workflows/v2-foundation-qa.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install V2 dependencies
+        run: npm install --no-audit --no-fund
+      - name: Typecheck domain and API
+        run: npm run typecheck
+      - name: Run foundation contract tests
+        run: npm test
+      - name: Build isolated preview
+        run: npm run build
+      - name: Upload Manager and Player preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: club-control-v2-preview
+          path: v2/dist
+          if-no-files-found: error
