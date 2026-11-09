@@ -1008,17 +1008,11 @@
       +'</section>';
   }
   function ccManagerCanonicalProvisionalRows_(league){
-    const key=name=>text(name).toLocaleLowerCase('hu').replace(/[^a-z0-9áéíóöőúüű]/g,'');
-    const points=new Map();
-    for(const m of (ccMrszPhotoState_.canonicalMatches||[])){
-      if(text(m.competitionLabel)!==league||text(m.status)!=='played')continue;
-      const h=Number(m.homeSets),a=Number(m.awaySets);
-      if(!((h===3&&a>=0&&a<=2)||(a===3&&h>=0&&h<=2)))continue;
-      points.set(key(m.homeName),(points.get(key(m.homeName))||0)+(h===3?2:(String(m.status).toLowerCase().includes('forfeit')||m.walkover===true||m.noShow===true?0:1)));
-      points.set(key(m.awayName),(points.get(key(m.awayName))||0)+(a===3?2:(String(m.status).toLowerCase().includes('forfeit')||m.walkover===true||m.noShow===true?0:1)));
-    }
+    // Canonical team stats have already resolved federation name aliases.
+    // Compute points from those same wins/losses to keep points consistent.
     return (ccMrszPhotoState_.canonicalTeamStats||[]).filter(r=>text(r.competitionLabel)===league)
-      .map(r=>({...r,sourceTeamId:'canonical:'+text(r.teamKey),focus:ccIsBeacLeagueTeam_(r.teamName),tablePoints:points.get(key(r.teamName))||0,_ccUnranked:true}))
+      .map(r=>({...r,sourceTeamId:'canonical:'+text(r.teamKey),focus:ccIsBeacLeagueTeam_(r.teamName),
+        tablePoints:2*(Number(r.wins)||0)+(Number(r.losses)||0),_ccUnranked:true}))
       .sort((a,b)=>b.tablePoints-a.tablePoints||Number(b.wins)-Number(a.wins)||(Number(b.setsFor)-Number(b.setsAgainst))-(Number(a.setsFor)-Number(a.setsAgainst))||text(a.teamName).localeCompare(text(b.teamName),'hu'))
       .map((r,i)=>({...r,position:i+1}));
   }
