@@ -26,6 +26,7 @@ export async function loadManagerTestPreview(session,{signal}={}){
  const events=[...data.trainings.map(e=>({...e,kind:'training'})),...data.matches.map(e=>({...e,kind:'match'}))];
  const teamMap=new Map();
  for(const e of events)if(e.teamId)teamMap.set(String(e.teamId),{id:String(e.teamId),name:String(e.teamName||'Csapat')});
+ for(const p of data.players)if(p.teamId && !teamMap.has(String(p.teamId)))teamMap.set(String(p.teamId),{id:String(p.teamId),name:String(p.teamName||'Csapat')});
  const normalized={
   teams:[...teamMap.values()],
   events:events.map(e=>({eventId:e.eventId,teamId:e.teamId,title:(e.kind==='match'?'Meccs: ':'Edzés: ')+(e.title||e.eventType||'Esemény'),startsAt:e.startsAt,venue:e.venue||''})),
