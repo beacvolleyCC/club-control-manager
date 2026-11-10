@@ -14,9 +14,9 @@ test('new Player is independent and has meaningful accessible routes',()=>{
  new Function(js);
 });
 test('new Player preview is non-writing and clearly separate from LIVE',()=>{
- assert.match(html,/DEMO UI · nincs adatkapcsolat/);
- assert.match(js,/nem mentés|nincs mentés/i);
- assert.doesNotMatch(js,/\bfetch\s*\(|localStorage|sessionStorage|service_role|supabase\.co/i);
+ assert.match(html,/TEST belépés szükséges/);assert.match(html,/id="testAuthMount"/);assert.match(js,/mountTestAuth/);assert.match(js,/cc_v2_player_read_v1/);
+ assert.match(js,/nincs mentés/i);
+ assert.doesNotMatch(js,/\bfetch\s*\(|localStorage|sessionStorage|service_role|supabase\.co/i);assert.match(html,/\.\.\/shared\/test-auth\.css/);
  assert.doesNotMatch(html,/snqsxlyhontaepembaic|szzoubvhlwnojtzqjebc|supabase\.co/i);
 });
 test('new Player uses shared tokens and responsive reduced-motion-safe styling',()=>{
