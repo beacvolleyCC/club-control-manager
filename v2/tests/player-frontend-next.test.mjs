@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 const root=new URL('../frontend-next/player/',import.meta.url);
 const html=readFileSync(new URL('index.html',root),'utf8');
 const js=readFileSync(new URL('main.js',root),'utf8');
@@ -11,7 +13,8 @@ test('new Player is independent and has meaningful accessible routes',()=>{
  for(const id of ['playerNav','playerView','playerMenuToggle','playerDataStatus'])assert.match(html,new RegExp('id="'+id+'"'));
  assert.match(html,/lang="hu"/);assert.match(html,/aria-expanded="false"/);
  assert.match(js,/aria-current/);assert.match(js,/hashchange/);
- new Function(js);
+ const checked=spawnSync(process.execPath,['--check',fileURLToPath(new URL('../frontend-next/player/main.js',import.meta.url))],{encoding:'utf8'});
+ assert.equal(checked.status,0,checked.stderr);
 });
 test('new Player preview is non-writing and clearly separate from LIVE',()=>{
  assert.match(html,/TEST belépés szükséges/);assert.match(html,/id="testAuthMount"/);assert.match(js,/mountTestAuth/);assert.match(js,/cc_v2_player_read_v1/);
