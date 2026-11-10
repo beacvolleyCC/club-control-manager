@@ -1,6 +1,6 @@
 // Independent Manager V2 read-only TEST shell. No direct table access, no writes.
 import {mountTestAuth} from '../shared/test-auth-ui.js';
-import {readTestRpc,testManagerWindow} from '../shared/test-rpc.js';
+import {readTestManagerModules} from '../shared/test-rpc.js';
 const $=id=>document.getElementById(id);
 const nav=$('managerNav'),heading=$('pageTitle'),view=$('view'),menu=$('menuToggle'),status=$('dataStatus');
 const pages={
@@ -8,24 +8,23 @@ const pages={
  trainings:['Edzések','A jogosult edzések listája'],
  matches:['Meccsek','Saját csapatok meccseseményei, külön jegyzőkönyv-bekötés nélkül'],
  players:['Sportolók','A jogosult csapatok sportolói'],
- teams:['Csapatok','Az engedélyezett rekordokban megjelenő csapatok']
+ teams:['Csapatok','A csapatmodulhoz engedélyezett csapatok']
 };
-let data=null,mode='signed-out',failure='',controller=null,requestVersion=0;
+let data=null,available={},mode='signed-out',failure='',controller=null,requestVersion=0;
 const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);if(cls)e.className=cls;return e};
 const safeDate=value=>value&&Number.isFinite(Date.parse(value))?new Intl.DateTimeFormat('hu-HU',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Budapest'}).format(new Date(value)):'Nincs időpont';
-function clearRead(){requestVersion++;controller?.abort();controller=null;data=null;mode='signed-out';failure='';render()}
+function clearRead(){requestVersion++;controller?.abort();controller=null;data=null;available={};mode='signed-out';failure='';render()}
 async function login(session){
  const version=++requestVersion;controller?.abort();controller=new AbortController();data=null;mode='loading';failure='';render();
  try{
-  const payload=await readTestRpc(session,'cc_v2_manager_read_v1',testManagerWindow(),{signal:controller.signal});
+  const payload=await readTestManagerModules(session,{signal:controller.signal});
   if(requestVersion!==version||controller.signal.aborted)return;
-  if(!Array.isArray(payload.trainings)||!Array.isArray(payload.matches)||!Array.isArray(payload.players))
-   throw new Error('A TEST Manager RPC hiányos listákat adott vissza.');
-  data={trainings:payload.trainings,matches:payload.matches,players:payload.players};
+  if(!Object.values(payload.available).some(Boolean))throw new Error('Ehhez a fiókhoz nincs elérhető Manager modul.');
+  data=payload.data;available=payload.available;
   mode='ready';
  }catch(error){
   if(requestVersion!==version||controller.signal.aborted)return;
-  data=null;failure=error.message||'TEST API hiba';mode='error';
+  data=null;available={};failure=error.message||'TEST API hiba';mode='error';
  }finally{if(requestVersion===version)render()}
 }
 mountTestAuth($('testAuthMount'),{onLogin:login,onLogout:clearRead});
@@ -58,19 +57,18 @@ function playersPanel(rows){
  section.append(list);return section;
 }
 function teamsPanel(){
- const section=panel('Érintett csapatok','Csak a már engedélyezett edzés-, meccs- és játékosrekordokból. Nem teljes csapatlista.');
- const names=new Map();
- for(const record of [...data.trainings,...data.matches,...data.players]){
-  if(record.teamId&&record.teamName)names.set(record.teamId,record.teamName);
- }
+ const section=panel('Csapatok',data.teams.length+' engedélyezetten visszaadott TEST csapat');
  const list=make('div',undefined,'v2-record-list');
- for(const name of [...names.values()].sort((a,b)=>a.localeCompare(b,'hu')))list.append(item(name,'Jogosultsággal betöltött rekordból','TEST'));
- if(!names.size)list.append(make('p','Nincs megjeleníthető csapat.','cc-muted'));
+ for(const team of data.teams.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'hu'))){
+  list.append(item(team.name||'Csapat',team.season||'Szezon nincs megadva',
+   team.playerCount===undefined?'TEST':String(team.playerCount)+' játékos'));
+ }
+ if(!data.teams.length)list.append(make('p','Nincs megjeleníthető csapat.','cc-muted'));
  section.append(list);return section;
 }
 function render(){
  for(const link of nav.querySelectorAll('a[data-view]')){
-  const allowed=Object.hasOwn(pages,link.dataset.view)&&(link.dataset.view==='overview'||mode==='ready');
+  const allowed=Object.hasOwn(pages,link.dataset.view)&&(link.dataset.view==='overview'||(mode==='ready'&&available[link.dataset.view]===true));
   link.hidden=!allowed;
  }
  const requested=location.hash.slice(1);
@@ -86,9 +84,16 @@ function render(){
   status.textContent='Hitelesített TEST · csak olvasás';
   if(key==='overview'){
    const cards=make('div',undefined,'v2-stats');
-   for(const [label,count] of [['Edzések',data.trainings.length],['Meccsek',data.matches.length],['Játékosok',data.players.length]])
-    {const card=panel(label);card.append(make('strong',count,'v2-big-number'));cards.append(card)}
-   view.append(cards,eventPanel('Következő / elmúlt események',[...data.trainings,...data.matches]));
+   for(const [key,label,count] of [['trainings','Edzések',data.trainings.length],['matches','Meccsek',data.matches.length],['players','Játékosok',data.players.length],['teams','Csapatok',data.teams.length]]){
+    if(!available[key])continue;
+    const card=panel(label);card.append(make('strong',count,'v2-big-number'));cards.append(card);
+   }
+   view.append(cards);
+   if(available.trainings||available.matches)view.append(eventPanel('Engedélyezett események',[
+    ...(available.trainings?data.trainings:[]),...(available.matches?data.matches:[])
+   ]));
+   if(available.players&&!available.trainings&&!available.matches)view.append(playersPanel(data.players));
+   if(available.teams&&!available.trainings&&!available.matches&&!available.players)view.append(teamsPanel());
   }else if(key==='trainings')view.append(eventPanel(title,data.trainings));
   else if(key==='matches'){view.append(eventPanel(title,data.matches));
    view.append(panel('Jegyzőkönyv későbbi modulban','A TEST meccsesemények nem azonosak automatikusan a szövetségi eredmény- és jegyzőkönyvforrással. Kitalált összekötést nem használunk.'))}
