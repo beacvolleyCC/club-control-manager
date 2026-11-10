@@ -8,7 +8,8 @@ export const TEST_ORIGIN='https://szzoubvhlwnojtzqjebc.supabase.co';
 const TEST_PUBLISHABLE_KEY='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB';
 const ALLOWED_READ_RPC=new Set([
  'cc_v2_manager_read_v1','cc_v2_player_read_v1',
- 'cc_manager_events_v1','cc_manager_players_v2','cc_manager_teams_v1'
+ 'cc_manager_events_v1','cc_manager_players_v2','cc_manager_teams_v1',
+ 'cc_v2_manager_mass_read_v1'
 ]);
 const emailValid=value=>typeof value==='string'&&value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const authHeaders=()=>({apikey:TEST_PUBLISHABLE_KEY,'Content-Type':'application/json',Accept:'application/json'});
@@ -81,14 +82,21 @@ export async function readTestLegacyList(session,rpc,args={},options={}){
  */
 export async function readTestManagerModules(session,{request=fetch,signal,clock}={}){
  const {p_from,p_to}=testManagerWindow(clock);
+ const massWindow=testManagerMassWindow(clock);
  const modules=[
   ['trainings','cc_manager_events_v1',{p_from,p_to,p_kind:'training',p_team_id:null}],
   ['matches','cc_manager_events_v1',{p_from,p_to,p_kind:'match',p_team_id:null}],
   ['players','cc_manager_players_v2',{p_team_id:null,p_query:''}],
-  ['teams','cc_manager_teams_v1',{}]
+  ['teams','cc_manager_teams_v1',{}],
+  ['massTrainings','cc_v2_manager_mass_read_v1',massWindow,'envelope']
  ];
- const settled=await Promise.allSettled(modules.map(([,rpc,args])=>
-  readTestLegacyList(session,rpc,args,{request,signal})));
+ const settled=await Promise.allSettled(modules.map(([,rpc,args,type])=>{
+  if(type==='envelope')return readTestRpc(session,rpc,args,{request,signal}).then(payload=>{
+   if(!Array.isArray(payload.trainings))throw new Error('Hiányos V2 tömegsportos edzéslista');
+   return payload.trainings;
+  });
+  return readTestLegacyList(session,rpc,args,{request,signal});
+ }));
  if(signal?.aborted)throw new Error('TEST read cancelled');
  const data={},available={},errors={};
  for(let i=0;i<modules.length;i++){
@@ -108,4 +116,14 @@ export function testManagerWindow(clock=()=>new Date()){
  const now=clock(),start=new Date(now),end=new Date(now);
  start.setUTCDate(start.getUTCDate()-45);end.setUTCDate(end.getUTCDate()+120);
  return {p_from:start.toISOString(),p_to:end.toISOString(),p_team_id:null,p_player_query:''};
+}
+
+/** Calendar date parameters for TEST mass RPC, based on Budapest local day. */
+export function testManagerMassWindow(clock=()=>new Date()){
+ const day=new Intl.DateTimeFormat('sv-SE',{
+  timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'
+ }).format(clock());
+ const today=new Date(day+'T12:00:00Z'),from=new Date(today),to=new Date(today);
+ from.setUTCDate(from.getUTCDate()-45);to.setUTCDate(to.getUTCDate()+120);
+ return {p_from:from.toISOString().slice(0,10),p_to:to.toISOString().slice(0,10)};
 }
