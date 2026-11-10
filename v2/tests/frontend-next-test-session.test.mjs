@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
- TEST_ORIGIN,TestAccessError,createTestAuthSession,readTestRpc,testManagerWindow
+ TEST_ORIGIN,TestAccessError,createTestAuthSession,readTestRpc,readTestManagerModules,readTestLegacyList,testManagerWindow
 } from '../frontend-next/shared/test-rpc.js';
 const response=(payload,status=200)=>({ok:status>=200&&status<300,status,json:async()=>payload});
 test('TEST auth sends OTP without registering unknown users and retains JWT only in memory',async()=>{
@@ -63,4 +63,62 @@ test('Manager read window is ISO UTC and has bounded horizon',()=>{
  assert.ok(Date.parse(range.p_from)<Date.parse(range.p_to));
  assert.ok(Date.parse(range.p_to)-Date.parse(range.p_from)<200*86400000);
  assert.equal(range.p_team_id,null);
+});
+
+
+test('one denied Manager module never blocks an authorized module or reveals data',async()=>{
+ const calls=[];
+ const session={accessToken:'jwt-fixture'};
+ const request=async(url,init)=>{
+  const rpc=url.split('/').pop(),args=JSON.parse(init.body);
+  calls.push({rpc,args,method:init.method,authorization:init.headers.Authorization});
+  if(rpc==='cc_manager_events_v1'){
+   assert.deepEqual(Object.keys(args).sort(),['p_from','p_kind','p_team_id','p_to'].sort());
+   return args.p_kind==='training'?response([{eventId:'safe-training',title:'Edzés'}]):response({message:'not authorized'},403);
+  }
+  if(rpc==='cc_manager_players_v2'){
+   assert.deepEqual(args,{p_team_id:null,p_query:''});
+   return response([]);
+  }
+  if(rpc==='cc_manager_teams_v1'){
+   assert.deepEqual(args,{});
+   return response({message:'not authorized'},403);
+  }
+  throw new Error('Unexpected RPC '+rpc);
+ };
+ const {data,available,errors}=await readTestManagerModules(session,{request,clock:()=>new Date('2026-11-10T11:00:00Z')});
+ assert.deepEqual(available,{trainings:true,matches:false,players:true,teams:false});
+ assert.equal(data.trainings[0].eventId,'safe-training');
+ assert.deepEqual(data.matches,[]);
+ assert.deepEqual(data.players,[]);
+ assert.deepEqual(data.teams,[]);
+ assert.equal(errors.matches,'Nincs jogosultság.');
+ assert.equal(calls.length,4);
+ assert.ok(calls.every(x=>x.method==='POST'&&x.authorization==='Bearer jwt-fixture'));
+});
+
+test('empty authorized list is not confused with access denied, malformed data fails closed',async()=>{
+ const request=async(url,init)=>{
+  const rpc=url.split('/').pop(),args=JSON.parse(init.body);
+  if(rpc==='cc_manager_events_v1')return response([]);
+  if(rpc==='cc_manager_players_v2')return response({unexpected:'not-array'});
+  return response({message:'no access'},403);
+ };
+ const {data,available,errors}=await readTestManagerModules({accessToken:'test'}, {request});
+ assert.equal(available.trainings,true);
+ assert.equal(available.matches,true);
+ assert.equal(available.players,false);
+ assert.equal(available.teams,false);
+ assert.deepEqual(data.players,[]);
+ assert.equal(errors.players,'A modul adatai nem tölthetők be.');
+ await assert.rejects(readTestLegacyList({accessToken:'test'},'cc_v2_manager_mass_booking_write_v1',{}, {request}),/read-only/);
+});
+
+test('all Manager modules denied leaves no visible data and aborted request cannot publish results',async()=>{
+ const request=async()=>response({message:'forbidden'},403);
+ const denied=await readTestManagerModules({accessToken:'test'}, {request});
+ assert.ok(Object.values(denied.available).every(value=>value===false));
+ assert.ok(Object.values(denied.data).every(value=>Array.isArray(value)&&value.length===0));
+ const controller=new AbortController();controller.abort();
+ await assert.rejects(readTestManagerModules({accessToken:'test'}, {request,signal:controller.signal}),/cancelled/);
 });
