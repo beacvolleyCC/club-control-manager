@@ -91,9 +91,11 @@ export async function readTestManagerModules(session,{request=fetch,signal,clock
   ['matches','cc_manager_events_v1',{p_from,p_to,p_kind:'match',p_team_id:null}],
   ['players','cc_manager_players_v2',{p_team_id:null,p_query:''}],
   ['teams','cc_manager_teams_v1',{}],
-  ['massTrainings','cc_v2_manager_mass_read_v1',massWindow,'envelope']
+  ['massTrainings','cc_v2_manager_mass_read_v1',massWindow,'envelope'],
+  ['massPasses','cc_v2_manager_mass_passes_read_v1',{p_month:testCurrentBudapestMonth(clock)},'passes']
  ];
  const settled=await Promise.allSettled(modules.map(([,rpc,args,type])=>{
+  if(type==='passes')return readTestMassPasses(session,{month:args.p_month},{request,signal});
   if(type==='envelope')return readTestRpc(session,rpc,args,{request,signal}).then(payload=>{
    if(!Array.isArray(payload.trainings))throw new Error('Hiányos V2 tömegsportos edzéslista');
    return payload.trainings;
@@ -169,4 +171,12 @@ export async function readTestMassPasses(session,{query='',month=''}={}, {reques
   {p_query:q,p_month:m},{request,signal});
  if(!Array.isArray(payload.passes))throw new Error('Hibás TEST bérletadatok.');
  return payload.passes;
+}
+
+
+/** Strict current-month filter rather than returning every historical pass at login. */
+export function testCurrentBudapestMonth(clock=()=>new Date()){
+ return new Intl.DateTimeFormat('sv-SE',{
+  timeZone:'Europe/Budapest',year:'numeric',month:'2-digit'
+ }).format(clock()).slice(0,7);
 }
