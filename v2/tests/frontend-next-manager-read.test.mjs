@@ -9,10 +9,13 @@ const client=readFileSync(new URL('../frontend-next/shared/test-rpc.js',import.m
 const auth=readFileSync(new URL('../frontend-next/shared/test-auth-ui.js',import.meta.url),'utf8');
 test('Manager shell consumes permission-checked TEST RPC without direct database access or writes',()=>{
  assert.match(manager,/readTestManagerModules\(session/);
- for(const s of ['payload.data','payload.available','available[link.dataset.view]','data.teams','requestVersion','controller?.abort','mode=','onLogout:clearRead'])assert.ok(manager.includes(s),s);
+ for(const s of ['payload.data','payload.available','available[link.dataset.view]','data.teams','data.massTrainings','requestVersion','controller?.abort','mode=','onLogout:clearRead'])assert.ok(manager.includes(s),s);
  assert.doesNotMatch(manager,/fetch\s*\(|localStorage|sessionStorage|service_role/);
  assert.match(managerHtml,/id="testAuthMount"/);
  assert.match(managerHtml,/data-view="finance" hidden/);
+ assert.match(managerHtml,/data-view="massTrainings" hidden/);
+ assert.match(client,/cc_v2_manager_mass_read_v1/);
+ assert.match(manager,/Elmúlt – legutóbbi elöl/);
 });
 test('Player shell maps actual TEST bootstrap dateLabel and myStatus, no fabricated startedAt or RSVP write',()=>{
  assert.match(player,/readTestRpc\(session,'cc_v2_player_read_v1'/);
