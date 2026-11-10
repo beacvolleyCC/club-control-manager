@@ -9,7 +9,10 @@ const TEST_PUBLISHABLE_KEY='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB';
 const ALLOWED_READ_RPC=new Set([
  'cc_v2_manager_read_v1','cc_v2_player_read_v1',
  'cc_manager_events_v1','cc_manager_players_v2','cc_manager_teams_v1',
- 'cc_v2_manager_mass_read_v1'
+ 'cc_v2_manager_mass_read_v1',
+ 'cc_v2_manager_mass_event_detail_v1',
+ 'cc_v2_manager_mass_waitlist_summary_v1',
+ 'cc_v2_manager_mass_passes_read_v1'
 ]);
 const emailValid=value=>typeof value==='string'&&value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const authHeaders=()=>({apikey:TEST_PUBLISHABLE_KEY,'Content-Type':'application/json',Accept:'application/json'});
@@ -126,4 +129,44 @@ export function testManagerMassWindow(clock=()=>new Date()){
  const today=new Date(day+'T12:00:00Z'),from=new Date(today),to=new Date(today);
  from.setUTCDate(from.getUTCDate()-45);to.setUTCDate(to.getUTCDate()+120);
  return {p_from:from.toISOString().slice(0,10),p_to:to.toISOString().slice(0,10)};
+}
+
+
+/**
+ * Read-only details for an event that was already returned by the authorized
+ * training list. Do not accept an arbitrary guessed event ID from UI input.
+ * The server repeats a mass.trainings permission check.
+ */
+export async function readTestMassEventDetail(session,eventId,permittedIds,{request=fetch,signal}={}){
+ const id=String(eventId??'').trim();
+ if(!id||id.length>200||!(permittedIds instanceof Set)||!permittedIds.has(id))
+  throw new Error('Nem engedélyezett vagy ismeretlen TEST edzésazonosító.');
+ const payload=await readTestRpc(session,'cc_v2_manager_mass_event_detail_v1',
+  {p_event_id:id},{request,signal});
+ if(String(payload.externalEventId??'')!==id||
+    !payload.detail||typeof payload.detail!=='object'||Array.isArray(payload.detail)||
+    String(payload.detail.event?.eventId??'')!==id||
+    !Array.isArray(payload.detail.bookings)||!Array.isArray(payload.detail.waitlist))
+  throw new Error('Hibás TEST edzésrészlet-válasz; nem jelenítünk meg adatot.');
+ return payload.detail;
+}
+
+/** Summary counts only: no athlete identifiers, names, email or notes. */
+export async function readTestMassWaitlistSummary(session,{request=fetch,signal,clock}={}){
+ const payload=await readTestRpc(session,'cc_v2_manager_mass_waitlist_summary_v1',
+  testManagerMassWindow(clock),{request,signal});
+ if(!Array.isArray(payload.events))
+  throw new Error('Hibás TEST várólista-összesítés.');
+ return payload.events;
+}
+
+/** Passes: never called without an explicit permission-protected Manager route. */
+export async function readTestMassPasses(session,{query='',month=''}={}, {request=fetch,signal}={}){
+ const q=String(query??'').trim(),m=String(month??'').trim();
+ if(q.length>150||(m!==''&&!/^20\d{2}-(0[1-9]|1[0-2])$/.test(m)))
+  throw new Error('Érvénytelen TEST bérlet-szűrő.');
+ const payload=await readTestRpc(session,'cc_v2_manager_mass_passes_read_v1',
+  {p_query:q,p_month:m},{request,signal});
+ if(!Array.isArray(payload.passes))throw new Error('Hibás TEST bérletadatok.');
+ return payload.passes;
 }
