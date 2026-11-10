@@ -14,6 +14,13 @@ test('Manager shell consumes permission-checked TEST RPC without direct database
  assert.match(managerHtml,/id="testAuthMount"/);
  assert.match(managerHtml,/data-view="finance" hidden/);
  assert.match(managerHtml,/data-view="massTrainings" hidden/);
+ assert.match(managerHtml,/data-view="massPasses" hidden/);
+ for(const fragment of ['readTestMassEventDetail','readTestMassWaitlistSummary','readTestMassPasses','openMassDetail','loadWaitlistTotals','searchPasses','clearExtras','detailRequest','waitlistRequest','passRequest','activeSession=null'])assert.ok(manager.includes(fragment),fragment);
+ assert.match(client,/cc_v2_manager_mass_event_detail_v1/);
+ assert.match(client,/cc_v2_manager_mass_waitlist_summary_v1/);
+ assert.match(client,/cc_v2_manager_mass_passes_read_v1/);
+ assert.doesNotMatch(manager,/\.innerHTML\s*=|\.insertAdjacentHTML\s*\(/);
+
  assert.match(client,/cc_v2_manager_mass_read_v1/);
  assert.match(manager,/Elmúlt – legutóbbi elöl/);
 });
