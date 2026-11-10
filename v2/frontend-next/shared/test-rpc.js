@@ -6,7 +6,10 @@
 export const TEST_ORIGIN='https://szzoubvhlwnojtzqjebc.supabase.co';
 // Public/publishable key, not a privileged API key; this project is TEST only.
 const TEST_PUBLISHABLE_KEY='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB';
-const ALLOWED_READ_RPC=new Set(['cc_v2_manager_read_v1','cc_v2_player_read_v1']);
+const ALLOWED_READ_RPC=new Set([
+ 'cc_v2_manager_read_v1','cc_v2_player_read_v1',
+ 'cc_manager_events_v1','cc_manager_players_v2','cc_manager_teams_v1'
+]);
 const emailValid=value=>typeof value==='string'&&value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const authHeaders=()=>({apikey:TEST_PUBLISHABLE_KEY,'Content-Type':'application/json',Accept:'application/json'});
 export class TestAccessError extends Error{
@@ -47,7 +50,7 @@ export function createTestAuthSession({request=fetch,clock=()=>Date.now()}={}){
  }
  return Object.freeze({requestCode,verifyCode,current,clear});
 }
-export async function readTestRpc(session,rpc,args={}, {request=fetch,signal}={}){
+async function postTestRead(session,rpc,args,{request=fetch,signal}={}){
  if(!ALLOWED_READ_RPC.has(rpc))throw new Error('Only approved read-only V2 TEST RPCs are available');
  if(!session?.accessToken||typeof session.accessToken!=='string')throw new Error('TEST belépés szükséges.');
  const response=await request(TEST_ORIGIN+'/rest/v1/rpc/'+rpc,{
@@ -57,10 +60,49 @@ export async function readTestRpc(session,rpc,args={}, {request=fetch,signal}={}
  });
  if(!response.ok)throw new TestAccessError(response.status,
   (response.status===401||response.status===403)?'Nincs jogosultság a TEST adatokhoz.':'TEST adatbetöltési hiba (HTTP '+response.status+').');
- const payload=await response.json();
+ return response.json();
+}
+export async function readTestRpc(session,rpc,args={},options={}){
+ const payload=await postTestRead(session,rpc,args,options);
  if(!payload||typeof payload!=='object'||Array.isArray(payload)||payload.schemaVersion!==1)
   throw new Error('Ismeretlen V2 TEST API-válasz; az adatok nem jeleníthetők meg.');
  return payload;
+}
+export async function readTestLegacyList(session,rpc,args={},options={}){
+ if(!['cc_manager_events_v1','cc_manager_players_v2','cc_manager_teams_v1'].includes(rpc))
+  throw new Error('Only approved read-only Manager lists are available');
+ const payload=await postTestRead(session,rpc,args,options);
+ if(!Array.isArray(payload))throw new Error('Hiányos TEST Manager lista: '+rpc);
+ return payload;
+}
+/**
+ * Independent, server-permission-checked module reads. One denied module
+ * must not block other authorized modules. A 401/403 does not reveal data.
+ */
+export async function readTestManagerModules(session,{request=fetch,signal,clock}={}){
+ const range=testManagerWindow(clock);
+ const modules=[
+  ['trainings','cc_manager_events_v1',{...range,p_kind:'training'}],
+  ['matches','cc_manager_events_v1',{...range,p_kind:'match'}],
+  ['players','cc_manager_players_v2',{p_team_id:null,p_query:''}],
+  ['teams','cc_manager_teams_v1',{}]
+ ];
+ const settled=await Promise.allSettled(modules.map(([,rpc,args])=>
+  readTestLegacyList(session,rpc,args,{request,signal})));
+ if(signal?.aborted)throw new Error('TEST read cancelled');
+ const data={},available={},errors={};
+ for(let i=0;i<modules.length;i++){
+  const key=modules[i][0],answer=settled[i];
+  if(answer.status==='fulfilled'){
+   data[key]=answer.value;available[key]=true;
+  }else{
+   data[key]=[];available[key]=false;
+   const error=answer.reason;
+   errors[key]=error instanceof TestAccessError&&(error.status===401||error.status===403)?
+    'Nincs jogosultság.':'A modul adatai nem tölthetők be.';
+  }
+ }
+ return {data,available,errors};
 }
 export function testManagerWindow(clock=()=>new Date()){
  const now=clock(),start=new Date(now),end=new Date(now);
