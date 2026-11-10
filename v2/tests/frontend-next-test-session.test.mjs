@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
- TEST_ORIGIN,TestAccessError,createTestAuthSession,readTestRpc,readTestManagerModules,readTestLegacyList,testManagerWindow,testManagerMassWindow
+ TEST_ORIGIN,TestAccessError,createTestAuthSession,readTestRpc,readTestManagerModules,readTestLegacyList,testManagerWindow,testManagerMassWindow,readTestMassEventDetail,readTestMassWaitlistSummary,readTestMassPasses,testCurrentBudapestMonth
 } from '../frontend-next/shared/test-rpc.js';
 const response=(payload,status=200)=>({ok:status>=200&&status<300,status,json:async()=>payload});
 test('TEST auth sends OTP without registering unknown users and retains JWT only in memory',async()=>{
@@ -89,17 +89,22 @@ test('one denied Manager module never blocks an authorized module or reveals dat
    assert.match(args.p_from,/^\d{4}-\d{2}-\d{2}$/);
    return response({schemaVersion:1,trainings:[{eventId:'mass-safe',level:'Kezdő'}]});
   }
+  if(rpc==='cc_v2_manager_mass_passes_read_v1'){
+   assert.deepEqual(args,{p_query:'',p_month:'2026-11'});
+   return response({schemaVersion:1,passes:[{passNumber:'TEST-B1',validMonth:'2026-11'}]});
+  }
   throw new Error('Unexpected RPC '+rpc);
  };
  const {data,available,errors}=await readTestManagerModules(session,{request,clock:()=>new Date('2026-11-10T11:00:00Z')});
- assert.deepEqual(available,{trainings:true,matches:false,players:true,teams:false,massTrainings:true});
+ assert.deepEqual(available,{trainings:true,matches:false,players:true,teams:false,massTrainings:true,massPasses:true});
  assert.equal(data.trainings[0].eventId,'safe-training');
  assert.equal(data.massTrainings[0].eventId,'mass-safe');
+ assert.equal(data.massPasses[0].passNumber,'TEST-B1');
  assert.deepEqual(data.matches,[]);
  assert.deepEqual(data.players,[]);
  assert.deepEqual(data.teams,[]);
  assert.equal(errors.matches,'Nincs jogosultság.');
- assert.equal(calls.length,5);
+ assert.equal(calls.length,6);
  assert.ok(calls.every(x=>x.method==='POST'&&x.authorization==='Bearer jwt-fixture'));
 });
 
@@ -134,4 +139,70 @@ test('Budapest mass dates use calendar days, never full timestamp arguments',()=
  assert.match(range.p_from,/^\d{4}-\d{2}-\d{2}$/);
  assert.match(range.p_to,/^\d{4}-\d{2}-\d{2}$/);
  assert.equal(Math.round((Date.parse(range.p_to)-Date.parse(range.p_from))/86400000),165);
+});
+
+
+test('mass detail enforces event-list membership before making any request',async()=>{
+ const session={accessToken:'TEST-token'},allowed=new Set(['evt-01']);let calls=0;
+ const request=async(url,init)=>{
+  calls++;
+  assert.equal(url,TEST_ORIGIN+'/rest/v1/rpc/cc_v2_manager_mass_event_detail_v1');
+  assert.deepEqual(JSON.parse(init.body),{p_event_id:'evt-01'});
+  return response({schemaVersion:1,externalEventId:'evt-01',
+   detail:{event:{eventId:'evt-01',level:'Kezdő'},bookings:[{id:'b1',name:'Teszt Sportoló'}],waitlist:[{id:'w1',status:'VÁRAKOZIK'}]}});
+ };
+ await assert.rejects(readTestMassEventDetail(session,'other',allowed,{request}),/ismeretlen TEST/);
+ await assert.rejects(readTestMassEventDetail(session,'',allowed,{request}),/ismeretlen TEST/);
+ assert.equal(calls,0);
+ const detail=await readTestMassEventDetail(session,'evt-01',allowed,{request});
+ assert.equal(detail.bookings.length,1);
+ assert.equal(detail.waitlist.length,1);
+ assert.equal(calls,1);
+});
+
+test('mass detail mismatch, malformed schema and forbidden access are fail-closed',async()=>{
+ const allowed=new Set(['evt-01']),session={accessToken:'TEST-token'};
+ const badBody={schemaVersion:1,externalEventId:'evt-99',
+  detail:{event:{eventId:'evt-99'},bookings:[],waitlist:[]}};
+ await assert.rejects(readTestMassEventDetail(session,'evt-01',allowed,
+  {request:async()=>response(badBody)}),/Hibás TEST edzésrészlet/);
+ const badArray={schemaVersion:1,externalEventId:'evt-01',
+  detail:{event:{eventId:'evt-01'},bookings:null,waitlist:[]}};
+ await assert.rejects(readTestMassEventDetail(session,'evt-01',allowed,
+  {request:async()=>response(badArray)}),/Hibás TEST edzésrészlet/);
+ await assert.rejects(readTestMassEventDetail(session,'evt-01',allowed,
+  {request:async()=>response({message:'forbidden'},403)}),
+  error=>error instanceof TestAccessError&&error.status===403);
+});
+
+test('mass waitlist summary is authorized, date-limited and count-only',async()=>{
+ let calls=0;const session={accessToken:'TEST-token'};
+ const request=async(url,init)=>{
+  calls++;
+  assert.equal(url,TEST_ORIGIN+'/rest/v1/rpc/cc_v2_manager_mass_waitlist_summary_v1');
+  const args=JSON.parse(init.body);assert.match(args.p_from,/^2026-/);
+  return response({schemaVersion:1,events:[{eventId:'evt-01',waiting:2,offered:1,expired:0}]});
+ };
+ const summary=await readTestMassWaitlistSummary(session,{request,clock:()=>new Date('2026-11-10T08:00:00Z')});
+ assert.equal(summary[0].waiting,2);
+ assert.equal(calls,1);
+ await assert.rejects(readTestMassWaitlistSummary(session,{request:async()=>response({schemaVersion:1,events:null})}),/Hibás TEST várólista/);
+});
+
+test('mass passes require valid month and server-confirmed scope',async()=>{
+ let calls=0;
+ const session={accessToken:'TEST-token'};
+ const request=async(url,init)=>{
+  calls++;
+  assert.equal(url,TEST_ORIGIN+'/rest/v1/rpc/cc_v2_manager_mass_passes_read_v1');
+  assert.deepEqual(JSON.parse(init.body),{p_query:'Teszt',p_month:'2026-11'});
+  return response({schemaVersion:1,passes:[{product:'Novemberi bérlet',validMonth:'2026-11'}]});
+ };
+ const rows=await readTestMassPasses(session,{query:'Teszt',month:'2026-11'},{request});
+ assert.equal(rows.length,1);
+ assert.equal(calls,1);
+ await assert.rejects(readTestMassPasses(session,{month:'2026-13'},{request}),/Érvénytelen/);
+ await assert.rejects(readTestMassPasses(session,{query:'x'.repeat(151)},{request}),/Érvénytelen/);
+ assert.equal(calls,1);
+ assert.equal(testCurrentBudapestMonth(()=>new Date('2026-11-30T23:30:00Z')),'2026-12');
 });
