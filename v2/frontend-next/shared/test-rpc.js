@@ -80,10 +80,10 @@ export async function readTestLegacyList(session,rpc,args={},options={}){
  * must not block other authorized modules. A 401/403 does not reveal data.
  */
 export async function readTestManagerModules(session,{request=fetch,signal,clock}={}){
- const range=testManagerWindow(clock);
+ const {p_from,p_to}=testManagerWindow(clock);
  const modules=[
-  ['trainings','cc_manager_events_v1',{...range,p_kind:'training'}],
-  ['matches','cc_manager_events_v1',{...range,p_kind:'match'}],
+  ['trainings','cc_manager_events_v1',{p_from,p_to,p_kind:'training',p_team_id:null}],
+  ['matches','cc_manager_events_v1',{p_from,p_to,p_kind:'match',p_team_id:null}],
   ['players','cc_manager_players_v2',{p_team_id:null,p_query:''}],
   ['teams','cc_manager_teams_v1',{}]
  ];
