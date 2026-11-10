@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
- TEST_ORIGIN,TestAccessError,createTestAuthSession,readTestRpc,readTestManagerModules,readTestLegacyList,testManagerWindow
+ TEST_ORIGIN,TestAccessError,createTestAuthSession,readTestRpc,readTestManagerModules,readTestLegacyList,testManagerWindow,testManagerMassWindow
 } from '../frontend-next/shared/test-rpc.js';
 const response=(payload,status=200)=>({ok:status>=200&&status<300,status,json:async()=>payload});
 test('TEST auth sends OTP without registering unknown users and retains JWT only in memory',async()=>{
@@ -84,16 +84,22 @@ test('one denied Manager module never blocks an authorized module or reveals dat
    assert.deepEqual(args,{});
    return response({message:'not authorized'},403);
   }
+  if(rpc==='cc_v2_manager_mass_read_v1'){
+   assert.deepEqual(Object.keys(args).sort(),['p_from','p_to']);
+   assert.match(args.p_from,/^\d{4}-\d{2}-\d{2}$/);
+   return response({schemaVersion:1,trainings:[{eventId:'mass-safe',level:'Kezdő'}]});
+  }
   throw new Error('Unexpected RPC '+rpc);
  };
  const {data,available,errors}=await readTestManagerModules(session,{request,clock:()=>new Date('2026-11-10T11:00:00Z')});
- assert.deepEqual(available,{trainings:true,matches:false,players:true,teams:false});
+ assert.deepEqual(available,{trainings:true,matches:false,players:true,teams:false,massTrainings:true});
  assert.equal(data.trainings[0].eventId,'safe-training');
+ assert.equal(data.massTrainings[0].eventId,'mass-safe');
  assert.deepEqual(data.matches,[]);
  assert.deepEqual(data.players,[]);
  assert.deepEqual(data.teams,[]);
  assert.equal(errors.matches,'Nincs jogosultság.');
- assert.equal(calls.length,4);
+ assert.equal(calls.length,5);
  assert.ok(calls.every(x=>x.method==='POST'&&x.authorization==='Bearer jwt-fixture'));
 });
 
@@ -121,4 +127,11 @@ test('all Manager modules denied leaves no visible data and aborted request cann
  assert.ok(Object.values(denied.data).every(value=>Array.isArray(value)&&value.length===0));
  const controller=new AbortController();controller.abort();
  await assert.rejects(readTestManagerModules({accessToken:'test'}, {request,signal:controller.signal}),/cancelled/);
+});
+
+test('Budapest mass dates use calendar days, never full timestamp arguments',()=>{
+ const range=testManagerMassWindow(()=>new Date('2026-11-10T23:30:00Z'));
+ assert.match(range.p_from,/^\d{4}-\d{2}-\d{2}$/);
+ assert.match(range.p_to,/^\d{4}-\d{2}-\d{2}$/);
+ assert.equal(Math.round((Date.parse(range.p_to)-Date.parse(range.p_from))/86400000),165);
 });
