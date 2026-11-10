@@ -6,3 +6,15 @@
 @media(max-width:450px){.v2-stats{grid-template-columns:1fr}.v2-record{align-items:flex-start}.v2-record-tag{white-space:normal;text-align:center;max-width:90px}}
 
 .v2-list-heading{font-size:13px;font-weight:750;color:#53667a;margin:14px 0 2px;letter-spacing:.3px}
+
+.v2-action-bar{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
+.v2-read-button{padding:9px 12px;border-radius:8px;background:#fff;color:#254462;border:1px solid #b2c2d0;font-size:12px;font-weight:700}
+.v2-read-button:hover{background:#edf3f9}.v2-read-button[aria-expanded=true]{background:#203b53;color:white}
+.v2-read-button:disabled{opacity:.6;cursor:not-allowed}
+.v2-record{flex-wrap:wrap}.v2-record>div{flex:1;min-width:180px}
+.v2-subpanel{padding:15px 0;border-top:1px solid var(--cc-line);margin-top:18px}.v2-subpanel h3{font-size:15px;margin:0 0 12px}
+.v2-filter-form{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin:14px 0}
+.v2-filter-form label{display:grid;gap:6px;font-size:12px;color:var(--cc-muted);min-width:180px;flex:1}
+.v2-filter-form input{background:#fff;border:1px solid #bbc8d4;border-radius:9px;padding:10px;min-height:42px;font:inherit}
+.v2-filter-form button{min-height:42px}.v2-error{color:#a12b2b}
+@media(max-width:600px){.v2-filter-form{display:grid;grid-template-columns:1fr}.v2-filter-form label{min-width:0}.v2-record>div{min-width:130px}}
