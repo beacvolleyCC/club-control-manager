@@ -8,8 +8,8 @@ const playerHtml=readFileSync(new URL('../frontend-next/player/index.html',impor
 const client=readFileSync(new URL('../frontend-next/shared/test-rpc.js',import.meta.url),'utf8');
 const auth=readFileSync(new URL('../frontend-next/shared/test-auth-ui.js',import.meta.url),'utf8');
 test('Manager shell consumes permission-checked TEST RPC without direct database access or writes',()=>{
- assert.match(manager,/readTestRpc\(session,'cc_v2_manager_read_v1'/);
- for(const s of ['payload.trainings','payload.matches','payload.players','requestVersion','controller?.abort','mode=','onLogout:clearRead'])assert.ok(manager.includes(s),s);
+ assert.match(manager,/readTestManagerModules\(session/);
+ for(const s of ['payload.data','payload.available','available[link.dataset.view]','data.teams','requestVersion','controller?.abort','mode=','onLogout:clearRead'])assert.ok(manager.includes(s),s);
  assert.doesNotMatch(manager,/fetch\s*\(|localStorage|sessionStorage|service_role/);
  assert.match(managerHtml,/id="testAuthMount"/);
  assert.match(managerHtml,/data-view="finance" hidden/);
