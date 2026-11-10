@@ -4,7 +4,8 @@ import {readTestManagerModules} from '../shared/test-rpc.js';
 const $=id=>document.getElementById(id);
 const nav=$('managerNav'),heading=$('pageTitle'),view=$('view'),menu=$('menuToggle'),status=$('dataStatus');
 const pages={
- overview:['Áttekintés','Jogosultság szerint visszaadott események és játékosok'],
+ overview:['Áttekintés','Jogosultság szerint visszaadott edzések, meccsek és játékosok'],
+ massTrainings:['Tömegsport · edzések','Szabad helyek és várólista a jogosult TEST edzésekhez'],
  trainings:['Edzések','A jogosult edzések listája'],
  matches:['Meccsek','Saját csapatok meccseseményei, külön jegyzőkönyv-bekötés nélkül'],
  players:['Sportolók','A jogosult csapatok sportolói'],
@@ -37,12 +38,48 @@ function panel(title,description){
  const section=make('section',undefined,'cc-card v2-panel');section.append(make('h2',title));
  if(description)section.append(make('p',description,'cc-muted'));return section;
 }
+function byTimePhase(rows){
+ const now=Date.now(),valid=e=>e.startsAt&&Number.isFinite(Date.parse(e.startsAt));
+ const future=rows.filter(e=>valid(e)&&Date.parse(e.startsAt)>=now).sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt));
+ const past=rows.filter(e=>valid(e)&&Date.parse(e.startsAt)<now).sort((a,b)=>Date.parse(b.startsAt)-Date.parse(a.startsAt));
+ const undated=rows.filter(e=>!valid(e));
+ return [['Közelgő',future],['Elmúlt – legutóbbi elöl',past],['Időpont nélkül',undated]];
+}
 function eventPanel(title,rows){
  const section=panel(title,rows.length+' megjeleníthető TEST esemény');
  const list=make('div',undefined,'v2-record-list');
- for(const e of [...rows].sort((a,b)=>(Date.parse(a.startsAt)||0)-(Date.parse(b.startsAt)||0)).slice(0,100))
-  list.append(item(e.title||e.eventType||'Esemény',safeDate(e.startsAt)+' · '+(e.venue||'Helyszín nincs megadva')+' · '+(e.teamName||'–'),e.status||'Aktív'));
+ for(const [label,entries] of byTimePhase(rows)){
+  if(!entries.length)continue;
+  list.append(make('h3',label,'v2-list-heading'));
+  for(const e of entries.slice(0,100))list.append(item(
+   e.title||e.eventType||'Esemény',
+   safeDate(e.startsAt)+' · '+(e.venue||'Helyszín nincs megadva')+' · '+(e.teamName||'–'),
+   e.status||'Aktív'
+  ));
+ }
  if(!rows.length)list.append(make('p','Nincs megjeleníthető adat a lekért időszakban.','cc-muted'));
+ section.append(list);return section;
+}
+function massPanel(){
+ const rows=data.massTrainings||[];
+ const section=panel('Tömegsport edzések',rows.length+' megjeleníthető TEST edzés · csak olvasás');
+ const list=make('div',undefined,'v2-record-list');
+ for(const [label,entries] of byTimePhase(rows)){
+  if(!entries.length)continue;
+  list.append(make('h3',label,'v2-list-heading'));
+  for(const e of entries.slice(0,100)){
+   const free=Number.isFinite(Number(e.free))?String(e.free):'–';
+   const capacity=Number.isFinite(Number(e.capacity))?String(e.capacity):'–';
+   const wait=Number.isFinite(Number(e.waitlistCount))?String(e.waitlistCount):'–';
+   list.append(item(
+    e.level||'Tömegsport edzés',
+    safeDate(e.startsAt)+' · '+(e.court||'Pálya nincs megadva')+
+      ' · '+String(e.totalActive??'–')+' jelentkező · '+wait+' várólistán',
+    free+' / '+capacity+' szabad'
+   ));
+  }
+ }
+ if(!rows.length)list.append(make('p','Nincs jogosult tömegsportos edzés a lekért időszakban.','cc-muted'));
  section.append(list);return section;
 }
 function playersPanel(rows){
@@ -84,7 +121,7 @@ function render(){
   status.textContent='Hitelesített TEST · csak olvasás';
   if(key==='overview'){
    const cards=make('div',undefined,'v2-stats');
-   for(const [key,label,count] of [['trainings','Edzések',data.trainings.length],['matches','Meccsek',data.matches.length],['players','Játékosok',data.players.length],['teams','Csapatok',data.teams.length]]){
+   for(const [key,label,count] of [['massTrainings','Tömegsport',data.massTrainings.length],['trainings','Edzések',data.trainings.length],['matches','Meccsek',data.matches.length],['players','Játékosok',data.players.length],['teams','Csapatok',data.teams.length]]){
     if(!available[key])continue;
     const card=panel(label);card.append(make('strong',count,'v2-big-number'));cards.append(card);
    }
@@ -92,9 +129,11 @@ function render(){
    if(available.trainings||available.matches)view.append(eventPanel('Engedélyezett események',[
     ...(available.trainings?data.trainings:[]),...(available.matches?data.matches:[])
    ]));
-   if(available.players&&!available.trainings&&!available.matches)view.append(playersPanel(data.players));
-   if(available.teams&&!available.trainings&&!available.matches&&!available.players)view.append(teamsPanel());
-  }else if(key==='trainings')view.append(eventPanel(title,data.trainings));
+   if(available.massTrainings)view.append(massPanel());
+   if(available.players&&!available.trainings&&!available.matches&&!available.massTrainings)view.append(playersPanel(data.players));
+   if(available.teams&&!available.trainings&&!available.matches&&!available.players&&!available.massTrainings)view.append(teamsPanel());
+  }else if(key==='massTrainings')view.append(massPanel());
+  else if(key==='trainings')view.append(eventPanel(title,data.trainings));
   else if(key==='matches'){view.append(eventPanel(title,data.matches));
    view.append(panel('Jegyzőkönyv későbbi modulban','A TEST meccsesemények nem azonosak automatikusan a szövetségi eredmény- és jegyzőkönyvforrással. Kitalált összekötést nem használunk.'))}
   else if(key==='players')view.append(playersPanel(data.players));
