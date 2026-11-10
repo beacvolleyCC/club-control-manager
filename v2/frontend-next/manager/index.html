@@ -1,1 +1,25 @@
-<!doctype html><html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Club Control V2 – Új Manager</title><link rel="stylesheet" href="../shared/tokens.css"><link rel="stylesheet" href="./manager.css"></head><body><div class="layout"><aside class="sidebar" aria-label="Manager navigáció"><div class="brand"><span class="brand-mark" aria-hidden="true">CC</span><div><strong>Club Control</strong><small>BEAC · MANAGER V2</small></div></div><nav aria-label="Főmenü" id="managerNav"><a href="#overview" data-view="overview" aria-current="page">Áttekintés</a><a href="#trainings" data-view="trainings">Edzések</a><a href="#matches" data-view="matches">Meccsek</a><a href="#players" data-view="players">Sportolók</a><a href="#teams" data-view="teams">Csapatok</a><a href="#finance" data-view="finance">Pénzügyek</a><a href="#statistics" data-view="statistics">Statisztikák</a><a href="#settings" data-view="settings">Beállítások</a></nav><p class="cc-muted aside-note">Új frontend · fejlesztői váz</p></aside><div class="workspace"><header class="topbar"><button type="button" id="menuToggle" aria-controls="managerNav" aria-expanded="false" class="mobile-menu">Menü</button><div><span class="cc-muted">BEAC Röplabda</span><h1 id="pageTitle">Áttekintés</h1></div><span class="cc-tag" id="dataStatus" role="status">DEMO · nincs adatkapcsolat</span></header><main id="view" tabindex="-1"><section class="cc-card"><h2>Manager V2</h2><p>Az új felület alapja elkészült. A modulok adatkapcsolatát és jogosultságait külön kötjük be.</p><p class="cc-muted">Ez nem a LIVE rendszer, és nem a régi Manager felület átalakítása.</p></section></main></div></div><script type="module" src="./main.js"></script></body></html>
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#172234"><title>Club Control V2 – Új Manager</title>
+<link rel="stylesheet" href="../shared/tokens.css"><link rel="stylesheet" href="./manager.css"></head>
+<body><a class="manager-skip-link" href="#view">Ugrás a tartalomra</a>
+<div class="layout"><aside class="sidebar" aria-label="Manager navigáció">
+<div class="brand"><span class="brand-mark" aria-hidden="true">CC</span><div><strong>Club Control</strong><small>BEAC · MANAGER V2</small></div></div>
+<nav aria-label="Főmenü" id="managerNav">
+<a href="#overview" data-view="overview" aria-current="page">Áttekintés</a>
+<a href="#trainings" data-view="trainings" hidden>Edzések</a>
+<a href="#matches" data-view="matches" hidden>Meccsek</a>
+<a href="#players" data-view="players" hidden>Sportolók</a>
+<a href="#teams" data-view="teams" hidden>Csapatok</a>
+<a href="#finance" data-view="finance" hidden>Pénzügyek</a>
+<a href="#statistics" data-view="statistics" hidden>Statisztikák</a>
+<a href="#settings" data-view="settings" hidden>Beállítások</a>
+</nav><p class="cc-muted aside-note">V2 · külön TEST fejlesztés</p></aside>
+<div class="workspace"><header class="topbar">
+<button type="button" id="menuToggle" aria-controls="managerNav" aria-expanded="false" class="mobile-menu">Menü</button>
+<div><span class="cc-muted">BEAC Röplabda · csak TEST</span><h1 id="pageTitle">Áttekintés</h1></div>
+<span class="cc-tag" id="dataStatus" role="status">TEST belépés szükséges</span>
+</header><section id="testAuthMount" class="cc-card test-auth-panel" aria-label="TEST bejelentkezés"></section>
+<main id="view" tabindex="-1"><section class="cc-card"><h2>Manager V2</h2><p>Az adatok csak TEST bejelentkezés után jelennek meg.</p></section></main>
+<footer class="cc-footer">Független V2 frontend. A LIVE rendszerhez nem kapcsolódik; minden funkció csak olvasható.</footer>
+</div></div><script type="module" src="./main.js"></script></body></html>
