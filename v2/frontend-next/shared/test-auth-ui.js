@@ -9,11 +9,13 @@ export function mountTestAuth(root,{onLogin=()=>{},onLogout=()=>{}}={}){
  const get=sel=>root.querySelector(sel),email=get('[data-auth-email]'),code=get('[data-auth-code]'),status=get('[data-auth-status]');
  const send=get('[data-auth-send]'),verify=get('[data-auth-verify]'),logout=get('[data-auth-logout]');
  const auth=createTestAuthSession();
- let uiVersion=0;
+ let uiVersion=0,active=false,expiryTimer=null;
+ function stopExpiry(){if(expiryTimer!==null)clearTimeout(expiryTimer);expiryTimer=null;}
  function message(value,error=false){status.textContent=value;status.setAttribute('role',error?'alert':'status')}
  function busy(value){send.disabled=value;verify.disabled=value}
- function signOut(){uiVersion++;auth.clear();busy(false);code.value='';message('Nincs TEST munkamenet.');onLogout()}
+ function signOut(){uiVersion++;stopExpiry();active=false;auth.clear();busy(false);code.value='';message('Nincs TEST munkamenet.');onLogout()}
  send.addEventListener('click',async()=>{
+  if(active)signOut();
   const own=++uiVersion;busy(true);message('TEST kódkérés folyamatban…');
   try{const accepted=await auth.requestCode(email.value);if(own===uiVersion&&accepted)message('Ha a fiók létezik, a kódot elküldtük.');}
   catch(error){if(own===uiVersion)message(error.message,true)}
@@ -24,13 +26,14 @@ export function mountTestAuth(root,{onLogin=()=>{},onLogout=()=>{}}={}){
   try{
    const session=await auth.verifyCode(email.value,code.value);
    if(own!==uiVersion||!session)return;
-   code.value='';message('TEST munkamenet aktív. Adatok betöltése…');
+   code.value='';active=true;message('TEST munkamenet aktív. Adatok betöltése…');
+   stopExpiry();expiryTimer=setTimeout(()=>{if(active){signOut();message('A TEST munkamenet lejárt. Jelentkezz be újra.',true)}},Math.max(0,session.expiresAt-Date.now()-15000));
    onLogin(session);
-  }catch(error){if(own===uiVersion){auth.clear();onLogout();message(error.message,true)}}
+  }catch(error){if(own===uiVersion){stopExpiry();active=false;auth.clear();onLogout();message(error.message,true)}}
   finally{if(own===uiVersion)busy(false)}
  });
  logout.addEventListener('click',signOut);
- const onVisible=()=>{if(!document.hidden&&!auth.current()&&status.textContent.includes('aktív')){signOut();message('A TEST munkamenet lejárt. Jelentkezz be újra.',true)}};
+ const onVisible=()=>{if(!document.hidden&&active&&!auth.current()){signOut();message('A TEST munkamenet lejárt. Jelentkezz be újra.',true)}};
  document.addEventListener('visibilitychange',onVisible);
- return Object.freeze({session:()=>auth.current(),signOut,dispose:()=>document.removeEventListener('visibilitychange',onVisible)});
+ return Object.freeze({session:()=>auth.current(),signOut,dispose:()=>{stopExpiry();document.removeEventListener('visibilitychange',onVisible)}});
 }
