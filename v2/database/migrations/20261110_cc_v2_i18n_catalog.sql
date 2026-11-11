@@ -14,7 +14,7 @@ create unique index if not exists i18n_one_default_language_idx
  on public.i18n_languages(is_default) where is_default;
 
 create table if not exists public.i18n_keys (
- key text primary key check (length(key)<=180 and key ~ '^[a-z][a-zA-Z0-9_]*(\.[a-z][a-zA-Z0-9_]*)+
+ key text primary key check (length(key) between 3 and 180 and position('.' in key)>0),
  scope text not null check (scope ~ '^[a-z][a-z0-9_]*$'),
  source_hu text not null check (length(source_hu)>0),
  description text not null default '',
