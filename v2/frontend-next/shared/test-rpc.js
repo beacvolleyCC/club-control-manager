@@ -5,7 +5,7 @@
  */
 export const TEST_ORIGIN='https://szzoubvhlwnojtzqjebc.supabase.co';
 // Public/publishable key, not a privileged API key; this project is TEST only.
-const TEST_PUBLISHABLE_KEY='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB';
+export const TEST_PUBLISHABLE_KEY='sb_publishable_1iOpBTxKteHCgJdNyzXQCA_5gxcFWZB';
 const ALLOWED_READ_RPC=new Set([
  'cc_v2_manager_read_v1','cc_v2_player_read_v1',
  'cc_manager_events_v1','cc_manager_players_v2','cc_manager_teams_v1',
