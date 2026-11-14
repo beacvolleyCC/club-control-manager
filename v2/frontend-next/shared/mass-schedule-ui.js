@@ -26,7 +26,12 @@ export function mountPublicMassSchedule(root,{read=readPublicMassSchedule}={}){
  controls.append(pick,update);top.append(heading,controls);area.append(top,help,status,list);root.replaceChildren(area);
  let sequence=0,controller=null,events=[],pending=false,problem=false;
  function draw(){
-  const tr=label[locale.getLanguage()==='en'?'en':'hu'];
+  const base=label[locale.getLanguage()==='en'?'en':'hu'];
+  const tr=new Proxy(base,{get(fallback,key){
+   if(typeof key!=='string')return undefined;
+   const token='mass.schedule.'+key,translated=locale.t(token);
+   return translated===token?fallback[key]:translated;
+  }});
   heading.textContent=tr.title;help.textContent=tr.intro;update.textContent=tr.reload;
   status.textContent=pending?'…':problem?tr.error:tr.test;
   list.replaceChildren();
