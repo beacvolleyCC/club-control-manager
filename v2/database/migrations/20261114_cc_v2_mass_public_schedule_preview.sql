@@ -31,7 +31,7 @@ begin
    ) remaining,
    w.waiting waitlist_count,
    (
-    coalesce((window.rules->>'bookingOpen')::boolean,false)
+    coalesce((time_rules.rules->>'bookingOpen')::boolean,false)
     and not (lower(coalesce(e.legacy_row->>'managerWaitlistOnly','false')) in ('true','1','yes','igen'))
     and least(
       greatest(greatest(coalesce(e.capacity,0),0)-b.total_active-w.offered,0),
@@ -39,8 +39,8 @@ begin
     )>0 and w.pending=0
    ) booking_open,
    (
-    coalesce((window.rules->>'waitlistOpen')::boolean,false)
-    and w.waiting<coalesce((window.rules->>'waitlistLimit')::int,0)
+    coalesce((time_rules.rules->>'waitlistOpen')::boolean,false)
+    and w.waiting<coalesce((time_rules.rules->>'waitlistLimit')::int,0)
     and (
       lower(coalesce(e.legacy_row->>'managerWaitlistOnly','false')) in ('true','1','yes','igen')
       or w.pending>0
@@ -68,7 +68,7 @@ begin
       and (w.waitlist_status='VÁRAKOZIK'
         or (w.waitlist_status='HELY FELAJÁNLVA' and w.offer_expires_at>now()))
   ) w
-  cross join lateral (select private.cc_mass_advanced_window_v1(e.id,now()) rules) window
+  cross join lateral (select private.cc_mass_advanced_window_v1(e.id,now()) rules) time_rules
   where e.event_date between v_from and v_to
    and e.active is true and e.public_registration_active is true
    and upper(coalesce(e.session_type,'')) in ('TÖMEGSPORT','TOMEGSPORT','SPORT7')
