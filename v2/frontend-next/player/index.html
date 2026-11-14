@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#162535"><title>Club Control V2 – Új Player</title>
-<link rel="stylesheet" href="../shared/tokens.css"><link rel="stylesheet" href="../shared/test-auth.css"><link rel="stylesheet" href="./player.css"></head>
+<link rel="stylesheet" href="../shared/tokens.css"><link rel="stylesheet" href="../shared/test-auth.css"><link rel="stylesheet" href="../shared/mass-schedule.css"><link rel="stylesheet" href="./player.css"></head>
 <body><a class="skip-link" href="#playerView">Ugrás a tartalomra</a>
 <div class="player-shell">
 <header class="player-header"><div class="player-header-inner">
@@ -19,7 +19,8 @@
 <div class="page-heading"><div><p class="player-eyebrow">BEAC Röplabda · fejlesztői előnézet</p><h1 id="playerTitle">Áttekintés</h1><p class="cc-muted" id="playerDescription">Az új Player szerkezete.</p></div>
 <span class="cc-tag player-environment" id="playerDataStatus" role="status">TEST belépés szükséges</span></div>
 <section id="testAuthMount" class="cc-card test-auth-panel player-auth-panel" aria-label="TEST bejelentkezés"></section>
+<section id="massPublicMount" class="player-mass-public" aria-label="Tömegsportos edzések"></section>
 <main id="playerView" tabindex="-1" aria-label="Player tartalom"></main>
 <p class="player-footnote">V2 külön TEST fejlesztési ág. Ez a felület nem a LIVE Player, csak hitelesített TEST adatokat mutathat; nincs adatmentés és nem használ LIVE kapcsolatot.</p>
 </div></div>
-<script type="module" src="./main.js"></script></body></html>
+<script type="module" src="./main.js"></script><script type="module" src="./mass-entry.js"></script></body></html>
