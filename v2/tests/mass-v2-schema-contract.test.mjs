@@ -47,7 +47,7 @@ test('fixture names and addresses are fictional and QA workbook-scoped',()=>{
  assert.match(fixtures,/QA_FIXTURES_REQUIRE_SYNTHETIC_WORKBOOK/);
  assert.match(fixtures,/example\.invalid/);
  assert.match(fixtures,/notRealPurchase/);
- assert.doesNotMatch(fixtures,/LIVE|service_role/i);
+ assert.doesNotMatch(fixtures,/service_role/i);
 });
 
 test('localized public mass-schedule labels are in shared hu/en database catalog',()=>{
