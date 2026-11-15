@@ -115,3 +115,10 @@ A központi formakártyák korábbi implementációjának végellenőrzésekor e
 - A névazonosítás ellenőrzése a 263 nem lezárt kanonikus mérkőzés összes különböző, csoportspecifikus csapatnevére nem talált a jelenlegi Manager/Player renderelésben unmatched formakártyát.
 
 **Nyitva marad:** tényleges bejelentkezett Player/Manager és iPhone kijelzőn végzett vizuális teszt; hivatalos helyezések forrásigazolása és későbbi összekötése; hiányzó mérkőzéseredmények. Új LIVE adatbázis-írás ebben a lezáró körben **nem történt**; csak Manager frontend + regressziós tesztek és dokumentáció frissült. A V2 TEST/PR #89 változatlan.
+
+
+## 8. Utólagos helyesbítés és folytatás (2026-11-15)
+
+A jelenlegi LIVE SQL-ben **2–3 játszott mérkőzésnél is megjelenhet ↗/↘ nyíl**, ha az utolsó eredmény eltér az előzőtől; a `trendBasis=last_match_vs_previous_match_limited` jelzi a rövid mintát. A fenti „négy mérkőzésnél kevesebb esetén szürke →” mondat a jelenlegi deploy-olt SQL-re így nem igaz. SQL-képletet a következő frontend UI/Overview munkakörben nem változtattunk.
+
+A kártyák frissebb megjelenítése **részleges helyezés + színes nyíl + csapatnév egy sorban, legfeljebb öt színes eredménypont a következő sorban**. Az Áttekintés tabellái ugyanebből a közös LIVE canonical adatforrásból olvasnak; a korábbi mentett tabellák nem szerepelhetnek élő helyként. [Részletes új handover](HANDOVER_20261115_LIVE_OVERVIEW_CANONICAL_FORM_UI.md). Manager PR #90 és Player PR #32 a LIVE főágon; a V2 TEST/PR #89 érintetlen.
