@@ -1,3 +1,9 @@
+# Club Control – LIVE MECCSEK: SZÍNEZETT BAJNOKI KATEGÓRIÁK (2026-11-15)
+
+**Frissítés:** [Manager összesített Meccsek bajnoki színek handover](docs/handover/HANDOVER_20261115_LIVE_MATCH_AGGREGATE_LEAGUE_COLORS.md). PR #93 beolvasztva. A négy kategória (Női I., Női II/B, Férfi I/A, Férfi I/B) a beállított BEAC-csapatszínt kapja, a csoportkártyákon és a meccskártyákon is. Csak az összesített Meccsek nézet változott. Player, LIVE Supabase és V2 TEST érintetlen. A bejelentkezett iPhone/böngésző vizuális E2E még külön ellenőrzendő.
+
+---
+
 # Club Control – LIVE csillag nélküli helyezés + SVG trendikon (2026-11-15)
 
 **Újabb UI handover:** [csillag nélküli helyezés és tőzsdei mini trendnyíl](docs/handover/HANDOVER_20261115_LIVE_TREND_SVG_RANK_NO_STAR.md). Manager PR #92 és Player PR #33 beolvasztva; mindkét GitHub Pages éles telepítés és a kapcsolódó QA sikeres. A tárolt részleges rang továbbra sem hivatalos, ennek jelzése tooltipben/tájékoztatásban marad; a kártyák és a Manager Áttekintés nem tesz csillagot a helyezés után. Nincs LIVE DB-írás, a V2 TEST érintetlen. A bejelentkezett böngészős/iPhone UI E2E továbbra is ellenőrzendő.
