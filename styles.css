@@ -7184,3 +7184,34 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
   }
   .cc-form-trend-icon{width:19px;height:19px;stroke-width:2.6}
 }
+
+
+/* Aggregate Meccsek: competition identity follows the Manager team's configured
+   color. Leave the match card's result, form, and neutral surface untouched. */
+.cc-match-league-context .cc-mrsz-league-matches.cc-match-league-accent{
+  border-left:4px solid var(--cc-match-league-color);
+}
+.cc-match-league-context .cc-match-league-accent .ms-match-panel-head{
+  border-bottom:1px solid color-mix(in srgb,var(--cc-match-league-color) 32%,var(--line));
+}
+.cc-match-league-context .cc-match-league-accent .ms-match-panel-head b{
+  border-left:3px solid var(--cc-match-league-color);
+  padding-left:7px;
+}
+.cc-match-league-context .cc-match-scoreboard.cc-match-category-accent{
+  border-left:5px solid var(--cc-match-league-color);
+}
+.cc-match-league-context .cc-scoreboard-division{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  border-radius:6px;padding:3px 7px;
+  border:1px solid color-mix(in srgb,var(--cc-match-league-color) 48%,transparent);
+  background:color-mix(in srgb,var(--cc-match-league-color) 16%,white);
+  color:#262626;font-size:10px;line-height:1.2;font-weight:850;
+  letter-spacing:0;white-space:nowrap;
+}
+.cc-match-category-accent .cc-scoreboard-kickoff{margin-left:auto}
+@media(max-width:430px){
+  .cc-match-league-context .cc-match-league-accent .ms-match-panel-head b{padding-left:5px}
+  .cc-match-league-context .cc-scoreboard-division{font-size:9px;padding:3px 5px}
+  .cc-match-category-accent .cc-scoreboard-top{gap:5px 8px}
+}
