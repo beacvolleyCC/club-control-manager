@@ -113,3 +113,38 @@ test('match screen binds one selected league table, preserves BEAC event details
  for(const key of ['data-overview-standings-team','data-overview-open-standings','data-overview-men-group'])
    assert.ok(bind.includes(key));
 });
+
+test('aggregate Meccsek league label and color use current configured team colors',()=>{
+ const fun=slice('  function ccMatchLeagueTheme_(', '  function ccLeagueMatchesContextHtml_(');
+ const ctx={
+   text:x=>String(x??''),
+   state:{teams:[
+      {id:'10000000-0000-4000-8000-000000000001',color:'#A06A31'},
+      {id:'10000000-0000-4000-8000-000000000002',color:'#FFF100'},
+      {id:'10000000-0000-4000-8000-000000000003',color:'#3262B0'}]}
+ };
+ vm.createContext(ctx);vm.runInContext(fun+'\nthis.get=ccMatchLeagueTheme_;',ctx);
+ const w1=ctx.get('Női Budapest I. osztály');
+ const w2=ctx.get('Női Budapest II. osztály – B csoport');
+ const mA=ctx.get('Férfi Budapest I. osztály – A csoport');
+ const mB=ctx.get('Férfi Budapest I. osztály – B csoport');
+ assert.deepEqual([w1.short,w2.short,mA.short,mB.short],['Női I.','Női II/B','Férfi I/A','Férfi I/B']);
+ assert.equal(w1.color,'#A06A31');
+ assert.equal(w2.color,'#FFF100');
+ assert.equal(mA.color,'#3262B0');
+ assert.equal(mB.color,'#3262B0');
+ assert.equal(ctx.get('Nem létező bajnokság'),null);
+ ctx.state.teams[0].color='red;background:url(https://unsafe)';
+ assert.equal(ctx.get('Női Budapest I. osztály').color,'#B76508','Reject malformed color input');
+});
+test('league coloring is restricted to aggregate Meccsek, preserving team-specific cards',()=>{
+ const context=slice('  function ccLeagueMatchesContextHtml_()', '  function renderCompetitionMatchCards_()');
+ assert.ok(context.includes('const allTeams=selectedTeamIds.length===0&&!ccMatchesSelectedGroup_'));
+ assert.ok(context.includes('categoryAccent:allTeams'));
+ assert.ok(context.includes('Női Budapest II. osztály – B csoport'));
+ const panel=slice('  function ccMrszLeagueFixturePanelHtml_(', '  // Read-only cross-league audit');
+ assert.ok(panel.includes('options.categoryAccent?ccMatchLeagueTheme_(group):null'));
+ assert.ok(panel.includes('categoryTheme:leagueTheme'));
+ assert.ok(panel.includes('cc-match-league-accent'));
+ assert.ok(!panel.includes('state.teams.filter('));
+});
