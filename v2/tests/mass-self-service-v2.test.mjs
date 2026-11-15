@@ -72,9 +72,10 @@ test('fixed RPC allowlist and strict types refuse arbitrary actions',async()=>{
 test('manager pass policy RPC is permission-scoped and validates inputs',async()=>{
  const requests=[],request=async(url,opts)=>{requests.push({url,opts});return ok({schemaVersion:1,validMonth:'2026-11',salesState:'unknown'})};
  await readManagerPassSales({accessToken:'admin-jwt'},'2026-11',{request});
- await setManagerPassSales({accessToken:'admin-jwt'}, {month:'2026-11',state:'unavailable',graceUntil:null,reason:'TEST'}, {request});
+ await setManagerPassSales({accessToken:'admin-jwt'}, {month:'2026-11',state:'unavailable',graceUntil:null,importGraceUntil:'2026-11-18T10:00:00.000Z',reason:'TEST'}, {request});
  assert.ok(requests.every(x=>x.opts.headers.Authorization==='Bearer admin-jwt'));
- assert.deepEqual(requests.map(x=>x.url.split('/').at(-1)),['cc_v2_manager_pass_sales_status_v1','cc_v2_manager_pass_sales_set_v1']);
+ assert.equal(JSON.parse(requests[1].opts.body).p_import_grace_until,'2026-11-18T10:00:00.000Z');
+ assert.deepEqual(requests.map(x=>x.url.split('/').at(-1)),['cc_v2_manager_pass_sales_status_v1','cc_v2_manager_pass_sales_set_v2']);
  await assert.rejects(readManagerPassSales({},'2026-11',{request}),/LOGIN_REQUIRED/);
  assert.throws(()=>setManagerPassSales({accessToken:'jwt'},{month:'2026-11',state:'available',graceUntil:'2027-11-01'},{request}),/POLICY_INVALID/);
 });
