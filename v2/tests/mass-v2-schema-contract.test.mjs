@@ -58,3 +58,14 @@ test('localized public mass-schedule labels are in shared hu/en database catalog
  assert.match(ui,/locale\.t\(token\)/);
  assert.match(ui,/createTestI18n/);
 });
+
+test('conditional booking state is visible to Manager without claiming a payment',()=>{
+ const sql=read('20261115_cc_v2_mass_pending_review_tracking.sql');
+ assert.match(sql,/v_review:='pending_import'/);
+ assert.match(sql,/pass_status='ELLENŐRZÉSRE VÁR'/);
+ assert.match(sql,/public\.mass_bookings/);
+ assert.match(sql,/public\.mass_waitlist/);
+ assert.match(sql,/cc_vnext_mass_public_book_v1/);
+ assert.match(sql,/cc_vnext_mass_public_wait_v1/);
+ assert.doesNotMatch(sql,/pass_status='FIZETVE'|pass_status='ELLENŐRZÖTT'/);
+});
