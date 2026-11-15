@@ -7233,3 +7233,35 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
   .cc-form-mini{column-gap:3px}
   .cc-form-rank{padding:0!important}
 }
+
+/* LIVE: current-form strip inside standings, rank remains the first table column.
+   Only the canonical match-form source supplies arrows/dots; not rank movements. */
+.ms-standings-card .ms-table td.team :is(button,.cc-mrsz-photo-team){
+  display:flex;align-items:center;gap:6px;min-width:0;
+}
+.ms-standings-card .cc-standings-form-arrow{
+  display:inline-flex!important;flex:0 0 17px!important;
+  width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;
+  padding:0!important;margin:0!important;
+}
+.ms-standings-card .cc-standings-form-arrow .cc-form-trend-icon{width:16px;height:16px}
+.ms-standings-card .cc-standings-team-name-block{
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  gap:4px;min-width:0;max-width:100%;text-align:left;
+}
+.ms-standings-card .cc-standings-team-name-block>strong{display:block;min-width:0;max-width:100%}
+.ms-standings-card .cc-standings-dots{
+  display:flex;align-items:center;gap:4px;min-height:6px;white-space:nowrap;
+}
+.ms-standings-card .cc-standings-dots .cc-form-dot{
+  display:block;flex:0 0 6px;width:6px;height:6px;border-radius:50%;
+}
+@media(max-width:600px){
+ .ms-standings-card .ms-table td.team :is(button,.cc-mrsz-photo-team){gap:4px}
+ .ms-standings-card .cc-standings-form-arrow{
+   flex-basis:14px!important;width:14px!important;height:14px!important;min-width:14px!important;min-height:14px!important;
+ }
+ .ms-standings-card .cc-standings-form-arrow .cc-form-trend-icon{width:14px;height:14px}
+ .ms-standings-card .cc-standings-dots{gap:3px}
+ .ms-standings-card .cc-standings-dots .cc-form-dot{flex-basis:5px;width:5px;height:5px}
+}

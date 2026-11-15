@@ -99,7 +99,10 @@ test('Manager match card uses only canonical form, never stale standings snapsho
  assert.ok(upcoming.includes('cc-form-dot is-win'));
  assert.ok(!upcoming.includes('99. helyen áll'));
  const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:0});
- assert.ok(!played.includes('cc-form-mini'),'Historic matches must not receive current form');
+ assert.ok(played.includes('cc-form-mini'),'A finished match shows the current canonical team form');
+ assert.ok(played.includes('2.'));
+ assert.ok(played.includes('Aktuális tabella és forma (nem a mérkőzéskori állapot)'));
+ assert.ok(played.includes('<strong>3 – 0</strong>'));
  assert.ok(!played.includes('99. helyen áll'));
  ctx.ccMrszPhotoState_.canonicalFormCards=[{
   competitionLabel:'Different league',teamName:'BEAC II.',rank:1,lastFive:['W'],trend:'up'
@@ -182,7 +185,7 @@ test('unplayed match remains VS. with no artificial set-point status',()=>{
  assert.ok(css.includes('  .cc-scoreboard-set-coverage{font-size:8px;'));
 });
 
-test('compact shared form renders partial ranks, arrows and recent-result dots only for unplayed fixtures',()=>{
+test('canonical current form appears on upcoming and played match cards',()=>{
  ctx.ccMrszPhotoState_.tables=[];
  ctx.ccMrszPhotoState_.canonicalFormCards=[
   {competitionLabel:fixture.competitionLabel,teamName:'BEAC II.',rank:2,trend:'up',trendBasis:'last_match_vs_previous_match_limited',lastFive:['L','W']},
@@ -210,7 +213,12 @@ test('compact shared form renders partial ranks, arrows and recent-result dots o
  assert.ok(css.includes('background:transparent!important'));
  assert.ok(css.includes('.cc-form-arrow::before,.cc-form-arrow::after{content:none!important'));
  const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:1});
- assert.ok(!played.includes('cc-form-mini'),'a completed fixture should not display a misleading current future-form forecast');
+ assert.ok(played.includes('cc-form-mini'),'Current rank and form also show on completed fixtures');
+ assert.ok(played.includes('2.'));
+ assert.ok(played.includes('5.'));
+ assert.ok(played.includes('<strong>3 – 1</strong>'));
+ assert.ok(played.includes('cc-form-dot is-win'));
+ assert.ok(played.includes('cc-form-dot is-loss'));
 });
 
 test('aggregate league stripe and compact division label use one trusted theme; regular cards stay unchanged',()=>{
@@ -249,4 +257,21 @@ test('Manager form places an unboxed rank after trend icon, before name',()=>{
  assert.ok(css.includes('background:transparent!important'));
  assert.ok(css.includes('.cc-form-arrow{grid-column:1'));
  assert.ok(css.includes('.cc-form-rank{grid-column:2'));
+});
+
+test('completed cards with no current canonical form keep the original teams and saved score',()=>{
+ ctx.ccMrszPhotoState_.canonicalFormCards=[];
+ const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:0});
+ assert.ok(!played.includes('cc-form-mini'));
+ assert.ok(played.includes('BEAC II.'));
+ assert.ok(played.includes('UTE'));
+ assert.ok(played.includes('<strong>3 – 0</strong>'));
+});
+test('current form cannot leak across leagues on a completed match',()=>{
+ ctx.ccMrszPhotoState_.canonicalFormCards=[
+  {competitionLabel:'Férfi Budapest I. osztály – B csoport',teamName:'BEAC II.',rank:1,trend:'up',lastFive:['W']}
+ ];
+ const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:1});
+ assert.ok(!played.includes('cc-form-mini'));
+ assert.ok(played.includes('<strong>3 – 1</strong>'));
 });
