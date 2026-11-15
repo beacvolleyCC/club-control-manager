@@ -30,19 +30,20 @@ test('team multiselect preserves state and includes all-teams reset on every int
 test('jersey sort never interprets missing numbers as jersey zero',()=>{
  assert.ok(playersSection.includes("text(p.jerseyNo)!==''"));
 });
-test('overview and match screens share official archived MRSZ tables, not empty BRSZ placeholders',()=>{
+test('Overview uses the shared LIVE canonical forms and stats, never archived snapshot ranks',()=>{
  const model=slice('  function ccOverviewStandingsModel_(', '  function standingsLogo_(');
- const cards=slice('  function standingsCard_(', '  // ---------------------------------------------------------------------------');
- assert.ok(model.includes('ccMrszPhotoState_.tables.find'));
- assert.ok(model.includes('ccStandingsPhotoTeamRows_(snapshot)'));
- assert.ok(model.includes("r.position"));
- assert.ok(model.includes('played>0||points>0'));
- assert.ok(cards.includes('ccOverviewStandingsModel_(contextTeamId)'));
+ const cards=slice('  function standingsCard_(', '  function ccOpenStandingsContext_(');
+ assert.ok(model.includes('canonicalFormCards'));
+ assert.ok(model.includes('canonicalTeamStats'));
+ assert.ok(model.includes('officialRankVerified:false'));
+ assert.ok(!model.includes('ccMrszPhotoState_.tables.find'));
+ assert.ok(!model.includes('ccOverviewLeagueInsights_'));
+ assert.ok(!model.includes('standingsForContext_'));
+ assert.ok(cards.includes('Hely*'));
+ assert.ok(cards.includes('Részleges eredményekből számított helyezés'));
+ assert.ok(cards.includes('cc-overview-standings-disclaimer'));
  assert.ok(cards.includes('data-overview-men-group'));
  assert.ok(cards.includes('data-overview-open-standings'));
- assert.ok(cards.includes("contexts.map(standingsCard_)"));
- assert.ok(cards.includes('ccOpenStandingsContext_'));
- assert.ok(cards.includes("setRoute('competition','standings')"));
 });
 test('overview fetch updates itself when standings snapshot arrives',()=>{
  const loader=slice('  async function ccLoadMrszPhotoSnapshot_(){','  let ccMrszMenGroup_');
@@ -59,25 +60,47 @@ test('standalone standings shows all teams after removing hidden filter and neve
  const other=slice('  function ccMrszMenGroupTableHtml_(){','  function ccMrszMenGroupSwitcherHtml_');
  assert.ok(other.includes("Number(r.position)>0&&Number(r.played)>0"));
 });
-test('snapshot choice shows actual known rows and discloses missing male B group',()=>{
- const functions=slice('  function ccOverviewStandingsModel_(', '  function standingsLogo_(');
+test('canonical Overview separates mens A/B and BEAC II; zero-result teams never get a position',()=>{
+ const f=slice('  function ccOverviewStandingsModel_(', '  function standingsLogo_(');
  const ctx={
- text:x=>String(x??'').trim(),num:x=>Number(x)||0,
- ccMrszMenGroup_:'A',ccOverviewLeagueInsights_:{},ccEnsureOverviewLeagueInsight_:()=>{},ccLeagueInsightRows_:()=>[],
- ccMrszPhotoState_:{loaded:true,tables:[{competitionLabel:'Férfi Budapest I. osztály – A csoport',rows:[{position:1,teamName:'MAFC',played:1}]}]},
- ccStandingsPhotoTeamRows_:x=>x.rows,
- ccMrszCoverageLabel_:snapshot=>snapshot?'MRSZ · mentett tabella':'MRSZ · nincs tabella',
- standingsForContext_:()=>[{teamName:'Férfi csapat',position:null,played:0,tablePoints:0}]
+  text:x=>String(x??'').trim(),
+  ccMrszNormPairName_:n=>String(n??'').toLowerCase().replace(/[^a-z0-9]/g,''),
+  ccIsBeacLeagueTeam_:n=>String(n).toLowerCase().startsWith('beac'),
+  ccMrszMenGroup_:'B',
+  ccMrszPhotoState_:{loaded:true,canonicalMatches:[],canonicalFormCards:[
+   {competitionLabel:'Férfi Budapest I. osztály – B csoport',teamKey:'beac',teamName:'BEAC',rank:1,played:3,points:5,won:2,lost:1},
+   {competitionLabel:'Férfi Budapest I. osztály – B csoport',teamKey:'pdse',teamName:'PDSE',rank:null,played:0,points:0,won:0,lost:0},
+   {competitionLabel:'Férfi Budapest I. osztály – A csoport',teamKey:'mafc',teamName:'MAFC-Kármán',rank:1,played:1,points:2,won:1,lost:0},
+   {competitionLabel:'Női Budapest II. osztály – B csoport',teamKey:'beacii',teamName:'BEAC II.',rank:2,played:2,points:4,won:2,lost:0}
+  ],canonicalTeamStats:[
+   {competitionLabel:'Férfi Budapest I. osztály – B csoport',teamKey:'beac',played:3,wins:2,losses:1,setsFor:7,setsAgainst:3,pointsFor:237,pointsAgainst:218},
+   {competitionLabel:'Férfi Budapest I. osztály – B csoport',teamKey:'pdse',played:0,wins:0,losses:0,setsFor:0,setsAgainst:0},
+   {competitionLabel:'Női Budapest II. osztály – B csoport',teamKey:'beacii',played:2,wins:2,losses:0,setsFor:6,setsAgainst:0}
+  ],tables:[{competitionLabel:'Férfi Budapest I. osztály – B csoport',rows:[{teamName:'BEAC',position:99}]}]}
  };
  vm.createContext(ctx);
- vm.runInContext(functions+'\nthis.get=ccOverviewStandingsModel_;',ctx);
- assert.equal(ctx.get('10000000-0000-4000-8000-000000000003').rows.length,1);
- ctx.ccMrszMenGroup_='B';
- const fallback=ctx.get('10000000-0000-4000-8000-000000000003');
- assert.equal(fallback.rows.length,1);
- assert.equal(fallback.rows[0].position,null);
- assert.equal(fallback.rows[0].played,null);
- assert.match(fallback.source,/nincs/);
+ vm.runInContext(f+'\nthis.get=ccOverviewStandingsModel_;',ctx);
+ const men=ctx.get('10000000-0000-4000-8000-000000000003');
+ assert.equal(men.rows.length,2);
+ assert.equal(men.rows[0].teamName,'BEAC');
+ assert.equal(men.rows[0].position,1);
+ assert.equal(men.rows[0].tablePoints,5);
+ assert.equal(men.rows[0].setsFor,7);
+ assert.equal(men.rows[0].pointsFor,237);
+ assert.equal(men.rows[0].officialRankVerified,false);
+ assert.equal(men.rows[1].position,null,'No fake rank before first result');
+ assert.ok(men.source.includes('részleges'));
+ ctx.ccMrszMenGroup_='A';
+ const menA=ctx.get('10000000-0000-4000-8000-000000000003');
+ assert.equal(menA.rows.length,1);
+ assert.equal(menA.rows[0].teamName,'MAFC-Kármán');
+ const womenII=ctx.get('10000000-0000-4000-8000-000000000002');
+ assert.equal(womenII.rows.length,1);
+ assert.equal(womenII.rows[0].teamName,'BEAC II.');
+ assert.equal(womenII.rows[0].tablePoints,4);
+ ctx.ccMrszPhotoState_.canonicalFormCards=[];
+ const failClosed=ctx.get('10000000-0000-4000-8000-000000000003');
+ assert.equal(failClosed.rows.length,0,'Never fall back to stale photo ranks');
 });
 test('match screen binds one selected league table, preserves BEAC event details and overview A/B controls',()=>{
  const match=slice('  function renderCompetitionMatchCards_(){','  function renderEventList(');

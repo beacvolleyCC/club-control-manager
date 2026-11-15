@@ -62,15 +62,18 @@ test('Meccsek partial table shows no unverified ranking but keeps actual result 
 });
 const makeOverview=new Function('ccOverviewStandingsModel_','teamById','text','esc','msLogoHtml_','ccMrszStatNumber_','ccMrszStatPosition_','ccMrszStatPair_','ccMrszStatRatio_','ccMrszRecordNumber_','ccMrszRecordNoticeHtml_',
  slice('  function standingsCard_(','  function ccOpenStandingsContext_(')+';return standingsCard_;')(
- ()=>({rows:[{...row,sourceTeamId:'x'}],group:'Liga A',source:coverage({partial:true}),snapshot:{partial:true}}),
+ ()=>({rows:[{...row,sourceTeamId:'x'}],group:'Liga A',source:'Közös LIVE eredményekből számított részleges tabella',snapshot:null,canonical:true}),
  ()=>({name:'Női I',color:'#000'}),x=>String(x??''),esc,()=>'',helpers.number,helpers.position,helpers.pair,helpers.ratio,helpers.recordNumber,helpers.notice);
-test('Áttekintő displays list index but never fabricates official ranking or missing points',()=>{
+test('Áttekintő marks partial ranking and leaves missing point data unknown',()=>{
  const html=makeOverview('1');
- assert.ok(html.includes('Listasorszám, nem helyezés'));
- assert.ok(html.includes('<b>1</b>'));
- assert.ok(html.includes('Frissítve: 2026.10.14.'));
+ assert.ok(html.includes('Hely*'));
+ assert.ok(html.includes('Részleges eredményekből számított helyezés'));
+ assert.ok(html.includes('<b>1.*</b>'));
+ assert.ok(html.includes('Közös LIVE eredményekből számított részleges tabella'));
+ assert.ok(html.includes('nem a szövetség hivatalos tabellája'));
  assert.ok(html.includes('0</td>'));
  assert.ok(html.includes('<td>–</td>'));
+ assert.ok(!html.includes('Frissítve: 2026.10.14.'));
 });
 test('Standalone standings and auxiliary men-group table apply the same missing-number helpers',()=>{
  const standings=slice('  function renderManagerStandings_(','  function eventPlace(');
