@@ -2966,14 +2966,6 @@ async function ccMassAthleteHistoryLoad_(id){
 
   // One display for linked Manager events and read-only federation fixtures.
   // Uses actual saved outcomes only; zero-zero and missing scores are never treated as results.
-  function ccMatchScoreboardRank_(league,name){
-    const table=(ccMrszPhotoState_.tables||[]).find(t=>text(t.competitionLabel)===text(league)&&t.partial===false);
-    const key=ccMrszNormPairName_(name);
-    const candidates=key?(table?.rows||[]).filter(r=>ccMrszNormPairName_(r.teamName)===key):[];
-    const row=candidates.length===1?candidates[0]:null;
-    const rank=Number(row?.position);
-    return row&&Number.isInteger(rank)&&rank>0?rank:null;
-  }
   // Compact cards share server-side calculations; rank is partial, NEVER official.
   function ccFormCardTeam_(league,name){
     const key=ccMrszNormPairName_(name).replace(/[^a-z0-9]/g,'');
@@ -3049,7 +3041,6 @@ async function ccMassAthleteHistoryLoad_(id){
       setCoverage=hasScore?ccMrszSetCoverageLabel_(m):'',
       sets=hasScore&&!setIssue&&Array.isArray(m.setScores)?m.setScores.filter(x=>x?.home!=null&&x?.away!=null&&text(x.home)!==''&&text(x.away)!=='')
         .map(x=>Number(x.home)+':'+Number(x.away)).join(' · '):'',
-      rankHome=ccMatchScoreboardRank_(league,home),rankAway=ccMatchScoreboardRank_(league,away),
       formHome=!hasScore?ccFormCardLine_(league,home):'',formAway=!hasScore?ccFormCardLine_(league,away):'',
       validDate=/^\d{4}-\d{2}-\d{2}$/.test(kickoff.date),validTime=/^\d{2}:\d{2}$/.test(kickoff.time),
       venue=text(m.venue||m.court||league||''),badge=text(options.badge||'Bajnoki mérkőzés'),
@@ -3068,12 +3059,12 @@ async function ccMassAthleteHistoryLoad_(id){
       +'<span class="cc-scoreboard-main"><span class="cc-scoreboard-team home">'
       +'<span class="cc-scoreboard-crest">'+msLogoHtml_('',home,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
-      +(formHome||(rankHome?'<small>'+rankHome+'. helyen áll</small>':''))+'</span></span>'
+      +formHome+'</span></span>'
       +'<span class="cc-scoreboard-score">'+(hasScore||postponed?'<strong>'+esc(score.replace('–',' – '))+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
       +(setCoverage?'<small class="cc-scoreboard-set-coverage"'+(setIssue?' title="'+esc(setIssue)+'"':'')+'>'+esc(setCoverage)+'</small>':'')+'</span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
-      +(formAway||(rankAway?'<small>'+rankAway+'. helyen áll</small>':''))+'</span></span>'
+      +formAway+'</span></span>'
       +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')+'</span>'
       +'<span class="cc-scoreboard-bottom"><span class="cc-scoreboard-location">'+esc(venue||'Helyszín nincs megadva')+'</span>'
       +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source+(options.editHtml||'')
