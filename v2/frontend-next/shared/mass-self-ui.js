@@ -49,14 +49,11 @@ export function mountMassSelfService(root,{client=createMassSelfClient(),read=re
   }finally{if(ownRequest===serial){busy=false;render()}}
  }
  async function reload(){
-  try{
-   const [mine,events]=await Promise.all([client.ownData(),read()]);
-   own=mine;sessions=events.filter(e=>e.bookingOpen||e.waitlistOpen);
-   phase='registered';
-  }catch(error){
-   if(String(error.message).includes('MASS_PROFILE_LINK_REQUIRED')){phase='unregistered';own=null}
-   else throw error;
-  }
+  const identity=await client.accountStatus();
+  if(identity.hasMassProfile!==true){phase='unregistered';own=null;return}
+  const [mine,events]=await Promise.all([client.ownData(),read()]);
+  own=mine;sessions=events.filter(e=>e.bookingOpen||e.waitlistOpen);
+  phase='registered';
  }
  function ownList(title,entries,kind){
   results.append(elem('h3',title));
