@@ -34,4 +34,5 @@ Megjelenés: az egyes bajnoki panelek színes bal oldali sávot kapnak; minden m
 - `tests/scoreboard-match-cards.test.cjs`: címke, színes sáv, normál kártya marad semleges
 - `tests/manager-standings-filters.test.cjs`: ligánkénti kategóriák, saját csapatszín, hibás CSS-szín elutasítása, összesített módhoz kötött színezés
 - Cache verzió: `20261115-match-category-colors-v4`.
-- LIVE merge és GitHub Pages telepítés csak a zöld QA-k után. Valódi, bejelentkezett mobilos vizuális teszt külön ellenőrzendő.
+- **LIVE merge:** [Manager PR #93](https://github.com/beacvolleyCC/club-control-manager/pull/93) beolvasztva; squash commit: `31fac2017c180d22fd5968be04ca0c21a5faf47c`. A hét releváns PR QA sikeres.
+- **LIVE deploy:** [GitHub Pages build/deployment](https://github.com/beacvolleyCC/club-control-manager/actions/runs/43727540119); az aktuális végső állapot a hivatkozáson ellenőrizhető. Valódi, bejelentkezett mobilos vizuális teszt külön szükséges.
