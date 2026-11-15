@@ -71,7 +71,7 @@ test('Áttekintő marks partial ranking and leaves missing point data unknown',(
  assert.ok(html.includes('nem a szövetség hivatalos tabellája'));
 
  assert.ok(html.includes('Részleges eredményekből számított helyezés'));
- assert.ok(html.includes('<b>1.*</b>'));
+ assert.ok(html.includes('<b>1.</b>'));
  assert.ok(html.includes('Közös LIVE eredményekből számított részleges tabella'));
  assert.ok(html.includes('nem a szövetség hivatalos tabellája'));
  assert.ok(html.includes('0</td>'));
