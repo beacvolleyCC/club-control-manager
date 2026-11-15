@@ -3065,12 +3065,15 @@ async function ccMassAthleteHistoryLoad_(id){
       source=!linked&&/^https:\/\//i.test(url)?'<a class="cc-scoreboard-source" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(options.sourceKind==='protocol'?'Jegyzőkönyv ↗':'Forrás ↗')+'</a>':'',
       protocolAvailable=!linked&&text(m.matchCode)&&m.protocol&&Array.isArray(m.protocol.teams)&&m.protocol.teams.length===2,
       protocolLink=!linked&&!protocolAvailable&&hasScore&&/^https:\/\/(?:www\.)?hunvolley\.info\//i.test(text(m.protocolUrl)),
+      categoryTheme=options.categoryTheme||null,
       tag=linked?'button':'article';
     return '<'+tag+(linked?' type="button" data-event-id="'+esc(id)+'"':'')
-      +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+(protocolAvailable?' has-protocol':'')+(postponed?' is-postponed':'')+'"'
+      +' class="cc-match-scoreboard '+(hasScore?'is-played':'is-upcoming')+' '+(linked?'is-linked':'is-league')+(protocolAvailable?' has-protocol':'')+(postponed?' is-postponed':'')+(categoryTheme?' cc-match-category-accent':'')+'"'
       +(protocolAvailable?' data-cc-mrsz-protocol="'+esc(m.matchCode)+'" data-cc-mrsz-protocol-league="'+esc(league)+'" role="button" tabindex="0"':protocolLink?' data-cc-mrsz-external="'+esc(m.protocolUrl)+'" role="link" tabindex="0"':'')
+      +(categoryTheme?' style="--cc-match-league-color:'+esc(categoryTheme.color)+'"':'')
       +' aria-label="'+esc(home+' – '+away+' · '+score)+'">'
       +'<span class="cc-scoreboard-top"><span class="cc-scoreboard-label">'+esc(postponed?'Halasztva':dateInsteadOfBadge?(validDate?kickoff.date:'Időpont nélkül'):badge)+'</span>'
+      +(categoryTheme?'<span class="cc-scoreboard-division" title="'+esc(categoryTheme.full)+'">'+esc(categoryTheme.short)+'</span>':'')
       +'<span class="cc-scoreboard-kickoff">'+(postponed?'Időpont egyeztetés alatt':dateInsteadOfBadge?(validTime?esc(kickoff.time):''):(esc(validDate?kickoff.date:'Időpont nélkül')+(validTime?' · '+esc(kickoff.time):'')))+'</span></span>'
       +'<span class="cc-scoreboard-main"><span class="cc-scoreboard-team home">'
       +'<span class="cc-scoreboard-crest">'+msLogoHtml_('',home,'cc-scoreboard-team-logo')+'</span>'
@@ -3513,6 +3516,7 @@ async function ccMassAthleteHistoryLoad_(id){
   let ccStandingsMatchSort_='oldest';
   let ccStandingsMatchTeamFilter_='all';
   function ccMrszLeagueFixturePanelHtml_(group,canonicalMatches=[],options={}){
+    const leagueTheme=options.categoryAccent?ccMatchLeagueTheme_(group):null;
     const merged=ccMrszMergedLeagueMatches_(group,canonicalMatches);
     const table=(ccMrszPhotoState_.tables||[]).find(t=>text(t.competitionLabel)===group);
     const tableRows=Array.isArray(table?.rows)?table.rows:[];
@@ -3557,7 +3561,7 @@ async function ccMassAthleteHistoryLoad_(id){
       +'<button type="button" data-league-match-scope="beac" aria-pressed="'+(scope==='beac')+'" class="'+(scope==='beac'?'active':'')+'">BEAC meccsek</button>'
       +'<button type="button" data-league-match-scope="all" aria-pressed="'+(scope==='all')+'" class="'+(scope==='all'?'active':'')+'">Összes bajnoki meccs</button></div>':'';
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    const items=visible.map(m=>ccMatchScoreboardHtml_(m,{league:group,
+    const items=visible.map(m=>ccMatchScoreboardHtml_(m,{league:group,categoryTheme:leagueTheme,
       badge:'Bajnoki mérkőzés',dateInsteadOfBadge:!!m.isFixture,
       meta:'',
       past:!!ccMrszLocalKickoff_(m.startsAt).date&&ccMrszLocalKickoff_(m.startsAt).date<today,
@@ -3566,7 +3570,7 @@ async function ccMassAthleteHistoryLoad_(id){
     })).join('');
     const noTableNote='';
     const unverifiedOnly=review.every(r=>r.reason==='Nem megerősített BEAC–BEAC menetrendi rekord');
-    return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches"><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
+    return '<section class="ms-panel ms-match-panel cc-mrsz-league-matches'+(leagueTheme?' cc-match-league-accent':'')+'"'+(leagueTheme?' style="--cc-match-league-color:'+esc(leagueTheme.color)+'"':'')+'><div class="ms-panel-head ms-match-panel-head"><div><b>Bajnoki mérkőzések</b><span>'
       +visible.length+' / '+matches.length+' meccs · '+esc(group)+'</span></div>'+controls+'<label class="field compact"><span>Státusz</span><select class="cc-postponed-filter"><option value="all" '+(ccLeaguePostponedFilter_==='all'?'selected':'')+'>Összes</option><option value="postponed" '+(ccLeaguePostponedFilter_==='postponed'?'selected':'')+'>Halasztva</option><option value="scheduled" '+(ccLeaguePostponedFilter_==='scheduled'?'selected':'')+'>Kiírt</option><option value="played" '+(ccLeaguePostponedFilter_==='played'?'selected':'')+'>Lejátszott</option></select></label></div>'+noTableNote+'<div class="ms-match-list">'
       +(items||'<div class="ms-empty">'+(scope==='beac'?'Nincs megjeleníthető mérkőzés.':'Ebben a bajnoki csoportban nincs mentett mérkőzés.')+'</div>')+'</div>'
       +(review.length?'<details class="cc-mrsz-review-fixtures"><summary>'+review.length+(unverifiedOnly?' ellenőrzendő BRSZ-rekord':' ellenőrzendő rekord')+' · külön a meccslistától</summary><ul>'
@@ -3760,6 +3764,23 @@ async function ccMassAthleteHistoryLoad_(id){
       +(state.teams||[]).filter(t=>t.active!==false).map(t=>'<option value="'+esc(t.id)+'" '+(text(t.id)===id?'selected':'')+'>'+esc(t.name)+'</option>').join('')
       +'</select></label>';
   }
+  // Matches aggregate view: reuse the configured competition-team colors.
+  // Division labels are explicit, since men's A and B share the same BEAC team.
+  function ccMatchLeagueTheme_(league){
+    const categories={
+      'Női Budapest I. osztály':{label:'Női I.',teamId:'10000000-0000-4000-8000-000000000001',fallback:'#B76508'},
+      'Női Budapest II. osztály – B csoport':{label:'Női II/B',teamId:'10000000-0000-4000-8000-000000000002',fallback:'#F3D34A'},
+      'Férfi Budapest I. osztály – A csoport':{label:'Férfi I/A',teamId:'10000000-0000-4000-8000-000000000003',fallback:'#6AA84F'},
+      'Férfi Budapest I. osztály – B csoport':{label:'Férfi I/B',teamId:'10000000-0000-4000-8000-000000000003',fallback:'#6AA84F'}
+    };
+    const selected=categories[text(league)];
+    if(!selected)return null;
+    const team=(state.teams||[]).find(t=>text(t.id)===selected.teamId);
+    const custom=text(team?.color);
+    return {short:selected.label,full:text(league),
+      color:/^#[0-9a-f]{6}$/i.test(custom)?custom:selected.fallback};
+  }
+  
   function ccLeagueMatchesContextHtml_(){
     const group=ccMatchesSelectedGroup_||ccMatchesDefaultLeague_(),snapshot=ccMrszPhotoState_;
     if(!snapshot.loaded)return '<section class="cc-match-league-context"><article class="panel"><p class="ms-empty">Mentett bajnokságok betöltése…</p></article></section>';
@@ -3779,7 +3800,7 @@ async function ccMassAthleteHistoryLoad_(id){
     try{
       return '<section class="cc-match-league-context">'
         +(allTeams?'':('<div class="cc-matches-league-picker">'+ccLeagueContextSelectHtml_(group)+'</div>'))
-        +groups.map(league=>ccMrszLeagueFixturePanelHtml_(league,[],{onlyBeac:true})).join('')
+        +groups.map(league=>ccMrszLeagueFixturePanelHtml_(league,[],{onlyBeac:true,categoryAccent:allTeams})).join('')
         +'</section>';
     }finally{ccLeagueMatchScope_=oldScope}
   }
