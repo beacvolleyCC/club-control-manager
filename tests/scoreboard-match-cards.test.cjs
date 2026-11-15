@@ -230,3 +230,23 @@ test('aggregate league stripe and compact division label use one trusted theme; 
  assert.ok(css.includes('.cc-match-league-context .cc-match-scoreboard.cc-match-category-accent{'));
  assert.ok(css.includes('.cc-match-league-context .cc-scoreboard-division{'));
 });
+
+test('aggregate match cards use soft league backgrounds instead of prominent left rails',()=>{
+ assert.ok(css.includes('color-mix(in srgb,var(--cc-match-league-color) 10%,#fff)'));
+ assert.ok(css.includes('border-left:1px solid rgba(122,106,89,.19)'));
+ assert.ok(!css.includes('border-left:5px solid var(--cc-match-league-color)'));
+ assert.ok(!css.includes('border-left:4px solid var(--cc-match-league-color)'));
+});
+test('Manager form places an unboxed rank after trend icon, before name',()=>{
+ ctx.ccMrszPhotoState_.canonicalFormCards=[{
+  competitionLabel:fixture.competitionLabel,teamName:'BEAC II.',rank:3,
+  trend:'up',trendBasis:'last_match_vs_previous_match_limited',lastFive:['W','W','L']}];
+ const html=ctx.scoreboard({...fixture,homeSets:null,awaySets:null});
+ assert.ok(html.indexOf('cc-form-arrow up')<html.indexOf('cc-form-rank'));
+ assert.ok(html.indexOf('cc-form-rank')<html.indexOf('cc-form-team-name'));
+ assert.ok(html.includes('3.'));
+ assert.ok(css.includes('border:0!important'));
+ assert.ok(css.includes('background:transparent!important'));
+ assert.ok(css.includes('.cc-form-arrow{grid-column:1'));
+ assert.ok(css.includes('.cc-form-rank{grid-column:2'));
+});
