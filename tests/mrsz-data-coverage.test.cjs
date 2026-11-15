@@ -33,12 +33,15 @@ test('missing table has an explicit non-live no-table label',()=>{
  assert.match(missing,/Nem élő adat/);
  assert.doesNotMatch(missing,/teljes mentett tabella/);
 });
-test('Manager overview, main standings and matches route use one snapshot coverage source',()=>{
+test('Manager Overview uses LIVE canonical feed; archived labels stay scoped to archived routes',()=>{
  const overview=section('  function ccOverviewStandingsModel_(','  function standingsLogo_(');
  const standings=section('  function renderManagerStandings_(','  function eventPlace(');
  const matchTable=section('  function ccMrszMainPhotoTableHtml_(','  // League fixture cards');
  const matchPage=section('  function ccLeagueMatchesContextHtml_(','  function renderCompetitionMatchCards_(');
- assert.ok(overview.includes('source:ccMrszCoverageLabel_(snapshot)'));
+ assert.ok(overview.includes('canonicalFormCards'));
+ assert.ok(overview.includes('canonicalTeamStats'));
+ assert.ok(!overview.includes('ccMrszCoverageLabel_(snapshot)'));
+ assert.ok(!overview.includes('standingsForContext_'));
  assert.ok(standings.includes('const canonicalRows=ccManagerCanonicalProvisionalRows_(group)'));
  assert.ok(standings.includes('ccMrszCoverageLabel_(null)'));
  assert.ok(matchTable.includes('ccMrszCoverageLabel_(table)'));
@@ -58,11 +61,12 @@ test('Match-page archived table renders actual shared source label for complete 
   assert.ok(!html.includes('élő frissítés'));
  }
 });
-test('BRSZ overview fallback is described as archived data with unknown source date',()=>{
+test('Overview never resurrects old BRSZ positions as current rankings',()=>{
  const overview=section('  function ccOverviewStandingsModel_(','  function standingsLogo_(');
- assert.ok(overview.includes('BRSZ · mentett állás · forrásdátum nem igazolt · nem élő adat'));
- assert.ok(overview.includes('rows.length?'));
- assert.ok(!overview.includes("source:'BRSZ · mentett bajnoki állás'"));
+ assert.ok(overview.includes('Közös LIVE eredményekből számított részleges tabella'));
+ assert.ok(overview.includes('Ehhez a csoporthoz még nincs számítható közös eredmény'));
+ assert.ok(!overview.includes('BRSZ · mentett állás'));
+ assert.ok(!overview.includes('ccMrszPhotoState_.tables.find'));
 });
 test('Matches page no longer calls saved standings current',()=>{
  const matches=section('  function renderCompetitionMatchCards_(','  function renderEventList(');
