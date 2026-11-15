@@ -35,7 +35,7 @@
 
 ## 4. Kiadás és nyitott tételek
 
-**Mindkét változtatás a LIVE main ágon van**: Manager [#90](https://github.com/beacvolleyCC/club-control-manager/pull/90) squash merge `69a629ce1826d50fcdf76852afa33f9e9594b4fa`; Player [#32](https://github.com/beacvolleyCC/player_application/pull/32) squash merge `275d22fa2a28e2aed864bb76a5b78e6b573cd7fb`. Manager főági QA és Pages deploy sikeres: https://github.com/beacvolleyCC/club-control-manager/actions/runs/43724524981 . Player főági CI 4/4 zöld; Pages deploy státusza az átadás után külön követendő: https://github.com/beacvolleyCC/player_application/actions/runs/43724686472 . Az újabb hivatalos eredmény automatikusan frissíti a canonical statot és az Overview-t – új tabellaimport nem kell.
+**Mindkét változtatás a LIVE main ágon van**: Manager [#90](https://github.com/beacvolleyCC/club-control-manager/pull/90) squash merge `69a629ce1826d50fcdf76852afa33f9e9594b4fa`; Player [#32](https://github.com/beacvolleyCC/player_application/pull/32) squash merge `275d22fa2a28e2aed864bb76a5b78e6b573cd7fb`. Manager főági QA és Pages deploy sikeres: https://github.com/beacvolleyCC/club-control-manager/actions/runs/43724524981 . Player főági CI 4/4 zöld; **Player Pages build + deployment sikeres**: https://github.com/beacvolleyCC/player_application/actions/runs/43724686472 . Az újabb hivatalos eredmény automatikusan frissíti a canonical statot és az Overview-t – új tabellaimport nem kell.
 
 **Nyitott:** vizuális Manager/Player UI-ellenőrzés valódi bejelentkezéssel, iPhone 11 szélesség; hivatalos, teljes és friss tabellák forrásigazolása; hiányzó hivatalos mérkőzéseredmények, különösen női II/A; külön megtervezett pontos történeti ranghoz viszonyított helyezésváltozás (nem azonos a jelenlegi forma-nyíllal).
 
