@@ -1,3 +1,9 @@
+# Club Control – LIVE JEGYZŐKÖNYVEK ÉS STATISZTIKÁK (2026-11-15)
+
+**Legfrissebb LIVE adatfrissítési handover:** [15 jegyzőkönyv importja és statisztikaállapot](docs/handover/HANDOVER_20261115_LIVE_PROTOCOL_IMPORT_STATS.md). 15/15 hivatalos eredmény és kétoldali névsor a közös LIVE kanonikus mérkőzésforrásban; ebből 12 korábban hiányzó eredmény. A LIVE Player és Manager statisztikai modul meglévő kódja a közös adatokból számol, a teljes ligastatisztika még részleges. V2 TEST/PR #89 változatlan.
+
+---
+
 # Club Control – AKTUÁLIS FŐÁGI HANDOVER (2026-11-10)
 
 **Elsőként olvasd:** [docs/handover/HANDOVER_20261110_CC_CURRENT.md](docs/handover/HANDOVER_20261110_CC_CURRENT.md). A V2 külön branch handovere az új dokumentumban hivatkozva. **Folytatási kulcs:** `CC-FOLYTATÁS`. Az alábbi régebbi tartalom történeti előzmény, nem írja felül a november 10-i ellenőrzött státuszt.
