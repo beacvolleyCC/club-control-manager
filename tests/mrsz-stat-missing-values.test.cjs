@@ -43,7 +43,7 @@ test('Unverified or partial MRSZ table positions must remain unavailable',()=>{
 });
 const makePhoto=new Function('text','esc','num','msLogoHtml_','ccMrszCoverageLabel_','ccMrszStatNumber_','ccMrszStatPosition_','ccMrszStatPair_','ccMrszStatRatio_','ccMrszRecordNumber_','ccMrszRecordNoticeHtml_','ccStandingsTeamInnerHtml_',
  slice('  function ccMrszMainPhotoTableHtml_(','  // League fixture cards')+';return ccMrszMainPhotoTableHtml_;')(
- x=>String(x??''),esc,x=>Number(x)||0,()=>'',coverage,helpers.number,helpers.position,helpers.pair,helpers.ratio,helpers.recordNumber,helpers.notice,(_league,r)=>'<strong>'+esc(r.teamName)+'</strong>');
+ x=>String(x??''),esc,x=>Number(x)||0,()=>'',coverage,helpers.number,helpers.position,helpers.pair,helpers.ratio,helpers.recordNumber,helpers.notice,(_league,r)=>'<strong>'+esc(r.teamName)+'</strong>'+helpers.notice(r));
 const row={teamName:'MTK',position:1,played:1,wins:1,losses:0,tablePoints:3,setsFor:3,setsAgainst:0,pointsFor:null,pointsAgainst:55};
 test('Meccsek saved table displays genuine zero, unknown points and a defined set ratio',()=>{
  const html=makePhoto({partial:false,competitionLabel:'Liga A',rows:[row]});
@@ -63,7 +63,7 @@ test('Meccsek partial table shows no unverified ranking but keeps actual result 
 const makeOverview=new Function('ccOverviewStandingsModel_','teamById','text','esc','msLogoHtml_','ccMrszStatNumber_','ccMrszStatPosition_','ccMrszStatPair_','ccMrszStatRatio_','ccMrszRecordNumber_','ccMrszRecordNoticeHtml_','ccStandingsTeamInnerHtml_',
  slice('  function standingsCard_(','  function ccOpenStandingsContext_(')+';return standingsCard_;')(
  ()=>({rows:[{...row,sourceTeamId:'x'}],group:'Liga A',source:'Közös LIVE eredményekből számított részleges tabella',snapshot:null,canonical:true}),
- ()=>({name:'Női I',color:'#000'}),x=>String(x??''),esc,()=>'',helpers.number,helpers.position,helpers.pair,helpers.ratio,helpers.recordNumber,helpers.notice,(_league,r)=>'<strong>'+esc(r.teamName)+'</strong>');
+ ()=>({name:'Női I',color:'#000'}),x=>String(x??''),esc,()=>'',helpers.number,helpers.position,helpers.pair,helpers.ratio,helpers.recordNumber,helpers.notice,(_league,r)=>'<strong>'+esc(r.teamName)+'</strong>'+helpers.notice(r));
 test('Áttekintő marks partial ranking and leaves missing point data unknown',()=>{
  const html=makeOverview('1');
  assert.ok(html.includes('Hely</th>'));
