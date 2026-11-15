@@ -1,3 +1,9 @@
+# CLUB CONTROL – LIVE forma a lejátszott meccseken ÉS a tabellákban (2026-11-15)
+
+**Aktuális handover:** [LIVE CURRENT FORM – PLAYED & STANDINGS](docs/handover/HANDOVER_20261115_LIVE_FORM_ON_PLAYED_AND_STANDINGS.md). Manager [PR #95](https://github.com/beacvolleyCC/club-control-manager/pull/95), Player [PR #35](https://github.com/beacvolleyCC/player_application/pull/35) beolvasztva. A közös `canonicalFormCards` alapján mindkét alkalmazásban a közelgő és a már lejátszott meccsek mutatják az aktuális formát; a Manager Áttekintés/Tabella és Player rögzített tabellarész sorrendje **helyezés → trendnyíl → csapatnév**, alatta az utolsó öt eredménypont. A trend a csapatforma jelzése, nem helyezésmozgás; a lejátszott meccseken sem a meccsnapra visszaszámított adat. Manager LIVE frontend merge `cedc10f03da08ae232e5e52a41052df19650b110`; Player `8be92d04062a81b60a294c9466dd0cb7f7baa54e`. Központi DB írás és V2 TEST módosítás **nem volt**. Bejelentkezett mobilos vizuális E2E még ellenőrzendő.
+
+---
+
 # Club Control – LIVE MECCSEK: SZÍNEZETT BAJNOKI KATEGÓRIÁK (2026-11-15)
 
 **Frissítés:** [Manager összesített Meccsek bajnoki színek handover](docs/handover/HANDOVER_20261115_LIVE_MATCH_AGGREGATE_LEAGUE_COLORS.md). PR #93 beolvasztva. A négy kategória (Női I., Női II/B, Férfi I/A, Férfi I/B) a beállított BEAC-csapatszínt kapja, a csoportkártyákon és a meccskártyákon is. Csak az összesített Meccsek nézet változott. Player, LIVE Supabase és V2 TEST érintetlen. A bejelentkezett iPhone/böngésző vizuális E2E még külön ellenőrzendő.
