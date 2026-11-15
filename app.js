@@ -2988,7 +2988,7 @@ async function ccMassAthleteHistoryLoad_(id){
     const row=ccFormCardTeam_(league,name);
     if(!row)return '';
     const validRank=Number.isSafeInteger(Number(row.rank))&&Number(row.rank)>0;
-    const rank=validRank?'<span class="cc-form-rank" title="Részleges eredményekből számított, nem hivatalos helyezés">'+Number(row.rank)+'.</span>'
+    const rank=validRank?'<span class="cc-form-rank" title="Aktuális, részleges eredményekből számított, nem hivatalos helyezés">'+Number(row.rank)+'.</span>'
       :'<span class="cc-form-rank" title="Helyezés nem számítható">–</span>';
     const form=Array.isArray(row.lastFive)?row.lastFive.filter(x=>x==='W'||x==='L').slice(-5):[];
     const dots=form.map(outcome=>'<i class="cc-form-dot '+(outcome==='W'?'is-win':'is-loss')+'" title="'+(outcome==='W'?'Győzelem':'Vereség')+'" aria-hidden="true"></i>').join('');
@@ -3003,7 +3003,7 @@ async function ccMassAthleteHistoryLoad_(id){
     :trend==='down'
       ?'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7 L9 14 L13 10 L21 19 M15 19 H21 V13"/></svg>'
       :'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12 H21 M16 7 L21 12 L16 17"/></svg>';
-  return '<span class="cc-form-mini" title="'+esc(title)+'">'
+  return '<span class="cc-form-mini" title="'+esc('Aktuális tabella és forma (nem a mérkőzéskori állapot) · '+title)+'">'
       +'<span class="cc-form-arrow '+trend+'" aria-label="'+esc(title)+'">'
       +icon+'</span>'+rank
       +'<strong class="cc-form-team-name">'+esc(name)+'</strong>'
@@ -3057,7 +3057,7 @@ async function ccMassAthleteHistoryLoad_(id){
       setCoverage=hasScore?ccMrszSetCoverageLabel_(m):'',
       sets=hasScore&&!setIssue&&Array.isArray(m.setScores)?m.setScores.filter(x=>x?.home!=null&&x?.away!=null&&text(x.home)!==''&&text(x.away)!=='')
         .map(x=>Number(x.home)+':'+Number(x.away)).join(' · '):'',
-      formHome=!hasScore?ccFormCardLine_(league,home):'',formAway=!hasScore?ccFormCardLine_(league,away):'',
+      formHome=ccFormCardLine_(league,home),formAway=ccFormCardLine_(league,away),
       validDate=/^\d{4}-\d{2}-\d{2}$/.test(kickoff.date),validTime=/^\d{2}:\d{2}$/.test(kickoff.time),
       venue=text(m.venue||m.court||league||''),badge=text(options.badge||'Bajnoki mérkőzés'),
       dateInsteadOfBadge=options.dateInsteadOfBadge===true,
