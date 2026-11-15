@@ -66,7 +66,10 @@ const makeOverview=new Function('ccOverviewStandingsModel_','teamById','text','e
  ()=>({name:'Női I',color:'#000'}),x=>String(x??''),esc,()=>'',helpers.number,helpers.position,helpers.pair,helpers.ratio,helpers.recordNumber,helpers.notice);
 test('Áttekintő marks partial ranking and leaves missing point data unknown',()=>{
  const html=makeOverview('1');
- assert.ok(html.includes('Hely*'));
+ assert.ok(html.includes('Hely</th>'));
+ assert.ok(!html.includes('Hely*</th>'));
+ assert.ok(html.includes('nem a szövetség hivatalos tabellája'));
+
  assert.ok(html.includes('Részleges eredményekből számított helyezés'));
  assert.ok(html.includes('<b>1.*</b>'));
  assert.ok(html.includes('Közös LIVE eredményekből számított részleges tabella'));
