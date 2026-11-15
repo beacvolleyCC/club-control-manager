@@ -7163,3 +7163,24 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
  .cc-form-dots{gap:4px;min-height:7px}
  .cc-form-dot{flex-basis:7px;width:7px;height:7px}
 }
+
+/* LIVE v3: remove legacy colored circular arrow backgrounds; use a crisp
+   self-contained, font-independent mini financial-chart direction icon. */
+.cc-form-mini{column-gap:6px}
+.cc-form-arrow,.cc-form-arrow.up,.cc-form-arrow.down,.cc-form-arrow.flat{
+  display:inline-flex!important;justify-content:center;align-items:center;
+  box-sizing:border-box;width:23px;height:23px;min-width:23px;min-height:23px;
+  margin:0 2px 0 0;padding:0;border:0!important;border-radius:0!important;
+  box-shadow:none!important;background:transparent!important;
+  line-height:1!important;overflow:visible
+}
+.cc-form-arrow::before,.cc-form-arrow::after{content:none!important;display:none!important}
+.cc-form-trend-icon{display:block;flex:none;width:22px;height:22px;fill:none;
+  stroke:currentColor;stroke-width:2.55;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:480px){
+  .cc-form-mini{column-gap:4px}
+  .cc-form-arrow,.cc-form-arrow.up,.cc-form-arrow.down,.cc-form-arrow.flat{
+    width:19px;height:19px;min-width:19px;min-height:19px;margin-right:2px
+  }
+  .cc-form-trend-icon{width:19px;height:19px;stroke-width:2.6}
+}
