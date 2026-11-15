@@ -1,3 +1,9 @@
+# Club Control – LIVE ÁTTEKINTÉS KANONIKUS TABELLÁK + FORMA UI (2026-11-15)
+
+**Legfrissebb frontend-fejlesztés:** [Áttekintés közös LIVE részleges tabellák + Manager/Player W/L meccskártyák](docs/handover/HANDOVER_20261115_LIVE_OVERVIEW_CANONICAL_FORM_UI.md). Manager PR #90, Player PR #32. Mindkét alkalmazás a meglévő canonical feedet olvassa, nem a régi 2026-10-14-i tabellafotót. A helyezések továbbra is csillagozottak/nem hivatalosak; bejelentkezett iPhone/browser E2E hátravan. LIVE adatbázis-írás és V2 TEST változtatás nem történt.
+
+---
+
 # Club Control – AKTUÁLIS LIVE FORMA/TREND HANDOVER (2026-11-15)
 
 **Legfrissebb LIVE kártya/formamodul állapot – lezárva 2026-11-15:** [központi forma, részleges helyezés és ↑/↓/→ nyilak – teljes handover](docs/handover/HANDOVER_20261115_LIVE_FORM_TREND_MATCH_CARDS.md). A Manager és Player ugyanazon Supabase `canonicalFormCards` feedet használja; a régi Manager helyezés-fallback megszűnt. A LIVE SQL, a Manager regressziós QA és mindkét Pages deploy sikeres. A csillagos helyezés **részleges, nem hivatalos**; a valódi iPhone/böngészős E2E és a friss hivatalos tabella hiteles bekötése hátravan. V2 TEST/PR #89 változatlan.
