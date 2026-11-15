@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const js=fs.readFileSync('app.js','utf8'),css=fs.readFileSync('styles.css','utf8');
-const begin=js.indexOf('  function ccMatchScoreboardRank_(');
+const begin=js.indexOf('  function ccFormCardTeam_(');
 const end=js.indexOf('  function ccMrszMergedLeagueMatches_(',begin);
 assert.ok(begin>0&&end>begin);
 const ctx={
@@ -76,11 +76,31 @@ test('league-only cards escape source names and disallow unsafe URLs',()=>{
  assert.ok(!html.includes('<script>'));
  assert.ok(!html.includes('href="javascript:'));
 });
-test('league rank appears only from an actual nonpartial standings snapshot',()=>{
- ctx.ccMrszPhotoState_.tables=[{competitionLabel:fixture.competitionLabel,partial:false,rows:[{teamName:'BEAC II.',position:2}]}];
- assert.ok(ctx.scoreboard({...fixture,homeSets:3,awaySets:1}).includes('2. helyen áll'));
- ctx.ccMrszPhotoState_.tables[0].partial=true;
- assert.ok(!ctx.scoreboard({...fixture,homeSets:3,awaySets:1}).includes('2. helyen áll'));
+test('Manager match card uses only canonical form, never stale standings snapshots',()=>{
+ ctx.ccMrszPhotoState_.tables=[{competitionLabel:fixture.competitionLabel,partial:false,
+  rows:[{teamName:'BEAC II.',position:99}]}];
+ ctx.ccMrszPhotoState_.canonicalFormCards=[];
+ const unmatched=ctx.scoreboard({...fixture,homeSets:null,awaySets:null});
+ assert.ok(!unmatched.includes('99. helyen áll'),'Old table must not supply a rank');
+ assert.ok(!unmatched.includes('cc-form-mini'));
+ ctx.ccMrszPhotoState_.canonicalFormCards=[{
+  competitionLabel:fixture.competitionLabel,teamName:'BEAC II.',rank:2,
+  lastFive:['L','W'],trend:'up',trendBasis:'last_match_vs_previous_match_limited'
+ }];
+ const upcoming=ctx.scoreboard({...fixture,homeSets:null,awaySets:null});
+ assert.ok(upcoming.includes('2.*'),'Provisional rank must have a star');
+ assert.ok(upcoming.includes('cc-form-arrow up'));
+ assert.ok(upcoming.includes('cc-form-dot is-loss'));
+ assert.ok(upcoming.includes('cc-form-dot is-win'));
+ assert.ok(!upcoming.includes('99. helyen áll'));
+ const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:0});
+ assert.ok(!played.includes('cc-form-mini'),'Historic matches must not receive current form');
+ assert.ok(!played.includes('99. helyen áll'));
+ ctx.ccMrszPhotoState_.canonicalFormCards=[{
+  competitionLabel:'Different league',teamName:'BEAC II.',rank:1,lastFive:['W'],trend:'up'
+ }];
+ const crossLeague=ctx.scoreboard({...fixture,homeSets:null,awaySets:null});
+ assert.ok(!crossLeague.includes('cc-form-mini'),'Other league must never be matched');
 });
 test('Manager Meccsek shows BEAC match roster before secondary federation fixtures',()=>{
  const start=js.indexOf('  function renderCompetitionMatchCards_()'),end=js.indexOf('  function renderEventList(',start);
