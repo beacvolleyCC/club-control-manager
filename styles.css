@@ -7135,3 +7135,31 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
  .cc-form-dot{width:12px;height:13px;flex-basis:12px;font-size:8px;border-radius:3px}
 }
 
+
+/* 2026-11-15: aligned match-form reference – rank + arrow + team name on one
+   baseline, up to five result dots directly underneath the team name. */
+.cc-form-mini{display:grid!important;grid-template-columns:max-content max-content minmax(0,1fr);
+  align-items:center;justify-content:start;column-gap:4px;row-gap:4px;
+  min-width:0;max-width:100%;width:max-content;white-space:normal;line-height:1.12;
+  font-weight:700;margin-top:0}
+.cc-form-rank{grid-column:1;grid-row:1;font-size:clamp(12px,1.6vw,18px);
+  font-weight:700;color:var(--muted,#777);white-space:nowrap}
+.cc-form-arrow{grid-column:2;grid-row:1;font-size:clamp(18px,2.4vw,27px);
+  font-weight:900;line-height:1;white-space:nowrap}
+.cc-form-team-name{grid-column:3;grid-row:1;min-width:0;overflow-wrap:anywhere;
+  font-size:clamp(15px,2vw,23px);font-weight:900;line-height:1.16}
+.cc-form-dots{grid-column:3;grid-row:2;display:flex;align-items:center;justify-content:flex-start;
+  gap:5px;min-height:8px}
+.cc-form-dot{display:inline-block;flex:0 0 8px;width:8px;height:8px;border-radius:50%}
+.cc-form-dot.is-win{background:#23834d}.cc-form-dot.is-loss{background:#c34240}
+.cc-scoreboard-teamcopy .cc-form-mini{display:grid!important}
+.cc-overview-standings-disclaimer{padding:8px 12px 12px;margin:0;border-top:1px solid var(--line);
+  font-size:10px;color:var(--muted);line-height:1.45}
+@media(max-width:480px){
+ .cc-form-mini{column-gap:3px;row-gap:2px}
+ .cc-form-rank{font-size:11px}
+ .cc-form-arrow{font-size:16px}
+ .cc-form-team-name{font-size:14px}
+ .cc-form-dots{gap:4px;min-height:7px}
+ .cc-form-dot{flex-basis:7px;width:7px;height:7px}
+}
