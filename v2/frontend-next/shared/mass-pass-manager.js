@@ -18,12 +18,14 @@ export function readManagerPassSales(session,month,{request=fetch}={}){
  if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(String(month)))throw Error('MASS_MANAGER_MONTH_INVALID');
  return requestRpc(session,'cc_v2_manager_pass_sales_status_v1',{p_month:month},request);
 }
-export function setManagerPassSales(session,{month,state,graceUntil=null,reason=''},{request=fetch}={}){
+export function setManagerPassSales(session,{month,state,graceUntil=null,importGraceUntil=null,reason=''},{request=fetch}={}){
  if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(String(month))||
   !['unknown','available','unavailable'].includes(state)||String(reason).length>800||
-  (state!=='unavailable'&&graceUntil!==null))throw Error('MASS_MANAGER_POLICY_INVALID');
- return requestRpc(session,'cc_v2_manager_pass_sales_set_v1',{
-  p_month:month,p_state:state,p_grace_until:graceUntil,p_reason:reason
+  (state!=='unavailable'&&graceUntil!==null)||
+  (importGraceUntil!==null&&!Number.isFinite(Date.parse(importGraceUntil))))throw Error('MASS_MANAGER_POLICY_INVALID');
+ return requestRpc(session,'cc_v2_manager_pass_sales_set_v2',{
+  p_month:month,p_state:state,p_grace_until:graceUntil,
+  p_import_grace_until:importGraceUntil,p_reason:reason
  },request);
 }
 const mk=(tag,value)=>{const x=document.createElement(tag);if(value!==undefined)x.textContent=String(value);return x};
@@ -39,9 +41,11 @@ export function mountManagerPassSales(root,session,{month,request=fetch}={}){
  const reasonLabel=mk('label','Indok '),reason=mk('input');reason.maxLength=800;reasonLabel.append(reason);
  const untilLabel=mk('label','Feltételes jelentkezés határideje '),until=mk('input');
  until.type='datetime-local';untilLabel.append(until);
+ const importLabel=mk('label','Importkésés miatti feltételes jelentkezés határideje '),importUntil=mk('input');
+ importUntil.type='datetime-local';importLabel.append(importUntil);
  const submit=mk('button','Mentés');submit.type='button';submit.disabled=true;
  const note=mk('p','A jelenlegi szabály csak a bérletellenőrzési állapotot szabályozza; nem igazol fizetést.');
- section.append(heading,status,label,reasonLabel,untilLabel,submit,note);root.replaceChildren(section);
+ section.append(heading,status,label,reasonLabel,untilLabel,importLabel,submit,note);root.replaceChildren(section);
  let serial=0;
  const dateLocal=t=>{
   if(!t)return'';
@@ -57,11 +61,12 @@ export function mountManagerPassSales(root,session,{month,request=fetch}={}){
    if(own!==serial||!root.isConnected)return;
    pick.value=value.salesState;reason.value=value.reason||'';
    until.value=dateLocal(value.graceUntil);
+   importUntil.value=dateLocal(value.importGraceUntil);
    status.textContent='Hónap: '+value.validMonth+' · '+value.salesState;
    const canEdit=value.canEdit===true;
    submit.hidden=!canEdit;
-   submit.disabled=!canEdit;pick.disabled=!canEdit;reason.disabled=!canEdit;
-   if(!canEdit){until.disabled=true;status.textContent+=' · csak megtekintés'}
+   submit.disabled=!canEdit;pick.disabled=!canEdit;reason.disabled=!canEdit;importUntil.disabled=!canEdit;
+   if(!canEdit){until.disabled=true;importUntil.disabled=true;status.textContent+=' · csak megtekintés'}
    else syncForm();
   }catch(error){if(own!==serial)return;status.textContent='Nem elérhető vagy nincs jogosultság ('+String(error.message||'ERROR')+')';}
  }
@@ -69,9 +74,12 @@ export function mountManagerPassSales(root,session,{month,request=fetch}={}){
   if(submit.disabled)return;submit.disabled=true;
   try{
    const datetime=until.value?new Date(until.value):null;
-   if(datetime&&!Number.isFinite(datetime.getTime()))throw Error('MASS_MANAGER_DATE_INVALID');
+   const importDatetime=importUntil.value?new Date(importUntil.value):null;
+   if((datetime&&!Number.isFinite(datetime.getTime()))||
+    (importDatetime&&!Number.isFinite(importDatetime.getTime())))throw Error('MASS_MANAGER_DATE_INVALID');
    const value=await setManagerPassSales(session,{
-    month,state:pick.value,graceUntil:datetime?datetime.toISOString():null,reason:reason.value
+    month,state:pick.value,graceUntil:datetime?datetime.toISOString():null,
+    importGraceUntil:importDatetime?importDatetime.toISOString():null,reason:reason.value
    },{request});
    status.textContent='Mentve, auditálva: '+value.salesState;
   }catch(error){status.textContent='Nem menthető: '+String(error.message||'ERROR')}
