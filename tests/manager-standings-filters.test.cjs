@@ -148,3 +148,43 @@ test('league coloring is restricted to aggregate Meccsek, preserving team-specif
  assert.ok(panel.includes('cc-match-league-accent'));
  assert.ok(!panel.includes('state.teams.filter('));
 });
+
+test('Manager Overview and full standings read the current form without replacing displayed table ranks',()=>{
+ const standings=slice('  function standingsCard_(', '  function ccOpenStandingsContext_(');
+ const manager=slice('  function renderManagerStandings_()', '  function eventPlace(');
+ assert.ok(standings.includes('ccStandingsTeamInnerHtml_(data.group,r)'));
+ assert.ok(standings.includes('ccMrszStatPosition_(r.position,data.snapshot)'));
+ assert.ok(manager.includes('ccStandingsTeamInnerHtml_(group,r)'));
+ assert.ok(manager.includes('ccManagerCanonicalProvisionalRows_(group)'));
+ const helpers=slice('  function ccCurrentStandingsFormParts_(', '  // Check only explicitly saved set points.');
+ assert.ok(helpers.includes('ccFormCardTeam_(league,name)'));
+ assert.ok(helpers.includes('Aktuális csapatforma, nem helyezésváltozás'));
+ assert.ok(helpers.includes('cc-standings-dots'));
+ assert.ok(helpers.includes("slice(-5)"));
+ assert.ok(!helpers.includes('standingsForContext_'));
+});
+test('Manager standings form is league-specific and leaves missing teams without invented arrows',()=>{
+ const sources=slice('  function ccFormCardTeam_(', '  // Check only explicitly saved set points.');
+ const ctx={
+  text:x=>String(x??''),esc:x=>String(x??''),
+  ccMrszNormPairName_:x=>String(x??'').toLowerCase().replace(/[^a-z0-9]/g,''),
+  ccMrszPhotoState_:{canonicalFormCards:[
+   {competitionLabel:'Női Budapest I. osztály',teamName:'BEAC',rank:3,lastFive:['W','L','W'],trend:'up'},
+   {competitionLabel:'Női Budapest II. osztály – B csoport',teamName:'BEAC II.',rank:1,lastFive:['L'],trend:'down'}
+  ]},
+  msLogoHtml_:(id,n)=>'<img alt="'+n+'">',
+  ccMrszRecordNoticeHtml_:()=>''
+ };
+ vm.createContext(ctx);
+ vm.runInContext(sources+'\nthis.parts=ccCurrentStandingsFormParts_;this.cell=ccStandingsTeamInnerHtml_;',ctx);
+ const row={teamName:'BEAC',sourceTeamId:'123'};
+ const parts=ctx.parts('Női Budapest I. osztály','BEAC');
+ assert.ok(parts.arrow.includes('cc-standings-form-arrow up'));
+ assert.equal((parts.dots.match(/cc-form-dot /g)||[]).length,3);
+ const cell=ctx.cell('Női Budapest I. osztály',row);
+ assert.ok(cell.indexOf('cc-standings-form-arrow')<cell.indexOf('<strong>BEAC</strong>'));
+ assert.ok(cell.indexOf('<strong>BEAC</strong>')<cell.indexOf('cc-standings-dots'));
+ assert.ok(!cell.includes('3.</span>'),'Rank must stay in the existing first column');
+ assert.ok(!ctx.parts('Férfi Budapest I. osztály – B csoport','BEAC').arrow);
+ assert.ok(!ctx.cell('Férfi Budapest I. osztály – B csoport',row).includes('cc-standings-dots'));
+});
