@@ -109,7 +109,7 @@ test('server stays scoped to verified owner and QA workbook with existing bookin
 test('unverified import claim requires an audited Manager-only grace window',()=>{
  const migration=readFileSync(new URL('../database/migrations/20261115_cc_v2_mass_import_claim_grace_guard.sql',import.meta.url),'utf8');
  assert.match(migration,/MASS_SELF_IMPORT_CLAIM_AWAITING_MANAGER/);
- assert.match(migration,/import_grace_until>\s*now\(\)/);
+ assert.match(migration,/v_import_until<=now\(\)/);
  assert.match(migration,/p_import_grace_until<=now\(\)/);
  assert.match(migration,/p_import_grace_until>now\(\)\+interval '7 days'/);
  assert.match(migration,/cc_v2_mass_pass_sales_audit_v1/);
