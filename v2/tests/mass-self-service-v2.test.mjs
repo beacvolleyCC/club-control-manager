@@ -105,3 +105,18 @@ test('server stays scoped to verified owner and QA workbook with existing bookin
  assert.match(read,/CC-QA-SYNTHETIC/);
  assert.doesNotMatch(sql,/grant execute on function public\.cc_vnext_mass_public_book_v1/);
 });
+
+test('unverified import claim requires an audited Manager-only grace window',()=>{
+ const migration=readFileSync(new URL('../database/migrations/20261115_cc_v2_mass_import_claim_grace_guard.sql',import.meta.url),'utf8');
+ assert.match(migration,/MASS_SELF_IMPORT_CLAIM_AWAITING_MANAGER/);
+ assert.match(migration,/import_grace_until>\s*now\(\)/);
+ assert.match(migration,/p_import_grace_until<=now\(\)/);
+ assert.match(migration,/p_import_grace_until>now\(\)\+interval '7 days'/);
+ assert.match(migration,/cc_v2_mass_pass_sales_audit_v1/);
+ assert.match(migration,/cc_manager_require_any_v1\('mass\.passes','edit'\)/);
+ assert.doesNotMatch(migration,/grant execute on function public\.cc_vnext_mass_public_book_v1/);
+ const manager=readFileSync(new URL('../frontend-next/shared/mass-pass-manager.js',import.meta.url),'utf8');
+ assert.match(manager,/cc_v2_manager_pass_sales_set_v2/);
+ assert.match(manager,/p_import_grace_until/);
+ assert.match(manager,/canEdit===true/);
+});
