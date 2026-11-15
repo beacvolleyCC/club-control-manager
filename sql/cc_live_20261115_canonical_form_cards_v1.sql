@@ -46,7 +46,9 @@ form as (
    coalesce(jsonb_agg(outcome order by recency desc) filter(where recency<=5),'[]'::jsonb) last_five,
    count(*)::int recorded_matches,
    sum(case when outcome='W' then 1 else 0 end) filter(where recency in (1,2)) newer_wins,
-   sum(case when outcome='W' then 1 else 0 end) filter(where recency in (3,4)) older_wins
+   sum(case when outcome='W' then 1 else 0 end) filter(where recency in (3,4)) older_wins,
+   max(outcome) filter(where recency=1) latest_result,
+   max(outcome) filter(where recency=2) previous_result
  from ordered group by league,team_key
 )
 select coalesce(jsonb_agg(jsonb_build_object(
@@ -55,10 +57,16 @@ select coalesce(jsonb_agg(jsonb_build_object(
   'rankKind','partial_saved_results','officialRankVerified',false,
   'played',r.played,'points',r.points,'won',r.wins,'lost',r.losses,
   'lastFive',coalesce(f.last_five,'[]'::jsonb),
-  'trend',case when coalesce(f.recorded_matches,0)<4 then 'flat'
+  'trend',case
+      when coalesce(f.recorded_matches,0)<2 then 'flat'
+      when f.recorded_matches<4 and f.latest_result='W' and f.previous_result='L' then 'up'
+      when f.recorded_matches<4 and f.latest_result='L' and f.previous_result='W' then 'down'
+      when f.recorded_matches<4 then 'flat'
       when f.newer_wins>f.older_wins then 'up'
       when f.newer_wins<f.older_wins then 'down' else 'flat' end,
-  'trendBasis',case when coalesce(f.recorded_matches,0)<4 then 'insufficient'
+  'trendBasis',case
+      when coalesce(f.recorded_matches,0)<2 then 'insufficient'
+      when f.recorded_matches<4 then 'last_match_vs_previous_match_limited'
       else 'last_2_vs_previous_2_wins' end
  ) order by r.league,r.provisional_rank),'[]'::jsonb)
  from ranked r left join form f on f.league=r.league and f.team_key=r.team_key;
