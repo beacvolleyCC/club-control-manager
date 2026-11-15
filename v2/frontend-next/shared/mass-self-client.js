@@ -45,12 +45,13 @@ export function createMassSelfClient({request=fetch,clock=()=>Date.now()}={}){
  }
  async function rpc(name,args={},options={}){
   const s=current();if(!s)throw Error('MASS_NOT_SIGNED_IN');
-  if(!new Set(['cc_v2_mass_profile_register_v1','cc_v2_mass_self_read_v1',
+  if(!new Set(['cc_v2_mass_profile_register_v1','cc_v2_mass_account_status_v1','cc_v2_mass_self_read_v1',
    'cc_v2_mass_self_book_v1','cc_v2_mass_self_cancel_v1']).has(name))
    throw Error('MASS_RPC_NOT_ALLOWED');
   return POST('/rest/v1/rpc/'+name,args,{request,token:s.accessToken,signal:options.signal});
  }
  function register(name,level){return rpc('cc_v2_mass_profile_register_v1',{p_name:String(name||'').trim(),p_level:level})}
+ async function accountStatus(){const value=await rpc('cc_v2_mass_account_status_v1');if(value?.schemaVersion!==1)throw Error('MASS_INVALID_ACCOUNT');return value}
  async function ownData(){
   const value=await rpc('cc_v2_mass_self_read_v1');
   if(value?.schemaVersion!==1||value?.domain!=='mass'||!Array.isArray(value.bookings)||
@@ -67,5 +68,5 @@ export function createMassSelfClient({request=fetch,clock=()=>Date.now()}={}){
   if(typeof id!=='string'||!id||id.length>200||!['booking','waitlist'].includes(kind))throw Error('MASS_INVALID_CANCELLATION');
   return rpc('cc_v2_mass_self_cancel_v1',{p_booking_id:id,p_kind:kind});
  }
- return Object.freeze({requestCode,verifyCode,register,ownData,book,cancel,current,signOut});
+ return Object.freeze({requestCode,verifyCode,register,accountStatus,ownData,book,cancel,current,signOut});
 }
