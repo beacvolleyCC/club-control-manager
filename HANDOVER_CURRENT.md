@@ -1,3 +1,9 @@
+# Club Control – AKTUÁLIS LIVE FORMA/TREND HANDOVER (2026-11-15)
+
+**Legfrissebb LIVE kártya/formamodul állapot:** [központi forma, részleges helyezés és ↑/↓/→ nyilak – teljes handover](docs/handover/HANDOVER_20261115_LIVE_FORM_TREND_MATCH_CARDS.md). A Manager és Player a közös Supabase canonicalFormCards feedből dolgozik; a LIVE SQL működik, GitHub Pages deployok sikeresek. A megjelenített csillagos helyezés részleges, nem hivatalos; a valós iPhone/böngészős E2E és a hivatalos friss tabella helyezéseinek bekötése hátravan. A V2 TEST/PR #89 külön marad.
+
+---
+
 # Club Control – LIVE JEGYZŐKÖNYVEK ÉS STATISZTIKÁK (2026-11-15)
 
 **Legfrissebb LIVE adatfrissítési handover:** [15 jegyzőkönyv importja és statisztikaállapot](docs/handover/HANDOVER_20261115_LIVE_PROTOCOL_IMPORT_STATS.md). 15/15 hivatalos eredmény és kétoldali névsor a közös LIVE kanonikus mérkőzésforrásban; ebből 12 korábban hiányzó eredmény. A LIVE Player és Manager statisztikai modul meglévő kódja a közös adatokból számol, a teljes ligastatisztika még részleges. V2 TEST/PR #89 változatlan.
