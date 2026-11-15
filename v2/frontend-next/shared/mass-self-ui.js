@@ -3,6 +3,7 @@
  */
 import {createMassSelfClient} from './mass-self-client.js';
 import {readPublicMassSchedule} from './mass-schedule.js';
+import {createTestI18n} from './i18n-test-loader.js';
 
 const texts={
  hu:{title:'Tömegsport · jelentkezés',intro:'TEST rendszer. Az e-mailes regisztráció és a jelentkezések itt ellenőrizhetők.',email:'E-mail-cím',code:'E-mailben kapott kód',send:'Kód kérése',login:'Belépés',name:'Teljes név',level:'Edzésszint',register:'Profil létrehozása / összekapcsolása',myBookings:'Saját jelentkezéseim',myWaitlist:'Saját várólistám',pass:'Bérletellenőrzés',event:'Válassz edzést',book:'Jelentkezem',wait:'Várólistára',first:'Első edzés',claimed:'A bérletet már megvettem, de az import még késhet',cancel:'Lemondás',logout:'Kijelentkezés',unknown:'Nincs megerősített bérlet',pending_import:'Importellenőrzésre vár',sales_unavailable_grace:'Bérletértékesítés még nem elérhető · feltételes jelentkezés',missing:'Hiányzó bérlet',verified:'Ellenőrzött bérlet',qa_mock_pass:'Fiktív tesztbérlet',empty:'Nincs saját jelentkezés.',otpSent:'Ha lehetséges, a TEST e-mail-kódot elküldtük.',signedIn:'E-mail sikeresen ellenőrizve.',registered:'Profil sikeresen beállítva.',saved:'A művelet sikerült. A foglalás és bérletellenőrzés külön állapot.',failed:'A művelet nem sikerült. Ellenőrizd a hozzáférést vagy a foglalási szabályokat.',ready:'Lépj be, majd hozd létre vagy kapcsold össze a profilodat.',notReady:'Jelenleg nincs foglalható TEST-edzés.',choose:'Válassz edzést'},
@@ -15,8 +16,14 @@ export function mountMassSelfService(root,{client=createMassSelfClient(),read=re
  const heading=elem('h2'),intro=elem('p'),status=elem('p');status.setAttribute('role','status');
  const form=elem('div',undefined,'mass-self-controls'),results=elem('div',undefined,'mass-self-results');
  container.append(heading,intro,status,form,results);root.replaceChildren(container);
+ const translations=createTestI18n();
  let locale='hu',phase='signed-out',own=null,sessions=[],serial=0,busy=false,notice='';
- const tr=()=>texts[locale];
+ const tr=()=>new Proxy(texts[locale],{get(base,key){
+  if(typeof key!=='string')return undefined;
+  const messageKey='mass.self.'+key;
+  const translated=translations.t(messageKey);
+  return translated===messageKey?base[key]:translated;
+ }});
  function input(label,type='text'){
   const holder=elem('label'),caption=elem('span',label),field=elem('input');
   field.type=type;field.setAttribute('aria-label',label);holder.append(caption,field);return {holder,field};
@@ -108,5 +115,8 @@ export function mountMassSelfService(root,{client=createMassSelfClient(),read=re
   render();
  }
  void open();
- return {setLanguage:value=>{locale=value==='en'?'en':'hu';render()},dispose:()=>{serial++;client.signOut();root.replaceChildren()}};
+ return {setLanguage:value=>{
+  locale=value==='en'?'en':'hu';translations.setLanguage(locale);render();
+  void translations.refresh(locale).then(()=>{if(root.isConnected)render()});
+ },dispose:()=>{serial++;translations.cancelPending();client.signOut();root.replaceChildren()}};
 }
