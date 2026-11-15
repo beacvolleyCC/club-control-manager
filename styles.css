@@ -7098,3 +7098,23 @@ button.cc-match-scoreboard:focus-visible{outline:2px solid var(--yellow-dark,#b5
 }
 .dark .legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="yes"] .slider-zone{color:#effff2!important}
 .dark .legacy-mass-roster-card .attendance-slider[data-manager-slider-kind="mass"][data-slider-state="no"] .slider-zone{color:#fff0f0!important}
+
+
+/* Compact shared competition form from the central canonical LIVE snapshot.
+   Asterisk denotes provisional, partial-result rank; trend neutral if <4 matches. */
+.cc-form-mini{display:inline-flex;align-items:center;justify-content:center;gap:5px;max-width:100%;
+  min-height:17px;margin-top:3px;white-space:nowrap;font-size:10px;line-height:1.2;font-weight:600}
+.cc-form-rank{font-size:10px;color:var(--muted,#666);font-weight:700;white-space:nowrap}
+.cc-form-arrow{display:inline-flex;align-items:center;justify-content:center;
+  font-size:15px;line-height:13px;font-weight:800}
+.cc-form-arrow.up{color:#23834d}.cc-form-arrow.down{color:#c34240}
+.cc-form-arrow.flat{color:#868b94}
+.cc-form-dots{display:inline-flex;gap:3px;align-items:center}
+.cc-form-dot{display:inline-block;width:6px;height:6px;flex:0 0 6px;border-radius:50%}
+.cc-form-dot.is-win{background:#23834d}.cc-form-dot.is-loss{background:#c34240}
+.cc-scoreboard-teamcopy .cc-form-mini,.player-match-team .cc-form-mini{display:inline-flex}
+@media(max-width:480px){
+ .cc-form-mini{font-size:9px;gap:3px;margin-top:2px}
+ .cc-form-arrow{font-size:13px}
+ .cc-form-dots{gap:2px}.cc-form-dot{width:5px;height:5px;flex-basis:5px}
+}
