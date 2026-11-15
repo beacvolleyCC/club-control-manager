@@ -2991,7 +2991,7 @@ async function ccMassAthleteHistoryLoad_(id){
       ?'<span class="cc-form-rank" title="Részleges eredményekből számított, nem hivatalos helyezés">'+Number(r.rank)+'.*</span>'
       :'<span class="cc-form-rank" title="Helyezés nem számítható">–</span>';
     const form=Array.isArray(r.lastFive)?r.lastFive.filter(x=>x==='W'||x==='L').slice(-5):[];
-    const past=form.map(outcome=>'<i class="cc-form-dot '+(outcome==='W'?'is-win':'is-loss')+'" title="'+(outcome==='W'?'Győzelem':'Vereség')+'"></i>').join('');
+    const past=form.map(outcome=>'<span class="cc-form-dot '+(outcome==='W'?'is-win':'is-loss')+'" title="'+(outcome==='W'?'Győzelem':'Vereség')+'" aria-hidden="true">'+outcome+'</span>').join('');
     const trend=r.trend==='up'?'up':r.trend==='down'?'down':'flat';
     const title=r.trendBasis==='insufficient'?'Kevés mérkőzés a trend meghatározásához'
       :r.trendBasis==='last_match_vs_previous_match_limited'?'Rövid formajelzés az utolsó 2 eredményből (részleges adatok)'
