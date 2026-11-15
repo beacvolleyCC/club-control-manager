@@ -76,7 +76,7 @@ test('manager pass policy RPC is permission-scoped and validates inputs',async()
  assert.ok(requests.every(x=>x.opts.headers.Authorization==='Bearer admin-jwt'));
  assert.deepEqual(requests.map(x=>x.url.split('/').at(-1)),['cc_v2_manager_pass_sales_status_v1','cc_v2_manager_pass_sales_set_v1']);
  await assert.rejects(readManagerPassSales({},'2026-11',{request}),/LOGIN_REQUIRED/);
- await assert.rejects(setManagerPassSales({accessToken:'jwt'},{month:'2026-11',state:'available',graceUntil:'2027-11-01'},{request}),/POLICY_INVALID/);
+ assert.throws(()=>setManagerPassSales({accessToken:'jwt'},{month:'2026-11',state:'available',graceUntil:'2027-11-01'},{request}),/POLICY_INVALID/);
 });
 test('two independent frontends use the same verified self-service component',()=>{
  const web=readFileSync(new URL('../frontend-next/mass/main.js',import.meta.url),'utf8');
