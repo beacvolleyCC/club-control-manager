@@ -58,7 +58,11 @@ export function mountManagerPassSales(root,session,{month,request=fetch}={}){
    pick.value=value.salesState;reason.value=value.reason||'';
    until.value=dateLocal(value.graceUntil);
    status.textContent='Hónap: '+value.validMonth+' · '+value.salesState;
-   submit.disabled=false;syncForm();
+   const canEdit=value.canEdit===true;
+   submit.hidden=!canEdit;
+   submit.disabled=!canEdit;pick.disabled=!canEdit;reason.disabled=!canEdit;
+   if(!canEdit){until.disabled=true;status.textContent+=' · csak megtekintés'}
+   else syncForm();
   }catch(error){if(own!==serial)return;status.textContent='Nem elérhető vagy nincs jogosultság ('+String(error.message||'ERROR')+')';}
  }
  submit.addEventListener('click',async()=>{
