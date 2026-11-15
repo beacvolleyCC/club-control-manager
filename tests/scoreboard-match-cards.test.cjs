@@ -88,9 +88,14 @@ test('Manager match card uses only canonical form, never stale standings snapsho
   lastFive:['L','W'],trend:'up',trendBasis:'last_match_vs_previous_match_limited'
  }];
  const upcoming=ctx.scoreboard({...fixture,homeSets:null,awaySets:null});
- assert.ok(upcoming.includes('2.*'),'Provisional rank must have a star');
+ assert.ok(upcoming.includes('2.'),'Provisional position is displayed without an asterisk');
+ assert.ok(!upcoming.includes('2.*'));
+
  assert.ok(upcoming.includes('cc-form-arrow up'));
  assert.ok(upcoming.includes('cc-form-dot is-loss'));
+ assert.ok(upcoming.includes('M3 17 L9 10 L13 14 L21 5'));
+ assert.ok(!upcoming.includes('↗'));
+ assert.ok(!upcoming.includes('↘'));
  assert.ok(upcoming.includes('cc-form-dot is-win'));
  assert.ok(!upcoming.includes('99. helyen áll'));
  const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:0});
@@ -185,14 +190,25 @@ test('compact shared form renders partial ranks, arrows and recent-result dots o
  ];
  const upcoming=ctx.scoreboard({...fixture,homeSets:null,awaySets:null});
  assert.match(upcoming,/cc-form-rank/);
- assert.ok(upcoming.includes('2.*'));
- assert.ok(upcoming.includes('5.*'));
+ assert.ok(upcoming.includes('2.'));
+ assert.ok(upcoming.includes('5.'));
  assert.ok(upcoming.includes('cc-form-arrow up'));
  assert.ok(upcoming.includes('cc-form-arrow down'));
+ assert.ok(upcoming.includes('cc-form-trend-icon'));
+ assert.ok(upcoming.includes('M3 17 L9 10 L13 14 L21 5'));
+ assert.ok(upcoming.includes('M3 7 L9 14 L13 10 L21 19'));
+ assert.ok(!upcoming.includes('↗'));
+ assert.ok(!upcoming.includes('↘'));
+ assert.ok(upcoming.includes('viewBox="0 0 24 24"'));
+ assert.ok(!upcoming.includes('2.*'));
+ assert.ok(!upcoming.includes('5.*'));
+ assert.ok(upcoming.includes('nem hivatalos helyezés'));
  assert.ok(upcoming.includes('cc-form-dot is-win'));
  assert.ok(upcoming.includes('cc-form-dot is-loss'));
  assert.ok(!upcoming.includes('2. helyen áll'),'partial positions must not claim official status');
  assert.ok(css.includes('.cc-form-mini{'));
+ assert.ok(css.includes('background:transparent!important'));
+ assert.ok(css.includes('.cc-form-arrow::before,.cc-form-arrow::after{content:none!important'));
  const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:1});
  assert.ok(!played.includes('cc-form-mini'),'a completed fixture should not display a misleading current future-form forecast');
 });

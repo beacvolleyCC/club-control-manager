@@ -659,7 +659,7 @@
           focus:ccIsBeacLeagueTeam_(card.teamName),partial:true,
           officialRankVerified:false};
       }).sort((x,y)=>(x.position??9999)-(y.position??9999)||text(x.teamName).localeCompare(text(y.teamName),'hu'));
-      return {rows,group,source:'Közös LIVE eredményekből számított részleges tabella · nem hivatalos helyezés (*)',
+      return {rows,group,source:'Közös LIVE eredményekből számított részleges tabella · nem hivatalos helyezés',
         snapshot:null,verified:false,canonical:true};
     }
     // Fail closed: do not silently fall back to old archived/foreign league tables.
@@ -674,9 +674,9 @@
       men=text(contextTeamId)==='10000000-0000-4000-8000-000000000003';
     const controls=men?'<span class="cc-overview-men-groups" role="group" aria-label="Férfi bajnoki csoport">'
       +['B','A'].map(g=>'<button type="button" data-overview-men-group="'+g+'" aria-pressed="'+(ccMrszMenGroup_===g)+'" class="'+(ccMrszMenGroup_===g?'active':'')+'">'+g+'</button>').join('')+'</span>':'';
-    const body=rows.length?'<div class="ms-table-scroll"><table class="ms-table"><thead><tr><th title="Rögzített eredmények alapján számított részleges helyezés; nem hivatalos">Hely*</th><th class="team">Csapat</th><th>M</th><th>GY</th><th>V</th><th class="group-end">P</th><th>SZ</th><th>SZA</th><th>P</th><th>PA</th></tr></thead><tbody>'
-      +rows.map(r=>'<tr class="'+(r.focus?'focus':'')+'"><td title="Részleges eredményekből számított helyezés; nem hivatalos"><b>'+esc(ccMrszStatPosition_(r.position,data.snapshot)==='–'?'–':ccMrszStatPosition_(r.position,data.snapshot)+'.*')+'</b></td><td class="team"><button type="button" data-overview-standings-team="'+esc(r.sourceTeamId||'')+'" data-overview-standings-context="'+esc(contextTeamId)+'">'
-        +msLogoHtml_(r.sourceTeamId,r.teamName)+'<strong>'+esc(r.teamName)+'</strong>'+ccMrszRecordNoticeHtml_(r)+'</button></td><td>'+ccMrszStatNumber_(r.played)+'</td><td>'+ccMrszRecordNumber_(r,'wins')+'</td><td>'+ccMrszRecordNumber_(r,'losses')+'</td><td class="group-end"><b>'+ccMrszStatNumber_(r.tablePoints)+'</b></td><td>'+esc(ccMrszStatPair_(r.setsFor,r.setsAgainst))+'</td><td>'+esc(ccMrszStatRatio_(r.setsFor,r.setsAgainst))+'</td><td>'+esc(ccMrszStatPair_(r.pointsFor,r.pointsAgainst))+'</td><td>'+esc(ccMrszStatRatio_(r.pointsFor,r.pointsAgainst))+'</td></tr>').join('')+'</tbody></table></div><p class="cc-overview-standings-disclaimer">* Rögzített eredményekből számított részleges sorrend, nem a szövetség hivatalos tabellája. A hiányzó eredmények befolyásolhatják a helyezéseket.</p>'
+    const body=rows.length?'<div class="ms-table-scroll"><table class="ms-table"><thead><tr><th title="Rögzített eredmények alapján számított részleges helyezés; nem hivatalos">Hely</th><th class="team">Csapat</th><th>M</th><th>GY</th><th>V</th><th class="group-end">P</th><th>SZ</th><th>SZA</th><th>P</th><th>PA</th></tr></thead><tbody>'
+      +rows.map(r=>'<tr class="'+(r.focus?'focus':'')+'"><td title="Részleges eredményekből számított helyezés; nem hivatalos"><b>'+esc(ccMrszStatPosition_(r.position,data.snapshot)==='–'?'–':ccMrszStatPosition_(r.position,data.snapshot)+'.')+'</b></td><td class="team"><button type="button" data-overview-standings-team="'+esc(r.sourceTeamId||'')+'" data-overview-standings-context="'+esc(contextTeamId)+'">'
+        +msLogoHtml_(r.sourceTeamId,r.teamName)+'<strong>'+esc(r.teamName)+'</strong>'+ccMrszRecordNoticeHtml_(r)+'</button></td><td>'+ccMrszStatNumber_(r.played)+'</td><td>'+ccMrszRecordNumber_(r,'wins')+'</td><td>'+ccMrszRecordNumber_(r,'losses')+'</td><td class="group-end"><b>'+ccMrszStatNumber_(r.tablePoints)+'</b></td><td>'+esc(ccMrszStatPair_(r.setsFor,r.setsAgainst))+'</td><td>'+esc(ccMrszStatRatio_(r.setsFor,r.setsAgainst))+'</td><td>'+esc(ccMrszStatPair_(r.pointsFor,r.pointsAgainst))+'</td><td>'+esc(ccMrszStatRatio_(r.pointsFor,r.pointsAgainst))+'</td></tr>').join('')+'</tbody></table></div><p class="cc-overview-standings-disclaimer">Rögzített eredményekből számított részleges sorrend, nem a szövetség hivatalos tabellája. A hiányzó eredmények befolyásolhatják a helyezéseket.</p>'
       :'<p class="cc-standings-notice">'+esc(data.source)+'</p>';
     return '<article class="panel standings-card ms-standings-card overview-ms-standings" style="--team-color:'+esc(team?.color||'#f7b700')+'"><div class="panel-head cc-overview-standings-head"><div><h3>'+esc(team?.name||'Tabella')+'</h3><p>'+esc(data.group)+' · '+esc(data.source)+'</p></div>'+controls
       +'<button type="button" class="button quiet small cc-overview-standings-more" data-overview-open-standings="'+esc(contextTeamId)+'">Részletek</button></div>'+body+'</article>';
@@ -2988,7 +2988,7 @@ async function ccMassAthleteHistoryLoad_(id){
     const row=ccFormCardTeam_(league,name);
     if(!row)return '';
     const validRank=Number.isSafeInteger(Number(row.rank))&&Number(row.rank)>0;
-    const rank=validRank?'<span class="cc-form-rank" title="Részleges eredményekből számított, nem hivatalos helyezés">'+Number(row.rank)+'.*</span>'
+    const rank=validRank?'<span class="cc-form-rank" title="Részleges eredményekből számított, nem hivatalos helyezés">'+Number(row.rank)+'.</span>'
       :'<span class="cc-form-rank" title="Helyezés nem számítható">–</span>';
     const form=Array.isArray(row.lastFive)?row.lastFive.filter(x=>x==='W'||x==='L').slice(-5):[];
     const dots=form.map(outcome=>'<i class="cc-form-dot '+(outcome==='W'?'is-win':'is-loss')+'" title="'+(outcome==='W'?'Győzelem':'Vereség')+'" aria-hidden="true"></i>').join('');
@@ -2998,9 +2998,14 @@ async function ccMassAthleteHistoryLoad_(id){
       :trend==='up'?'Javuló forma: utolsó 2 vs. előző 2 mérkőzés'
       :trend==='down'?'Romló forma: utolsó 2 vs. előző 2 mérkőzés'
       :'Változatlan forma: utolsó 2 vs. előző 2 mérkőzés';
-    return '<span class="cc-form-mini" title="'+esc(title)+'">'
+    const icon=trend==='up'
+    ?'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17 L9 10 L13 14 L21 5 M15 5 H21 V11"/></svg>'
+    :trend==='down'
+      ?'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7 L9 14 L13 10 L21 19 M15 19 H21 V13"/></svg>'
+      :'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12 H21 M16 7 L21 12 L16 17"/></svg>';
+  return '<span class="cc-form-mini" title="'+esc(title)+'">'
       +rank+'<span class="cc-form-arrow '+trend+'" aria-label="'+esc(title)+'">'
-      +(trend==='up'?'↗':trend==='down'?'↘':'→')+'</span>'
+      +icon+'</span>'
       +'<strong class="cc-form-team-name">'+esc(name)+'</strong>'
       +'<span class="cc-form-dots" aria-label="Utolsó eredmények: '+esc(form.map(x=>x==='W'?'győzelem':'vereség').join(', ')||'nincs rögzített mérkőzés')+'">'+dots+'</span></span>';
   }
