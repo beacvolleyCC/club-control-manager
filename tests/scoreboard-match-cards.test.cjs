@@ -156,3 +156,23 @@ test('unplayed match remains VS. with no artificial set-point status',()=>{
  assert.ok(css.includes('.cc-scoreboard-set-coverage{'));
  assert.ok(css.includes('  .cc-scoreboard-set-coverage{font-size:8px;'));
 });
+
+test('compact shared form renders partial ranks, arrows and recent-result dots only for unplayed fixtures',()=>{
+ ctx.ccMrszPhotoState_.tables=[];
+ ctx.ccMrszPhotoState_.canonicalFormCards=[
+  {competitionLabel:fixture.competitionLabel,teamName:'BEAC II.',rank:2,trend:'up',trendBasis:'last_match_vs_previous_match_limited',lastFive:['L','W']},
+  {competitionLabel:fixture.competitionLabel,teamName:'UTE',rank:5,trend:'down',trendBasis:'last_match_vs_previous_match_limited',lastFive:['W','L']}
+ ];
+ const upcoming=ctx.scoreboard({...fixture,homeSets:null,awaySets:null});
+ assert.match(upcoming,/cc-form-rank/);
+ assert.ok(upcoming.includes('2.*'));
+ assert.ok(upcoming.includes('5.*'));
+ assert.ok(upcoming.includes('cc-form-arrow up'));
+ assert.ok(upcoming.includes('cc-form-arrow down'));
+ assert.ok(upcoming.includes('cc-form-dot is-win'));
+ assert.ok(upcoming.includes('cc-form-dot is-loss'));
+ assert.ok(!upcoming.includes('2. helyen áll'),'partial positions must not claim official status');
+ assert.ok(css.includes('.cc-form-mini{'));
+ const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:1});
+ assert.ok(!played.includes('cc-form-mini'),'a completed fixture should not display a misleading current future-form forecast');
+});
