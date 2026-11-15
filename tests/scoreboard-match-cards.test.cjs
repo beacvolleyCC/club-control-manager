@@ -212,3 +212,21 @@ test('compact shared form renders partial ranks, arrows and recent-result dots o
  const played=ctx.scoreboard({...fixture,homeSets:3,awaySets:1});
  assert.ok(!played.includes('cc-form-mini'),'a completed fixture should not display a misleading current future-form forecast');
 });
+
+test('aggregate league stripe and compact division label use one trusted theme; regular cards stay unchanged',()=>{
+ const theme={short:'Női II/B',full:fixture.competitionLabel,color:'#F3D34A'};
+ const aggregate=ctx.scoreboard({...fixture,homeSets:null,awaySets:null},{categoryTheme:theme,dateInsteadOfBadge:true});
+ assert.ok(aggregate.includes('cc-match-category-accent'));
+ assert.ok(aggregate.includes('style="--cc-match-league-color:#F3D34A"'));
+ assert.ok(aggregate.includes('class="cc-scoreboard-division"'));
+ assert.ok(aggregate.includes('Női II/B'));
+ assert.ok(aggregate.includes(fixture.competitionLabel));
+ assert.ok(aggregate.includes('2026-10-13'));
+ assert.ok(aggregate.includes('19:30'));
+ const regular=ctx.scoreboard({...fixture,homeSets:null,awaySets:null},{dateInsteadOfBadge:true});
+ assert.ok(!regular.includes('cc-match-category-accent'));
+ assert.ok(!regular.includes('cc-scoreboard-division'));
+ assert.ok(!regular.includes('--cc-match-league-color'));
+ assert.ok(css.includes('.cc-match-league-context .cc-match-scoreboard.cc-match-category-accent{'));
+ assert.ok(css.includes('.cc-match-league-context .cc-scoreboard-division{'));
+});
