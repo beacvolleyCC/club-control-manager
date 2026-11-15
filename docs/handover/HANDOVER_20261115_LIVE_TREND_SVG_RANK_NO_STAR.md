@@ -17,5 +17,7 @@ Player: `beacvolleyCC/player_application` / PR #33
 
 - Manager regressziós tesztjei: `tests/scoreboard-match-cards.test.cjs`, `tests/manager-standings-filters.test.cjs`, `tests/mrsz-stat-missing-values.test.cjs`.
 - Player: `tests/player-form-mini-canonical.test.cjs`, `tests/protocol-match-order-20261019.test.cjs`; a PWA cache verzió egységes: `20261115-trend-svg-v3`.
-- Merge, éles GitHub Pages workflow és a bejelentkezett mobilos/böngészős vizuális E2E külön ellenőrzendő. A PR merge csak sikeres CI esetén történhet.
+- **Manager PR #92 merged**: `b9509911a2ac8851b42f0c16e0817bbbf4bf3ddc`. A végső QA ellenőrzések 7/7 zöldek, a főági Pages build és deploy [sikeres](https://github.com/beacvolleyCC/club-control-manager/actions/runs/43726164619).
+- **Player PR #33 merged**: `20d7648e0d6c267c53ffdb3b02f01f96fcaba185`. A főági négy célzott QA zöld, a Pages build és deploy [sikeres](https://github.com/beacvolleyCC/player_application/actions/runs/43726028195).
+- A bejelentkezett mobilos/böngészős vizuális E2E továbbra is külön ellenőrzendő; a GitHub Actions ellenőrzés nem helyettesíti.
 - Rollback: csak a két frontend PR revertje szükséges. LIVE adatbázis és V2 TEST változatlan.
