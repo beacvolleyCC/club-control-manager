@@ -90,3 +90,28 @@ Közvetlen SQL-lekérdezéssel:
 - V2 szüneteltetési checkpoint: v2/docs/HANDOVER_PAUSE_FOR_LIVE_2026-11-15.md a V2 ágon.
 
 **Folytatási kulcs:** CC-FOLYTATÁS – LIVE FORMA/TREND.
+
+
+## 7. Lezáró javítás – 2026-11-15
+
+A központi formakártyák korábbi implementációjának végellenőrzésekor egy fontos eltérés derült ki: a Manager `ccMatchScoreboardHtml_` még rendelkezett egy külön `ccMatchScoreboardRank_` fallbackkel, amely régi, önálló tabellasnapshotból is kiírhatott pozíciót. **Ezt a régi fallbacket eltávolítottuk.** Most a meccskártya Manager- és Player-oldalon egyaránt kizárólag a hitelesített snapshot `canonicalFormCards` mezőjéből jeleníti meg a kompakt formát, a részleges helyezést és a trendet. A befejezett meccseknél nem társítunk visszamenőleg aktuális rangot.
+
+**GitHub változtatások (Manager `main`):**
+- `52c4a2c0f6f2d07ae67b1905678301c1db034e3a` – legacy Manager rank fallback eltávolítása.
+- `92e8c1cec69f7c8dffbf07a325c3cbc53ad31caf` – régi helyezés-teszt helyett központi formakártya-regresszió.
+- `3a1d4316270d9257dfd0ba26c23027ee2cef92b3` – csapatalias-teszt átállítása a központi adatra.
+- `cb4c4ba2bd8d36f4ffe7e76ac8331f3aa3703028` – meccsösszefésülési teszt átállítása; a csoporton kívüli csapatnak nem ad rangot.
+
+**Végleges automatizált ellenőrzés:**
+- Manager competition training roster QA – **success**: https://github.com/beacvolleyCC/club-control-manager/actions/runs/43721578915
+- Manager Pages build & deployment – **success**: https://github.com/beacvolleyCC/club-control-manager/actions/runs/43721578571
+- Player legutóbb ellenőrzött meccs/forma QA és Pages deploy – **success**: https://github.com/beacvolleyCC/player_application/actions/runs/43718948012 és https://github.com/beacvolleyCC/player_application/actions/runs/43718947911. A Player kódjához az utolsó Manager fallback-javítás során nem kellett hozzányúlni.
+
+**LIVE SQL-kontraktus végellenőrzés:**
+- Mindkét `cc_*_competition_mrsz_snapshot_v2()` közvetlenül ugyanazt a `private.cc_competition_team_form_cards_v1()` függvényt hívja.
+- `anon` nem hívhatja a publikus v2 snapshot RPC-ket, a privát formakalkulációt `authenticated` sem hívhatja közvetlenül.
+- 40 formakártya 5 csoportban, 33 csillagozott részleges helyezéssel; hibás trendérték, ötnél hosszabb eredménysor, eredmény nélküli csapatnak kiosztott helyezés, vagy hivatalosnak megjelölt részleges rang **0**.
+- A frissen beimportált *teljes hivatalos tabella* megléte a LIVE közös `competition_source_standings` táblában továbbra sem igazolható (helyezésmező NULL); ezért a csillagozott helyezések a helyes, óvatos megoldás.
+- A névazonosítás ellenőrzése a 263 nem lezárt kanonikus mérkőzés összes különböző, csoportspecifikus csapatnevére nem talált a jelenlegi Manager/Player renderelésben unmatched formakártyát.
+
+**Nyitva marad:** tényleges bejelentkezett Player/Manager és iPhone kijelzőn végzett vizuális teszt; hivatalos helyezések forrásigazolása és későbbi összekötése; hiányzó mérkőzéseredmények. Új LIVE adatbázis-írás ebben a lezáró körben **nem történt**; csak Manager frontend + regressziós tesztek és dokumentáció frissült. A V2 TEST/PR #89 változatlan.
