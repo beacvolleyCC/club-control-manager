@@ -13,10 +13,13 @@ const section=(from,to)=>{
 const norm=new Function('text',section('  function ccMrszNormPairName_(','  function ccMrszLocalKickoff_(')+';return ccMrszNormPairName_;')(text);
 const setIssue=new Function('text',section('  function ccMrszSetScoreIssue_(','  function ccMatchScoreboardHtml_(')+';return ccMrszSetScoreIssue_;')(text);
 const results=new Function('text','ccMrszNormPairName_','ccMrszSetScoreIssue_',section('  function ccSavedLeagueResults_(','  function ccSavedLeagueResultsHtml_(')+';return ccSavedLeagueResults_;')(text,norm,setIssue);
-const rank=new Function('text','ccMrszNormPairName_','ccMrszPhotoState_',section('  function ccMatchScoreboardRank_(','  function ccMatchScoreboardHtml_(')+';return ccMatchScoreboardRank_;')(text,norm,{
- tables:[{competitionLabel:'Liga A',partial:false,rows:[{teamName:'Kandó Sport Klub',position:2},{teamName:'Kandó SK',position:3}]},
- {competitionLabel:'Liga B',partial:false,rows:[{teamName:'Kandó Sport Klub',position:4}]}]
-});
+const formTeam=new Function('text','ccMrszNormPairName_','ccMrszPhotoState_',
+ section('  function ccFormCardTeam_(','  function ccFormCardLine_(')+';return ccFormCardTeam_;')(
+ text,norm,{canonicalFormCards:[
+  {competitionLabel:'Liga A',teamName:'Kandó Sport Klub',rank:2},
+  {competitionLabel:'Liga A',teamName:'Kandó SK',rank:3},
+  {competitionLabel:'Liga B',teamName:'Kandó Sport Klub',rank:4}
+ ]});
 const photoRows=(snapshot,contextLeague,canonical=[])=>new Function('text','ccMrszNormPairName_','msRows_','msData_','ccIsBeacLeagueTeam_',
  section('  function ccStandingsPhotoTeamRows_(','  function ccMrszLeagueFixturePanelHtml_(')+';return ccStandingsPhotoTeamRows_;')(
  text,norm,()=>canonical,()=>({competitionLabel:contextLeague}),name=>norm(name)==='beac'
@@ -57,10 +60,10 @@ test('League results only match exact known saved MTK blue variant',()=>{
  assert.equal(results(blue,'Liga B',[base],[blue,plain,{teamName:'Ráckeve'}]).length,1);
  assert.equal(results(plain,'Liga B',[base],[blue,plain]).length,0);
 });
-test('Ambiguous rank aliases never select the first row by accident',()=>{
- assert.equal(rank('Liga A','Kandó Sport Klub'),null);
- assert.equal(rank('Liga B','Kandó Sport Klub'),4);
- assert.equal(rank('Liga B','Kandó Sport Klub II.'),null);
+test('Central form aliases cannot cross leagues or choose ambiguous teams',()=>{
+ assert.equal(formTeam('Liga A','Kandó Sport Klub'),null);
+ assert.equal(formTeam('Liga B','Kandó Sport Klub')?.rank,4);
+ assert.equal(formTeam('Liga B','Kandó Sport Klub II.'),null);
 });
 test('Fallback snapshot identifiers are league-specific, not photo-0 across leagues',()=>{
  const a=photoRows({competitionLabel:'Liga A',rows:[{teamName:'Kandó Sport Klub'}]},'Unrelated league',[{teamName:'Kandó Sport Klub',sourceTeamId:'wrong'}]);
