@@ -30,10 +30,10 @@ begin
  end if;
  v_month:=to_char(v_event.event_date,'YYYY-MM');
  v_pass:=private.cc_v2_mass_pass_state_v1(v_owner,v_month);
- if upper(v_event.session_type)='SPORT7' then
-  v_pass_no:='SPORT7';
- elsif v_mode='first_training' then
+ if v_mode='first_training' then
   v_pass_no:='';
+ elsif upper(v_event.session_type)='SPORT7' then
+  v_pass_no:='SPORT7';
  elsif v_pass->>'status'='verified' then
   select p.pass_number into v_pass_no from public.mass_passes p
   where p.source_workbook_id=v_event.source_workbook_id
@@ -57,7 +57,6 @@ begin
  end if;
  if v_mode='wait' then
   -- A dedicated waitlist helper accepts first-training as the pass label.
-  if v_mode='first_training' then v_person:=jsonb_set(v_person,'{passNumber}','"ELSŐ EDZÉS"'::jsonb);end if;
   v_result:=public.cc_vnext_mass_public_wait_v1(p_event_id,v_person);
  else
   -- Random, non-user-provided one-use cancellation secret; no raw token exposed.
@@ -101,6 +100,7 @@ begin
    then raise exception 'MASS_SELF_WAITLIST_EVENT_INVALID' using errcode='42501';end if;
   select * into v_w from public.mass_waitlist where id=p_booking_id for update;
   if v_w.waitlist_status not in ('VÁRAKOZIK','HELY FELAJÁNLVA')
+   or lower(btrim(coalesce(v_w.email,'')))<>v_owner->>'email'
    then raise exception 'MASS_SELF_WAITLIST_ALREADY_RESOLVED' using errcode='22023';end if;
   update public.mass_waitlist set waitlist_status='LEMONDVA',updated_at=now(),
    token_hash=null where id=v_w.id;
