@@ -1,5 +1,6 @@
 // Independent Manager V2 read-only TEST shell. No direct table access, no writes.
 import {mountTestAuth} from '../shared/test-auth-ui.js';
+import {mountManagerPassSales} from '../shared/mass-pass-manager.js';
 import {readTestManagerModules,readTestMassEventDetail,readTestMassWaitlistSummary,readTestMassPasses,testCurrentBudapestMonth} from '../shared/test-rpc.js';
 const $=id=>document.getElementById(id);
 const nav=$('managerNav'),heading=$('pageTitle'),view=$('view'),menu=$('menuToggle'),status=$('dataStatus');
@@ -213,7 +214,13 @@ function massPassesPanel(){
   list.append(item(title,info,p.currentMonth===true?'Aktuális havi':'Másik hónap'));
  }
  if(!rows.length)list.append(make('p','Nincs bérlet a szűrés alapján.','cc-muted'));
- section.append(list);return section;
+ section.append(list);
+ if(activeSession&&mode==='ready'&&available.massPasses){
+  const host=make('div',undefined,'v2-pass-sales-policy');
+  section.append(host);
+  mountManagerPassSales(host,activeSession,{month:passFilter.month});
+ }
+ return section;
 }
 function playersPanel(rows){
  const section=panel('Sportolók',rows.length+' jogosultság szerint lekért játékos');
