@@ -49,3 +49,23 @@
 2. Valódi TEST OTP-s fiók létrehozása, e-mail sablon ellenőrzése, fiktív QA-edzés kézi jelentkezés+lemondás próbája; ugyanaz látszódjon weben és Playerben.
 3. Névütközés, foglalási ütközés, bérlet- és szankciószabályok negatív / több fiókos E2E.
 4. Csak ezután staged LIVE-adatátvételi terv és külön élesítési döntés.
+
+
+## 2026-11-15 kiegészítő SQL-tranzakciós teszt
+
+A TEST Supabase-ben a meglévő hitelesített TEST auth felhasználó azonosítóját egy `BEGIN ... ROLLBACK` tranzakción belül szimulált JWT-környezetként beállítva és átmeneti, fiktív tömegsportos profilhoz kapcsolva a következőket **sikeresen végrehajtottuk**:
+
+- `cc_v2_mass_self_read_v1()`: saját adatok igazolt felhasználóként.
+- `cc_v2_mass_self_book_v1(...,'first_training',false)`: fiktív jövőbeli edzés foglalása.
+- `cc_v2_mass_self_cancel_v1(...,'booking')`: saját foglalás lemondása.
+- `cc_v2_mass_self_book_v1(...,'wait',false)`: átmeneti kapacitás=0 és Manager grace szabály mellett várólistára kerülés.
+- `cc_v2_mass_self_cancel_v1(...,'waitlist')`: saját várólista törlése.
+- Hiányzó JWT-vel `authenticated` szerepkörben saját profil lekérése 42501 jogosultsági hibával elutasítva.
+
+**Minden pozitív adatbázispróba explicit ROLLBACK-kel végződött.** Utóellenőrzés: a foglalások száma továbbra is 1, a várólista-bejegyzések száma 7, a valódi regisztrált mass-account kapcsolatok száma 0, a bérletértékesítési grace szabályok száma 0, a fiktív jövőbeli edzés kapacitása 4. Nem maradt hátra tesztfoglalás.
+
+Az új `cc_v2_manager_pass_sales_status_v1` emellett `canEdit` jogosultsági jelzőt ad, és a Manager szerkesztési gombja el van rejtve, ha a szerveren a `mass.passes edit` jogosultság nincs meg. A tényleges írási funkció továbbra is külön, szerveroldalon ellenőrzi az engedélyt.
+
+A központi fordítási adatbázisban a teljes TEST-szövegkulcskészlet most **681 kulcs**, ebből **96 publikált angol** fordítás; az új tömegsportos HU/EN szövegek már a közös nyelvi motorból jönnek.
+
+**Továbbra sincs valódi végfelhasználói e-mail OTP / webes PWA E2E**, ez Cloudflare V2 TEST deployment és kézi próba után minősíthető késznek.
