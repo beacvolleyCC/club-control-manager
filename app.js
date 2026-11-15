@@ -2857,7 +2857,7 @@ async function ccMassAthleteHistoryLoad_(id){
 
 
   // Isolated Hunvolley screenshots: not the automatic BRSZ schedule or league source.
-  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[],userMatches:[],canonicalMatches:[],canonicalCoverage:[],canonicalTeamStats:[]};
+  let ccMrszPhotoState_={loaded:false,loading:false,error:'',matches:[],fixtures:[],tables:[],userMatches:[],canonicalMatches:[],canonicalCoverage:[],canonicalTeamStats:[],canonicalFormCards:[]};
   let ccBrszEffectiveMatches_=[];
   // Snapshot-based league selection is independent from BEAC team permissions.
   // Empty value means follow the existing BEAC team context.
@@ -2898,7 +2898,7 @@ async function ccMassAthleteHistoryLoad_(id){
     try{
       const [data,sourceMatches,userMatches]=await Promise.all([rpc('cc_manager_competition_mrsz_snapshot_v2'),rpc('cc_manager_competition_source_matches_effective_v1'),rpc('cc_manager_competition_user_schedule_v1').catch(()=>[])]);
       ccBrszEffectiveMatches_=Array.isArray(sourceMatches)?sourceMatches:[];
-      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[],userMatches:Array.isArray(userMatches)?userMatches:[],canonicalMatches:Array.isArray(data?.canonicalMatches)?data.canonicalMatches:[],canonicalCoverage:Array.isArray(data?.canonicalCoverage)?data.canonicalCoverage:[],canonicalTeamStats:Array.isArray(data?.canonicalTeamStats)?data.canonicalTeamStats:[]};
+      ccMrszPhotoState_={loaded:true,loading:false,error:'',matches:Array.isArray(data?.matches)?data.matches:[],fixtures:Array.isArray(data?.fixtures)?data.fixtures:[],tables:Array.isArray(data?.tables)?data.tables:[],userMatches:Array.isArray(userMatches)?userMatches:[],canonicalMatches:Array.isArray(data?.canonicalMatches)?data.canonicalMatches:[],canonicalCoverage:Array.isArray(data?.canonicalCoverage)?data.canonicalCoverage:[],canonicalTeamStats:Array.isArray(data?.canonicalTeamStats)?data.canonicalTeamStats:[],canonicalFormCards:Array.isArray(data?.canonicalFormCards)?data.canonicalFormCards:[]};
     }catch(err){ccBrszEffectiveMatches_=[];ccMrszPhotoState_={loaded:true,loading:false,error:text(err?.message||err),matches:[],fixtures:[],tables:[]}}
     if(ccRouteIs_('competition','matches'))renderCompetitionMatchCards_();
     else if(ccRouteIs_('competition','standings'))renderManagerStandings_();
@@ -2974,6 +2974,32 @@ async function ccMassAthleteHistoryLoad_(id){
     const rank=Number(row?.position);
     return row&&Number.isInteger(rank)&&rank>0?rank:null;
   }
+  // Compact cards share server-side calculations; rank is partial, NEVER official.
+  function ccFormCardTeam_(league,name){
+    const key=ccMrszNormPairName_(name).replace(/[^a-z0-9]/g,'');
+    const rows=(ccMrszPhotoState_.canonicalFormCards||[]).filter(r=>
+      text(r.competitionLabel)===text(league)
+      && ccMrszNormPairName_(r.teamName).replace(/[^a-z0-9]/g,'')===key);
+    return key&&rows.length===1?rows[0]:null;
+  }
+  function ccFormCardLine_(league,name){
+    const r=ccFormCardTeam_(league,name);
+    if(!r)return '';
+    const rank=Number.isSafeInteger(Number(r.rank))&&Number(r.rank)>0
+      ?'<span class="cc-form-rank" title="Részleges eredményekből számított, nem hivatalos helyezés">'+Number(r.rank)+'.*</span>'
+      :'<span class="cc-form-rank" title="Helyezés nem számítható">–</span>';
+    const form=Array.isArray(r.lastFive)?r.lastFive.filter(x=>x==='W'||x==='L').slice(-5):[];
+    const past=form.map(outcome=>'<i class="cc-form-dot '+(outcome==='W'?'is-win':'is-loss')+'" title="'+(outcome==='W'?'Győzelem':'Vereség')+'"></i>').join('');
+    const trend=r.trend==='up'?'up':r.trend==='down'?'down':'flat';
+    const title=r.trendBasis==='insufficient'?'Kevés mérkőzés a trend meghatározásához'
+      :trend==='up'?'Javuló forma: legutóbbi 2 vs. előző 2'
+      :trend==='down'?'Romló forma: legutóbbi 2 vs. előző 2'
+      :'Változatlan forma: legutóbbi 2 vs. előző 2';
+    return '<span class="cc-form-mini" title="'+esc(title)+'">'+rank
+      +'<span class="cc-form-arrow '+trend+'" aria-label="'+esc(title)+'">'
+      +(trend==='up'?'↑':trend==='down'?'↓':'→')+'</span>'
+      +'<span class="cc-form-dots" aria-label="'+esc(form.map(x=>x==='W'?'GY':'V').join(', '))+'">'+past+'</span></span>';
+  }
   // Check only explicitly saved set points. Missing or partial lists are not proof
   // that the match result is wrong; an impossible saved set or a full contradictory
   // list is separated for review instead of silently being treated as verified.
@@ -3022,7 +3048,7 @@ async function ccMassAthleteHistoryLoad_(id){
       setCoverage=hasScore?ccMrszSetCoverageLabel_(m):'',
       sets=hasScore&&!setIssue&&Array.isArray(m.setScores)?m.setScores.filter(x=>x?.home!=null&&x?.away!=null&&text(x.home)!==''&&text(x.away)!=='')
         .map(x=>Number(x.home)+':'+Number(x.away)).join(' · '):'',
-      rankHome=ccMatchScoreboardRank_(league,home),rankAway=ccMatchScoreboardRank_(league,away),
+      formHome=!hasScore?ccFormCardLine_(league,home):'',formAway=!hasScore?ccFormCardLine_(league,away):'',
       validDate=/^\d{4}-\d{2}-\d{2}$/.test(kickoff.date),validTime=/^\d{2}:\d{2}$/.test(kickoff.time),
       venue=text(m.venue||m.court||league||''),badge=text(options.badge||'Bajnoki mérkőzés'),
       dateInsteadOfBadge=options.dateInsteadOfBadge===true,
@@ -3040,12 +3066,12 @@ async function ccMassAthleteHistoryLoad_(id){
       +'<span class="cc-scoreboard-main"><span class="cc-scoreboard-team home">'
       +'<span class="cc-scoreboard-crest">'+msLogoHtml_('',home,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
-      +(rankHome?'<small>'+rankHome+'. helyen áll</small>':'')+'</span></span>'
+      +formHome+'</span></span>'
       +'<span class="cc-scoreboard-score">'+(hasScore||postponed?'<strong>'+esc(score.replace('–',' – '))+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
       +(setCoverage?'<small class="cc-scoreboard-set-coverage"'+(setIssue?' title="'+esc(setIssue)+'"':'')+'>'+esc(setCoverage)+'</small>':'')+'</span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
       +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
-      +(rankAway?'<small>'+rankAway+'. helyen áll</small>':'')+'</span></span>'
+      +formAway+'</span></span>'
       +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')+'</span>'
       +'<span class="cc-scoreboard-bottom"><span class="cc-scoreboard-location">'+esc(venue||'Helyszín nincs megadva')+'</span>'
       +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source+(options.editHtml||'')
