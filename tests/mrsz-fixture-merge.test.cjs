@@ -173,23 +173,25 @@ test('unknown-completeness standings do not falsely reject an otherwise valid ar
   assert.ok(!html.includes('1. helyen áll'), 'rank is not verified');
  }finally{ctx.ccMrszPhotoState_.tables=old;ctx.qa.setScope('beac');}
 });
-test('match-card ranks require explicit full standings, not merely missing partial flag',()=>{
+test('Manager match-card rank comes only from same-league central form, not old standings photos',()=>{
  const league='Női Budapest II. osztály – B csoport';
- const old=ctx.ccMrszPhotoState_.tables;
- const base={competitionLabel:league,rows:[{teamName:'MTK kék',position:1},{teamName:'RKSK felnőtt női',position:2}]};
- const rank=vm.runInContext('ccMatchScoreboardRank_',ctx);
+ const oldTables=ctx.ccMrszPhotoState_.tables,oldForm=ctx.ccMrszPhotoState_.canonicalFormCards;
+ const formTeam=vm.runInContext('ccFormCardTeam_',ctx);
  try{
-  for(const partial of [undefined,true]){
-   ctx.ccMrszPhotoState_.tables=[{...base,partial}];
-   assert.equal(rank(league,'MTK kék'),null);
-  }
-  ctx.ccMrszPhotoState_.tables=[{...base,partial:false}];
-  assert.equal(rank(league,'MTK kék'),1);
-  assert.equal(rank(league,'RKSK felnőtt női'),2);
-  assert.equal(rank('Férfi Budapest I. osztály – A csoport','MTK kék'),null,'league isolation');
- }finally{ctx.ccMrszPhotoState_.tables=old;}
+  ctx.ccMrszPhotoState_.tables=[{competitionLabel:league,partial:false,rows:[
+   {teamName:'MTK kék',position:99},{teamName:'RKSK felnőtt női',position:88}
+  ]}];
+  ctx.ccMrszPhotoState_.canonicalFormCards=[];
+  assert.equal(formTeam(league,'MTK kék'),null,'stale snapshot must not provide rank');
+  ctx.ccMrszPhotoState_.canonicalFormCards=[
+   {competitionLabel:league,teamName:'MTK kék',rank:1},
+   {competitionLabel:league,teamName:'RKSK felnőtt női',rank:2}
+  ];
+  assert.equal(formTeam(league,'MTK kék')?.rank,1);
+  assert.equal(formTeam(league,'RKSK felnőtt női')?.rank,2);
+  assert.equal(formTeam('Férfi Budapest I. osztály – A csoport','MTK kék'),null,'league isolation');
+ }finally{ctx.ccMrszPhotoState_.tables=oldTables;ctx.ccMrszPhotoState_.canonicalFormCards=oldForm;}
 });
-
 
 test('verified protocol can be opened without changing federation match scorecards or roster actions',()=>{
  const league='Női Budapest I. osztály';
