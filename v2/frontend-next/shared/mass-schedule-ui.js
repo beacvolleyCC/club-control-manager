@@ -12,7 +12,7 @@ const label={
 };
 const el=(tag,content,className)=>{const node=document.createElement(tag);if(content!==undefined)node.textContent=String(content);if(className)node.className=className;return node;};
 
-export function mountPublicMassSchedule(root,{read=readPublicMassSchedule}={}){
+export function mountPublicMassSchedule(root,{read=readPublicMassSchedule,onLanguageChange=()=>{}}={}){
  if(!root)throw Error('CC_MASS_MISSING_MOUNT');
  const locale=createTestI18n();
  const area=el('section',undefined,'mass-public-schedule');
@@ -54,7 +54,7 @@ export function mountPublicMassSchedule(root,{read=readPublicMassSchedule}={}){
   catch{if(own!==sequence)return;events=[];problem=true}
   finally{if(own===sequence){pending=false;draw()}}
  }
- pick.addEventListener('change',()=>{locale.setLanguage(pick.value);void locale.refresh(pick.value).then(()=>{if(root.isConnected)draw()});draw()});
+ pick.addEventListener('change',()=>{locale.setLanguage(pick.value);onLanguageChange(pick.value);void locale.refresh(pick.value).then(()=>{if(root.isConnected)draw()});draw()});
  update.addEventListener('click',reload);
  void reload();
  return {reload,dispose:()=>{sequence++;controller?.abort();locale.cancelPending()}};
