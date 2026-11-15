@@ -182,7 +182,8 @@ function massDetailPanel(){
   group.append(make('h3',title+' ('+rows.length+')'));
   const list=make('div',undefined,'v2-record-list');
   for(const p of rows.slice(0,150)){
-   const primary=p.name||'Név nélkül';
+   const requiresPassReview=/(ELLENŐRZÉSRE VÁR|HIÁNYZIK|NINCS BÉRLET|FÜGGŐBEN|PENDING)/i.test(String(p.passStatus||''));
+   const primary=(requiresPassReview?'⚠ ':'')+(p.name||'Név nélkül');
    const detail=[p.bookingStatus||p.status||'',p.attendance||'',p.passStatus||'',p.submittedAt?safeDate(p.submittedAt):'Dátum nincs megadva'].filter(Boolean).join(' · ');
    list.append(item(primary,detail,p.passNumber||'–'));
   }
