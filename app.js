@@ -2985,23 +2985,24 @@ async function ccMassAthleteHistoryLoad_(id){
     return key&&rows.length===1?rows[0]:null;
   }
   function ccFormCardLine_(league,name){
-    const r=ccFormCardTeam_(league,name);
-    if(!r)return '';
-    const rank=Number.isSafeInteger(Number(r.rank))&&Number(r.rank)>0
-      ?'<span class="cc-form-rank" title="Részleges eredményekből számított, nem hivatalos helyezés">'+Number(r.rank)+'.*</span>'
+    const row=ccFormCardTeam_(league,name);
+    if(!row)return '';
+    const validRank=Number.isSafeInteger(Number(row.rank))&&Number(row.rank)>0;
+    const rank=validRank?'<span class="cc-form-rank" title="Részleges eredményekből számított, nem hivatalos helyezés">'+Number(row.rank)+'.*</span>'
       :'<span class="cc-form-rank" title="Helyezés nem számítható">–</span>';
-    const form=Array.isArray(r.lastFive)?r.lastFive.filter(x=>x==='W'||x==='L').slice(-5):[];
-    const past=form.map(outcome=>'<span class="cc-form-dot '+(outcome==='W'?'is-win':'is-loss')+'" title="'+(outcome==='W'?'Győzelem':'Vereség')+'" aria-hidden="true">'+outcome+'</span>').join('');
-    const trend=r.trend==='up'?'up':r.trend==='down'?'down':'flat';
-    const title=r.trendBasis==='insufficient'?'Kevés mérkőzés a trend meghatározásához'
-      :r.trendBasis==='last_match_vs_previous_match_limited'?'Rövid formajelzés az utolsó 2 eredményből (részleges adatok)'
-      :trend==='up'?'Javuló forma: legutóbbi 2 vs. előző 2'
-      :trend==='down'?'Romló forma: legutóbbi 2 vs. előző 2'
-      :'Változatlan forma: legutóbbi 2 vs. előző 2';
-    return '<span class="cc-form-mini" title="'+esc(title)+'">'+rank
-      +'<span class="cc-form-arrow '+trend+'" aria-label="'+esc(title)+'">'
-      +(trend==='up'?'↑':trend==='down'?'↓':'→')+'</span>'
-      +'<span class="cc-form-dots" aria-label="'+esc(form.map(x=>x==='W'?'GY':'V').join(', '))+'">'+past+'</span></span>';
+    const form=Array.isArray(row.lastFive)?row.lastFive.filter(x=>x==='W'||x==='L').slice(-5):[];
+    const dots=form.map(outcome=>'<i class="cc-form-dot '+(outcome==='W'?'is-win':'is-loss')+'" title="'+(outcome==='W'?'Győzelem':'Vereség')+'" aria-hidden="true"></i>').join('');
+    const trend=row.trend==='up'?'up':row.trend==='down'?'down':'flat';
+    const title=row.trendBasis==='insufficient'?'Kevés mérkőzés a trend meghatározásához'
+      :row.trendBasis==='last_match_vs_previous_match_limited'?'Korlátozott trend: utolsó eredmény az előzőhöz képest'
+      :trend==='up'?'Javuló forma: utolsó 2 vs. előző 2 mérkőzés'
+      :trend==='down'?'Romló forma: utolsó 2 vs. előző 2 mérkőzés'
+      :'Változatlan forma: utolsó 2 vs. előző 2 mérkőzés';
+    return '<span class="cc-form-mini" title="'+esc(title)+'">'
+      +rank+'<span class="cc-form-arrow '+trend+'" aria-label="'+esc(title)+'">'
+      +(trend==='up'?'↗':trend==='down'?'↘':'→')+'</span>'
+      +'<strong class="cc-form-team-name">'+esc(name)+'</strong>'
+      +'<span class="cc-form-dots" aria-label="Utolsó eredmények: '+esc(form.map(x=>x==='W'?'győzelem':'vereség').join(', ')||'nincs rögzített mérkőzés')+'">'+dots+'</span></span>';
   }
   // Check only explicitly saved set points. Missing or partial lists are not proof
   // that the match result is wrong; an impossible saved set or a full contradictory
@@ -3068,13 +3069,11 @@ async function ccMassAthleteHistoryLoad_(id){
       +'<span class="cc-scoreboard-kickoff">'+(postponed?'Időpont egyeztetés alatt':dateInsteadOfBadge?(validTime?esc(kickoff.time):''):(esc(validDate?kickoff.date:'Időpont nélkül')+(validTime?' · '+esc(kickoff.time):'')))+'</span></span>'
       +'<span class="cc-scoreboard-main"><span class="cc-scoreboard-team home">'
       +'<span class="cc-scoreboard-crest">'+msLogoHtml_('',home,'cc-scoreboard-team-logo')+'</span>'
-      +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(home)+'</strong>'
-      +formHome+'</span></span>'
+      +'<span class="cc-scoreboard-teamcopy">'+(formHome||'<strong>'+esc(home)+'</strong>')+'</span></span>'
       +'<span class="cc-scoreboard-score">'+(hasScore||postponed?'<strong>'+esc(score.replace('–',' – '))+'</strong>':'<span class="cc-scoreboard-versus">VS.</span>')
       +(setCoverage?'<small class="cc-scoreboard-set-coverage"'+(setIssue?' title="'+esc(setIssue)+'"':'')+'>'+esc(setCoverage)+'</small>':'')+'</span>'
       +'<span class="cc-scoreboard-team away"><span class="cc-scoreboard-crest">'+msLogoHtml_('',away,'cc-scoreboard-team-logo')+'</span>'
-      +'<span class="cc-scoreboard-teamcopy"><strong>'+esc(away)+'</strong>'
-      +formAway+'</span></span>'
+      +'<span class="cc-scoreboard-teamcopy">'+(formAway||'<strong>'+esc(away)+'</strong>')+'</span></span>'
       +(sets?'<span class="cc-scoreboard-set-results" aria-label="Játszmák: '+esc(sets)+'">'+esc(sets)+'</span>':'')+'</span>'
       +'<span class="cc-scoreboard-bottom"><span class="cc-scoreboard-location">'+esc(venue||'Helyszín nincs megadva')+'</span>'
       +(meta?'<span class="cc-scoreboard-meta">'+esc(meta)+'</span>':'')+source+(options.editHtml||'')
