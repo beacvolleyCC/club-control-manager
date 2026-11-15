@@ -1,3 +1,9 @@
+# Club Control – LIVE csillag nélküli helyezés + SVG trendikon (2026-11-15)
+
+**Újabb UI handover:** [csillag nélküli helyezés és tőzsdei mini trendnyíl](docs/handover/HANDOVER_20261115_LIVE_TREND_SVG_RANK_NO_STAR.md). Manager PR #92, Player PR #33. A tárolt részleges rang továbbra sem hivatalos, ennek jelzése tooltipben/tájékoztatásban marad; a kártyák és a Manager Áttekintés nem tesz csillagot a helyezés után. Nincs LIVE DB-írás, a V2 TEST érintetlen. A merge és a bejelentkezett UI E2E ellenőrzendő.
+
+---
+
 # Club Control – LIVE ÁTTEKINTÉS KANONIKUS TABELLÁK + FORMA UI (2026-11-15)
 
 **Legfrissebb frontend-fejlesztés:** [Áttekintés közös LIVE részleges tabellák + mintakép szerinti Manager/Player formajelzés](docs/handover/HANDOVER_20261115_LIVE_OVERVIEW_CANONICAL_FORM_UI.md). Manager PR #90 és Player PR #32 beolvasztva; Manager Pages deploy zöld, Player főági Pages ellenőrzés a hivatkozott handoverben. A meccskártyán helyezés + nyíl + név egy sorban, legfeljebb öt eredménypont a második sorban. Mindkét alkalmazás a meglévő canonical feedet olvassa, nem a régi 2026-10-14-i tabellafotót. A helyezések továbbra is csillagozottak/nem hivatalosak; bejelentkezett iPhone/browser E2E hátravan. LIVE adatbázis-írás és V2 TEST változtatás nem történt.
