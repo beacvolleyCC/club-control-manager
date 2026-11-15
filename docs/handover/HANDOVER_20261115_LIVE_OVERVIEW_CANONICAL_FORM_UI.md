@@ -12,7 +12,7 @@
 - Az október 14-i, elavult MRSZ-képernyőkép és a külön BRSZ fallback **nem állíthat elő élő Overview-helyezést**. Ha nincs canonical rekord, hiányjelzés látszik, nem kitalált szám.
 - A táblában a **Hely*** oszlopban csillagozott, **részleges/nem hivatalos helyezés** jelenik meg. A mezők: lejátszott meccs, győzelem, vereség, **2–1–0 szabály szerinti pont**, szettek, szettarány, játszmapontok és pontarány, ahol az adat rendelkezésre áll. Null eredményt vagy ismeretlen adatot nem alakítunk automatikusan nullává.
 - Az Áttekintés férfi A/B váltója külön ligakulcsot használ; a női I. BEAC és női II/B BEAC II. nem keveredik.
-- A **Manager és Player még nem játszott mérkőzésein** a korábbi apró eredménypontok helyett kis, zöld **W** és piros **L** kockák jelennek meg; mellettük csillagozott helyezés és zöld ↑ / piros ↓ / szürke → forma-nyíl. Mobilon kisebb chipek, egy sorban. Az adatszámítás nem változott: továbbra is ugyanaz a DB-`canonicalFormCards` a forrás. Lejátszott meccs nem kap utólag aktuális formát.
+- A **Manager és Player még nem játszott mérkőzésein** a mintaképhez igazodva a **csillagozott részleges helyezés + színes trendnyíl + csapatnév egy sorban**, és **alatta legfeljebb öt zöld/piros körpont** látható (W/L-sorrend, győzelem/vereség tooltip). A trend ikon: javuló **↗**, romló **↘**, nem értékelhető vagy azonos **→**. iPhone-szélességnél külön CSS méretezi a sort és a pontokat. Az adatszámítás változatlanul ugyanaz a DB-`canonicalFormCards`. A lezárt meccsek nem kapnak utólag aktuális formát.
 - HTML-/JS- és PWA cache-verziók összehangolva, hogy a friss CSS/JS mindkét alkalmazásban betöltődhessen.
 
 ## 2. A LIVE központi adatok tényleges ellenőrzése
@@ -30,12 +30,12 @@
 - Manager `tests/manager-standings-filters.test.cjs`: ugyanaz a canonical forrás, ligahatár, BEAC II., részleges rang, nulla lejátszott meccs, semmilyen legacy fallback.
 - Manager `tests/mrsz-data-coverage.test.cjs` és `tests/mrsz-stat-missing-values.test.cjs`: történeti MRSZ source státusz külön az élő, részleges Overview-tól; nem kitalált hiányzó pontszám.
 - Player `tests/player-form-mini-canonical.test.cjs`: ligahatár, részleges csillag, W/L, hiányzó helyezés, akadálymentes címkék. Hozzáadva a Player meccs QA workflow-hoz.
-- **Manager #90 PR CI:** 7/7 ellenőrzött QA zöld az `6a72f80` commiton. **Player #32 PR CI:** 4/4 ellenőrzött QA zöld az `8d7aaab` commiton.
+- **Manager #90 PR CI:** 7/7 releváns QA zöld (az `6a72f80` code-checkpointon). **Player #32 PR CI:** 4/4 zöld, a mintakép szerinti meccskártya-regresszióval együtt (`b36d318` code-checkpoint).
 - **Még nincs bejelentkezett webes vagy iPhone-os vizuális E2E.** A GitHub Actions sikeressége nem ennek helyettesítője.
 
 ## 4. Kiadás és nyitott tételek
 
-A munkavégzés elején külön ágakon, PR-ban készültek a változtatások; a főági merge/deploy commitokat a véglegesítéskor kell rögzíteni. Az újabb hivatalos eredmény automatikusan frissíti a canonical statot és az Overview-t – új tabellaimport nem kell.
+**Mindkét változtatás a LIVE main ágon van**: Manager [#90](https://github.com/beacvolleyCC/club-control-manager/pull/90) squash merge `69a629ce1826d50fcdf76852afa33f9e9594b4fa`; Player [#32](https://github.com/beacvolleyCC/player_application/pull/32) squash merge `275d22fa2a28e2aed864bb76a5b78e6b573cd7fb`. Manager főági QA és Pages deploy sikeres: https://github.com/beacvolleyCC/club-control-manager/actions/runs/43724524981 . Player főági CI 4/4 zöld; Pages deploy státusza az átadás után külön követendő: https://github.com/beacvolleyCC/player_application/actions/runs/43724686472 . Az újabb hivatalos eredmény automatikusan frissíti a canonical statot és az Overview-t – új tabellaimport nem kell.
 
 **Nyitott:** vizuális Manager/Player UI-ellenőrzés valódi bejelentkezéssel, iPhone 11 szélesség; hivatalos, teljes és friss tabellák forrásigazolása; hiányzó hivatalos mérkőzéseredmények, különösen női II/A; külön megtervezett pontos történeti ranghoz viszonyított helyezésváltozás (nem azonos a jelenlegi forma-nyíllal).
 
