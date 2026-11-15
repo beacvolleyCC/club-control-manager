@@ -39,7 +39,9 @@ test('Overview uses the shared LIVE canonical forms and stats, never archived sn
  assert.ok(!model.includes('ccMrszPhotoState_.tables.find'));
  assert.ok(!model.includes('ccOverviewLeagueInsights_'));
  assert.ok(!model.includes('standingsForContext_'));
- assert.ok(cards.includes('Hely*'));
+ assert.ok(cards.includes('Hely</th>'));
+ assert.ok(!cards.includes('Hely*</th>'));
+ assert.ok(!cards.includes("r.position)+'.*'"));
  assert.ok(cards.includes('Részleges eredményekből számított helyezés'));
  assert.ok(cards.includes('cc-overview-standings-disclaimer'));
  assert.ok(cards.includes('data-overview-men-group'));
