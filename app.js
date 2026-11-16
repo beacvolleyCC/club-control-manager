@@ -4593,7 +4593,7 @@ async function ccMassAthleteHistoryLoad_(id){
         ]).then(([data,views])=>{
           state.financeAnalytics=data;state.financeSavedViews=Array.isArray(views)?views:[];
           const total=(data.finance||[]).length+(data.passes||[]).length+(data.trainings||[]).length;
-          if(total<8)state.financeAnalyticsDemo=true;
+          if((data.finance||[]).length<8&&(data.passes||[]).length<3)state.financeAnalyticsDemo=true;
         }).catch(e=>{state.financeAnalyticsError=text(e.message||e)})
           .finally(()=>{state.financeAnalyticsLoading=false;renderFinance()});
       }
