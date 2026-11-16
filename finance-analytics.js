@@ -19,9 +19,9 @@ function financeGlobal(state){
  return (state.permissions||[]).some(p=>p==='*'||(p&&p.moduleKey==='competition.fees'&&!p.teamId&&(p.canView||p.canEdit)));
 }
 function financeVisible(state){return financeGlobal(state)||(state.financeScopes||[]).some(p=>p.canView||p.canEdit)}
-function demo(){
+function demo(state){
  const names=['Teszt Anna','Teszt Bence','Teszt Csilla','Teszt Dóra','Teszt Emese','Teszt Ferenc'];
- const teams=[['Női I.','t-w1'],['Női II.','t-w2'],['Férfi','t-men']];
+ const teams=Array.from(new Map((state.financeScopes||[]).filter(s=>s.teamId&&s.canView).map(s=>[s.teamId,[s.teamName,s.teamId]])).values());
  const finance=[];
  teams.forEach((t,j)=>names.forEach((name,i)=>['coach_fee','beac_pass','permission_fee'].forEach((ft,k)=>{
    const paid=(i+j+k)%4!==0,amount=ft==='permission_fee'?12000:ft==='coach_fee'?7000:7000;
@@ -35,10 +35,10 @@ function demo(){
 function authorizedData(state){
  const raw=state.financeAnalytics||{finance:[],passes:[],trainings:[]};
  const demoMode=!!state.financeAnalyticsDemo;
- const d=demoMode?demo():raw;
+ const d=demoMode?demo(state):raw;
  const getAllowedTeam=name=> (state.financeScopes||[]).some(s=>s.teamName===name&&s.canView);
  return {
-  finance:(d.finance||[]).filter(x=>demoMode?getAllowedTeam(x.teamName)&&scoped(state,x.feeType):scoped(state,x.feeType,x.teamId)),
+  finance:(d.finance||[]).filter(x=>scoped(state,x.feeType,x.teamId)),
   passes:scoped(state,'mass_pass')?(d.passes||[]):[],
   trainings:scoped(state,'mass_training')?(d.trainings||[]):[]
  };
