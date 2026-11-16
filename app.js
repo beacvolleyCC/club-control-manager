@@ -228,7 +228,7 @@
     const b=$('#requestCodeBtn');if(b)b.disabled=true;
     try{
       loginMessage('#loginMsg','Kód küldése…');
-      const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
+      const {error}=await state.supabase.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
       if(error)throw error;
       state.pendingEmail=email;
       if($('#loginEmailPreview'))$('#loginEmailPreview').textContent=email;
@@ -245,7 +245,7 @@
     const b=$('#resendCodeBtn');if(b)b.disabled=true;
     try{
       loginMessage('#loginCodeMsg','Új kód küldése…');
-      const {error}=await state.supabase.auth.signInWithOtp({email:state.pendingEmail,options:{shouldCreateUser:true}});
+      const {error}=await state.supabase.auth.signInWithOtp({email:state.pendingEmail,options:{shouldCreateUser:false}});
       if(error)throw error;
       if($('#loginCode'))$('#loginCode').value='';
       loginMessage('#loginCodeMsg','Új kódot küldtünk. A korábbi kód már nem használható.')
