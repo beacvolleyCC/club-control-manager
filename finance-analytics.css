@@ -1,0 +1,50 @@
+/* Club Control Manager TEST Finance Analytics – isolated namespaced UI */
+.cc-fi-analytics{display:grid;gap:15px;min-width:0}
+.cc-fi-heading{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.cc-fi-heading h2{margin:0 0 4px;font-size:clamp(20px,3.2vw,28px)}
+.cc-fi-heading p{margin:0;color:var(--muted,#78808a);font-size:13px}
+.cc-fi-mode{border:1px solid var(--line,#d9dce1);border-radius:10px;padding:9px 12px;font-size:12px}
+.cc-fi-mode input{accent-color:#e3a900;vertical-align:middle}
+.cc-fi-demo-banner{background:#fff3d0;color:#805000;border:1px dashed #d6a800;padding:12px 14px;border-radius:10px;font-weight:800;letter-spacing:.025em;font-size:12px}
+.cc-fi-source-banner{color:var(--muted,#666);font-size:12px;padding:4px 2px}
+.cc-fi-filters{display:flex;flex-wrap:wrap;gap:10px;padding:13px;border:1px solid var(--line,#d8dce0);border-radius:13px;background:var(--surface,#fff)}
+.cc-fi-filters label{display:grid;gap:5px;min-width:130px;flex:1 1 140px;color:var(--muted,#666);font-size:12px;font-weight:600}
+.cc-fi-filters select{width:100%;min-height:37px;background:var(--surface,#fff);color:inherit;border:1px solid var(--line,#cbd0d8);border-radius:9px;padding:5px 9px}
+.cc-fi-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.cc-fi-kpis>div{background:var(--surface,#fff);border:1px solid var(--line,#d8dce0);border-radius:12px;padding:13px;display:grid;align-content:space-between;min-height:90px;gap:7px}
+.cc-fi-kpis small{font-size:12px;color:var(--muted,#777)}
+.cc-fi-kpis b{font-size:clamp(16px,2vw,24px);font-weight:800;word-wrap:break-word}
+.cc-fi-panel-grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:12px;align-items:start}
+.cc-fi-panel-grid .panel{min-width:0;overflow:auto;margin:0}
+.cc-fi-panel-grid h3,.cc-fi-details h3,.cc-fi-saved h3{margin:0 0 14px}
+.cc-fi-chart{display:grid;gap:14px}
+.cc-fi-bar-row{display:grid;grid-template-columns:minmax(95px,1.05fr) minmax(70px,2fr) minmax(54px,.7fr);gap:10px;align-items:center;font-size:12px}
+.cc-fi-bar-label{min-width:0;overflow-wrap:anywhere}
+.cc-fi-bar-bg{height:14px;border-radius:99px;background:rgba(148,150,157,.15);overflow:hidden}
+.cc-fi-bar-bg span{display:block;height:100%;border-radius:inherit;background:#d5a01c;min-width:0}
+.cc-fi-bar-row b{text-align:right;white-space:nowrap;font-size:12px}
+.cc-fi-table{border-collapse:collapse;width:100%;font-size:12px}
+.cc-fi-table th,.cc-fi-table td{padding:9px;border-bottom:1px solid var(--line,#e1e4e7);text-align:left}
+.cc-fi-table td:last-child{text-align:right;font-weight:700}
+.cc-fi-table th:first-child{overflow-wrap:anywhere}
+.cc-fi-total{font-size:13px;font-weight:700;text-align:right;margin-top:12px}
+.cc-fi-table-scroll{overflow-x:auto;max-height:380px;overflow-y:auto}
+.cc-fi-details{min-width:0;overflow:hidden}
+.cc-fi-details .finance-matrix th,.cc-fi-details .finance-matrix td{padding:8px 11px;font-size:12px;white-space:nowrap}
+.cc-fi-saved p{font-size:13px;color:var(--muted,#777)}
+.cc-fi-save-controls{display:flex;flex-wrap:wrap;gap:8px}
+.cc-fi-save-controls input,.cc-fi-save-controls select{background:var(--surface,#fff);color:inherit;border:1px solid var(--line,#cbd0d8);border-radius:8px;min-height:36px;padding:6px 10px;flex:1 1 130px;max-width:350px}
+.cc-fi-warning{font-size:12px;color:var(--muted,#888);margin:3px}
+.cc-fi-admin-permissions{padding:15px;border:1px solid var(--line,#d6dae0);border-radius:12px;background:var(--surface,#fff);margin:14px 0}
+.cc-fi-admin-permissions h4{margin:0 0 6px}
+.cc-fi-admin-permissions>p{color:var(--muted,#777);font-size:12px;margin:0 0 12px}
+.cc-fi-permission-row{display:grid;grid-template-columns:minmax(0,1fr) 106px 130px;gap:10px;align-items:center;padding:8px;border-bottom:1px solid var(--line,#e3e3e3);font-size:12px}
+.cc-fi-permission-row>span{overflow-wrap:anywhere}
+.cc-fi-permission-row small{display:block;color:var(--muted,#888)}
+.cc-fi-permission-row label{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.cc-fi-permission-row input{accent-color:#bd9500}
+.cc-fi-permission-row[data-fi-inherited="1"]{opacity:.65}
+.cc-fi-admin-permissions button{margin-top:15px}
+body.cc-test-finance-mode::before{content:"CLUB CONTROL MANAGER · TEST · NEM ÉLES";position:sticky;top:0;z-index:9999;display:block;text-align:center;padding:5px;background:#f0bc2b;color:#111;font-size:11px;font-weight:900;letter-spacing:.13em}
+@media(max-width:850px){.cc-fi-panel-grid{grid-template-columns:minmax(0,1fr)}.cc-fi-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.cc-fi-kpis{gap:7px}.cc-fi-kpis>div{padding:10px;min-height:82px}.cc-fi-kpis b{font-size:17px}.cc-fi-permission-row{grid-template-columns:minmax(0,1fr) 75px 88px;gap:5px;font-size:10px}.cc-fi-bar-row{grid-template-columns:82px minmax(50px,1fr) 75px;gap:5px}.cc-fi-save-controls .button{flex:1 1 110px}}
