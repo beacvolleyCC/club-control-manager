@@ -3002,7 +3002,7 @@ async function ccMassAthleteHistoryLoad_(id){
     ?'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17 L9 10 L13 14 L21 5 M15 5 H21 V11"/></svg>'
     :trend==='down'
       ?'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7 L9 14 L13 10 L21 19 M15 19 H21 V13"/></svg>'
-      :'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12 H21 M16 7 L21 12 L16 17"/></svg>';
+      :'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12 H20"/></svg>';
   return '<span class="cc-form-mini" title="'+esc('Aktuális tabella és forma (nem a mérkőzéskori állapot) · '+title)+'">'
       +'<span class="cc-form-arrow '+trend+'" aria-label="'+esc(title)+'">'
       +icon+'</span>'+rank
@@ -3015,7 +3015,7 @@ async function ccMassAthleteHistoryLoad_(id){
     const trend=row.trend==='up'?'up':row.trend==='down'?'down':'flat';
     const path=trend==='up'?'M3 17 L9 10 L13 14 L21 5 M15 5 H21 V11'
       :trend==='down'?'M3 7 L9 14 L13 10 L21 19 M15 19 H21 V13'
-      :'M3 12 H21 M16 7 L21 12 L16 17';
+      :'M4 12 H20';
     const title=trend==='up'?'Javuló forma':trend==='down'?'Romló forma':'Semleges forma';
     const arrow='<span class="cc-form-arrow cc-standings-form-arrow '+trend+'" title="'+esc('Aktuális csapatforma, nem helyezésváltozás: '+title)+'" aria-label="'+esc('Aktuális csapatforma: '+title)+'">'
       +'<svg class="cc-form-trend-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="'+path+'"/></svg></span>';

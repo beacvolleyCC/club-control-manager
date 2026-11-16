@@ -170,13 +170,14 @@ test('Manager standings form is league-specific and leaves missing teams without
   ccMrszNormPairName_:x=>String(x??'').toLowerCase().replace(/[^a-z0-9]/g,''),
   ccMrszPhotoState_:{canonicalFormCards:[
    {competitionLabel:'Női Budapest I. osztály',teamName:'BEAC',rank:3,lastFive:['W','L','W'],trend:'up'},
-   {competitionLabel:'Női Budapest II. osztály – B csoport',teamName:'BEAC II.',rank:1,lastFive:['L'],trend:'down'}
+   {competitionLabel:'Női Budapest II. osztály – B csoport',teamName:'BEAC II.',rank:1,lastFive:['L'],trend:'down'},
+   {competitionLabel:'Női Budapest I. osztály',teamName:'PDSE',rank:null,lastFive:[],trend:'flat'}
   ]},
   msLogoHtml_:(id,n)=>'<img alt="'+n+'">',
   ccMrszRecordNoticeHtml_:()=>''
  };
  vm.createContext(ctx);
- vm.runInContext(sources+'\nthis.parts=ccCurrentStandingsFormParts_;this.cell=ccStandingsTeamInnerHtml_;',ctx);
+ vm.runInContext(sources+'\nthis.parts=ccCurrentStandingsFormParts_;this.cell=ccStandingsTeamInnerHtml_;this.line=ccFormCardLine_;',ctx);
  const row={teamName:'BEAC',sourceTeamId:'123'};
  const parts=ctx.parts('Női Budapest I. osztály','BEAC');
  assert.ok(parts.arrow.includes('cc-standings-form-arrow up'));
@@ -187,4 +188,13 @@ test('Manager standings form is league-specific and leaves missing teams without
  assert.ok(!cell.includes('3.</span>'),'Rank must stay in the existing first column');
  assert.ok(!ctx.parts('Férfi Budapest I. osztály – B csoport','BEAC').arrow);
  assert.ok(!ctx.cell('Férfi Budapest I. osztály – B csoport',row).includes('cc-standings-dots'));
+ const neutralMatch=ctx.line('Női Budapest I. osztály','PDSE');
+ const neutralStand=ctx.parts('Női Budapest I. osztály','PDSE');
+ assert.match(neutralMatch,/cc-form-arrow flat/);
+ assert.match(neutralMatch,/M4 12 H20/);
+ assert.doesNotMatch(neutralMatch,/M16 7 L21 12 L16 17/);
+ assert.match(neutralStand.arrow,/cc-standings-form-arrow flat/);
+ assert.match(neutralStand.arrow,/M4 12 H20/);
+ assert.doesNotMatch(neutralStand.arrow,/M16 7 L21 12 L16 17/);
+
 });
