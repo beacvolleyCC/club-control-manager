@@ -18,6 +18,7 @@ function scoped(state,category,teamId){
 function financeGlobal(state){
  return (state.permissions||[]).some(p=>p==='*'||(p&&p.moduleKey==='competition.fees'&&!p.teamId&&(p.canView||p.canEdit)));
 }
+function canEdit(state,category,teamId){return (state.financeScopes||[]).some(p=>p.category===category&&clean(p.teamId)===clean(teamId)&&p.canEdit===true)}
 function financeVisible(state){return financeGlobal(state)||(state.financeScopes||[]).some(p=>p.canView||p.canEdit)}
 function demo(state){
  const names=['Teszt Anna','Teszt Bence','Teszt Csilla','Teszt Dóra','Teszt Emese','Teszt Ferenc'];
@@ -81,6 +82,7 @@ function render(state){
  if(state.financeAnalyticsLoading||!state.financeAnalytics)return '<article class="panel"><div class="loading-inline">Az elemzések betöltése…</div></article>';
  const source=specs.some(x=>x.source===state.financeInsightsSource)?state.financeInsightsSource:specs[0].source;
  const spec=specs.find(x=>x.source===source),group=spec.groups.includes(state.financeInsightsGroup)?state.financeInsightsGroup:spec.groups[0],metric=spec.metrics.includes(state.financeInsightsMetric)?state.financeInsightsMetric:spec.metrics[0];
+ state.financeInsightsSource=source;state.financeInsightsGroup=group;state.financeInsightsMetric=metric;
  const d=authorizedData(state),teams=(state.financeScopes||[]).filter(p=>p.teamId&&p.canView).reduce((a,x)=>(a.find(y=>y.id===x.teamId)||a.push({id:x.teamId,name:x.teamName}),a),[]);
  const teamId=state.financeInsightsTeam||'',feeType=state.financeInsightsFee||'',month=state.financeInsightsMonth||'';
  const rows=(d[source]||[]).filter(r=>(source!=='finance'||(!teamId||r.teamId===teamId)&&(!feeType||r.feeType===feeType))
@@ -110,7 +112,20 @@ function render(state){
  ];
  const graph=groups.map(g=>'<div class="cc-fi-bar-row"><div class="cc-fi-bar-label">'+esc(g.label)+'</div><div class="cc-fi-bar-bg"><span style="width:'+Math.max(g.value>0?2:0,Math.round(g.value/maximum*100))+'%"></span></div><b>'+esc(metric==='amount'?money(g.value):metric==='occupancy'?g.value+'%':hu.format(g.value))+'</b></div>').join('')||'<p>Nincs adat ehhez a szűréshez.</p>';
  const table=groups.map(g=>'<tr><th>'+esc(g.label)+'</th><td>'+hu.format(g.items.length)+'</td><td>'+esc(metric==='amount'?money(g.value):metric==='occupancy'?g.value+'%':hu.format(g.value))+'</td></tr>').join('');
- const details=source==='finance'?'<div class="cc-fi-table-scroll"><table class="finance-matrix"><thead><tr><th>Csapat</th><th>Játékos</th><th>Díjtípus</th><th>Hónap</th><th>Állapot</th><th>Összeg</th><th>Fizetés módja</th><th>Kedvezményezett</th></tr></thead><tbody>'+rows.slice(0,300).map(r=>'<tr><td>'+esc(r.teamName)+'</td><td>'+esc(r.playerName)+'</td><td>'+esc(FEE[r.feeType]||r.feeType)+'</td><td>'+esc(r.period||'–')+'</td><td>'+esc(r.status==='paid'?'Fizetve':r.status==='prior_paid'?'Korábban fizetve':r.status==='waived'?'Elengedve':'Fizetendő')+'</td><td>'+esc(money(r.amountHuf))+'</td><td>'+esc(r.paymentMethod||'–')+'</td><td>'+esc(r.paidTo||'–')+'</td></tr>').join('')+'</tbody></table></div>':'';
+ const details=source==='finance'?'<div class="cc-fi-table-scroll"><table class="finance-matrix"><thead><tr><th>Csapat</th><th>Játékos</th><th>Díjtípus</th><th>Hónap</th><th>Állapot</th><th>Összeg</th><th>Fizetés módja</th><th>Kedvezményezett</th><th>Művelet</th></tr></thead><tbody>'+rows.slice(0,300).map((r,i)=>'<tr><td>'+esc(r.teamName)+'</td><td>'+esc(r.playerName)+'</td><td>'+esc(FEE[r.feeType]||r.feeType)+'</td><td>'+esc(r.period||'–')+'</td><td>'+esc(r.status==='paid'?'Fizetve':r.status==='prior_paid'?'Korábban fizetve':r.status==='waived'?'Elengedve':'Fizetendő')+'</td><td>'+esc(money(r.amountHuf))+'</td><td>'+esc(r.paymentMethod||'–')+'</td><td>'+esc(r.paidTo||'–')+'</td><td>'+(canEdit(state,r.feeType,r.teamId)&&!example?'<button type="button" class="button quiet small" data-cc-fi-edit="'+i+'">Szerkesztés</button>':'<span class="cc-fi-readonly">Csak olvasás</span>')+'</td></tr>').join('')+'</tbody></table></div>':'';
+ const editRow=source==='finance'&&!example&&state.financeEditing
+   ?rows.find(r=>r.playerId===state.financeEditing.playerId&&r.feeType===state.financeEditing.feeType&&r.period===state.financeEditing.period&&canEdit(state,r.feeType,r.teamId)):null;
+ const opt=(items,value)=>items.map(x=>'<option value="'+esc(x[0])+'"'+(clean(value)===clean(x[0])?' selected':'')+'>'+esc(x[1])+'</option>').join('');
+ const editor=editRow?'<article class="panel cc-fi-editor"><h3>Fizetési tétel szerkesztése · '+esc(editRow.playerName)+'</h3>'+
+  '<p>'+esc(editRow.teamName)+' · '+esc(FEE[editRow.feeType])+' · '+esc(editRow.period||'Egyszeri díj')+'</p>'+
+  '<form id="ccFiEditForm" class="cc-fi-edit-form">'+
+  '<label>Állapot<select id="ccFiEditStatus">'+opt([['due','Fizetendő'],['paid','Fizetve'],['prior_paid','Korábban fizetve'],['waived','Elengedve']],editRow.status)+'</select></label>'+
+  '<label>Összeg (Ft)<input type="number" min="0" max="100000000" id="ccFiEditAmount" value="'+esc(editRow.amountHuf??'')+'"></label>'+
+  '<label>Fizetési mód<select id="ccFiEditMethod">'+opt([['','Nincs rögzítve'],['cash','Készpénz'],['revolut','Revolut'],['transfer','Átutalás'],['online','Online'],['other','Egyéb'],['previous_season','Előző szezon']],editRow.paymentMethod)+'</select></label>'+
+  '<label>Fizetés dátuma<input type="date" id="ccFiEditPaidAt" value="'+esc(clean(editRow.paidAt).slice(0,10))+'"></label>'+
+  '<label>Kedvezményezett<input id="ccFiEditPaidTo" maxlength="200" value="'+esc(editRow.paidTo||'')+'"></label>'+
+  '<label class="cc-fi-span-all">Megjegyzés<textarea id="ccFiEditNote" maxlength="2000" rows="2"></textarea></label>'+
+  '<div class="cc-fi-editor-actions"><button type="submit" class="button primary">Mentés és naplózás</button><button id="ccFiEditCancel" type="button" class="button quiet">Mégse</button></div></form></article>':'';
  const saved=state.financeSavedViews||[];
  const savedList='<select id="ccFiSaved"><option value="">Mentett kimutatások</option>'+saved.map(r=>'<option value="'+esc(r.id)+'">'+esc(r.title)+'</option>').join('')+'</select>';
  return '<section class="cc-fi-analytics">'+
@@ -123,7 +138,7 @@ function render(state){
    '<div class="cc-fi-kpis">'+cards.map(c=>'<div><small>'+esc(c[0])+'</small><b>'+esc(c[1])+'</b></div>').join('')+'</div>'+
    '<div class="cc-fi-panel-grid"><article class="panel"><h3>'+esc(LABEL[metric])+' – '+esc(LABEL[group])+'</h3><div class="cc-fi-chart">'+graph+'</div></article>'+
    '<article class="panel"><h3>Összesítés</h3><table class="cc-fi-table"><thead><tr><th>'+esc(LABEL[group])+'</th><th>Tételek</th><th>'+esc(LABEL[metric])+'</th></tr></thead><tbody>'+table+'</tbody></table><p class="cc-fi-total">Összesen: '+esc(metric==='amount'?money(metricSum):metric==='occupancy'?metricSum+'%':hu.format(metricSum))+'</p></article></div>'+
-   (details?'<article class="panel cc-fi-details"><h3>Tételes adatok</h3>'+details+'</article>':'')+
+   (details?'<article class="panel cc-fi-details"><h3>Tételes adatok</h3>'+details+'</article>':'')+editor+
    '<article class="panel cc-fi-saved"><h3>Kimutatásépítő és mentett nézetek</h3><p>Az aktuális szűrők, csoportosítás és mutató névvel elmenthetők. Az export csak az engedélyezett adatokat tartalmazza.</p>'+
    '<div class="cc-fi-save-controls"><input id="ccFiViewName" maxlength="100" placeholder="Kimutatás neve…">'+
    '<button type="button" class="button primary small" id="ccFiSave">Nézet mentése</button>'+savedList+
@@ -148,7 +163,7 @@ function currentConfig(state){
  teamId:state.financeInsightsTeam||'',feeType:state.financeInsightsFee||'',month:state.financeInsightsMonth||''};
 }
 function bind({state,rpc,rerender,toast}){
- const field=(id,key)=>{const e=document.getElementById(id);if(e)e.addEventListener('change',()=>{state[key]=e.value;rerender()})};
+ const field=(id,key)=>{const e=document.getElementById(id);if(e)e.addEventListener('change',()=>{state[key]=e.value;state.financeEditing=null;rerender()})};
  field('ccFinanceInsightsSource','financeInsightsSource');
  field('ccFinanceInsightsGroup','financeInsightsGroup');
  field('ccFinanceInsightsMetric','financeInsightsMetric');
@@ -156,6 +171,36 @@ function bind({state,rpc,rerender,toast}){
  field('ccFinanceInsightsFee','financeInsightsFee');
  field('ccFinanceInsightsMonth','financeInsightsMonth');
  const demo=document.getElementById('ccFiDemo');if(demo)demo.addEventListener('change',()=>{state.financeAnalyticsDemo=demo.checked;rerender()});
+ document.querySelectorAll('[data-cc-fi-edit]').forEach(b=>b.addEventListener('click',()=>{
+   const source=state.financeInsightsSource,spec=DATA.find(d=>d.source===source)||DATA[0],d=authorizedData(state);
+   const rows=(d.finance||[]).filter(r=>(!state.financeInsightsTeam||r.teamId===state.financeInsightsTeam)&&(!state.financeInsightsFee||r.feeType===state.financeInsightsFee)&&(!state.financeInsightsMonth||dateMonth(r.period)===state.financeInsightsMonth));
+   const row=rows[Number(b.dataset.ccFiEdit)];
+   if(!row||!canEdit(state,row.feeType,row.teamId)||state.financeAnalyticsDemo)return;
+   state.financeEditing={playerId:row.playerId,feeType:row.feeType,period:row.period};rerender();
+   document.getElementById('ccFiEditForm')?.scrollIntoView({behavior:'smooth',block:'center'});
+ }));
+ const cancel=document.getElementById('ccFiEditCancel');if(cancel)cancel.onclick=()=>{state.financeEditing=null;rerender()};
+ const form=document.getElementById('ccFiEditForm');if(form)form.addEventListener('submit',async ev=>{
+   ev.preventDefault();
+   const target=state.financeEditing,record=(authorizedData(state).finance||[]).find(r=>r.playerId===target?.playerId&&r.feeType===target?.feeType&&r.period===target?.period);
+   if(!record||!canEdit(state,record.feeType,record.teamId)||state.financeAnalyticsDemo){toast('Nincs szerkesztési jogosultság.','error');return}
+   const btn=form.querySelector('button[type="submit"]');btn.disabled=true;
+   const amount=document.getElementById('ccFiEditAmount').value,paidDate=document.getElementById('ccFiEditPaidAt').value;
+   try{
+     await rpc('cc_manager_finance_override_scoped_v1',{
+       p_player_id:record.playerId,p_fee_type:record.feeType,p_period_key:record.period||'',p_season:'2026/27',
+       p_status:document.getElementById('ccFiEditStatus').value,
+       p_payment_method:document.getElementById('ccFiEditMethod').value,
+       p_amount_huf:amount===''?null:Number(amount),
+       p_paid_at:paidDate?new Date(paidDate+'T12:00:00').toISOString():null,
+       p_paid_to:document.getElementById('ccFiEditPaidTo').value,
+       p_note:document.getElementById('ccFiEditNote').value,
+       p_override_active:true
+     });
+     state.financeAnalytics=await rpc('cc_manager_finance_analytics_v1',{p_season:'2026/27',p_from:null,p_to:null});
+     state.financeEditing=null;toast('Fizetési tétel mentve és naplózva.','success');rerender()
+   }catch(e){toast(e.message||'A pénzügyi mentés sikertelen.','error');btn.disabled=false}
+ });
  const save=document.getElementById('ccFiSave');if(save)save.onclick=async()=>{
    const title=document.getElementById('ccFiViewName').value.trim();if(!title){toast('Adj nevet a kimutatásnak.','error');return}
    try{await rpc('cc_manager_finance_saved_views_v1',{p_action:'save',p_id:null,p_title:title,p_config:currentConfig(state)});
