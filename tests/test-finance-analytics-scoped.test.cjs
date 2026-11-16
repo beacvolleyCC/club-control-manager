@@ -17,7 +17,7 @@ test('TEST is isolated from LIVE project and has a visible separate PWA identity
  assert.match(index,/cc-test-finance-mode/);
  assert.match(index,/finance-analytics\.js/);
  assert.match(index,/finance-analytics\.css/);
- assert.match(sw,/cc-manager-TEST-/);
+ assert.match(sw,/cc-manager-20261116-test-/);
  assert.equal(manifest.short_name,'MGR TEST');
 });
 const src=fs.readFileSync('finance-analytics.js','utf8'),ctx={window:{},console};
