@@ -6,17 +6,18 @@
   <meta name="theme-color" content="#f7b700">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://hunvolley.info https://www.hunvolley.info https://*.hunvolley.info https://hunvolley.hu https://www.hunvolley.hu https://*.hunvolley.hu; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self';">
-  <title>Club Control – Manager</title>
+  <title>Club Control – Manager TEST · Pénzügyi Analytics</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="./styles.css?v=20261116-neutral-form-v1">
+  <link rel="stylesheet" href="./styles.css?v=20261116-test-finance-analytics-v1">
+  <link rel="stylesheet" href="./finance-analytics.css?v=20261116-test-finance-analytics-v1">
   <link rel="stylesheet" href="./scoreboard.css">
   <link rel="stylesheet" href="./volleyball.css">
   <link rel="stylesheet" href="./rotations.css?v=20261027-r2">
   <link rel="stylesheet" href="./match-rotations.css?v=20261028-m10">
 </head>
-<body>
+<body class="cc-test-finance-mode">
   <div class="login-overlay hidden" id="loginOverlay">
     <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
       <div class="eyebrow">CLUB CONTROL · MANAGER</div>
@@ -112,6 +113,7 @@
   <script src="./scoreboard.js"></script>
   <script src="./rotations.js?v=20261027-r2"></script>
   <script src="./match-rotations.js?v=20261028-m10"></script>
-  <script src="./app.js?v=20261116-neutral-form-v1"></script>
+  <script src="./finance-analytics.js?v=20261116-test-finance-analytics-v1"></script>
+  <script src="./app.js?v=20261116-test-finance-analytics-v1"></script>
 </body>
 </html>
