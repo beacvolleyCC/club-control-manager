@@ -1,0 +1,50 @@
+name: Club Control controlled patch – plan only
+on:
+  push:
+    branches:
+      - chore/controlled-patch-releases-20261117
+    paths:
+      - 'scripts/patchkit.cjs'
+      - 'tests/patchkit.test.cjs'
+      - '.club-control/patches/**'
+      - 'docs/operations/PATCH_RELEASE_PROCESS.md'
+      - 'docs/handover/HANDOVER_20261117_PATCH_RELEASE_FOUNDATION.md'
+      - '.github/workflows/patch-release-plan.yml'
+  pull_request:
+    paths:
+      - 'scripts/patchkit.cjs'
+      - 'tests/patchkit.test.cjs'
+      - '.club-control/patches/**'
+      - 'docs/operations/PATCH_RELEASE_PROCESS.md'
+      - 'docs/handover/HANDOVER_20261117_PATCH_RELEASE_FOUNDATION.md'
+      - '.github/workflows/patch-release-plan.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    name: patch-manifest-and-safe-sql
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate patch framework
+        run: node --test tests/patchkit.test.cjs
+      - name: Validate registered release
+        run: node scripts/patchkit.cjs validate --release .club-control/patches/releases/20261117_patch_release_foundation.json
+      - name: Generate TEST and LIVE plans – no deployment or DB access
+        run: |
+          mkdir -p patch-plans
+          node scripts/patchkit.cjs plan --release .club-control/patches/releases/20261117_patch_release_foundation.json --env test > patch-plans/test-plan.md
+          node scripts/patchkit.cjs plan --release .club-control/patches/releases/20261117_patch_release_foundation.json --env live > patch-plans/live-plan.md
+      - name: Save plans for human approval
+        uses: actions/upload-artifact@v4
+        with:
+          name: club-control-patch-plans-NO-DEPLOY
+          path: patch-plans/
+          retention-days: 30

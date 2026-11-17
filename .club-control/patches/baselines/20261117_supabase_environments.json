@@ -1,0 +1,25 @@
+{
+  "capturedOn": "2026-11-17",
+  "readOnly": true,
+  "purpose": "Migration planning metadata only. No user records or database contents copied.",
+  "environments": {
+    "live": {
+      "supabaseProjectRef": "snqsxlyhontaepembaic",
+      "migrationEntries": 48,
+      "publicTables": 52,
+      "publicColumns": 655,
+      "publicFunctions": 309,
+      "publicPolicies": 11
+    },
+    "test": {
+      "supabaseProjectRef": "szzoubvhlwnojtzqjebc",
+      "migrationEntries": 119,
+      "publicTables": 80,
+      "publicColumns": 861,
+      "publicFunctions": 170,
+      "publicPolicies": 15
+    }
+  },
+  "sharedMigrationVersions": 0,
+  "warning": "Snapshots are time-sensitive and are NOT proof of schema compatibility. Re-read both environments before applying patches."
+}
