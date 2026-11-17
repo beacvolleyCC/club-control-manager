@@ -22,6 +22,8 @@ A `database.mode: none` nem jelenti azt, hogy a frontend szabadon meghívhat új
 
 2026-11-17-én a Supabase nyilvántartásában **48 LIVE**, **119 TEST** migráció volt; a verzióazonosítók között nem volt átfedés. Ez önmagában **nem bizonyítja**, hogy az aktuális adatbázis-séma teljesen különböző, de azt igen, hogy a két korábbi migrációtörténet nem vonható össze automatikusan.
 
+A 2026-11-17-i **read-only sémafelmérés** szerint LIVE: 52 public tábla, 655 public oszlop, 309 public függvény, 11 public RLS policy; TEST: 80 tábla, 861 oszlop, 170 függvény, 15 policy. Ez bizonyítja, hogy a **szerkezeti eltérés is jelentős**, ezért szigorúan előbb össze kell vetni a konkrét érintett táblákat, függvényeket és GRANT-okat. Az ellenőrzés pillanatképét a `.club-control/patches/baselines/20261117_supabase_environments.json` fájl tartalmazza; telepítés előtt friss felmérés szükséges.
+
 A repo `supabase/migrations/` mappájában jelenleg csak 8 történeti migrációs fájl található: ez **nem** tekinthető a teljes LIVE vagy TEST történetnek. **Tilos** a korábbi TEST migrációkat egyszerűen `db push`-sal a LIVE-ra futtatni, amíg a sémákat és az előzményeket külön nem egyeztettük.
 
 A frissítésekhez **új, külön azonosítójú, célzott patch-eket** készítünk. Az egységes történeti baseline későbbi, külön audit- és egyeztetési feladat; nem végzünk kézi `migration repair` parancsokat ellenőrizetlenül.
