@@ -8,6 +8,7 @@ on:
       - 'tests/patchkit.test.cjs'
       - '.club-control/patches/**'
       - 'docs/operations/PATCH_RELEASE_PROCESS.md'
+      - 'docs/handover/HANDOVER_20261117_PATCH_RELEASE_FOUNDATION.md'
       - '.github/workflows/patch-release-plan.yml'
   pull_request:
     paths:
@@ -15,6 +16,7 @@ on:
       - 'tests/patchkit.test.cjs'
       - '.club-control/patches/**'
       - 'docs/operations/PATCH_RELEASE_PROCESS.md'
+      - 'docs/handover/HANDOVER_20261117_PATCH_RELEASE_FOUNDATION.md'
       - '.github/workflows/patch-release-plan.yml'
   workflow_dispatch:
 permissions:
