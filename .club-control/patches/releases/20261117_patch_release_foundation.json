@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "20261117_patch_release_foundation",
+  "summary": "Add an auditable TEST-first, manually approved patch-planning workflow without modifying any user records.",
+  "components": [
+    "manager",
+    "shared"
+  ],
+  "database": {
+    "mode": "none",
+    "migrations": []
+  },
+  "dataCopy": false,
+  "allowProductionDataWrite": false,
+  "securityReviewed": false,
+  "files": [
+    ".club-control/patches/releases/20261117_patch_release_foundation.json",
+    "scripts/patchkit.cjs",
+    "tests/patchkit.test.cjs",
+    ".github/workflows/patch-release-plan.yml",
+    "docs/operations/PATCH_RELEASE_PROCESS.md",
+    "docs/handover/HANDOVER_20261117_PATCH_RELEASE_FOUNDATION.md"
+  ],
+  "rollback": "Remove the patch-planning scripts and workflow through a later code-only revert; no database schema or rows were modified.",
+  "verification": "Node unit tests, static SQL safety tests, TEST/LIVE plan output, and repository CI must pass before proposing a deployment."
+}
