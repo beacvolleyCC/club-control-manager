@@ -1,3 +1,9 @@
+# CLUB CONTROL — VENDÉG VERSENYEDZÉS JELENTKEZÉS (2026-11-21, TEST)
+
+**Aktuális funkció-fejlesztés:** [GUEST COMPETITION RSVP TEST handover](docs/handover/HANDOVER_20261121_GUEST_COMPETITION_RSVP_TEST.md). Az egységes `players/events/availability` TEST adatmodell bővítése külön vendégprofilokkal, PIN-jogosultsággal, Manager Tömegsport/Vendégek kezeléssel, Player és Manager vendéglétszám/névsor integrációval, publikus `/vendeg` aloldallal. Három GitHub feature branch, TEST Supabase migráció feltelepítve. GitHub Node szintaktikai CI zöld. **Még nincs TEST Cloudflare deploy, hitelesített E2E vagy LIVE változtatás.** A korábbi LIVE handoverek változatlanok.
+
+---
+
 # CLUB CONTROL – LIVE forma a lejátszott meccseken ÉS a tabellákban (2026-11-15)
 
 **Aktuális handover:** [LIVE CURRENT FORM – PLAYED & STANDINGS](docs/handover/HANDOVER_20261115_LIVE_FORM_ON_PLAYED_AND_STANDINGS.md). Manager [PR #95](https://github.com/beacvolleyCC/club-control-manager/pull/95), Player [PR #35](https://github.com/beacvolleyCC/player_application/pull/35) beolvasztva. A közös `canonicalFormCards` alapján mindkét alkalmazásban a közelgő és a már lejátszott meccsek mutatják az aktuális formát; a Manager Áttekintés/Tabella és Player rögzített tabellarész sorrendje **helyezés → trendnyíl → csapatnév**, alatta az utolsó öt eredménypont. A trend a csapatforma jelzése, nem helyezésmozgás; a lejátszott meccseken sem a meccsnapra visszaszámított adat. Manager LIVE frontend merge `cedc10f03da08ae232e5e52a41052df19650b110`; Player `8be92d04062a81b60a294c9466dd0cb7f7baa54e`. Központi DB írás és V2 TEST módosítás **nem volt**. Bejelentkezett mobilos vizuális E2E még ellenőrzendő.
