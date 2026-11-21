@@ -49,3 +49,11 @@
 6. Üzemelő LIVE appban darabszámok, jogosultsági korlátozások, audit és adatforrások ellenőrzése.
 
 **Kritikus garancia:** a LIVE és TEST klubadatai külön maradnak; a PATCH csak ellenőrzött alkalmazáskódot és szükség esetén kompatibilis struktúrát vezet át, személyes/finanszírozási rekordokat nem másol.
+
+## 2026-11-21 – valós Cloudflare TEST telepítési kísérlet és hibakivizsgálás
+
+- `44913451618` GitHub Actions futás: `test-and-package` SUCCESS; `deploy-dedicated-TEST-only` FAILURE, a **Verify TEST project and separate credentials exist** lépésben: `Missing Cloudflare dedicated TEST project variable`. `wrangler pages deploy` **nem futott le**, sem TEST sem LIVE módosítás nem történt.
+- A GitHub workflow ezután fail-closed gate-et kapott: a TEST deploy csak akkor indul el, ha a külön TEST project-változó ki van töltve. Ennek hiányában a sikeres QA és build zöld marad, a deploy SKIPPED.
+- A konfigurációs hiányhoz létrehozott GitHub issue: https://github.com/beacvolleyCC/club-control-manager/issues/100. Pontos beállítás: `manager-test` environment, `CLOUDFLARE_TEST_MANAGER_PROJECT` variable, `CLOUDFLARE_TEST_ACCOUNT_ID` és `CLOUDFLARE_TEST_API_TOKEN` secret. Ne add meg ezeket chatben vagy commitban.
+- További TEST SQL tranzakciók: mentett nézet írás-olvasás működik; kizárólag egy csapat `coach_fee` megtekintési jogával `scopes=1`, `passes=0`, `trainings=0`, `can_read=true`, `can_write=false`, majd ROLLBACK. Tartós tesztadat-módosítás nincs.
+- LIVE élesítés még nem történt; a blokk feloldása és a tényleges bejelentkezéses TEST E2E után történhet külön jóváhagyott LIVE PATCH.
