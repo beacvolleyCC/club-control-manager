@@ -8,16 +8,23 @@ const files=['app.js','finance-analytics.js','sw.js'];
 test('TEST finance code is syntactically valid JavaScript',()=>{
  for(const path of files)assert.doesNotThrow(()=>execFileSync(process.execPath,['--check',path],{stdio:'pipe'}),path);
 });
-test('TEST is isolated from LIVE project and has a visible separate PWA identity',()=>{
- const config=fs.readFileSync('config.js','utf8'),index=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8'),manifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+test('source stays LIVE-safe and TEST build is strictly isolated',()=>{
+ const live=fs.readFileSync('config.js','utf8'),liveIndex=fs.readFileSync('index.html','utf8');
+ const config=fs.readFileSync('dist-test/config.js','utf8');
+ const index=fs.readFileSync('dist-test/index.html','utf8');
+ const sw=fs.readFileSync('dist-test/sw.js','utf8');
+ const manifest=JSON.parse(fs.readFileSync('dist-test/manifest.webmanifest','utf8'));
+ assert.match(live,/snqsxlyhontaepembaic/);
+ assert.doesNotMatch(live,/szzoubvhlwnojtzqjebc/);
+ assert.doesNotMatch(liveIndex,/cc-test-finance-mode/);
  assert.match(config,/STAGING_REF:'szzoubvhlwnojtzqjebc'/);
  assert.match(config,/TEST_ONLY:true/);
  assert.match(config,/sb_publishable_/);
  assert.doesNotMatch(config,/snqsxlyhontaepembaic|service_role|sb_secret_/i);
  assert.match(index,/cc-test-finance-mode/);
- assert.match(index,/finance-analytics\.js/);
- assert.match(index,/finance-analytics\.css/);
- assert.match(sw,/cc-manager-20261116-test-/);
+ assert.match(index,/finance-analytics\\.js/);
+ assert.match(index,/finance-analytics\\.css/);
+ assert.match(sw,/cc-manager-20261121-finance-TEST-v1/);
  assert.equal(manifest.short_name,'MGR TEST');
 });
 const src=fs.readFileSync('finance-analytics.js','utf8'),ctx={window:{},console};
