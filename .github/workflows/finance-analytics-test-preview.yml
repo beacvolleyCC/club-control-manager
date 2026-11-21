@@ -72,7 +72,7 @@ jobs:
 
   deploy-test:
     name: deploy-dedicated-TEST-only
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy_test == true
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/release/finance-analytics-test-20261121') || (github.event_name == 'workflow_dispatch' && inputs.deploy_test == true)
     needs: test-preview
     runs-on: ubuntu-latest
     environment: manager-test
