@@ -1353,7 +1353,7 @@
       +(edit?'<label style="display:flex;gap:9px;margin:14px 0"><input name="resetPin" type="checkbox"> Új PIN-kód generálása</label>':'<p>Új vendégnél 8 számjegyű PIN generálódik.</p>')
       +'<div class="toolbar-actions"><button type="submit" class="button primary" '+(editable?'':'disabled')+'>Mentés</button><button type="button" class="button quiet" id="ccGuestNew">Új vendég</button></div></form>'
       +(state.guestLastPin?'<div style="margin-top:16px"><strong>Egyszer megjelenített PIN</strong><p>Biztonságosan add át. Később csak új PIN generálható.</p><code style="font-size:24px;letter-spacing:.15em">'+esc(state.guestLastPin)+'</code></div>':'')+'</article>';
-    $('[data-guest-edit]').forEach(b=>b.onclick=()=>{state.guestEditId=text(b.dataset.guestEdit);state.guestLastPin='';renderMassGuests_()});
+    $$('[data-guest-edit]').forEach(b=>b.onclick=()=>{state.guestEditId=text(b.dataset.guestEdit);state.guestLastPin='';renderMassGuests_()});
     $('#ccGuestNew')?.addEventListener('click',()=>{state.guestEditId='';state.guestLastPin='';renderMassGuests_()});
     $('#ccGuestForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();if(!editable)return;
