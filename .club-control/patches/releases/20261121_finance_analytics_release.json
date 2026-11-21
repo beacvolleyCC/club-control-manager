@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "20261121_finance_analytics_release",
+  "summary": "Introduce permission-scoped finance, pass and training analytics, with non-destructive additive schema SQL, isolated TEST builds, and rollback instructions.",
+  "components": [
+    "manager",
+    "shared"
+  ],
+  "database": {
+    "mode": "additive-schema",
+    "migrations": [
+      ".club-control/patches/sql/20261121142001_cc_finance_acl_saved_views.sql",
+      ".club-control/patches/sql/20261121142002_cc_finance_analytics_feed.sql",
+      ".club-control/patches/sql/20261121142003_cc_finance_scope_fix.sql",
+      ".club-control/patches/sql/20261121142004_cc_finance_scoped_override.sql"
+    ]
+  },
+  "securityReviewed": true,
+  "dataCopy": false,
+  "allowProductionDataWrite": false,
+  "files": [
+    "app.js",
+    "config.js",
+    "index.html",
+    "sw.js",
+    "manifest.webmanifest",
+    "finance-analytics.js",
+    "finance-analytics.css",
+    "scripts/build-test-finance-analytics.cjs",
+    "tests/test-finance-analytics-scoped.test.cjs",
+    ".github/workflows/finance-analytics-test-preview.yml",
+    "sql/20261116_test_finance_analytics_acl_saved_views.sql",
+    "sql/20261116_test_finance_analytics_scoped_feed.sql",
+    "sql/20261116_test_finance_scopes_current_fix.sql",
+    "sql/20261116_test_finance_scoped_override.sql",
+    ".club-control/patches/releases/20261121_finance_analytics_release.json",
+    ".club-control/patches/sql/20261121142001_cc_finance_acl_saved_views.sql",
+    ".club-control/patches/sql/20261121142002_cc_finance_analytics_feed.sql",
+    ".club-control/patches/sql/20261121142003_cc_finance_scope_fix.sql",
+    ".club-control/patches/sql/20261121142004_cc_finance_scoped_override.sql"
+  ],
+  "rollback": "If the TEST frontend fails, redeploy the previous TEST application artifact. For LIVE, revert the Manager frontend first; do not drop financial schema tables without a separate data-preserving DBA rollback. Restore compatible function definitions if needed.",
+  "verification": "Require isolated TEST Pages deployment, real signed-in full/limited/unauthorized role E2E, migration advisor review, preserved fee counts, and manual LIVE approval before any production migration or frontend merge."
+}

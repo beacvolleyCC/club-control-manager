@@ -1,0 +1,117 @@
+name: Club Control finance – TEST package and guarded Pages deployment
+on:
+  push:
+    branches:
+      - release/finance-analytics-test-20261121
+    paths:
+      - 'app.js'
+      - 'config.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'manifest.webmanifest'
+      - 'finance-analytics.js'
+      - 'finance-analytics.css'
+      - 'scripts/build-test-finance-analytics.cjs'
+      - 'tests/test-finance-analytics-scoped.test.cjs'
+      - 'scripts/patchkit.cjs'
+      - 'tests/patchkit.test.cjs'
+      - '.club-control/patches/**'
+      - '.github/workflows/finance-analytics-test-preview.yml'
+  pull_request:
+    paths:
+      - 'finance-analytics.js'
+      - 'finance-analytics.css'
+      - 'scripts/build-test-finance-analytics.cjs'
+      - 'tests/test-finance-analytics-scoped.test.cjs'
+      - '.github/workflows/finance-analytics-test-preview.yml'
+  workflow_dispatch:
+    inputs:
+      deploy_test:
+        description: 'Explicitly deploy to the dedicated Cloudflare TEST project (requires configured TEST credentials)'
+        type: boolean
+        default: false
+        required: true
+permissions:
+  contents: read
+jobs:
+  test-preview:
+    name: test-and-package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build isolated Cloudflare TEST artifact
+        run: node scripts/build-test-finance-analytics.cjs
+      - name: Finance authorization, isolated runtime and CSV regression
+        run: node --test tests/test-finance-analytics-scoped.test.cjs
+      - name: Patch migration planner tests
+        run: node --test tests/patchkit.test.cjs
+      - name: Validate frozen finance SQL PATCH and generate release plans
+        run: |
+          node scripts/patchkit.cjs validate --release .club-control/patches/releases/20261121_finance_analytics_release.json
+          node scripts/patchkit.cjs plan --release .club-control/patches/releases/20261121_finance_analytics_release.json --env test > finance-TEST-release-plan.md
+          node scripts/patchkit.cjs plan --release .club-control/patches/releases/20261121_finance_analytics_release.json --env live > finance-LIVE-release-plan.md
+      - name: Upload TEST and LIVE release plans (no production actions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: finance-analytics-release-plans-NO-DEPLOY
+          path: |
+            finance-TEST-release-plan.md
+            finance-LIVE-release-plan.md
+          retention-days: 14
+      - name: Report whether Cloudflare TEST can deploy
+        env:
+          TEST_PROJECT: ${{ vars.CLOUDFLARE_TEST_MANAGER_PROJECT }}
+        run: |
+          if [ -z "$TEST_PROJECT" ]; then
+            echo "::notice::TEST artifact ready. Cloudflare deployment skipped: configure CLOUDFLARE_TEST_MANAGER_PROJECT in GitHub TEST environment."
+          else
+            echo "::notice::Cloudflare TEST project variable available. Dedicated deploy job will enforce TEST secrets and name guard."
+          fi
+      - name: Upload TEST preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: club-control-manager-finance-analytics-TEST
+          path: dist-test/
+          retention-days: 14
+          if-no-files-found: error
+
+  deploy-test:
+    name: deploy-dedicated-TEST-only
+    if: ((github.event_name == 'push' && github.ref == 'refs/heads/release/finance-analytics-test-20261121') || (github.event_name == 'workflow_dispatch' && inputs.deploy_test == true)) && vars.CLOUDFLARE_TEST_MANAGER_PROJECT != ''
+    needs: test-preview
+    runs-on: ubuntu-latest
+    environment: manager-test
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: club-control-manager-finance-analytics-TEST
+          path: dist-test/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify TEST project and separate credentials exist
+        env:
+          TEST_PROJECT: ${{ vars.CLOUDFLARE_TEST_MANAGER_PROJECT }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_TEST_ACCOUNT_ID }}
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_TEST_API_TOKEN }}
+        run: |
+          test -n "$TEST_PROJECT" || { echo "::error::Missing Cloudflare dedicated TEST project variable"; exit 1; }
+          test -n "$CF_ACCOUNT" || { echo "::error::Missing TEST Cloudflare account ID"; exit 1; }
+          test -n "$CF_TOKEN" || { echo "::error::Missing TEST Cloudflare token"; exit 1; }
+          case "$TEST_PROJECT" in
+            *test*|*staging*) ;;
+            *) echo "::error::Only dedicated TEST projects are allowed"; exit 1 ;;
+          esac
+          grep -q 'szzoubvhlwnojtzqjebc' dist-test/config.js
+          ! grep -q 'snqsxlyhontaepembaic' dist-test/config.js
+      - name: Deploy to dedicated Cloudflare Pages TEST (never LIVE)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_TEST_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_TEST_ACCOUNT_ID }}
+          CF_PROJECT: ${{ vars.CLOUDFLARE_TEST_MANAGER_PROJECT }}
+        run: npx --yes wrangler@4.26.0 pages deploy dist-test --project-name="$CF_PROJECT" --branch="finance-analytics-test"
