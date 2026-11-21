@@ -77,7 +77,7 @@ declare
   v_token text;
 begin
   if length(v_email)>254 or v_email !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'
-     or p_pin !~ '^[0-9]{6,12}$' then
+     or p_pin is null or p_pin !~ '^[0-9]{6,12}$' then
     return jsonb_build_object('ok',false,'error','INVALID_CREDENTIALS');
   end if;
   insert into private.cc_guest_pin_attempts_v1(email,window_started_at,failure_count)
@@ -95,7 +95,7 @@ begin
   select p.id,p.name,gp.pin_hash into v_row
     from public.players p join public.cc_guest_profiles_v1 gp on gp.player_id=p.id
     where lower(p.email::text)=v_email and p.active and gp.active and p.player_kind='guest';
-  if v_row.id is null or extensions.crypt(p_pin,v_row.pin_hash)<>v_row.pin_hash then
+  if v_row.id is null or extensions.crypt(p_pin,v_row.pin_hash) is distinct from v_row.pin_hash then
     update private.cc_guest_pin_attempts_v1
     set failure_count=failure_count+1 where email=v_email;
     return jsonb_build_object('ok',false,'error','INVALID_CREDENTIALS');
@@ -226,7 +226,7 @@ begin
   v_teams:=p_payload->'teamIds';
   if length(v_name)<2 or length(v_name)>120
      or length(v_email)>254 or v_email !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'
-     or jsonb_typeof(v_teams)<>'array' or jsonb_array_length(v_teams)=0
+     or v_teams is null or jsonb_typeof(v_teams)<>'array' or jsonb_array_length(v_teams)=0
      or jsonb_array_length(v_teams)>10 then
     raise exception 'INVALID_GUEST_PROFILE';
   end if;
