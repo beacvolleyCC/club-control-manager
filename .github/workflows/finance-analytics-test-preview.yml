@@ -1,0 +1,43 @@
+name: Finance Analytics TEST preview package
+on:
+  push:
+    branches:
+      - test/finance-analytics-scoped-20261116
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'finance-analytics.js'
+      - 'finance-analytics.css'
+      - 'scripts/build-test-finance-analytics.cjs'
+      - 'tests/test-finance-analytics-scoped.test.cjs'
+      - 'sql/20261116_test_finance_*.sql'
+      - 'config.js'
+      - 'index.html'
+      - 'app.js'
+      - 'sw.js'
+      - 'manifest.webmanifest'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-preview:
+    name: test-and-package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: TEST finance role/data isolation regression
+        run: node --test tests/test-finance-analytics-scoped.test.cjs
+      - name: Create TEST-only static Cloudflare Pages bundle
+        run: node scripts/build-test-finance-analytics.cjs
+      - name: Upload isolated TEST preview (never deploy LIVE)
+        uses: actions/upload-artifact@v4
+        with:
+          name: club-control-manager-finance-analytics-TEST
+          path: dist-test/
+          retention-days: 14
+          if-no-files-found: error
