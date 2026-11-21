@@ -22,8 +22,8 @@ test('source stays LIVE-safe and TEST build is strictly isolated',()=>{
  assert.match(config,/sb_publishable_/);
  assert.doesNotMatch(config,/snqsxlyhontaepembaic|service_role|sb_secret_/i);
  assert.match(index,/cc-test-finance-mode/);
- assert.match(index,/finance-analytics\\.js/);
- assert.match(index,/finance-analytics\\.css/);
+ assert.match(index,/finance-analytics\.js/);
+ assert.match(index,/finance-analytics\.css/);
  assert.match(sw,/cc-manager-20261121-finance-TEST-v1/);
  assert.equal(manifest.short_name,'MGR TEST');
 });
