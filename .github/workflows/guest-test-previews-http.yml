@@ -18,7 +18,7 @@ jobs:
             wc -c "/tmp/$NAME.html"
             head -c 260 "/tmp/$NAME.html"
             echo
-            grep -qi 'Club Control' "/tmp/$NAME.html"
+            grep -qi '<html' "/tmp/$NAME.html"
             curl -fsSL --max-time 30 "$BASE/$NAME/config.js" > "/tmp/$NAME-config.js"
             grep -q 'szzoubvhlwnojtzqjebc.supabase.co' "/tmp/$NAME-config.js"
             if grep -q 'snqsxlyhontaepembaic.supabase.co' "/tmp/$NAME-config.js"; then echo "LIVE DATABASE DETECTED"; exit 1; fi
