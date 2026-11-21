@@ -15,6 +15,7 @@ on:
       - 'tests/test-finance-analytics-scoped.test.cjs'
       - 'scripts/patchkit.cjs'
       - 'tests/patchkit.test.cjs'
+      - '.club-control/patches/**'
       - '.github/workflows/finance-analytics-test-preview.yml'
   pull_request:
     paths:
@@ -48,6 +49,19 @@ jobs:
         run: node --test tests/test-finance-analytics-scoped.test.cjs
       - name: Patch migration planner tests
         run: node --test tests/patchkit.test.cjs
+      - name: Validate frozen finance SQL PATCH and generate release plans
+        run: |
+          node scripts/patchkit.cjs validate --release .club-control/patches/releases/20261121_finance_analytics_release.json
+          node scripts/patchkit.cjs plan --release .club-control/patches/releases/20261121_finance_analytics_release.json --env test > finance-TEST-release-plan.md
+          node scripts/patchkit.cjs plan --release .club-control/patches/releases/20261121_finance_analytics_release.json --env live > finance-LIVE-release-plan.md
+      - name: Upload TEST and LIVE release plans (no production actions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: finance-analytics-release-plans-NO-DEPLOY
+          path: |
+            finance-TEST-release-plan.md
+            finance-LIVE-release-plan.md
+          retention-days: 14
       - name: Upload TEST preview artifact
         uses: actions/upload-artifact@v4
         with:
