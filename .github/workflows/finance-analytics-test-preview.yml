@@ -62,6 +62,15 @@ jobs:
             finance-TEST-release-plan.md
             finance-LIVE-release-plan.md
           retention-days: 14
+      - name: Report whether Cloudflare TEST can deploy
+        env:
+          TEST_PROJECT: ${{ vars.CLOUDFLARE_TEST_MANAGER_PROJECT }}
+        run: |
+          if [ -z "$TEST_PROJECT" ]; then
+            echo "::notice::TEST artifact ready. Cloudflare deployment skipped: configure CLOUDFLARE_TEST_MANAGER_PROJECT in GitHub TEST environment."
+          else
+            echo "::notice::Cloudflare TEST project variable available. Dedicated deploy job will enforce TEST secrets and name guard."
+          fi
       - name: Upload TEST preview artifact
         uses: actions/upload-artifact@v4
         with:
@@ -72,7 +81,7 @@ jobs:
 
   deploy-test:
     name: deploy-dedicated-TEST-only
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/release/finance-analytics-test-20261121') || (github.event_name == 'workflow_dispatch' && inputs.deploy_test == true)
+    if: ((github.event_name == 'push' && github.ref == 'refs/heads/release/finance-analytics-test-20261121') || (github.event_name == 'workflow_dispatch' && inputs.deploy_test == true)) && vars.CLOUDFLARE_TEST_MANAGER_PROJECT != ''
     needs: test-preview
     runs-on: ubuntu-latest
     environment: manager-test
