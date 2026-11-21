@@ -158,7 +158,7 @@ test('roster RPC calls deployed v1 directly and reuses inflight/cache',()=>{
   const end=source.indexOf('  function useDemo()',begin);
   assert.ok(begin>0&&end>begin);
   const part=source.slice(begin,end);
-  assert.ok(part.includes("rpc('cc_manager_event_roster_v1'"));
+  assert.ok(part.includes("rpc('cc_manager_event_roster_with_guests_v1'"),'the original v1 roster is wrapped with guest rows');
   assert.ok(!part.includes("rpc('cc_manager_event_roster_v2'"));
   assert.ok(part.includes('ccRosterInFlight_.has(id)'));
   assert.ok(part.includes('state.eventRosterCache.has(id)'));
