@@ -1,3 +1,9 @@
+# CLUB CONTROL – FINANCE ANALYTICS + PATCH INTEGRÁCIÓ (2026-11-21)
+
+**Aktuális integrációs átadás:** [pénzügyi Analytics + szabályozott PATCH release](docs/handover/HANDOVER_20261121_FINANCE_PATCH_INTEGRATION.md). Fejlesztési ág: `release/finance-analytics-test-20261121`; összevont #97 + #98 munka. TEST CI és izolált build ellenőrizve; a külön Cloudflare TEST deployment és bejelentkezett E2E még hiányzik. **A LIVE és TEST adatbázisok külön maradnak; sem LIVE SQL migráció, sem LIVE webes élesítés nem történt.**
+
+---
+
 # CLUB CONTROL – ÚJ PATCH-KIADÁSI FOLYAMAT (2026-11-17)
 
 **Ezen a fejlesztési ágon aktuális átadás:** [verziózott, TEST-first PATCH-kiadási folyamat](docs/handover/HANDOVER_20261117_PATCH_RELEASE_FOUNDATION.md), részletes szabályzat: [PATCH_RELEASE_PROCESS.md](docs/operations/PATCH_RELEASE_PROCESS.md). Branch: `chore/controlled-patch-releases-20261117` – kizárólag kiadástervezés és CI, **nincs LIVE adatbázis-módosítás vagy LIVE deployment**. A LIVE/TEST történeti migrációs sorát tilos automatikusan összeönteni.
