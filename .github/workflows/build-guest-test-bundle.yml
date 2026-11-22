@@ -1,0 +1,143 @@
+name: Build Club Control Guest TEST portable preview
+on:
+  push:
+    branches: [feature/guest-competition-rsvp-20261121]
+    paths: [.github/workflows/build-guest-test-bundle.yml]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Manager feature branch
+        uses: actions/checkout@v4
+        with:
+          path: repos/manager
+      - name: Checkout Player feature branch
+        uses: actions/checkout@v4
+        with:
+          repository: beacvolleyCC/player_application
+          path: repos/player
+          ref: feature/guest-competition-rsvp-20261121
+      - name: Checkout Guest website feature branch
+        uses: actions/checkout@v4
+        with:
+          repository: beacvolleyCC/beac-edzesek
+          path: repos/guest
+          ref: feature/guest-competition-rsvp-20261121
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax, TEST Supabase isolation and bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check repos/manager/app.js
+          node --check repos/player/app.js
+          node --check repos/guest/guest.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil, subprocess
+          out=Path('bundle');out.mkdir()
+          for repo in ('manager','player'):
+              base=Path('repos')/repo
+              config=(base/'config.js').read_text()
+              assert 'szzoubvhlwnojtzqjebc.supabase.co' in config
+              assert 'snqsxlyhontaepembaic.supabase.co' not in config
+              files=subprocess.check_output(['git','-C',str(base),'ls-files','-z']).decode().split('\0')
+              for entry in files:
+                  if not entry or entry.startswith(('.github/','sql/','tests/','docs/','v2/','.git/')): continue
+                  if entry in ('HANDOVER_CURRENT.md',): continue
+                  source=base/entry
+                  if not source.is_file(): continue
+                  target=out/repo/entry
+                  target.parent.mkdir(parents=True,exist_ok=True)
+                  shutil.copy2(source,target)
+          guest=Path('repos/guest/guest.js').read_text(encoding='utf8')
+          start='const HTML = String.raw'+chr(96)
+          a=guest.index(start)+len(start)
+          b=guest.index(chr(96)+';\n\nconst RPC',a)
+          page=guest[a:b]
+          assert '<!doctype html>' in page.lower() and 'cc_guest_week_v1' in page
+          (out/'vendeg').mkdir()
+          (out/'vendeg'/'index.html').write_text(page,encoding='utf8')
+          assert (out/'manager'/'index.html').is_file()
+          assert (out/'player'/'index.html').is_file()
+          print('Bundled TEST Manager, Player and Guest frontend')
+          PY
+          cat > bundle/START_TEST.bat <<'BAT'
+          @echo off
+          cd /d "%~dp0"
+          powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0RUN_LOCAL.ps1"
+          BAT
+          cat > bundle/RUN_LOCAL.ps1 <<'PS'
+          $ErrorActionPreference = 'Stop'
+          $root = [IO.Path]::GetFullPath($PSScriptRoot)
+          $prefix = 'http://127.0.0.1:8765/'
+          $listener = New-Object System.Net.HttpListener
+          $listener.Prefixes.Add($prefix)
+          try { $listener.Start() } catch {
+            Write-Host 'A 8765 port foglalt. Zarj be masik TEST szervert.' -ForegroundColor Red
+            Read-Host 'Enter'
+            exit 1
+          }
+          $types = @{
+             '.html'='text/html; charset=utf-8'; '.js'='application/javascript; charset=utf-8'
+             '.css'='text/css; charset=utf-8'; '.json'='application/json; charset=utf-8'
+             '.webmanifest'='application/manifest+json'; '.svg'='image/svg+xml'
+             '.png'='image/png';'.jpg'='image/jpeg';'.jpeg'='image/jpeg'
+             '.gif'='image/gif';'.webp'='image/webp';'.ico'='image/x-icon'
+             '.woff'='font/woff';'.woff2'='font/woff2';'.ttf'='font/ttf'
+             '.txt'='text/plain; charset=utf-8';'.xml'='application/xml'
+          }
+          Write-Host 'CLUB CONTROL TEST - http://127.0.0.1:8765/' -ForegroundColor Green
+          Write-Host 'Manager: http://127.0.0.1:8765/manager/'
+          Write-Host 'Player:  http://127.0.0.1:8765/player/'
+          Write-Host 'Vendeg:  http://127.0.0.1:8765/vendeg/'
+          Write-Host 'Bezárashoz Ctrl+C. Minden API a TEST Supabase-ba mutat.'
+          Start-Process 'http://127.0.0.1:8765/manager/'
+          try {
+            while ($listener.IsListening) {
+              $context = $listener.GetContext()
+              try {
+                $response = $context.Response
+                $relative = [Uri]::UnescapeDataString($context.Request.Url.AbsolutePath.TrimStart('/'))
+                if (!$relative -or $relative.EndsWith('/')) { $relative = $relative.TrimEnd('/') + '/index.html' }
+                $path = [IO.Path]::GetFullPath((Join-Path $root ($relative -replace '/', [IO.Path]::DirectorySeparatorChar)))
+                if (!$path.StartsWith($root + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or !(Test-Path -LiteralPath $path -PathType Leaf)) {
+                   $response.StatusCode = 404; $response.Close(); continue
+                }
+                $ext = [IO.Path]::GetExtension($path).ToLowerInvariant()
+                if (!$types.ContainsKey($ext)) { $response.StatusCode=403; $response.Close();continue }
+                $bytes = [IO.File]::ReadAllBytes($path)
+                $response.ContentType = $types[$ext]
+                $response.AddHeader('Cache-Control','no-store')
+                $response.ContentLength64 = $bytes.Length
+                if ($context.Request.HttpMethod -ne 'HEAD') { $response.OutputStream.Write($bytes,0,$bytes.Length) }
+                $response.Close()
+              } catch { try { $context.Response.Abort() } catch {} }
+            }
+          } finally { $listener.Stop(); $listener.Close() }
+          PS
+          cat > bundle/OLVASD_EL.txt <<'TXT'
+          CLUB CONTROL VENDÉG TEST (Windows 10/11)
+          1. Csomagold ki a teljes ZIP-et.
+          2. Indítsd a START_TEST.bat fájlt duplakattintással.
+          3. A böngészőben a TEST Manager nyílik meg.
+          4. Player: http://127.0.0.1:8765/player/
+          5. Vendég: http://127.0.0.1:8765/vendeg/
+          A PowerShell ablak bezárásával leáll a helyi kiszolgáló.
+          Csak a TEST Supabase adatbázist használja, LIVE érintetlen.
+          Manager és Player bejelentkezéshez TEST-fiók szükséges.
+          Az OTP/e-mail linkes belépés a Supabase Auth redirect listától függhet.
+          TXT
+          test -f bundle/manager/index.html
+          test -f bundle/player/index.html
+          test -f bundle/vendeg/index.html
+          find bundle -maxdepth 2 -type f | head -20
+      - name: Upload complete downloadable TEST package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Club_Control_Guest_TEST_Windows
+          path: bundle/
+          retention-days: 14
+          if-no-files-found: error
