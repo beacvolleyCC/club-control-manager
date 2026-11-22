@@ -1,0 +1,25 @@
+name: Probe temporary Cloudflare guest TEST URL
+on:
+  push:
+    branches: [feature/guest-competition-rsvp-20261121]
+    paths: [.github/workflows/probe-temporary-test.yml]
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe public URL and identify 404 cause
+        shell: bash
+        run: |
+          set +e
+          BASE=https://cc-beac-guest-system-test.gaudy-spandex.workers.dev
+          for path in / /index.html /manager/ /manager/index.html /player/ /vendeg/; do
+            echo "PATH $path"
+            for n in 1 2; do
+              curl -L -sS -D /tmp/cc-headers -o /tmp/cc-body --max-time 25 -w "HTTP %{http_code} TYPE %{content_type} IP %{remote_ip}\n" "$BASE$path"
+              grep -iE '^server:|^cf-ray:|^location:|^content-type:' /tmp/cc-headers | head -5
+              head -c 180 /tmp/cc-body
+              echo
+              sleep 2
+            done
+          done

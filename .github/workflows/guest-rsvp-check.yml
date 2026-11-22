@@ -1,0 +1,19 @@
+name: Guest RSVP feature checks
+on:
+  push:
+    branches:
+      - feature/guest-competition-rsvp-20261121
+  workflow_dispatch:
+jobs:
+  syntax-and-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate code and guest feature contracts
+        run: |
+          node --check app.js
+          grep -q "cc_manager_events_with_guests_v1" app.js
+          grep -q "cc_guest_admin_save_v1" app.js
