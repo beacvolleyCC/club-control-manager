@@ -4601,6 +4601,7 @@ async function ccMassAthleteHistoryLoad_(id){
     return '<article class="panel" id="ccManagerDebugPanel">'
       +'<div class="panel-head"><div><h3>Fejlesztői tesztmód</h3><p>Csak ehhez az engedélyezett Manager-fiókhoz. Nem hoz létre valódi vendéget, edzést vagy jelentkezést.</p></div>'
       +'<span class="status-pill warn">ELSZIGETELT TESZT</span></div>'
+      +'<div class="setting-row"><div><strong>Vendégjelentkezési weboldal</strong><small>LIVE vendégoldal · a vendég saját e-mail-címével és PIN-kódjával léphet be. Ez nem a szimuláció része.</small></div><a class="button quiet" href="./vendeg/" target="_blank" rel="noopener noreferrer">Vendégoldal megnyitása</a></div>'
       +'<div class="setting-row"><div><strong>Vendégjelentkezés előnézet</strong><small>A valódi adatok és létszámok változatlanok.</small></div>'
       +'<button type="button" class="button '+(active?'primary':'quiet')+'" id="ccDebugPreviewToggle" aria-pressed="'+active+'">'+(active?'Tesztmód kikapcsolása':'Tesztmód bekapcsolása')+'</button></div>'
       +(active?'<div style="margin-top:14px;padding:15px;border:1px dashed #c7a300;border-radius:12px;background:rgba(247,183,0,.05)">'
