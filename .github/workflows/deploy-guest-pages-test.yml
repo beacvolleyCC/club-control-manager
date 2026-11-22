@@ -1,0 +1,127 @@
+name: Deploy Club Control Guest permanent TEST Pages
+on:
+  push:
+    branches: [feature/guest-competition-rsvp-20261121]
+    paths: [.github/workflows/deploy-guest-pages-test.yml]
+  workflow_dispatch:
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Manager TEST feature
+        uses: actions/checkout@v4
+        with:
+          path: repos/manager
+      - name: Checkout Player TEST feature
+        uses: actions/checkout@v4
+        with:
+          repository: beacvolleyCC/player_application
+          ref: feature/guest-competition-rsvp-20261121
+          path: repos/player
+      - name: Prepare complete static TEST site
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil,subprocess
+          base=Path('repos')
+          target=Path('site')
+          for part in ('manager','player'):
+              repo=base/part
+              config=(repo/'config.js').read_text(encoding='utf8')
+              assert 'szzoubvhlwnojtzqjebc.supabase.co' in config, 'TEST config missing'
+              assert 'snqsxlyhontaepembaic.supabase.co' not in config, 'LIVE config detected'
+              names=subprocess.check_output(['git','-C',str(repo),'ls-files','-z']).decode().split('\0')
+              for name in names:
+                  if not name or name.startswith(('.github/','docs/','sql/','tests/','v2/','test-guest-preview/')) or name=='HANDOVER_CURRENT.md':continue
+                  src=repo/name
+                  if not src.is_file():continue
+                  dest=target/part/name
+                  dest.parent.mkdir(parents=True,exist_ok=True)
+                  shutil.copyfile(src,dest)
+              assert (target/part/'index.html').is_file()
+          p=base/'manager'/'test-guest-preview'/'index.html'
+          assert p.is_file()
+          d=target/'vendeg';d.mkdir()
+          shutil.copyfile(p,d/'index.html')
+          assert 'szzoubvhlwnojtzqjebc.supabase.co' in (d/'index.html').read_text()
+          for path in target.rglob('*'):
+              if path.is_file():
+                  assert path.stat().st_size<=5*1024*1024, f'Temporary Cloudflare asset too large: {path}'
+                  if path.suffix.lower() in ('.html','.js','.css','.json','.webmanifest','.txt'):
+                      assert 'snqsxlyhontaepembaic.supabase.co' not in path.read_text(encoding='utf8'),f'LIVE reference: {path}'
+          print('STAGING ONLY: Manager, Player, Guest frontends verified')
+          print('Assets:',sum(p.is_file() for p in target.rglob('*')))
+          PY
+          cat > site/index.html <<'HTML'
+          <!doctype html><html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Club Control TEST</title>
+          <style>body{background:#f5f5f2;color:#222;font:16px system-ui,Arial;margin:0}.top{background:#f7b700;padding:24px 7%;font-size:24px;font-weight:800}.main{max-width:600px;margin:35px auto;padding:0 20px}.link{display:block;padding:18px 20px;margin:14px 0;background:white;border:1px solid #ddd;border-radius:12px;color:#111;text-decoration:none;font-weight:750}.link:hover{border-color:#f3bf00}small{color:#777}strong{font-weight:800}</style></head>
+          <body><div class="top">CLUB CONTROL — TEST</div><main class="main"><p><strong>Csak tesztadatbázis</strong> · A LIVE rendszer változatlan.</p><a class="link" href="./manager/">Manager — Vendégek és edzések</a><a class="link" href="./player/">Player — Edzésnévsor</a><a class="link" href="./vendeg/">Vendégjelentkezés — PIN-belépés</a><small>Ideiglenes Cloudflare előnézet. 60 perc után megszűnhet.</small></main></body></html>
+          HTML
+          cat > edge-temp.js <<'JS'
+          export default {
+            async fetch(request,env) {
+              return env.ASSETS.fetch(request)
+            }
+          }
+          JS
+          cat > wrangler.temp.jsonc <<'CONFIG'
+          {
+            "name": "cc-beac-guest-system-test",
+            "main": "./edge-temp.js",
+            "compatibility_date": "2026-11-22",
+            "assets": { "directory": "./site", "binding": "ASSETS" }
+          }
+          CONFIG
+          node --version
+          node --check repos/manager/app.js
+          node --check repos/player/app.js
+      - name: Validate TEST-only deployment credentials
+        shell: bash
+        env:
+          TEST_ACCOUNT: ${{ secrets.CLOUDFLARE_TEST_ACCOUNT_ID }}
+          TEST_TOKEN: ${{ secrets.CLOUDFLARE_TEST_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$TEST_ACCOUNT" ] || [ -z "$TEST_TOKEN" ]; then
+            echo "::error::TEST Cloudflare credentials are missing. Configure CLOUDFLARE_TEST_ACCOUNT_ID and CLOUDFLARE_TEST_API_TOKEN as GitHub Actions secrets."
+            exit 1
+          fi
+          echo "TEST-only deployment credentials available; LIVE routes are not configured."
+      - name: Deploy to isolated TEST Pages project
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_TEST_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_TEST_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          PROJECT=cc-beac-guest-system-test
+          if ! npx --yes wrangler@4.102.0 pages project create "$PROJECT" --production-branch guest-test > /tmp/cc-pages-create.log 2>&1; then
+            if ! grep -qiE 'already exists|already a project|name is already taken|has already been taken' /tmp/cc-pages-create.log; then
+              echo "Could not create isolated TEST project."
+              sed -E 's/[A-Za-z0-9_-]{45,}/[REDACTED]/g' /tmp/cc-pages-create.log | tail -20
+              exit 1
+            fi
+            echo "Existing TEST project found."
+          fi
+          npx --yes wrangler@4.102.0 pages deploy site --project-name "$PROJECT" --branch guest-test
+          echo "Published TEST Pages: https://${PROJECT}.pages.dev"
+          echo "### Club Control Guest TEST (Cloudflare Pages)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [Manager](https://${PROJECT}.pages.dev/manager/)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [Player](https://${PROJECT}.pages.dev/player/)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [Vendégjelentkezés](https://${PROJECT}.pages.dev/vendeg/)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify actual TEST website
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=https://cc-beac-guest-system-test.pages.dev
+          for p in / /manager/ /player/ /vendeg/; do
+            curl --fail --location --retry 4 --retry-delay 3 --silent --show-error --max-time 25 "$BASE$p" -o /tmp/cc-check.html
+            grep -iq '<html' /tmp/cc-check.html
+            echo "PASS TEST $p"
+          done
