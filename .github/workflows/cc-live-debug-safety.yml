@@ -1,0 +1,44 @@
+name: LIVE debug preview safety gates
+on:
+  push:
+    branches: [feature/live-admin-debug-gated-20261122]
+  pull_request:
+    paths: [app.js,sql/cc_manager_debug_access_v1_20261122.sql]
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check LIVE Manager syntax
+        run: node --check app.js
+      - name: Verify server-gated no-write demo contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'JS'
+          const fs=require('fs');
+          const assert=require('node:assert/strict');
+          const s=fs.readFileSync('app.js','utf8');
+          const sql=fs.readFileSync('sql/cc_manager_debug_access_v1_20261122.sql','utf8');
+          assert.match(s,/state\.debugAllowed=\(await rpc\('cc_manager_debug_access_v1'\)\)===true/);
+          assert.match(s,/if\(!state\.debugAllowed\)return ''/);
+          assert.match(s,/if\(!state\.debugAllowed\)return;/);
+          assert.match(s,/ccManagerDebugPreviewHtml_\(\)/);
+          assert.match(s,/state\.debugPreviewOn=false/);
+          const region=s.slice(s.indexOf('function ccManagerDebugPreviewHtml_'),s.indexOf('function renderSettings(){'));
+          assert.ok(region.length>1000);
+          for(const banned of ['state.supabase.from','await rpc(','state.supabase.rpc(','fetch(','window.location','role:','service_role']) {
+            assert.equal(region.includes(banned),false,'unsafe debug sandbox: '+banned)
+          }
+          assert.match(sql,/auth\.uid\(\)/);
+          assert.match(sql,/private\.cc_manager_current_account_v1\(\)/);
+          assert.match(sql,/return false;\s*end \$/);
+          assert.match(sql,/grant execute on function public\.cc_manager_debug_access_v1\(\) to authenticated/);
+          assert.match(sql,/enabled boolean not null default false/);
+          assert.doesNotMatch(sql,/insert into private\.cc_manager_debug_access_v1/i);
+          console.log('PASS: server-gated, disabled-by-default, read-only debug sandbox');
+          JS
