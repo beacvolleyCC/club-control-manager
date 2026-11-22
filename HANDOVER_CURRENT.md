@@ -1,3 +1,9 @@
+# Club Control — LIVE vendégoldal URL (2026-11-23)
+
+**Friss átadás:** [HANDOVER_20261123_LIVE_GUEST_URL](docs/handover/HANDOVER_20261123_LIVE_GUEST_URL.md). A vendégoldal éles URL-je `https://beacvolleycc.github.io/club-control-manager/vendeg/`. GitHub Pages és nyilvános HTTP smoke sikeres. A vendégoldal a LIVE Supabase-hoz kapcsolódik; a szükséges vendég RPC-k és a 3 állású RSVP migráció telepítve. **Még nincs LIVE vendégprofil, és a Manager/Player vendégkezelés nincs összevonva a főágba.** A teljes működés E2E ellenőrzése nyitott. Az éles Manager debug panel linkeli a vendégoldalt. `beacvolley.hu/vendeg` Cloudflare URL még nem készült el.
+
+---
+
 # Club Control — LIVE Manager védett debug (2026-11-22)
 
 **Legfrissebb átadás:** [HANDOVER_20261122_LIVE_GATED_DEBUG](docs/handover/HANDOVER_20261122_LIVE_GATED_DEBUG.md). LIVE-ban szerveroldali debug feature flag migráció fent, **alapból mindenkinél OFF**. Manager PR #102 csak jogosult adminnak látható, adatot nem író vendégjelentkezési szimulációt készít. A meglévő Manager-belépést nem módosítja. A felhasználói e-mail konkrét azonosítása szükséges az aktiváláshoz. Vendégmodul PR #101/#38/#1 **nem kerül élesítésre** ezzel.
