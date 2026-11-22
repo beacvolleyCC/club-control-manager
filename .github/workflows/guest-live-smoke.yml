@@ -1,0 +1,40 @@
+name: LIVE Guest signup published URL smoke
+on:
+  push:
+    branches: [main]
+    paths: [vendeg/index.html,app.js,.github/workflows/guest-live-smoke.yml]
+  workflow_dispatch:
+jobs:
+  guest-http:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check guest page source isolation and JS syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node - <<'JS'
+          const fs=require('node:fs');
+          const vm=require('node:vm');
+          const assert=require('node:assert/strict');
+          const page=fs.readFileSync('vendeg/index.html','utf8');
+          const script=page.match(/<script>([\s\S]*?)<\/script>/i);
+          assert(script, 'guest script missing');
+          new vm.Script(script[1]);
+          assert(page.includes('https://snqsxlyhontaepembaic.supabase.co'),'LIVE endpoint missing');
+          assert(!page.includes('szzoubvhlwnojtzqjebc'),'TEST endpoint must not be present');
+          assert(page.includes('cc_guest_rsvp_v1'),'Guest RSVP API must exist');
+          assert(page.includes('beac_guest_live_token'),'Live session storage namespace missing');
+          console.log('PASS: guest HTML and script points only to LIVE');
+          JS
+      - name: Check deployed public guest URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL=https://beacvolleycc.github.io/club-control-manager/vendeg/
+          curl -L -fsS --retry 4 --retry-delay 3 --max-time 35 "$URL" > /tmp/cc-guest-live.html
+          grep -q 'BEAC Röplabda – Vendégjelentkezés' /tmp/cc-guest-live.html
+          grep -q 'https://snqsxlyhontaepembaic.supabase.co' /tmp/cc-guest-live.html
+          if grep -q 'szzoubvhlwnojtzqjebc' /tmp/cc-guest-live.html; then echo 'TEST ref in LIVE guest page'; exit 1; fi
+          echo 'PASS: LIVE guest URL published and responds with correct Supabase endpoint'
