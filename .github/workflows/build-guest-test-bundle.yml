@@ -18,12 +18,6 @@ jobs:
           repository: beacvolleyCC/player_application
           path: repos/player
           ref: feature/guest-competition-rsvp-20261121
-      - name: Checkout Guest website feature branch
-        uses: actions/checkout@v4
-        with:
-          repository: beacvolleyCC/beac-edzesek
-          path: repos/guest
-          ref: feature/guest-competition-rsvp-20261121
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -33,7 +27,6 @@ jobs:
           set -euo pipefail
           node --check repos/manager/app.js
           node --check repos/player/app.js
-          node --check repos/guest/guest.js
           python3 - <<'PY'
           from pathlib import Path
           import shutil, subprocess
@@ -45,18 +38,14 @@ jobs:
               assert 'snqsxlyhontaepembaic.supabase.co' not in config
               files=subprocess.check_output(['git','-C',str(base),'ls-files','-z']).decode().split('\0')
               for entry in files:
-                  if not entry or entry.startswith(('.github/','sql/','tests/','docs/','v2/','.git/')): continue
+                  if not entry or entry.startswith(('.github/','sql/','tests/','docs/','v2/','.git/','test-guest-preview/')): continue
                   if entry in ('HANDOVER_CURRENT.md',): continue
                   source=base/entry
                   if not source.is_file(): continue
                   target=out/repo/entry
                   target.parent.mkdir(parents=True,exist_ok=True)
                   shutil.copy2(source,target)
-          guest=Path('repos/guest/guest.js').read_text(encoding='utf8')
-          start='const HTML = String.raw'+chr(96)
-          a=guest.index(start)+len(start)
-          b=guest.index(chr(96)+';\n\nconst RPC',a)
-          page=guest[a:b]
+          page=Path('repos/manager/test-guest-preview/index.html').read_text(encoding='utf8')
           assert '<!doctype html>' in page.lower() and 'cc_guest_week_v1' in page
           (out/'vendeg').mkdir()
           (out/'vendeg'/'index.html').write_text(page,encoding='utf8')
