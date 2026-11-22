@@ -1,3 +1,9 @@
+# Club Control — LIVE Manager védett debug (2026-11-22)
+
+**Legfrissebb átadás:** [HANDOVER_20261122_LIVE_GATED_DEBUG](docs/handover/HANDOVER_20261122_LIVE_GATED_DEBUG.md). LIVE-ban szerveroldali debug feature flag migráció fent, **alapból mindenkinél OFF**. Manager PR #102 csak jogosult adminnak látható, adatot nem író vendégjelentkezési szimulációt készít. A meglévő Manager-belépést nem módosítja. A felhasználói e-mail konkrét azonosítása szükséges az aktiváláshoz. Vendégmodul PR #101/#38/#1 **nem kerül élesítésre** ezzel.
+
+---
+
 # CLUB CONTROL – LIVE forma a lejátszott meccseken ÉS a tabellákban (2026-11-15)
 
 **Aktuális handover:** [LIVE CURRENT FORM – PLAYED & STANDINGS](docs/handover/HANDOVER_20261115_LIVE_FORM_ON_PLAYED_AND_STANDINGS.md). Manager [PR #95](https://github.com/beacvolleyCC/club-control-manager/pull/95), Player [PR #35](https://github.com/beacvolleyCC/player_application/pull/35) beolvasztva. A közös `canonicalFormCards` alapján mindkét alkalmazásban a közelgő és a már lejátszott meccsek mutatják az aktuális formát; a Manager Áttekintés/Tabella és Player rögzített tabellarész sorrendje **helyezés → trendnyíl → csapatnév**, alatta az utolsó öt eredménypont. A trend a csapatforma jelzése, nem helyezésmozgás; a lejátszott meccseken sem a meccsnapra visszaszámított adat. Manager LIVE frontend merge `cedc10f03da08ae232e5e52a41052df19650b110`; Player `8be92d04062a81b60a294c9466dd0cb7f7baa54e`. Központi DB írás és V2 TEST módosítás **nem volt**. Bejelentkezett mobilos vizuális E2E még ellenőrzendő.
