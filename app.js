@@ -4618,7 +4618,7 @@ async function ccMassAthleteHistoryLoad_(id){
       try{localStorage.setItem('cc-manager-debug-preview:'+text(state.manager?.id),state.debugPreviewOn?'on':'off')}catch(_){}
       renderSettings();
     });
-    $('[data-cc-debug-rsvp]').forEach(button=>button.addEventListener('click',()=>{
+    document.querySelectorAll('[data-cc-debug-rsvp]').forEach(button=>button.addEventListener('click',()=>{
       state.debugPreviewStatus=text(button.dataset.ccDebugRsvp);
       renderSettings();
     }));
