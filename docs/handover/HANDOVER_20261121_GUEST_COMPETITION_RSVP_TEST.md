@@ -1,3 +1,15 @@
+## 2026-11-22 — Direct browser deployment attempt, TEST only
+
+**User unable to download chat/GitHub ZIP.** Added CI-driven website deployment of all three actual frontends from TEST feature branches and common TEST Supabase.
+
+- `.github/workflows/guest-temporary-test.yml` uses Cloudflare Wrangler v4.102.0 temporary unauthenticated Workers Static Assets, bundling Manager, Player and the guest page. The temporary Cloudflare Worker was created (GitHub run [45026804434](https://github.com/beacvolleyCC/club-control-manager/actions/runs/45026804434)), temporary URL `https://cc-beac-guest-system-test.gaudy-spandex.workers.dev/`. **Not confirmed browser-functional**; CI smoke received HTTP 404 immediately. A subsequent independent diagnostic [45026959119](https://github.com/beacvolleyCC/club-control-manager/actions/runs/45026959119) received HTTP 403 Cloudflare "Just a moment" bot challenge on all paths from the GitHub Actions runner. Browser challenge may be solvable by user; do not claim verified availability. Temporary account expires after 60 min unless claimed. Cloudflare claim token was intentionally **not exposed in public CI logs**.
+- `.github/workflows/deploy-guest-pages-test.yml`: permanent Direct Upload workflow targeting **uniquely named, separate** `cc-beac-guest-system-test` Cloudflare Pages project, with a test-only Manager/Player/guest routing index. No LIVE routes or LIVE projects are targeted. Manager/Player configs checked against TEST ref `szzoubvhlwnojtzqjebc`, LIVE ref rejected; static JS syntax validation.
+- Persistent deploy run [45027123458](https://github.com/beacvolleyCC/club-control-manager/actions/runs/45027123458) **blocked** at credential validation: both `CLOUDFLARE_TEST_ACCOUNT_ID` and `CLOUDFLARE_TEST_API_TOKEN` are unset in the Manager repo GitHub Actions secrets. Nothing was deployed to the user's Cloudflare account.
+- User action needed: save those **two values as repository Actions secrets** at `https://github.com/beacvolleyCC/club-control-manager/settings/secrets/actions` (Cloudflare token with Pages Edit access). **Never paste token in chat**. Then trigger the existing workflow on feature branch, or assistant can push a safe workflow-only revision to trigger CI.
+- No LIVE changes, no merge. Permanent TEST URL cannot be claimed active until successful workflow deploy + verified browser smoke.
+
+---
+
 ## 2026-11-22 — Portable Manager + Player + Guest TEST bundle
 - Verified that Manager/Player/guest feature branches are ahead of main, with zero commits behind main.
 - Separate Cloudflare TEST deployment still not available: no connected Cloudflare app, and `CLOUDFLARE_TEST_API_TOKEN` / `CLOUDFLARE_TEST_ACCOUNT_ID` GitHub Actions secrets were previously confirmed absent.
