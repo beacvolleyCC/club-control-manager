@@ -1,3 +1,16 @@
+## 2026-11-22 — Portable Manager + Player + Guest TEST bundle
+- Verified that Manager/Player/guest feature branches are ahead of main, with zero commits behind main.
+- Separate Cloudflare TEST deployment still not available: no connected Cloudflare app, and `CLOUDFLARE_TEST_API_TOKEN` / `CLOUDFLARE_TEST_ACCOUNT_ID` GitHub Actions secrets were previously confirmed absent.
+- Added `.github/workflows/build-guest-test-bundle.yml` on the Manager guest feature branch, with 3-app archive containing the current Manager, Player, and guest web frontend.
+- The first GitHub Actions run could not checkout the private `beac-edzesek` repository using Manager-scoped GitHub Actions permissions; resolved by copying the current guest frontend into `test-guest-preview/index.html` in the Manager TEST feature branch. No cross-repository secrets are included.
+- Packaging run: https://github.com/beacvolleyCC/club-control-manager/actions/runs/45021076207 — **success**, artifact ID 14754195866, artifact name `Club_Control_Guest_TEST_Windows`, size ~13 MB, retention 14 days.
+- ZIP contains `manager/`, `player/`, `vendeg/`, `START_TEST.bat` and `RUN_LOCAL.ps1`, which serve the TEST apps on Windows loopback at http://127.0.0.1:8765/.
+- ZIP bytes downloaded, verified as a valid ZIP with 196 entries and all required HTML, JS, configuration and launcher files present. A scan confirmed no LIVE Supabase project reference in any bundled source file; `manager/config.js` and `player/config.js` both point to `szzoubvhlwnojtzqjebc`.
+- GitHub Actions contract and static syntax checks were successful; **logged-in Manager/Player end-to-end QA remains unverified**. The automated browser runtime in the assistant environment blocked localhost navigation; verify launch and authentication on user Windows PC. Test-account sign-in via OTP/email redirect may depend on Supabase Auth's permitted redirect URLs.
+- No LIVE database, live frontend, or active website routes modified. All code additions are TEST feature branch only.
+
+---
+
 ## 2026-11-21 late update — Working TEST preview URLs
 
 Three Supabase Edge Functions were deployed to the **TEST Supabase project only**, not to LIVE:
