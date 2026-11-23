@@ -1,3 +1,11 @@
+# Club Control — 2026-11-23: vendégbelépési hibajelzés és vendégkezelő fejlesztési igény
+
+**Aktuális hibajelzés és folytatás:** [vendégbelépési vizsgálat / Vendégek modul követelmények](docs/handover/HANDOVER_20261123_GUEST_LOGIN_REVIEW.md). Új teszt-emailnél „hibás email” üzenet jelentkezik. A korábbi ellenőrzés szerint LIVE-ban még 0 vendégprofil volt és a teljes Manager/Player vendégintegráció nincs élesítve; a konkrét hiba visszaellenőrzése és a valódi vendégprofil-létrehozás E2E-je nyitott. Ez a kör csak handover-dokumentáció: nincs LIVE kód- vagy adatbázis-módosítás.
+
+**Állandó munkaszabály:** minden fejlesztési kör végén aktualizálni kell ezt a fájlt és a részletes handovert; megkülönböztetni a kódba bekerült, telepített és végponttól végpontig ellenőrzött állapotot.
+
+---
+
 # Club Control — LIVE vendégoldal URL (2026-11-23)
 
 **Friss átadás:** [HANDOVER_20261123_LIVE_GUEST_URL](docs/handover/HANDOVER_20261123_LIVE_GUEST_URL.md). A vendégoldal éles URL-je `https://beacvolleycc.github.io/club-control-manager/vendeg/`. GitHub Pages és nyilvános HTTP smoke sikeres. A vendégoldal a LIVE Supabase-hoz kapcsolódik; a szükséges vendég RPC-k és a 3 állású RSVP migráció telepítve. **Még nincs LIVE vendégprofil, és a Manager/Player vendégkezelés nincs összevonva a főágba.** A teljes működés E2E ellenőrzése nyitott. Az éles Manager debug panel linkeli a vendégoldalt. `beacvolley.hu/vendeg` Cloudflare URL még nem készült el.
