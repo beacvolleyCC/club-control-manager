@@ -2293,6 +2293,7 @@
     const rows=profiles.slice().sort((a,b)=>text(a.name).localeCompare(text(b.name),'hu')).map(p=>
       '<button type="button" class="person-row" data-guest-edit="'+esc(p.guestId)+'"><span class="person-primary"><span><b>'+esc(p.name)+'</b><small>'+esc(p.email)+'</small></span></span><span>'+esc((p.teamIds||[]).map(id=>teams.find(t=>text(t.id)===text(id))?.name||'Csapat').join(', '))+'</span><span>'+(p.active?'Aktív':'Inaktív')+' · '+num(p.goingCount)+' jelentkezés</span><i class="person-chevron"><span class="triangle-icon"></span></i></button>').join('');
     $('#viewContent').innerHTML='<div class="page-intro"><div><h2>Vendégek</h2><p>Vendégadatlapok, csapat-hozzáférés és PIN-kezelés.</p></div><a class="button quiet" href="./vendeg/" target="_blank" rel="noopener noreferrer">Vendégoldal megnyitása</a></div>'
+      +(state.guestLoadError?'<article class="panel"><p>Nem sikerült betölteni a vendégeket: '+esc(state.guestLoadError)+'</p><button type="button" class="button quiet" id="ccGuestReload">Újrapróbálás</button></article>':'')
       +'<article class="panel mass-directory-panel"><div class="mass-athlete-list">'+(rows||emptyInline('Még nincs vendég.'))+'</div></article>'
       +'<article class="panel"><h3>'+(edit?'Vendég szerkesztése':'Új vendég')+'</h3><form id="ccGuestForm" autocomplete="off">'
       +'<div class="detail-grid"><label class="field"><span>Név</span><input name="name" required maxlength="120" value="'+esc(edit?.name||'')+'" '+(editable?'':'disabled')+'></label>'
@@ -2302,10 +2303,10 @@
       +'<label style="display:flex;gap:9px;margin:14px 0"><input name="active" type="checkbox" '+(editable?'':'disabled')+' '+(!edit||edit.active?'checked':'')+'> Aktív</label>'
       +(edit?'<label style="display:flex;gap:9px;margin:14px 0"><input name="resetPin" type="checkbox" '+(editable?'':'disabled')+'> Új PIN-kód generálása</label>':'<p>Új vendégnél 8 számjegyű PIN generálódik.</p>')
       +'<div class="toolbar-actions"><button type="submit" class="button primary" '+(editable?'':'disabled')+'>Mentés</button><button type="button" class="button quiet" id="ccGuestNew">Új vendég</button></div></form>'
-      +(state.guestLastPin?'<div style="margin-top:16px"><strong>Egyszer megjelenített PIN</strong><p>Biztonságosan add át. Később csak új PIN generálható.</p><code style="font-size:24px;letter-spacing:.15em">'+esc(state.guestLastPin)+'</code></div>':'')+'</article>';
+      +(state.guestLastPin?'<div style="margin-top:16px"><strong>Egyszer megjelenített PIN</strong><p>Biztonságosan add át. Később csak új PIN generálható.</p><code style="font-size:24px;letter-spacing:.15em">'+esc(state.guestLastPin)+'</code> <button type="button" class="button quiet" id="ccGuestCopyPin">PIN másolása</button></div>':'')+'</article>';
     $('#ccGuestCopyPin')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(state.guestLastPin);status('PIN vágólapra másolva.','success')}catch(_){status('A böngésző nem engedte a másolást.','error')}});
     $('#ccGuestReload')?.addEventListener('click',async()=>{try{await loadGuests_();renderMassGuests_()}catch(err){state.guestLoadError=text(err?.message||err);renderMassGuests_()}});
-    $('[data-guest-edit]').forEach(b=>b.onclick=()=>{state.guestEditId=text(b.dataset.guestEdit);state.guestLastPin='';renderMassGuests_()});
+    document.querySelectorAll('[data-guest-edit]').forEach(b=>b.onclick=()=>{state.guestEditId=text(b.dataset.guestEdit);state.guestLastPin='';renderMassGuests_()});
     $('#ccGuestNew')?.addEventListener('click',()=>{state.guestEditId='';state.guestLastPin='';renderMassGuests_()});
     $('#ccGuestForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();if(!editable)return;
