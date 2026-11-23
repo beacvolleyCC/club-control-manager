@@ -1475,7 +1475,7 @@
     let players=(matrixSource_().players||[]).filter(p=>text(p.teamId||p.team_id)===text(teamId));
     const f=state.matrixFilters||{};
     if(f.status!=='ALL')players=players.filter(p=>events.some(e=>map.get(`${text(e.eventId)}:${text(p.playerId)}`)===f.status));
-    players.sort((a,b)=>(num(a.jerseyNo)||9999)-(num(b.jerseyNo)||9999)||text(a.displayName||a.name).localeCompare(text(b.displayName||b.name),'hu'));
+    players.sort((a,b)=>Number(!!a.isGuest)-Number(!!b.isGuest)||(num(a.jerseyNo)||9999)-(num(b.jerseyNo)||9999)||text(a.displayName||a.name).localeCompare(text(b.displayName||b.name),'hu'));
     const t=teamById(teamId);if(!events.length)return'';
     const coachNames=teamGridCoachNames_(t),coachMap=coachAvailabilityMap_();
     const teamColor=t?.color||events.find(e=>e.color)?.color||'#f7b700';
@@ -2457,6 +2457,8 @@ async function ccMassAthleteHistoryLoad_(id){
   function ccRosterSortedByResponse_(rows){
     const order={going:0,'not-going':1,none:2};
     return (Array.isArray(rows)?rows:[]).map(enrichPlayer_).sort((a,b)=>{
+      const guestOrder=Number(!!a.isGuest)-Number(!!b.isGuest);
+      if(guestOrder)return guestOrder;
       const tone=order[ccTrainingRsvpTone_(a.status)]-order[ccTrainingRsvpTone_(b.status)];
       if(tone)return tone;
       const anum=text(a.jerseyNo??a.jersey_no),bnum=text(b.jerseyNo??b.jersey_no);
