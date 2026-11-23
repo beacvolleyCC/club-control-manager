@@ -9,7 +9,7 @@
 
   const AREAS={
     mass:{label:'Tömegsport',glyph:'△',modules:[
-      ['trainings','Edzések','◇'],['athletes','Sportolók','○'],['passes','BEAC import','▤'],['calendar','Naptár','□'],['archive','Archívum','⌁']
+      ['trainings','Edzések','◇'],['athletes','Sportolók','○'],['guests','Vendégek','○'],['passes','BEAC import','▤'],['calendar','Naptár','□'],['archive','Archívum','⌁']
     ]},
     competition:{label:'Versenysport',glyph:'◇',modules:[
       ['overview','Áttekintés','△'],['trainings','Edzések','◇'],['matches','Meccsek','◆'],['courts','Terembeosztás','▦'],['standings','Tabella','≡'],['history','Statisztika','↗'],['teams','Csapatok','▱'],['players','Játékosok','○'],['calendar','Naptár','□'],['notifications','Értesítések','◉']
@@ -20,13 +20,13 @@
 
   const LEGACY_MAIN_SECTIONS=['competition','mass','calendar','planning','finance','settings'];
   const ADMIN_MODULES=[
-    {group:'Tömegsport',items:[['mass.overview','Áttekintés'],['mass.trainings','Edzések'],['mass.calendar','Naptár'],['mass.athletes','Sportolók'],['mass.passes','Bérletek']]},
+    {group:'Tömegsport',items:[['mass.overview','Áttekintés'],['mass.trainings','Edzések'],['mass.calendar','Naptár'],['mass.athletes','Sportolók'],['mass.guests','Vendégek'],['mass.passes','Bérletek']]},
     {group:'Versenysport',items:[['competition.overview','Áttekintés'],['competition.trainings','Edzések'],['competition.planning','Edzéstervező'],['competition.matches','Meccsek'],['competition.calendar','Naptár'],['competition.teams','Csapatok'],['competition.players','Játékosok'],['competition.fees','Pénzügyek'],['competition.competition','Versenyadatok']]},
     {group:'Rendszer',items:[['settings','Beállítások / adminok']]}
   ];
 
   const state={
-    debugAllowed:false,debugPreviewOn:false,debugPreviewStatus:'unknown',
+    debugAllowed:false,debugPreviewOn:false,debugPreviewStatus:'unknown',guestProfiles:[],guestEditId:'',guestLastPin:'',guestLoadError:'',
     mode:String(cfg.DATA_MODE||'demo').toLowerCase(),supabase:null,session:null,manager:null,permissions:[],teams:[],players:[],events:[],calendarEvents:[],activityEvents:[],massTrainings:[],massCalendarEvents:[],massArchiveEvents:[],massAthletes:[],massPasses:[],massLoadError:'',massDetailCache:new Map(),massDetailUi:new Map(),admins:[],adminTeams:[],adminsLoadError:'',adminEditId:'',adminBusy:false,overview:null,rsvpMatrix:{events:[],players:[],responses:[]},cardRsvpMatrix:{events:[],players:[],responses:[]},eventRosterCache:new Map(),matrixFilterOpen:false,eventFiltersOpen:false,calendarFiltersOpen:false,matrixFilters:{team:'',period:'14',kind:'ALL',status:'ALL',from:'',to:''},
     area:['mass','competition'].includes(cfg.DEFAULT_AREA)?cfg.DEFAULT_AREA:'competition',module:'overview',calendarMode:'week',calendarAnchor:new Date(),calendarTeam:'',calendarType:'',calendarScope:'COMPETITION',massCalendarLevel:'',massCalendarSession:'',massAthleteSearch:'',massAthleteLevel:'',massAthleteStatus:'',massPassSearch:'',massPassMonth:'',playerTeam:'',playerSearch:'',playerMedical:'all',playerSort:(()=>{try{return localStorage.getItem('cc-manager-player-sort')||'name'}catch(_){return'name'}})(),playerSortDir:(()=>{try{return localStorage.getItem('cc-manager-player-sort-dir')||'asc'}catch(_){return'asc'}})(),playerListMode:(()=>{try{return localStorage.getItem('cc-manager-player-list-mode')==='grouped'?'grouped':'all'}catch(_){return'all'}})(),playerFiltersOpen:false,massAthleteFiltersOpen:false,massPassFiltersOpen:false,massCalendarFiltersOpen:false,massTrainingFiltersOpen:false,massTrainingPeriod:'upcoming',massTrainingPastSort:'newest',massTrainingDate:'',massAthleteMonth:'',massAthletePass:'all',massAthleteFirst:'all',teamFiltersOpen:false,eventTeam:'',eventPeriod:'upcoming',eventPastSort:'newest',overviewTeam:'',selectedTeam:'',selectedPlayer:'',pendingEmail:'',loading:false,massActionBusy:'',massAttendanceBusy:new Set(),notificationRecipients:[],notificationHistory:[],notificationSelectedPlayerId:'',notificationSearch:'',notificationBusy:false,notificationLoadError:'',competitionSyncStatus:null,competitionSyncBusy:false,competitionResults:[],competitionStandings:[],competitionDataError:'',managerStandingsContext:(()=>{try{return localStorage.getItem('cc-manager-standings-context')||''}catch(_){return''}})(),managerStandingsTeam:(()=>{try{return localStorage.getItem('cc-manager-standings-team')||'all'}catch(_){return'all'}})(),managerStandingsMatchScope:(()=>{try{return localStorage.getItem('cc-manager-standings-match-scope')==='beac'?'beac':'all'}catch(_){return'all'}})(),managerLeagueInsights:{key:'',loading:false,loaded:false,error:'',data:null},financeTab:'competition',financeTeam:'',financeData:null,financeAudit:[],financeSettings:null,financeSettingsTeam:'',financePassCatalog:[],financePassCatalogLoaded:false,financePassSearch:'',financePassType:'',financePassLevel:'',financePassTeam:'',financePassMonth:'',financePassStatus:'',financeCompetitionSearch:'',financeCompetitionMonth:'',financeCompetitionStatus:'',financeCompetitionType:'',financeCompetitionFiltersOpen:false,financePassFiltersOpen:false,financeLoading:false,teamDetailTab:'grid',teamGridPeriod:(()=>{try{return localStorage.getItem('cc-manager-team-grid-period')==='all'?'all':'upcoming'}catch(_){return'upcoming'}})(),equipmentByTeam:new Map(),equipmentLoading:new Set(),coachAvailability:[],coachAvailabilityBusy:new Set(),managerMedicalAppointments:[],teamFilters:{overview:[],events:[],players:[],teams:[]},teamFilterOpen:{overview:false,events:false,players:false,teams:false},plannerTeam:'',plannerTab:'planner'
   };
@@ -201,6 +201,7 @@
     if(area==='competition'&&module==='history')return can('competition.competition');
     if(area==='competition'&&module==='courts')return can('competition.trainings');
     if(area==='mass'&&module==='archive')return can('mass.trainings')||can('mass.calendar');
+    if(area==='mass'&&module==='guests')return can('mass.athletes');
     return can(`${area}.${module}`);
   }
   function canMainSection_(section){
@@ -306,6 +307,7 @@
       if(can('mass.calendar'))jobs.push(loadMassCalendar().catch(err=>{console.error('MGR008 mass calendar load failed',err);state.massCalendarEvents=[]}));else state.massCalendarEvents=[];
       if(canRoute('mass','archive'))jobs.push(loadMassArchive().catch(err=>{console.error('Mass archive load failed',err);state.massArchiveEvents=[]}));else state.massArchiveEvents=[];
       if(can('mass.athletes'))jobs.push(loadMassAthletes().catch(err=>{console.error('MGR008 mass athletes load failed',err);state.massAthletes=[]}));else state.massAthletes=[];
+      if(can('mass.athletes'))jobs.push(loadGuests_().catch(err=>{console.warn('Guest directory unavailable',err);state.guestProfiles=[];state.guestLoadError=text(err?.message||err)}));else{state.guestProfiles=[];state.guestLoadError=''};
       if(can('mass.passes')){jobs.push(loadMassPasses().catch(err=>{console.error('MGR008 mass passes load failed',err);state.massPasses=[]}));if(can('mass.trainings'))jobs.push(loadMassWeeklyPassMatches_().catch(err=>{console.warn('Weekly pass matching unavailable',err);state.massWeeklyPassMatches=null}));}else {state.massPasses=[];state.massWeeklyPassMatches=null;}
       if(canAction('settings','edit'))jobs.push(loadAdmins().catch(err=>{console.error('MGR004 admin load failed',err);state.admins=[];state.adminTeams=[];state.adminsLoadError=text(err?.message||'Az admin-kezelő MGR004 modul még nincs telepítve.')}));else{state.admins=[];state.adminTeams=[];state.adminsLoadError=''};
       await Promise.all(jobs);
@@ -362,6 +364,7 @@
     }).sort((a,b)=>(eventStart(b)?.getTime()||0)-(eventStart(a)?.getTime()||0));
   }
   async function loadMassAthletes(){const d=await rpc('cc_manager_mass_athletes_v1',{p_query:'',p_level:'',p_status:''});state.massAthletes=Array.isArray(d)?d:[]}
+  async function loadGuests_(){const d=await rpc('cc_guest_admin_list_v1');state.guestProfiles=Array.isArray(d)?d:[];state.guestLoadError=''}
   async function loadMassPasses(){const d=await rpc('cc_manager_mass_passes_v1',{p_query:'',p_month:''});state.massPasses=Array.isArray(d)?d:[]}
   async function loadMassWeeklyPassMatches_(){const d=await rpc('cc_manager_mass_weekly_pass_matches_v1');state.massWeeklyPassMatches=d&&typeof d==='object'?d:null;}
   async function loadActivityEvents(){const now=new Date(),seasonYear=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1,from=new Date(seasonYear,7,1),to=new Date(seasonYear+1,7,1),jobs=[];if(can('competition.trainings'))jobs.push(rpc('cc_manager_events_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_kind:'training',p_team_id:null}));if(can('competition.matches'))jobs.push(rpc('cc_manager_events_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_kind:'match',p_team_id:null}));const parts=await Promise.all(jobs);state.activityEvents=parts.flatMap(x=>Array.isArray(x)?x:[]).sort((a,b)=>eventStart(a)-eventStart(b))}
@@ -1905,6 +1908,7 @@
     if(state.area==='competition'&&m==='competition'){renderPlaceholder('Versenyadatok','Competition Core: tabella, teljes meccslista, BRSZ/MRSZ források és konfliktusok.',['054 Competition Core backend előtt nincs production adat','Saját csapatok meccsei az events bridge-en keresztül','Külső liga-meccsek nem kerülnek az events táblába']);return}
     if(state.area==='mass'&&m==='trainings'){renderMassTrainings();return}
     if(state.area==='mass'&&m==='athletes'){renderMassAthletes();return}
+    if(state.area==='mass'&&m==='guests'){renderMassGuests_();return}
     if(state.area==='mass'&&m==='archive'){renderMassArchive();return}
     if(state.area==='mass'&&m==='passes'){renderMassPasses();return}
     renderPlaceholder(moduleMeta()?.[1]||'Modul','A modul foundation helye.',['read-only migráció','parity teszt','write csak később']);
@@ -2279,6 +2283,42 @@
   }
   function massAthleteFilterOptions_(key){if(key==='effectiveLevel')return Array.from(new Set((state.massAthletes||[]).map(a=>normalizeMassLevelLabel_(a.effectiveLevel||a.levelOverride||a.level)).filter(Boolean))).sort((a,b)=>HU_NAME_COLLATOR.compare(a,b));return Array.from(new Set((state.massAthletes||[]).map(a=>text(a[key])).filter(Boolean))).sort((a,b)=>HU_NAME_COLLATOR.compare(a,b))}
   function massAthleteRow_(a){const canonicalLevel=normalizeMassLevelLabel_(a.effectiveLevel||a.levelOverride||a.level),color=massLevelColor({level:canonicalLevel}),pass=a.currentPassNumber?`${a.currentPassNumber}${a.currentPassMonth?' · '+a.currentPassMonth:''}`:'Nincs aktuális bérlet';return `<button class="mass-athlete-row unified-person-card mass-no-avatar" type="button" data-mass-athlete-open="${esc(a.athleteId)}" style="--mass-athlete-color:${esc(color)};--player-team-color:${esc(color)}"><span class="person-primary"><span><b>${esc(a.name||'Névtelen')}</b><small>${esc(a.email||'–')}</small>${ccMassAthleteNamePeers_(a).length?'<small>⚠ Azonos nevű további adatlap</small>':''}</span></span><span><b>${esc(canonicalLevel)}</b><small>${a.levelOverride?'Edzői felülírás':'Alapszint'} · ${esc(a.status||'–')}</small></span><span><b>${esc(pass)}</b><small>${num(a.attended)} edzésen volt 09.29. óta · ${num(a.noShow)} hiányzás</small></span><i class="person-chevron"><span class="triangle-icon"></span></i></button>`}
+  function renderMassGuests_(){
+    if(!ccRouteIs_('mass','guests'))return;
+    const profiles=Array.isArray(state.guestProfiles)?state.guestProfiles:[];
+    const edit=profiles.find(p=>text(p.guestId)===text(state.guestEditId))||null;
+    const editable=canAction('mass.athletes','edit');
+    const teams=(state.teams||[]).filter(t=>t.active!==false);
+    const teamOptions=teams.map(t=>'<label style="display:inline-flex;align-items:center;gap:7px;margin:5px 14px 5px 0"><input type="checkbox" name="guestTeam" value="'+esc(t.id)+'" '+(editable?'':'disabled')+' '+((edit?.teamIds||[]).map(String).includes(String(t.id))?'checked':'')+'> '+esc(t.name)+'</label>').join('');
+    const rows=profiles.slice().sort((a,b)=>text(a.name).localeCompare(text(b.name),'hu')).map(p=>
+      '<button type="button" class="person-row" data-guest-edit="'+esc(p.guestId)+'"><span class="person-primary"><span><b>'+esc(p.name)+'</b><small>'+esc(p.email)+'</small></span></span><span>'+esc((p.teamIds||[]).map(id=>teams.find(t=>text(t.id)===text(id))?.name||'Csapat').join(', '))+'</span><span>'+(p.active?'Aktív':'Inaktív')+' · '+num(p.goingCount)+' jelentkezés</span><i class="person-chevron"><span class="triangle-icon"></span></i></button>').join('');
+    $('#viewContent').innerHTML='<div class="page-intro"><div><h2>Vendégek</h2><p>Vendégadatlapok, csapat-hozzáférés és PIN-kezelés.</p></div><a class="button quiet" href="./vendeg/" target="_blank" rel="noopener noreferrer">Vendégoldal megnyitása</a></div>'
+      +'<article class="panel mass-directory-panel"><div class="mass-athlete-list">'+(rows||emptyInline('Még nincs vendég.'))+'</div></article>'
+      +'<article class="panel"><h3>'+(edit?'Vendég szerkesztése':'Új vendég')+'</h3><form id="ccGuestForm" autocomplete="off">'
+      +'<div class="detail-grid"><label class="field"><span>Név</span><input name="name" required maxlength="120" value="'+esc(edit?.name||'')+'" '+(editable?'':'disabled')+'></label>'
+      +'<label class="field"><span>E-mail-cím</span><input name="email" type="email" required maxlength="254" value="'+esc(edit?.email||'')+'" '+(editable?'':'disabled')+'></label></div>'
+      +'<label class="field"><span>Megjegyzés</span><textarea name="note" maxlength="1000" '+(editable?'':'disabled')+'>'+esc(edit?.note||'')+'</textarea></label>'
+      +'<h4>Elérhető versenycsapatok</h4><div>'+teamOptions+'</div>'
+      +'<label style="display:flex;gap:9px;margin:14px 0"><input name="active" type="checkbox" '+(editable?'':'disabled')+' '+(!edit||edit.active?'checked':'')+'> Aktív</label>'
+      +(edit?'<label style="display:flex;gap:9px;margin:14px 0"><input name="resetPin" type="checkbox" '+(editable?'':'disabled')+'> Új PIN-kód generálása</label>':'<p>Új vendégnél 8 számjegyű PIN generálódik.</p>')
+      +'<div class="toolbar-actions"><button type="submit" class="button primary" '+(editable?'':'disabled')+'>Mentés</button><button type="button" class="button quiet" id="ccGuestNew">Új vendég</button></div></form>'
+      +(state.guestLastPin?'<div style="margin-top:16px"><strong>Egyszer megjelenített PIN</strong><p>Biztonságosan add át. Később csak új PIN generálható.</p><code style="font-size:24px;letter-spacing:.15em">'+esc(state.guestLastPin)+'</code></div>':'')+'</article>';
+    $('#ccGuestCopyPin')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(state.guestLastPin);status('PIN vágólapra másolva.','success')}catch(_){status('A böngésző nem engedte a másolást.','error')}});
+    $('#ccGuestReload')?.addEventListener('click',async()=>{try{await loadGuests_();renderMassGuests_()}catch(err){state.guestLoadError=text(err?.message||err);renderMassGuests_()}});
+    $('[data-guest-edit]').forEach(b=>b.onclick=()=>{state.guestEditId=text(b.dataset.guestEdit);state.guestLastPin='';renderMassGuests_()});
+    $('#ccGuestNew')?.addEventListener('click',()=>{state.guestEditId='';state.guestLastPin='';renderMassGuests_()});
+    $('#ccGuestForm')?.addEventListener('submit',async ev=>{
+      ev.preventDefault();if(!editable)return;
+      const fd=new FormData(ev.currentTarget);
+      const payload={name:text(fd.get('name')).trim(),email:text(fd.get('email')).trim(),note:text(fd.get('note')),active:fd.has('active'),resetPin:fd.has('resetPin'),teamIds:fd.getAll('guestTeam').map(String)};
+      if(edit)payload.guestId=edit.guestId;
+      if(!payload.teamIds.length){status('Válassz legalább egy csapatot.','error');return}
+      if(state.guestLoadError){status('A vendégadatok nem elérhetők, ezért a mentés tiltott.','error');return}
+      const btn=ev.currentTarget.querySelector('[type="submit"]');btn.disabled=true;
+      try{const result=await rpc('cc_guest_admin_save_v1',{p_payload:payload});state.guestEditId=result.guestId;state.guestLastPin=text(result.pin||'');await loadGuests_();renderMassGuests_();status('Vendégadatlap mentve.','success')}
+      catch(err){status(err.message||'Nem sikerült menteni.','error');btn.disabled=false}
+    });
+  }
   function renderMassAthletes(){if(!ccRouteIs_('mass','athletes'))return;
     state.massAthleteFiltersOpen=filterOpen_('mass.athletes',state.massAthleteFiltersOpen);const rows=massAthleteRows_(),levels=massAthleteFilterOptions_('effectiveLevel'),statuses=massAthleteFilterOptions_('status'),months=Array.from(new Set((state.massAthletes||[]).map(a=>text(a.currentPassMonth)).filter(Boolean))).sort().reverse(),active=!!state.massAthleteSearch||!!state.massAthleteLevel||!!state.massAthleteStatus||!!state.massAthleteMonth||state.massAthletePass!=='all'||state.massAthleteFirst!=='all';
     $('#viewContent').innerHTML=`<div class="page-intro"><div><h2>Sportolók</h2><p>Tömegsport sportolói adatbázis.</p></div><div class="filter-head-actions cc-icon-toolbar"><button class="matrix-filter-toggle icon-only cc-toolbar-icon ${state.massAthleteFiltersOpen?'open':''} ${active?'has-filter':''}" id="massAthleteFiltersToggle" aria-expanded="${state.massAthleteFiltersOpen?'true':'false'}" type="button" aria-label="Szűrők" title="Szűrők"><span class="triangle-icon"></span></button>${active?'<button class="filter-reset cc-toolbar-reset" id="massAthleteReset" type="button" aria-label="Szűrők törlése" title="Szűrők törlése">×</button>':''}<button class="cc-toolbar-icon cc-raw-import-icon" id="massRawImportOpen" type="button" aria-label="Raw BEAC import" title="Raw BEAC import">≡</button><button class="cc-toolbar-icon cc-refresh-icon" id="massAthletesRefresh" type="button" aria-label="Frissítés" title="Frissítés">↻</button></div></div><div class="filter-panel mass-directory-toolbar cc-mass-athlete-filters" id="massAthleteFiltersPanel" ${state.massAthleteFiltersOpen?'':'hidden'}><input id="massAthleteSearch" type="search" value="${esc(state.massAthleteSearch)}" placeholder="Keresés név, email, bérletszám vagy szint alapján…"><select id="massAthleteLevel"><option value="">Minden szint</option>${levels.map(x=>`<option value="${esc(x)}" ${x===state.massAthleteLevel?'selected':''}>${esc(x)}</option>`).join('')}</select><select id="massAthleteStatus"><option value="">Minden állapot</option>${statuses.map(x=>`<option value="${esc(x)}" ${x===state.massAthleteStatus?'selected':''}>${esc(x)}</option>`).join('')}</select><select id="massAthleteMonth"><option value="">Minden hónap</option>${months.map(x=>`<option value="${esc(x)}" ${x===state.massAthleteMonth?'selected':''}>${esc(x)}</option>`).join('')}</select><select id="massAthletePass"><option value="all" ${state.massAthletePass==='all'?'selected':''}>Minden bérlet</option><option value="has" ${state.massAthletePass==='has'?'selected':''}>Van aktuális bérlet</option><option value="missing" ${state.massAthletePass==='missing'?'selected':''}>Nincs aktuális bérlet</option></select><select id="massAthleteFirst"><option value="all" ${state.massAthleteFirst==='all'?'selected':''}>Első alkalom: mind</option><option value="not-yet" ${state.massAthleteFirst==='not-yet'?'selected':''}>Még nem volt első edzésen</option><option value="done" ${state.massAthleteFirst==='done'?'selected':''}>Volt már edzésen</option></select></div><article class="panel mass-directory-panel"><div class="mass-athlete-list">${rows.map(massAthleteRow_).join('')||emptyInline('Nincs a szűrésnek megfelelő sportoló.')}</div></article>`;
