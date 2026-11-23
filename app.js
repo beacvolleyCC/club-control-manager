@@ -2295,7 +2295,7 @@
     const teams=(state.teams||[]).filter(t=>t.active!==false);
     const teamOptions=teams.map(t=>'<label style="display:inline-flex;align-items:center;gap:7px;margin:5px 14px 5px 0"><input type="checkbox" name="guestTeam" value="'+esc(t.id)+'" '+(editable?'':'disabled')+' '+((edit?.teamIds||[]).map(String).includes(String(t.id))?'checked':'')+'> '+esc(t.name)+'</label>').join('');
     const rows=filtered.slice().sort((a,b)=>text(a.name).localeCompare(text(b.name),'hu')).map(p=>
-      '<button type="button" class="person-row" data-guest-edit="'+esc(p.guestId)+'"><span class="person-primary"><span><b>'+esc(p.name)+'</b><small>'+esc(p.email)+'</small></span></span><span>'+esc((p.teamIds||[]).map(id=>teams.find(t=>text(t.id)===text(id))?.name||'Csapat').join(', '))+'</span><span>'+(p.active?'Aktív':'Inaktív')+' · '+num(p.goingCount)+' jelentkezés</span><i class="person-chevron"><span class="triangle-icon"></span></i></button>').join('');
+      '<button type="button" class="person-row" data-guest-edit="'+esc(p.guestId)+'"><span class="person-primary"><span><b>'+esc(p.name)+'</b><small>'+esc(p.email)+(p.position?' · '+esc(p.position):'')+'</small></span></span><span>'+esc((p.teamIds||[]).map(id=>teams.find(t=>text(t.id)===text(id))?.name||'Csapat').join(', '))+'</span><span>'+(p.active?'Aktív':'Inaktív')+' · '+num(p.goingCount)+' jelentkezés</span><i class="person-chevron"><span class="triangle-icon"></span></i></button>').join('');
     $('#viewContent').innerHTML='<div class="page-intro"><div><h2>Vendégek</h2><p>Vendégadatlapok, csapat-hozzáférés és PIN-kezelés.</p></div><a class="button quiet" href="./vendeg/" target="_blank" rel="noopener noreferrer">Vendégoldal megnyitása</a></div>'
       +'<article class="panel"><div class="toolbar-actions" style="display:flex;flex-wrap:wrap;gap:10px;align-items:end"><div style="flex:1;min-width:180px"><label for="ccGuestSearch">Vendégek keresése</label><input id="ccGuestSearch" type="search" placeholder="Név vagy e-mail" value="'+esc(state.guestSearch||'')+'"></div><div><label for="ccGuestStatus">Állapot</label><select id="ccGuestStatus"><option value="all" '+(guestStatus==='all'?'selected':'')+'>Összes</option><option value="active" '+(guestStatus==='active'?'selected':'')+'>Aktív</option><option value="inactive" '+(guestStatus==='inactive'?'selected':'')+'>Inaktív</option></select></div></div><p aria-live="polite">'+profiles.length+' vendég · '+activeGuestCount+' aktív · '+(profiles.length-activeGuestCount)+' inaktív</p><p class="muted">Belépni csak aktív vendég tud, a saját e-mail-címével és a számára generált PIN-nel. Inaktív vendégnél a belépés biztonsági okból általános hibát jelez.</p></article>'
       +(state.guestLoadError?'<article class="panel"><p>Nem sikerült betölteni a vendégeket: '+esc(state.guestLoadError)+'</p><button type="button" class="button quiet" id="ccGuestReload">Újrapróbálás</button></article>':'')
@@ -2303,6 +2303,7 @@
       +'<article class="panel"><h3>'+(edit?'Vendég szerkesztése':'Új vendég')+'</h3><form id="ccGuestForm" autocomplete="off">'
       +'<div class="detail-grid"><label class="field"><span>Név</span><input name="name" required maxlength="120" value="'+esc(edit?.name||'')+'" '+(editable?'':'disabled')+'></label>'
       +'<label class="field"><span>E-mail-cím</span><input name="email" type="email" required maxlength="254" value="'+esc(edit?.email||'')+'" '+(editable?'':'disabled')+'></label></div>'
+      +'<label class="field"><span>Poszt</span><select name="position" '+(editable?'':'disabled')+'>'+positionOptions_(edit?.position||'')+'</select></label>'
       +'<label class="field"><span>Megjegyzés</span><textarea name="note" maxlength="1000" '+(editable?'':'disabled')+'>'+esc(edit?.note||'')+'</textarea></label>'
       +'<h4>Elérhető versenycsapatok</h4><div>'+teamOptions+'</div>'
       +'<label style="display:flex;gap:9px;margin:14px 0"><input name="active" type="checkbox" '+(editable?'':'disabled')+' '+(!edit||edit.active?'checked':'')+'> Aktív</label>'
@@ -2318,7 +2319,7 @@
     $('#ccGuestForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();if(!editable)return;
       const fd=new FormData(ev.currentTarget);
-      const payload={name:text(fd.get('name')).trim(),email:text(fd.get('email')).trim(),note:text(fd.get('note')),active:fd.has('active'),resetPin:fd.has('resetPin'),teamIds:fd.getAll('guestTeam').map(String)};
+      const payload={name:text(fd.get('name')).trim(),email:text(fd.get('email')).trim(),position:text(fd.get('position')).trim(),note:text(fd.get('note')),active:fd.has('active'),resetPin:fd.has('resetPin'),teamIds:fd.getAll('guestTeam').map(String)};
       if(edit)payload.guestId=edit.guestId;
       if(!payload.teamIds.length){status('Válassz legalább egy csapatot.','error');return}
       if(state.guestLoadError){status('A vendégadatok nem elérhetők, ezért a mentés tiltott.','error');return}
