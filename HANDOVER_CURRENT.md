@@ -6,7 +6,9 @@
 
 **TEST DB:** `szzoubvhlwnojtzqjebc`. Sikeresen alkalmazott migrációk: `cc_guest_position_profile_test_20261123`, `cc_guest_overview_matrix_test_20261123`. Verziókezelt SQL: `sql/cc_guest_position_profile_20261123.sql`, `sql/cc_guest_overview_matrix_20261123.sql`. A második RPC a meglévő jogosultságvizsgált overview olvasóból indul; az új RPC-re anon EXECUTE=false, authenticated EXECUTE=true. **Nem volt LIVE DB módosítás, LIVE frontend deploy, sem vendég RSVP írás.**
 
-**Nyitott kiadási kapu:** CI és JS syntax/regresszió; TEST bejelentkezett jogosultság és vendég RSVP E2E; Áttekintés (mátrix) + Edzések (kártya és névsor), csapatszűrés és létszám-egyezés; Player oldali névsor és létszám még külön integrálandó; LIVE DB migráció csak hitelesített release ellenőrzés után. **Ne állítsuk, hogy LIVE-ban elkészült.**
+**Automatikus QA (2026-11-23):** commit `fcf33c222cd4ee79e244a52f67d74089070b3152` mellett 9/9 GitHub Actions workflow sikeres, benne a `Manager competition training roster QA`, `Manager guest administration safety QA`, `LIVE debug preview safety gates` és Sport Scoring QA. A régi RPC stringet ellenőrző regressziós tesztet az új vendégnévsor RPC-hez aktualizáltuk. Az anon EXECUTE tiltás TEST DB-ben ellenőrzött. LIVE DB aggregált olvasás: 1 aktív vendégprofil és 1 going vendég RSVP; LIVE adatírás nem volt.
+
+**Nyitott kiadási kapu:** TEST bejelentkezett jogosultság és vendég RSVP E2E; Áttekintés (mátrix) + Edzések (kártya és névsor), csapatszűrés és létszám-egyezés; Player oldali névsor és létszám még külön integrálandó; LIVE DB migráció csak hitelesített release ellenőrzés után. **Ne állítsuk, hogy LIVE-ban elkészült.**
 
 ---
 
