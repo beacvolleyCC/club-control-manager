@@ -1,3 +1,15 @@
+# Club Control — 2026-11-23: vendég Áttekintés / Edzések / poszt integráció (TEST, KIADÁS ELŐTT)
+
+**Felhasználói igény:** a vendégek a Manager versenysport Áttekintés jelenléti táblában és Edzések névsorában is látszódjanak. A teljes „Jövök” létszám mellett jelenjen meg az ebből vendégként érkezők száma, pl. `12 (2 vendég)`; a vendégprofil posztot szerkeszthet, a normál játékoshoz hasonlóan, igazolási/sportorvosi mezők nélkül.
+
+**Fejlesztési ág:** `feature/guest-roster-count-position-20261123` (a korábbi vendéglista PR #104 ágáról), külön PR a főágra. Manager `app.js`: `cc_manager_events_with_guests_v1` eseményfeed, `cc_manager_event_roster_with_guests_v1` névsor; kártyán összes létszám + külön `guestCount`; névsorban `Vendég` megjelölés; `cc_manager_rsvp_matrix_with_guests_v1` Áttekintés mátrix; vendégprofil `position` mentés és megjelenítés. Vendég sorában sportorvosi/igazolási státusz nem látszik. A szezonális poszt RPC már tartalmazza a vendég jelentkezéseket.
+
+**TEST DB:** `szzoubvhlwnojtzqjebc`. Sikeresen alkalmazott migrációk: `cc_guest_position_profile_test_20261123`, `cc_guest_overview_matrix_test_20261123`. Verziókezelt SQL: `sql/cc_guest_position_profile_20261123.sql`, `sql/cc_guest_overview_matrix_20261123.sql`. A második RPC a meglévő jogosultságvizsgált overview olvasóból indul; az új RPC-re anon EXECUTE=false, authenticated EXECUTE=true. **Nem volt LIVE DB módosítás, LIVE frontend deploy, sem vendég RSVP írás.**
+
+**Nyitott kiadási kapu:** CI és JS syntax/regresszió; TEST bejelentkezett jogosultság és vendég RSVP E2E; Áttekintés (mátrix) + Edzések (kártya és névsor), csapatszűrés és létszám-egyezés; Player oldali névsor és létszám még külön integrálandó; LIVE DB migráció csak hitelesített release ellenőrzés után. **Ne állítsuk, hogy LIVE-ban elkészült.**
+
+---
+
 # Club Control — 2026-11-23: vendégbelépési diagnózis és vendéglista javítás (nem élesített)
 
 **Ellenőrzött LIVE diagnózis:** a `cc_guest_login_v1` email-regex helyes, nincs szükség Supabase Auth fiók létrehozására. A LIVE `cc_guest_profiles_v1` táblában 1 vendégprofil van, amelynek mind `players.active`, mind `cc_guest_profiles_v1.active` mezője false, így nem léphet be email+PIN-nel. Nem módosítottunk felhasználói adatot vagy PIN-t. Manager `main` már tartalmazza a `renderMassGuests_` admin listát és az `cc_guest_admin_save_v1` mentési folyamatot; a korábbi állítás, hogy a funkció egyáltalán nincs mainben, elavult.
