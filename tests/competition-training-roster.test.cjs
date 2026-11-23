@@ -201,3 +201,27 @@ test('match-only preview gives each real RSVP a visible label; training preview 
   assert.ok(source.includes("eventType(e)==='match'"));
   assert.ok(source.includes('loadEventRoster(id)'),'never infer roster from opponent or league fixture');
 });
+
+
+test('guests appear after registered players and never get a medical or player profile action',()=>{
+  const guest={playerId:'guest-1',name:'Vendég Teszt',isGuest:true,position:'Szélső',status:'going',jerseyNo:null};
+  const ordered=[...ctx.qa.order([...players,guest])].map(p=>p.playerId);
+  assert.equal(ordered.at(-1),'guest-1','guest remains last even when going');
+  const quick=ctx.qa.small([...players,guest],'ev',true,true);
+  const full=ctx.qa.row(guest,'ev',true,true);
+  assert.ok(quick.includes('Vendég</small>'));
+  assert.ok(quick.indexOf('Vendég Teszt')>quick.indexOf('Nincs mezszám'));
+  assert.ok(!quick.includes('data-roster-att-slider="guest-1"'),'guest RSVP is not editable by the player attendance slider');
+  assert.ok(!quick.includes('data-roster-profile-open="guest-1"'),'guest must use guest administration editor');
+  assert.ok(full.includes('VENDÉG'));
+  assert.ok(!full.includes('Sportorvosi:'));
+  assert.ok(!full.includes('data-roster-profile-open="guest-1"'));
+});
+test('manager overview and training loads request guest-aware summaries',()=>{
+  assert.ok(source.includes("rpc('cc_manager_events_with_guests_v1'"));
+  assert.ok(source.includes("rpc('cc_manager_rsvp_matrix_with_guests_v1'"));
+  assert.ok(source.includes("rpc('cc_manager_event_roster_with_guests_v1'"));
+  assert.ok(source.includes('guestCount=num(e.guestCount)'));
+  assert.ok(source.includes('Number(!!a.isGuest)-Number(!!b.isGuest)'));
+  assert.ok(source.includes('const guestGoing=')||source.includes('guestGoing=players.filter'));
+});
