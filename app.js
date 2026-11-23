@@ -399,7 +399,7 @@
   async function loadRsvpMatrix(){
     const {from,to}=matrixRange();
     try{
-      const d=await rpc('cc_manager_rsvp_matrix_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_team_id:null});
+      const d=await rpc('cc_manager_rsvp_matrix_with_guests_v1',{p_from:from.toISOString(),p_to:to.toISOString(),p_team_id:null});
       state.rsvpMatrix=d&&typeof d==='object'?d:{events:[],players:[],responses:[]};
       state.rsvpMatrixLoadError='';
     }catch(err){
@@ -1347,8 +1347,8 @@
       </span>
       <span class="cc-compact-roster-presence"><small class="cc-compact-roster-source">${preview.confirmed?'Rögzítve':'RSVP alapján'}</small>${ccCompetitionAttendanceSlider_(p,attendanceEditable)}</span>
       <span class="cc-compact-roster-actions">
-        <span class="cc-compact-roster-medical ${esc(m.cls)}" title="Sportorvosi: ${esc(p.medicalValidUntil?fmtDate(p.medicalValidUntil):'nincs adat')}">${esc(m.label)}</span>
-        <button type="button" class="cc-compact-roster-open" data-roster-profile-open="${esc(p.playerId||p.id)}" aria-label="${esc(name)} játékosprofilja" title="Játékosprofil megnyitása"><span class="triangle-icon" aria-hidden="true"></span></button>
+        ${p.isGuest?'<span class="cc-compact-roster-source">VENDÉG</span>':`<span class="cc-compact-roster-medical ${esc(m.cls)}" title="Sportorvosi: ${esc(p.medicalValidUntil?fmtDate(p.medicalValidUntil):'nincs adat')}">${esc(m.label)}</span>`}
+        ${p.isGuest?'':`<button type="button" class="cc-compact-roster-open" data-roster-profile-open="${esc(p.playerId||p.id)}" aria-label="${esc(name)} játékosprofilja" title="Játékosprofil megnyitása"><span class="triangle-icon" aria-hidden="true"></span></button>`}
       </span>
     </div>`;
   }
@@ -1479,14 +1479,14 @@
     const t=teamById(teamId);if(!events.length)return'';
     const coachNames=teamGridCoachNames_(t),coachMap=coachAvailabilityMap_();
     const teamColor=t?.color||events.find(e=>e.color)?.color||'#f7b700';
-    const head=`<th class="matrix-event-col matrix-event-side sticky-matrix-col">Alkalom</th><th class="matrix-count-col matrix-count-head">Fő</th>${coachNames.map(name=>`<th class="matrix-player-head matrix-coach-head" title="Edző: ${esc(name)}"><span class="grid-player-head-inner"><span class="matrix-coach-avatar">E</span><span class="grid-player-label">${esc(name)}</span></span></th>`).join('')}${players.map(p=>`<th class="matrix-player-head" title="${esc(p.displayName||p.name)}"><button class="matrix-player-profile-open" type="button" data-matrix-player-open="${esc(p.playerId||p.id)}" aria-label="${esc(p.displayName||p.name)} játékos profilja"><span class="grid-player-head-inner">${avatarHtml(p,'matrix')}<span class="grid-player-label">${esc(gridGivenName(p))}</span></span></button></th>`).join('')}`;
+    const head=`<th class="matrix-event-col matrix-event-side sticky-matrix-col">Alkalom</th><th class="matrix-count-col matrix-count-head">Fő</th>${coachNames.map(name=>`<th class="matrix-player-head matrix-coach-head" title="Edző: ${esc(name)}"><span class="grid-player-head-inner"><span class="matrix-coach-avatar">E</span><span class="grid-player-label">${esc(name)}</span></span></th>`).join('')}${players.map(p=>`<th class="matrix-player-head" title="${esc(p.displayName||p.name)}">${p.isGuest?`<span class="grid-player-head-inner" title="${esc(p.displayName||p.name)} · Vendég">${avatarHtml(p,'matrix')}<span class="grid-player-label">${esc(gridGivenName(p))} (V)</span></span>`:`<button class="matrix-player-profile-open" type="button" data-matrix-player-open="${esc(p.playerId||p.id)}" aria-label="${esc(p.displayName||p.name)} játékos profilja"><span class="grid-player-head-inner">${avatarHtml(p,'matrix')}<span class="grid-player-label">${esc(gridGivenName(p))}</span></span></button>`}</th>`).join('')}`;
     let lastMonth='';
     const body=events.map((e,idx)=>{
       const month=matrixMonthLabel(e),divider=idx>0&&month!==lastMonth?`<tr class="matrix-month-divider"><td colspan="${2+coachNames.length+players.length}"><span>${esc(month)}</span></td></tr>`:'';lastMonth=month;
-      const going=players.filter(p=>map.get(`${text(e.eventId)}:${text(p.playerId)}`)==='going').length;
+      const going=players.filter(p=>map.get(`${text(e.eventId)}:${text(p.playerId)}`)==='going').length, guestGoing=players.filter(p=>p.isGuest&&map.get(`${text(e.eventId)}:${text(p.playerId)}`)==='going').length;
       const iconPath=eventType(e)==='training'?'assets/event-training-mask.png':text(e.homeAway||e.home_away)==='away'?'assets/event-away-mask.png':'assets/event-home-mask.png';
       const eventLabel=eventType(e)==='training'?'Edzés':ccEventOpponent_(e)||'Meccs';
-      return divider+`<tr class="matrix-data-row"><th class="matrix-event-col matrix-event-side sticky-matrix-col"><button class="matrix-event-side-btn" type="button" data-event-id="${esc(e.eventId)}"><span class="matrix-side-icon"><img src="${iconPath}" alt=""></span><span class="matrix-event-copy"><b>${esc(eventLabel)}</b><small>${esc(fmtDate(eventStart(e)))} · ${esc(fmtTime(eventStart(e)))}</small></span></button></th><td class="matrix-count-col matrix-count-cell"><strong class="${matrixCountClass(going)}">${going}</strong></td>${coachNames.map(name=>`<td class="matrix-cell matrix-coach-cell">${coachMatrixControl_(e.eventId,teamId,name,coachMap.get(text(e.eventId)+':'+name))}</td>`).join('')}${players.map(p=>{const st=map.get(`${text(e.eventId)}:${text(p.playerId)}`);return `<td class="matrix-cell ${st==='going'?'going':st==='not_going'?'not-going':'none'}">${matrixPlayerControl_(e.eventId,p.playerId,st,false)}</td>`}).join('')}</tr>`
+      return divider+`<tr class="matrix-data-row"><th class="matrix-event-col matrix-event-side sticky-matrix-col"><button class="matrix-event-side-btn" type="button" data-event-id="${esc(e.eventId)}"><span class="matrix-side-icon"><img src="${iconPath}" alt=""></span><span class="matrix-event-copy"><b>${esc(eventLabel)}</b><small>${esc(fmtDate(eventStart(e)))} · ${esc(fmtTime(eventStart(e)))}</small></span></button></th><td class="matrix-count-col matrix-count-cell"><strong class="${matrixCountClass(going)}">${going}</strong>${guestGoing?`<small title="Ebből ${guestGoing} vendég"> (${guestGoing} vendég)</small>`:''}</td>${coachNames.map(name=>`<td class="matrix-cell matrix-coach-cell">${coachMatrixControl_(e.eventId,teamId,name,coachMap.get(text(e.eventId)+':'+name))}</td>`).join('')}${players.map(p=>{const st=map.get(`${text(e.eventId)}:${text(p.playerId)}`);return `<td class="matrix-cell ${st==='going'?'going':st==='not_going'?'not-going':'none'}">${matrixPlayerControl_(e.eventId,p.playerId,st,false)}</td>`}).join('')}</tr>`
     }).join('');
     return `<section class="matrix-team-section player-parity-team" style="--team-color:${esc(teamColor)}"><div class="matrix-team-title"><strong>${esc(t?.name||'Csapat')}</strong><span>${events.length} esemény · ${players.length} játékos</span></div><div class="matrix-scroll manager-player-grid"><table class="rsvp-matrix season-matrix transposed-matrix manager-player-matrix"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div></section>`
   }
@@ -2412,7 +2412,7 @@ async function ccMassAthleteHistoryLoad_(id){
   function ccGoingStatus_(value){const k=ccNameKey_(value);return k==='going'||k==='yes'||k==='jovok'||k==='igen'}
   function ccEventPositionSummary_(e){
     const id=text(e.eventId||e.id),record=ccSeasonPositionByEvent_.get(id);
-    if(record&&!num(e.guestCount)){
+    if(record){
       return {known:true,counts:{f:num(record.f),sz:num(record.sz),c:num(record.c),a:num(record.a),l:num(record.l),'?':num(record.unknown)},source:'season-summary'};
     }
     const cached=state.eventRosterCache.get(id);
