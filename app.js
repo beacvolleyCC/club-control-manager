@@ -2286,13 +2286,18 @@
   function renderMassGuests_(){
     if(!ccRouteIs_('mass','guests'))return;
     const profiles=Array.isArray(state.guestProfiles)?state.guestProfiles:[];
+    const guestSearch=text(state.guestSearch||'').trim().toLocaleLowerCase('hu');
+    const guestStatus=state.guestStatus||'all';
+    const filtered=profiles.filter(p=>(guestStatus==='all'||(guestStatus==='active'?!!p.active:!p.active))&&(!guestSearch||(text(p.name)+' '+text(p.email)).toLocaleLowerCase('hu').includes(guestSearch)));
+    const activeGuestCount=profiles.filter(p=>p.active).length;
     const edit=profiles.find(p=>text(p.guestId)===text(state.guestEditId))||null;
     const editable=canAction('mass.athletes','edit');
     const teams=(state.teams||[]).filter(t=>t.active!==false);
     const teamOptions=teams.map(t=>'<label style="display:inline-flex;align-items:center;gap:7px;margin:5px 14px 5px 0"><input type="checkbox" name="guestTeam" value="'+esc(t.id)+'" '+(editable?'':'disabled')+' '+((edit?.teamIds||[]).map(String).includes(String(t.id))?'checked':'')+'> '+esc(t.name)+'</label>').join('');
-    const rows=profiles.slice().sort((a,b)=>text(a.name).localeCompare(text(b.name),'hu')).map(p=>
+    const rows=filtered.slice().sort((a,b)=>text(a.name).localeCompare(text(b.name),'hu')).map(p=>
       '<button type="button" class="person-row" data-guest-edit="'+esc(p.guestId)+'"><span class="person-primary"><span><b>'+esc(p.name)+'</b><small>'+esc(p.email)+'</small></span></span><span>'+esc((p.teamIds||[]).map(id=>teams.find(t=>text(t.id)===text(id))?.name||'Csapat').join(', '))+'</span><span>'+(p.active?'Aktív':'Inaktív')+' · '+num(p.goingCount)+' jelentkezés</span><i class="person-chevron"><span class="triangle-icon"></span></i></button>').join('');
     $('#viewContent').innerHTML='<div class="page-intro"><div><h2>Vendégek</h2><p>Vendégadatlapok, csapat-hozzáférés és PIN-kezelés.</p></div><a class="button quiet" href="./vendeg/" target="_blank" rel="noopener noreferrer">Vendégoldal megnyitása</a></div>'
+      +'<article class="panel"><div class="toolbar-actions" style="display:flex;flex-wrap:wrap;gap:10px;align-items:end"><div style="flex:1;min-width:180px"><label for="ccGuestSearch">Vendégek keresése</label><input id="ccGuestSearch" type="search" placeholder="Név vagy e-mail" value="'+esc(state.guestSearch||'')+'"></div><div><label for="ccGuestStatus">Állapot</label><select id="ccGuestStatus"><option value="all" '+(guestStatus==='all'?'selected':'')+'>Összes</option><option value="active" '+(guestStatus==='active'?'selected':'')+'>Aktív</option><option value="inactive" '+(guestStatus==='inactive'?'selected':'')+'>Inaktív</option></select></div></div><p aria-live="polite">'+profiles.length+' vendég · '+activeGuestCount+' aktív · '+(profiles.length-activeGuestCount)+' inaktív</p><p class="muted">Belépni csak aktív vendég tud, a saját e-mail-címével és a számára generált PIN-nel. Inaktív vendégnél a belépés biztonsági okból általános hibát jelez.</p></article>'
       +(state.guestLoadError?'<article class="panel"><p>Nem sikerült betölteni a vendégeket: '+esc(state.guestLoadError)+'</p><button type="button" class="button quiet" id="ccGuestReload">Újrapróbálás</button></article>':'')
       +'<article class="panel mass-directory-panel"><div class="mass-athlete-list">'+(rows||emptyInline('Még nincs vendég.'))+'</div></article>'
       +'<article class="panel"><h3>'+(edit?'Vendég szerkesztése':'Új vendég')+'</h3><form id="ccGuestForm" autocomplete="off">'
@@ -2304,6 +2309,8 @@
       +(edit?'<label style="display:flex;gap:9px;margin:14px 0"><input name="resetPin" type="checkbox" '+(editable?'':'disabled')+'> Új PIN-kód generálása</label>':'<p>Új vendégnél 8 számjegyű PIN generálódik.</p>')
       +'<div class="toolbar-actions"><button type="submit" class="button primary" '+(editable?'':'disabled')+'>Mentés</button><button type="button" class="button quiet" id="ccGuestNew">Új vendég</button></div></form>'
       +(state.guestLastPin?'<div style="margin-top:16px"><strong>Egyszer megjelenített PIN</strong><p>Biztonságosan add át. Később csak új PIN generálható.</p><code style="font-size:24px;letter-spacing:.15em">'+esc(state.guestLastPin)+'</code> <button type="button" class="button quiet" id="ccGuestCopyPin">PIN másolása</button></div>':'')+'</article>';
+    $('#ccGuestSearch')?.addEventListener('input',ev=>{state.guestSearch=ev.target.value;const v=ev.target.value;const p=ev.target.selectionStart;renderMassGuests_();const el=$('#ccGuestSearch');el?.focus();if(el&&p!==null)el.setSelectionRange(p,p)});
+    $('#ccGuestStatus')?.addEventListener('change',ev=>{state.guestStatus=ev.target.value;renderMassGuests_()});
     $('#ccGuestCopyPin')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(state.guestLastPin);status('PIN vágólapra másolva.','success')}catch(_){status('A böngésző nem engedte a másolást.','error')}});
     $('#ccGuestReload')?.addEventListener('click',async()=>{try{await loadGuests_();renderMassGuests_()}catch(err){state.guestLoadError=text(err?.message||err);renderMassGuests_()}});
     document.querySelectorAll('[data-guest-edit]').forEach(b=>b.onclick=()=>{state.guestEditId=text(b.dataset.guestEdit);state.guestLastPin='';renderMassGuests_()});
