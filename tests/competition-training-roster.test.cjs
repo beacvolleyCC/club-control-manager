@@ -22,7 +22,7 @@ const players=[
 const ctx={
   Set,Map,state:{eventRosterCache:new Map()},
   text:x=>String(x??'').trim(),esc,num:x=>Number(x)||0,
-  enrichPlayer_:p=>p,avatarHtml:()=>'<span class="cc-avatar">A</span>',
+  enrichPlayer_:p=>p,canRoute:()=>true,avatarHtml:()=>'<span class="cc-avatar">A</span>',
   initials:x=>String(x??'').split(/\s+/).filter(Boolean).slice(0,2).map(v=>v[0]).join('')||'?',
   medicalState_:()=>({cls:'valid',label:'Érvényes'}),fmtDate:()=> '2027.01.01',
   ccEventCardHtml_:()=>'<button data-event-id="test">Esemény</button>',
@@ -153,12 +153,12 @@ test('match edits retain event ID and never replace an event with its RSVPs',()=
   assert.ok(reload.includes('loadRsvpMatrix()'),'refresh actual responses after saving');
   assert.ok(reload.includes('loadCardRsvpMatrix()'),'refresh match counts after saving');
 });
-test('roster RPC calls deployed v1 directly and reuses inflight/cache',()=>{
+test('guest-aware roster RPC reuses inflight/cache without legacy v2 fallback',()=>{
   const begin=source.indexOf('  const ccRosterInFlight_=new Map();');
   const end=source.indexOf('  function useDemo()',begin);
   assert.ok(begin>0&&end>begin);
   const part=source.slice(begin,end);
-  assert.ok(part.includes("rpc('cc_manager_event_roster_v1'"));
+  assert.ok(part.includes("rpc('cc_manager_event_roster_with_guests_v1'"), 'guest roster is now the canonical Manager reader');
   assert.ok(!part.includes("rpc('cc_manager_event_roster_v2'"));
   assert.ok(part.includes('ccRosterInFlight_.has(id)'));
   assert.ok(part.includes('state.eventRosterCache.has(id)'));
@@ -200,4 +200,30 @@ test('match-only preview gives each real RSVP a visible label; training preview 
   assert.ok(!training.includes('cc-match-rsvp-status'));
   assert.ok(source.includes("eventType(e)==='match'"));
   assert.ok(source.includes('loadEventRoster(id)'),'never infer roster from opponent or league fixture');
+});
+
+
+test('guests appear after registered players and never get a medical or player profile action',()=>{
+  const guest={playerId:'guest-1',name:'Vendég Teszt',isGuest:true,position:'Szélső',status:'going',jerseyNo:null};
+  const ordered=[...ctx.qa.order([...players,guest])].map(p=>p.playerId);
+  assert.equal(ordered.at(-1),'guest-1','guest remains last even when going');
+  const quick=ctx.qa.small([...players,guest],'ev',true,true);
+  const full=ctx.qa.row(guest,'ev',true,true);
+  assert.ok(quick.includes('Vendég</small>'));
+  assert.ok(quick.indexOf('Vendég Teszt')>quick.indexOf('Nincs mezszám'));
+  assert.ok(!quick.includes('data-roster-att-slider="guest-1"'),'guest RSVP is not editable by the player attendance slider');
+  assert.ok(!quick.includes('data-roster-profile-open="guest-1"'),'guest must not open verified player editor');
+  assert.ok(quick.includes('data-guest-profile-open="guest-1"'),'guest opens Manager guest editor');
+  assert.ok(full.includes('VENDÉG'));
+  assert.ok(!full.includes('Sportorvosi:'));
+  assert.ok(!full.includes('data-roster-profile-open="guest-1"'));
+  assert.ok(full.includes('data-guest-profile-open="guest-1"'));
+});
+test('manager overview and training loads request guest-aware summaries',()=>{
+  assert.ok(source.includes("rpc('cc_manager_events_with_guests_v1'"));
+  assert.ok(source.includes("rpc('cc_manager_rsvp_matrix_with_guests_v1'"));
+  assert.ok(source.includes("rpc('cc_manager_event_roster_with_guests_v1'"));
+  assert.ok(source.includes('guestCount=num(e.guestCount)'));
+  assert.ok(source.includes('Number(!!a.isGuest)-Number(!!b.isGuest)'));
+  assert.ok(source.includes('const guestGoing=')||source.includes('guestGoing=players.filter'));
 });

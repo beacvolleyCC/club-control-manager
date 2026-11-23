@@ -1,3 +1,41 @@
+# Club Control — 2026-11-23: vendégek utolsó oszlopban + Manager vendégprofil szerkesztésének megnyitása (TEST)
+
+**Hibajelzés:** a LIVE Managerben a vendég továbbra sem látszik az Edzések névsorában/Áttekintésben, noha a posztösszesítésben igen. **Kiváltó ok:** PR #105 nincs merge-elve a LIVE `main` ágba; a `main` még `cc_manager_events_v1` / `cc_manager_event_roster_v1` RPC-t használ, és a vendéges Áttekintés RPC még hiányzik LIVE DB-ből.
+
+**Éles adatok ellenőrizve, csak olvasva:** 1 aktív vendégprofil, 1 `going` RSVP, a vendég esemény/csapat hozzáférése érvényes, 0 vendég csapattagság a hagyományos `team_memberships` táblában, ezért a vendég nem szerepel a hagyományos névsorban, nem duplikált a meglévő összesítésben.
+
+**Kódfejlesztés:** `feature/guest-roster-count-position-20261123` / PR #105. A vendégek az Edzések gyors és részletes névsorában, valamint az Áttekintés mátrixában a normál játékosok UTÁN szerepelnek; a fő létszám részei és `(N vendég)` bontást kapnak. A vendégek saját poszttal rendelkeznek, sportorvosi/igazolási státusz nélkül. Jogosultság esetén a vendég neve melletti profilgomb és az Áttekintésben a vendégoszlop fejléce a Manager `Tömegsport → Vendégek` szerkesztőjéhez navigál. Más felhasználónál a szerkesztőgomb nem jelenik meg. Külön vendég PIN vagy Manager belépés nem módosult.
+
+**TEST DB javítva:** `cc_guest_profile_dedup_preserve_test_20261123` migráció; a névsor SQL-ben `isGuest` profil duplikációvédelme, a pozíció visszafelé kompatibilis mentése. Éles DB adat vagy séma most NEM változott. Kódverzió `fa900f5269ea473b7cfc2fe674cbd467df7e24e1`: 9/9 GitHub Actions QA sikeres, beleértve a vendég utolsó helyének, sportorvosi mező elrejtésének, jogosult editorhivatkozásának és RPC bekötésének regressziós tesztjeit.
+
+**Release blokk:** hitelesített TEST böngészős E2E és Player-egyeztetés nem történt; PR #105 továbbra is draft. LIVE schema+frontend telepítése csak együtt és a repo `AGENTS.md` kiadási szabályai szerint; jelen állapotban a LIVE felület változatlan. Handover minden kör után frissítendő.
+
+---
+
+# Club Control — 2026-11-23: vendég Áttekintés / Edzések / poszt integráció (TEST, KIADÁS ELŐTT)
+
+**Felhasználói igény:** a vendégek a Manager versenysport Áttekintés jelenléti táblában és Edzések névsorában is látszódjanak. A teljes „Jövök” létszám mellett jelenjen meg az ebből vendégként érkezők száma, pl. `12 (2 vendég)`; a vendégprofil posztot szerkeszthet, a normál játékoshoz hasonlóan, igazolási/sportorvosi mezők nélkül.
+
+**Fejlesztési ág:** `feature/guest-roster-count-position-20261123` (a korábbi vendéglista PR #104 ágáról), külön PR a főágra. Manager `app.js`: `cc_manager_events_with_guests_v1` eseményfeed, `cc_manager_event_roster_with_guests_v1` névsor; kártyán összes létszám + külön `guestCount`; névsorban `Vendég` megjelölés; `cc_manager_rsvp_matrix_with_guests_v1` Áttekintés mátrix; vendégprofil `position` mentés és megjelenítés. Vendég sorában sportorvosi/igazolási státusz nem látszik. A szezonális poszt RPC már tartalmazza a vendég jelentkezéseket.
+
+**TEST DB:** `szzoubvhlwnojtzqjebc`. Sikeresen alkalmazott migrációk: `cc_guest_position_profile_test_20261123`, `cc_guest_overview_matrix_test_20261123`. Verziókezelt SQL: `sql/cc_guest_position_profile_20261123.sql`, `sql/cc_guest_overview_matrix_20261123.sql`. A második RPC a meglévő jogosultságvizsgált overview olvasóból indul; az új RPC-re anon EXECUTE=false, authenticated EXECUTE=true. **Nem volt LIVE DB módosítás, LIVE frontend deploy, sem vendég RSVP írás.**
+
+**Automatikus QA (2026-11-23):** commit `fcf33c222cd4ee79e244a52f67d74089070b3152` mellett 9/9 GitHub Actions workflow sikeres, benne a `Manager competition training roster QA`, `Manager guest administration safety QA`, `LIVE debug preview safety gates` és Sport Scoring QA. A régi RPC stringet ellenőrző regressziós tesztet az új vendégnévsor RPC-hez aktualizáltuk. Az anon EXECUTE tiltás TEST DB-ben ellenőrzött. LIVE DB aggregált olvasás: 1 aktív vendégprofil és 1 going vendég RSVP; LIVE adatírás nem volt.
+
+**Poszt-kiegészítés:** TEST migráció `cc_guest_position_alias_4es_test_20261123`, verziózott `sql/cc_competition_position_4es_alias_20261123.sql`: a `4-es ütő` posztot a szélütő/SZ aggregációba is besoroljuk. Manager `ccPositionKey_` ugyanezt követi. Ez a módosítás sem került LIVE-ra. Az utolsó kódcommit `aa2de6e17738500674209755c3cbc6c40743e818` automatikus QA-ja: 9/9 sikeres GitHub Actions workflow; bejelentkezett TEST/LIVE UI E2E továbbra sem igazolt.
+
+**Nyitott kiadási kapu:** TEST bejelentkezett jogosultság és vendég RSVP E2E; Áttekintés (mátrix) + Edzések (kártya és névsor), csapatszűrés és létszám-egyezés; Player oldali névsor és létszám még külön integrálandó; LIVE DB migráció csak hitelesített release ellenőrzés után. **Ne állítsuk, hogy LIVE-ban elkészült.**
+
+---
+
+# Club Control — 2026-11-23: vendégbelépési diagnózis és vendéglista javítás (nem élesített)
+
+**Ellenőrzött LIVE diagnózis:** a `cc_guest_login_v1` email-regex helyes, nincs szükség Supabase Auth fiók létrehozására. A LIVE `cc_guest_profiles_v1` táblában 1 vendégprofil van, amelynek mind `players.active`, mind `cc_guest_profiles_v1.active` mezője false, így nem léphet be email+PIN-nel. Nem módosítottunk felhasználói adatot vagy PIN-t. Manager `main` már tartalmazza a `renderMassGuests_` admin listát és az `cc_guest_admin_save_v1` mentési folyamatot; a korábbi állítás, hogy a funkció egyáltalán nincs mainben, elavult.
+
+**Fejlesztési ág:** `fix/guest-directory-clarity-20261123`, commit `5c4cfd35103d20771e60e0517bcdc6e1bf5f548f`: keresés, aktív/inaktív szűrő, összesítés, egyértelmű belépési útmutató a Manager Vendégek listán. **Nincs LIVE deploy, nincs DB írás, valódi belépési E2E még hátra van.** Következő lépés: CI és bejelentkezett UI QA, megfelelő vendégprofil adminoldali aktiválása/jóváhagyott új próba-profil és PIN, majd valós belépési E2E.
+
+---
+
 # Club Control — 2026-11-23: vendégbelépési hibajelzés és vendégkezelő fejlesztési igény
 
 **Aktuális hibajelzés és folytatás:** [vendégbelépési vizsgálat / Vendégek modul követelmények](docs/handover/HANDOVER_20261123_GUEST_LOGIN_REVIEW.md). Új teszt-emailnél „hibás email” üzenet jelentkezik. A korábbi ellenőrzés szerint LIVE-ban még 0 vendégprofil volt és a teljes Manager/Player vendégintegráció nincs élesítve; a konkrét hiba visszaellenőrzése és a valódi vendégprofil-létrehozás E2E-je nyitott. Ez a kör csak handover-dokumentáció: nincs LIVE kód- vagy adatbázis-módosítás.
