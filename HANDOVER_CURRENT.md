@@ -1,3 +1,17 @@
+# Club Control — 2026-11-23: vendégek utolsó oszlopban + Manager vendégprofil szerkesztésének megnyitása (TEST)
+
+**Hibajelzés:** a LIVE Managerben a vendég továbbra sem látszik az Edzések névsorában/Áttekintésben, noha a posztösszesítésben igen. **Kiváltó ok:** PR #105 nincs merge-elve a LIVE `main` ágba; a `main` még `cc_manager_events_v1` / `cc_manager_event_roster_v1` RPC-t használ, és a vendéges Áttekintés RPC még hiányzik LIVE DB-ből.
+
+**Éles adatok ellenőrizve, csak olvasva:** 1 aktív vendégprofil, 1 `going` RSVP, a vendég esemény/csapat hozzáférése érvényes, 0 vendég csapattagság a hagyományos `team_memberships` táblában, ezért a vendég nem szerepel a hagyományos névsorban, nem duplikált a meglévő összesítésben.
+
+**Kódfejlesztés:** `feature/guest-roster-count-position-20261123` / PR #105. A vendégek az Edzések gyors és részletes névsorában, valamint az Áttekintés mátrixában a normál játékosok UTÁN szerepelnek; a fő létszám részei és `(N vendég)` bontást kapnak. A vendégek saját poszttal rendelkeznek, sportorvosi/igazolási státusz nélkül. Jogosultság esetén a vendég neve melletti profilgomb és az Áttekintésben a vendégoszlop fejléce a Manager `Tömegsport → Vendégek` szerkesztőjéhez navigál. Más felhasználónál a szerkesztőgomb nem jelenik meg. Külön vendég PIN vagy Manager belépés nem módosult.
+
+**TEST DB javítva:** `cc_guest_profile_dedup_preserve_test_20261123` migráció; a névsor SQL-ben `isGuest` profil duplikációvédelme, a pozíció visszafelé kompatibilis mentése. Éles DB adat vagy séma most NEM változott. Kódverzió `fa900f5269ea473b7cfc2fe674cbd467df7e24e1`: 9/9 GitHub Actions QA sikeres, beleértve a vendég utolsó helyének, sportorvosi mező elrejtésének, jogosult editorhivatkozásának és RPC bekötésének regressziós tesztjeit.
+
+**Release blokk:** hitelesített TEST böngészős E2E és Player-egyeztetés nem történt; PR #105 továbbra is draft. LIVE schema+frontend telepítése csak együtt és a repo `AGENTS.md` kiadási szabályai szerint; jelen állapotban a LIVE felület változatlan. Handover minden kör után frissítendő.
+
+---
+
 # Club Control — 2026-11-23: vendég Áttekintés / Edzések / poszt integráció (TEST, KIADÁS ELŐTT)
 
 **Felhasználói igény:** a vendégek a Manager versenysport Áttekintés jelenléti táblában és Edzések névsorában is látszódjanak. A teljes „Jövök” létszám mellett jelenjen meg az ebből vendégként érkezők száma, pl. `12 (2 vendég)`; a vendégprofil posztot szerkeszthet, a normál játékoshoz hasonlóan, igazolási/sportorvosi mezők nélkül.
