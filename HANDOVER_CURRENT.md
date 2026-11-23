@@ -1,3 +1,11 @@
+# Club Control — 2026-11-23: vendégbelépési diagnózis és vendéglista javítás (nem élesített)
+
+**Ellenőrzött LIVE diagnózis:** a `cc_guest_login_v1` email-regex helyes, nincs szükség Supabase Auth fiók létrehozására. A LIVE `cc_guest_profiles_v1` táblában 1 vendégprofil van, amelynek mind `players.active`, mind `cc_guest_profiles_v1.active` mezője false, így nem léphet be email+PIN-nel. Nem módosítottunk felhasználói adatot vagy PIN-t. Manager `main` már tartalmazza a `renderMassGuests_` admin listát és az `cc_guest_admin_save_v1` mentési folyamatot; a korábbi állítás, hogy a funkció egyáltalán nincs mainben, elavult.
+
+**Fejlesztési ág:** `fix/guest-directory-clarity-20261123`, commit `5c4cfd35103d20771e60e0517bcdc6e1bf5f548f`: keresés, aktív/inaktív szűrő, összesítés, egyértelmű belépési útmutató a Manager Vendégek listán. **Nincs LIVE deploy, nincs DB írás, valódi belépési E2E még hátra van.** Következő lépés: CI és bejelentkezett UI QA, megfelelő vendégprofil adminoldali aktiválása/jóváhagyott új próba-profil és PIN, majd valós belépési E2E.
+
+---
+
 # Club Control — 2026-11-23: vendégbelépési hibajelzés és vendégkezelő fejlesztési igény
 
 **Aktuális hibajelzés és folytatás:** [vendégbelépési vizsgálat / Vendégek modul követelmények](docs/handover/HANDOVER_20261123_GUEST_LOGIN_REVIEW.md). Új teszt-emailnél „hibás email” üzenet jelentkezik. A korábbi ellenőrzés szerint LIVE-ban még 0 vendégprofil volt és a teljes Manager/Player vendégintegráció nincs élesítve; a konkrét hiba visszaellenőrzése és a valódi vendégprofil-létrehozás E2E-je nyitott. Ez a kör csak handover-dokumentáció: nincs LIVE kód- vagy adatbázis-módosítás.
