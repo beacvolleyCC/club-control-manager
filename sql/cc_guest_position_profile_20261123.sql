@@ -58,7 +58,7 @@ begin
       raise exception 'GUEST_NOT_FOUND';
     end if;
     update public.players set name=v_name,display_name=v_name,email=v_email,
-      active=v_active,position=v_position,updated_at=now() where id=v_id;
+      active=v_active,position=case when p_payload ? 'position' then v_position else position end,updated_at=now() where id=v_id;
     update public.cc_guest_profiles_v1
       set active=v_active,note=v_note,updated_at=now() where player_id=v_id;
   else
@@ -116,6 +116,7 @@ begin
   join public.cc_guest_profiles_v1 gp on gp.player_id=av.player_id and gp.active
   join public.players p on p.id=gp.player_id and p.active
   join public.cc_guest_team_access_v1 ga on ga.player_id=gp.player_id and ga.team_id=e.team_id
-  where av.status='going';
+  where av.status='going' and p.player_kind='guest'
+    and not exists (select 1 from jsonb_array_elements(coalesce(v_base,'[]'::jsonb)) x where x->>'playerId'=p.id::text);
   return coalesce(v_base,'[]'::jsonb)||v_guest;
 end $function$;
