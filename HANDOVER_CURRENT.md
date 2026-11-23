@@ -8,6 +8,8 @@
 
 **Automatikus QA (2026-11-23):** commit `fcf33c222cd4ee79e244a52f67d74089070b3152` mellett 9/9 GitHub Actions workflow sikeres, benne a `Manager competition training roster QA`, `Manager guest administration safety QA`, `LIVE debug preview safety gates` és Sport Scoring QA. A régi RPC stringet ellenőrző regressziós tesztet az új vendégnévsor RPC-hez aktualizáltuk. Az anon EXECUTE tiltás TEST DB-ben ellenőrzött. LIVE DB aggregált olvasás: 1 aktív vendégprofil és 1 going vendég RSVP; LIVE adatírás nem volt.
 
+**Poszt-kiegészítés:** TEST migráció `cc_guest_position_alias_4es_test_20261123`, verziózott `sql/cc_competition_position_4es_alias_20261123.sql`: a `4-es ütő` posztot a szélütő/SZ aggregációba is besoroljuk. Manager `ccPositionKey_` ugyanezt követi. Ez a módosítás sem került LIVE-ra. Az utolsó kódcommit `aa2de6e17738500674209755c3cbc6c40743e818` automatikus QA-ja külön ellenőrizendő.
+
 **Nyitott kiadási kapu:** TEST bejelentkezett jogosultság és vendég RSVP E2E; Áttekintés (mátrix) + Edzések (kártya és névsor), csapatszűrés és létszám-egyezés; Player oldali névsor és létszám még külön integrálandó; LIVE DB migráció csak hitelesített release ellenőrzés után. **Ne állítsuk, hogy LIVE-ban elkészült.**
 
 ---
