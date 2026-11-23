@@ -1,3 +1,15 @@
+# Club Control – 2026-11-23 LIVE vendégintegráció: DB + Manager main kiadva, publikus deploy ellenőrzendő
+
+**Feladat:** a vendég a Versenysport → Edzések névsorában és létszámában, az Áttekintés jelenléti mátrixának legvégén szerepeljen; a Managerből vendégprofil (név, e-mail, poszt, csapat-hozzáférés, PIN reset, aktív státusz) szerkeszthető legyen.
+
+**GitHub LIVE main:** PR [#105](https://github.com/beacvolleyCC/club-control-manager/pull/105) squash merge **f35efd452c5348516d614797518f62f583404860**; a main `app.js` visszaolvasva már `cc_manager_events_with_guests_v1`, `cc_manager_event_roster_with_guests_v1` és `cc_manager_rsvp_matrix_with_guests_v1` olvasókat használ. A vendég a normál játékosok mögé rendeződik, külön „Vendég” jelzéssel; a teljes létszámban benne van és mellette vendég bontás szerepel; a vendég sorából jogosultsággal megnyitható a Tömegsport → Vendégek szerkesztő. Az igazolás és sportorvosi mezők vendégeknél rejtve.
+
+**LIVE Supabase:** `snqsxlyhontaepembaic`, sikeres `cc_live_guest_manager_roster_overview_position_20261123` migráció (3 verziózott SQL-fájlból: `cc_guest_position_profile_20261123.sql`, `cc_competition_position_4es_alias_20261123.sql`, `cc_guest_overview_matrix_20261123.sql`). Új overview RPC elérhető, módosított guest profile save/list és roster RPC telepítve; öt kapcsolódó Manager RPC anon EXECUTE=false / authenticated EXECUTE=true ellenőrizve. Valós vendég-RSVP adatokhoz nem nyúltunk. LIVE összesítés szerint 1 érvényes „going” vendég RSVP maradt. Visszaállítási SQL a `sql/rollback_guest_live_20261123.sql` fájlban, viszont rollback csak külön óvatos eljárással.
+
+**QA:** PR head `313555cf440984e70b707422f4f7bf91f8f5609a`: 9/9 GitHub Actions PR workflow sikeres; Manager main kód visszaolvasva. **Korlát:** A publikus GitHub Pages telepítés végleges sikerét és a bejelentkezett LIVE Manager UI E2E-t ebben a munkamenetben nem sikerült igazolni (közvetlen HTTP elérés hibázott). NEM állítjuk, hogy a felhasználói böngésző már az új JS-t tölti be. A Player app nem módosult. Következő ellenőrzés: GitHub Pages deployment success + kemény újratöltés + 1 vendég a megfelelő esemény névsorának végén, áttekintés utolsó oszlopában és létszámban; Manager Vendégek szerkesztés jogosultsággal.
+
+---
+
 # Club Control — 2026-11-23: vendégek utolsó oszlopban + Manager vendégprofil szerkesztésének megnyitása (TEST)
 
 **Hibajelzés:** a LIVE Managerben a vendég továbbra sem látszik az Edzések névsorában/Áttekintésben, noha a posztösszesítésben igen. **Kiváltó ok:** PR #105 nincs merge-elve a LIVE `main` ágba; a `main` még `cc_manager_events_v1` / `cc_manager_event_roster_v1` RPC-t használ, és a vendéges Áttekintés RPC még hiányzik LIVE DB-ből.
