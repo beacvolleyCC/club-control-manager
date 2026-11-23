@@ -22,7 +22,7 @@ const players=[
 const ctx={
   Set,Map,state:{eventRosterCache:new Map()},
   text:x=>String(x??'').trim(),esc,num:x=>Number(x)||0,
-  enrichPlayer_:p=>p,avatarHtml:()=>'<span class="cc-avatar">A</span>',
+  enrichPlayer_:p=>p,canRoute:()=>true,avatarHtml:()=>'<span class="cc-avatar">A</span>',
   initials:x=>String(x??'').split(/\s+/).filter(Boolean).slice(0,2).map(v=>v[0]).join('')||'?',
   medicalState_:()=>({cls:'valid',label:'Érvényes'}),fmtDate:()=> '2027.01.01',
   ccEventCardHtml_:()=>'<button data-event-id="test">Esemény</button>',
@@ -212,10 +212,12 @@ test('guests appear after registered players and never get a medical or player p
   assert.ok(quick.includes('Vendég</small>'));
   assert.ok(quick.indexOf('Vendég Teszt')>quick.indexOf('Nincs mezszám'));
   assert.ok(!quick.includes('data-roster-att-slider="guest-1"'),'guest RSVP is not editable by the player attendance slider');
-  assert.ok(!quick.includes('data-roster-profile-open="guest-1"'),'guest must use guest administration editor');
+  assert.ok(!quick.includes('data-roster-profile-open="guest-1"'),'guest must not open verified player editor');
+  assert.ok(quick.includes('data-guest-profile-open="guest-1"'),'guest opens Manager guest editor');
   assert.ok(full.includes('VENDÉG'));
   assert.ok(!full.includes('Sportorvosi:'));
   assert.ok(!full.includes('data-roster-profile-open="guest-1"'));
+  assert.ok(full.includes('data-guest-profile-open="guest-1"'));
 });
 test('manager overview and training loads request guest-aware summaries',()=>{
   assert.ok(source.includes("rpc('cc_manager_events_with_guests_v1'"));
