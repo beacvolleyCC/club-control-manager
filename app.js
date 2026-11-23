@@ -2407,7 +2407,7 @@ async function ccMassAthleteHistoryLoad_(id){
   function eventStatusLabel(e){return isEventPast(e)?'LEZÁRT':(text(e.status||'active').toLowerCase()==='active'?'AKTÍV':text(e.status||'').toUpperCase()||'AKTÍV')}
   function rosterGroup(title,rows,kind){return `<section class="roster-group ${kind} cc-unified-roster-group"><h4>${esc(title)} <span>${rows.length}</span></h4><div class="cc-unified-player-list">${rows.map(p=>playerUnifiedCardHtml_(p,{openAttr:'data-player-open'})).join('')||'<small class="roster-empty">Nincs játékos.</small>'}</div></section>`}
   function ccNameKey_(value){return text(value).toLocaleLowerCase('hu-HU').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
-  function ccPositionKey_(value){const k=ccNameKey_(value);if(k.includes('felado'))return'f';if(k.includes('szelso'))return'sz';if(k.includes('center')||k.includes('centre'))return'c';if(k.includes('atlo'))return'a';if(k.includes('libero'))return'l';return'?'}
+  function ccPositionKey_(value){const k=ccNameKey_(value);if(k.includes('felado'))return'f';if(k.includes('szelso')||k.includes('4 es'))return'sz';if(k.includes('center')||k.includes('centre'))return'c';if(k.includes('atlo'))return'a';if(k.includes('libero'))return'l';return'?'}
   function ccCardMatrix_(){const m=state.cardRsvpMatrix&&Array.isArray(state.cardRsvpMatrix.responses)?state.cardRsvpMatrix:state.rsvpMatrix;return m||{events:[],players:[],responses:[]}}
   function ccGoingStatus_(value){const k=ccNameKey_(value);return k==='going'||k==='yes'||k==='jovok'||k==='igen'}
   function ccEventPositionSummary_(e){
